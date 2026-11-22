@@ -946,6 +946,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <button type="button" data-t="start">Nouvelle partie</button>
     <button type="button" data-t="settings">Paramètres</button>
     <button type="button" data-t="news">Nouveautés</button>
+    <button type="button" data-t="wiki">Aide (wiki)</button>
     <button type="button" data-t="quit">Quitter</button>
   </nav>
   <p class="t-msg" role="status"></p>
@@ -1684,9 +1685,21 @@ let chaos = false;
    Claude Code ou Codex. ?idle=0 : bac à sable, tout débloqué (les tests s'en servent). Partie sauvegardée dans ce navigateur. */
 const IDLE = Q.get('idle') !== '0';
 const SAVE_KEY = 'aidcs:save';
-const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
+// machine neuve : ces paquets et les CLI d'agents s'installent à la main (G.pk, G.cli) ; ?setup=0 installe tout
+const STARTER_PKGS = ['xfce4', 'htop', 'atop', 'lm-sensors', 'firefaux', 'thunar', 'mousepad', 'atril', 'steam'];
+const SETUP_SKIP = Q.get('setup') === '0';
+const CLI_INST = {                                // la vraie commande d'installation de chaque CLI (et une autre façon)
+  mistral: { cmd: 'curl -LsSf https://mistral.ai/vibe/install.sh | bash', alt: 'uv tool install mistral-vibe' },
+  codex: { cmd: 'sudo npm install -g @openai/codex' },
+  claude: { cmd: 'curl -fsSL https://claude.ai/install.sh | bash', alt: 'sudo npm install -g @anthropic-ai/claude-code' },
+};
+function setupMig(o) {                            // sauvegarde d'avant la machine neuve : tout était déjà installé, ça le reste
+  if (!o.cli) { o.cli = { mistral: 1, codex: o.own?.codex ? 1 : 0, claude: o.own?.claude ? 1 : 0 }; o.pk = STARTER_PKGS.slice(); }
+  return o;
+}
+const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, t: Date.now() });
-let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...o } : G_DEF(); } catch { return G_DEF(); } })();
+let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
 function platInit() {                            // plateformes : une équipe chacune, les modèles achetés (et les sauvegardes d'avant)
@@ -1700,11 +1713,15 @@ function platInit() {                            // plateformes : une équipe ch
   G.bg = G.bg || {};
   G.boost = G.boost || {};                        // modes boost : { own, lvl (prolongations), day (dernier usage), left (secondes restantes) }
   G.rt = G.rt || {};                              // IA locale : les runtimes installés (lolama, studiolm)
+  G.cli = G.cli || {};                            // les CLI d'agents installés (machine neuve : aucun)
+  G.pk = G.pk || [];                              // les paquets de départ installés (machine neuve : aucun)
   G.lead = Math.min(3, G.lead || 0);
   G.agents = G.team[G.ai] || 1;
   G.model = G.pm[G.ai];
 }
 platInit();
+const cliHas = p => p === 'local' || !IDLE || SETUP_SKIP || !!G.cli?.[p];          // le CLI de la plateforme est-il installé ?
+const pkHas = n => !STARTER_PKGS.includes(n) || !IDLE || SETUP_SKIP || G.pk.includes(n);   // paquet présent au démarrage ?
 const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
 function saveGame() {
   if (!IDLE) return;
@@ -2315,7 +2332,17 @@ const FILE_HELP = () => [
   [H(['  mkdir · touch     ', 'org'], 'créer un dossier · créer un fichier'), '', 20],
   [H(['  rmdir · rm -r     ', 'org'], 'supprimer un dossier… mais pas n’importe lequel'), '', 20],
 ];
+const SETUP_HELP = () => [
+  [H(['Installer', 'fgc'], ['  (machine neuve : rien n’est installé, pas même votre agent)', 'dim']), '', 20],
+  [H(['  ' + CLI_INST.mistral.cmd, 'org'], ['  Vibe CLI, la commande mistral (ou : uv tool install mistral-vibe)', 'dim']), '', 20],
+  [H(['  ' + CLI_INST.codex.cmd, 'org'], ['  Codex (la licence s’achète au store)', 'dim']), '', 20],
+  [H(['  ' + CLI_INST.claude.cmd, 'org'], ['  Claude Code (licence au store)', 'dim']), '', 20],
+  [H(['  sudo apt install htop atop lm-sensors', 'org'], ['  surveiller le PC (htop, atop, sensors)', 'dim']), '', 20],
+  [H(['  sudo apt install xfce4 firefaux thunar mousepad atril', 'org'], ['  le bureau, le navigateur, les fichiers, l’éditeur, les PDF', 'dim']), '', 20],
+];
+const WIKI_LINE = () => [H(['Tout le reste', 'fgc'], ['  le wiki du jeu : commandes, store, matériel, pannes · ', 'dim'], ['wiki', 'org'], [' pour l’ouvrir', 'dim']), '', 20];
 const PRE_HELP_LINES = () => [
+  ...(IDLE ? [...SETUP_HELP(), ['', '', 20]] : []),
   [H(['Commandes disponibles', 'fgc'], ['  (aucun agent n’est encore lancé)', 'dim']), '', 20],
   [H(['  claude            ', 'org'], 'lancer Claude Code (Anthropic), ses agents et son orchestrateur Fable'), '', 20],
   [H(['    --model <nom>   ', 'org'], modelsOf('claude').join(' · ')), '', 20],
@@ -2342,6 +2369,7 @@ const PRE_HELP_LINES = () => [
   TABS_HELP(),
   ['', '', 20],
   [H(['Le reste arrive avec claude, codex ou mistral', 'fgc'], ['  agents, model, cost, ship, ordres à l’orchestrateur…', 'dim']), '', 20],
+  WIKI_LINE(),
 ];
 const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['Commandes disponibles', 'fgc']), '', 20],
@@ -2357,7 +2385,8 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, orchestrateur, modèles, skills, plateformes, matériel · la barre shippe toute seule'), '', 20],
     [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20],
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
-    [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20]] : []),
+    [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
+    [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
   [H(['  settings         ', 'org'], 'réglages : couleurs, taille, graphismes, nom (touche M)'), '', 20],
@@ -2372,6 +2401,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   ...BOSS.map(b => [H(['  ' + b, 'org']), '', 20]),
   ['', '', 20],
   [H(['Autre chose ?', 'fgc'], ['  le terminal écrit du code au hasard… et vous le facture.', 'dim']), '', 20],
+  WIKI_LINE(),
 ];
 
 /* ---------- commande inconnue : déluge de code façon hacker typer ---------- */
@@ -2646,11 +2676,12 @@ function renameUser(u) {
   updateCwd();
 }
 function resetFS() {                            // sauvegarde de jeudi : fichiers, paquets apt et dépendances npm d'origine
-  installed = new Set(DEFAULT_INSTALLED);
+  installed = new Set(startPkgs());
   aptUpgradable = 412;
   npmDeps.dependencies = { ...NPM_DEFAULT_DEPS };
   npmDeps.devDependencies = {};
   vfs = buildFS();
+  pkFsSync();
   cwd = [...PROJ_DIR];
   oldpwd = null;
   updateCwd();
@@ -2919,7 +2950,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3095,6 +3126,7 @@ const CATALOG = {
   golang: ['2:1.23~1', 120, 'go', 'le langage Go'],
   htop: ['3.4.1-1', 389, 'htop', 'moniteur de processus interactif'],
   jq: ['1.7.1-3', 160, 'jq', 'du JSON en ligne de commande'],
+  'lm-sensors': ['1:3.6.0-10', 221, 'sensors', 'températures, ventilateurs et tensions du PC'],
   libc6: ['2.40-3', 13100, '', 'la bibliothèque C (essentielle, ne pas y toucher)'],
   'linux-image-6.11.0-friday': ['6.11.0-1', 98100, '', 'le noyau, version vendredi (essentiel)'],
   nano: ['8.2-1', 2780, 'nano', 'éditeur de texte pour les humains'],
@@ -3114,11 +3146,13 @@ const CATALOG = {
   tmux: ['3.5a-1', 1130, 'tmux', 'un terminal dans le terminal'],
   tree: ['2.1.3-1', 112, 'tree', 'l’arborescence des dossiers'],
   vim: ['2:9.1.0861-1', 3910, 'vim', 'éditeur de texte (pour en sortir : voir Stack Overflow)'],
+  xfce4: ['4.20', 186400, 'startxfce4 xfce4-session', 'le bureau Xfce : fenêtres, menu, tableau de bord (commande xfce)'],
   zsh: ['5.9-6', 2890, '', 'le shell de ce terminal (essentiel ici)'],
 };
-const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'firefaux', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'mousepad', 'nano',
-  'nodejs', 'npm', 'python3', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'zsh'];
-let installed = new Set(DEFAULT_INSTALLED), aptUpgradable = 412;
+const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'firefaux', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'lm-sensors', 'mousepad', 'nano',
+  'nodejs', 'npm', 'python3', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'xfce4', 'zsh'];
+const startPkgs = () => DEFAULT_INSTALLED.filter(pkHas);   // machine neuve : sans les paquets de départ pas encore installés
+let installed = new Set(startPkgs()), aptUpgradable = 412;
 // paquets essentiels : [chemin affiché, dossiers supprimés] ; les enlever fait tomber le système
 const ESSENTIAL = {
   libc6: ['/lib/x86_64-linux-gnu', [['lib', 'x86_64-linux-gnu']]],
@@ -3130,13 +3164,22 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux' };
+const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux',
+  xfce4: 'xfce', 'lm-sensors': 'sensors' };
+const APT_ALIAS = { xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux' };   // ce qu'on tape, ce que Vibian comprend
+const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
 const APT_BYE = { steam: '412 jeux jamais lancés vous disent adieu.', sudo: 'sudo est parti. Pour le réinstaller, il faudra… sudo.',
   vim: 'Vous avez enfin réussi à quitter vim.', git: 'Plus de git. Plus de conflits non plus.', npm: 'npm désinstallé. node_modules, lui, reste.' };
 const READING = [['Lecture des listes de paquets... Fait', '', 220], ['Construction de l’arbre des dépendances... Fait', '', 160], ['Lecture des informations d’état... Fait', '', 120]];
 const frNum = (n, d = 1) => n.toFixed(d).replace('.', ',');
 const ko = k => k < 1000 ? `${frNum(k)} ko` : k < 1e6 ? `${frNum(k / 1000)} Mo` : `${frNum(k / 1e6)} Go`;
 const binsOf = p => (CATALOG[p]?.[2] || '').split(' ').filter(Boolean);
+function pkFsSync() {                             // /usr/bin suit les paquets : machine neuve, pas de htop dans /usr/bin
+  const rm = b => { if (nodeAt(['usr', 'bin', b])) removeAt(['usr', 'bin', b]); };
+  STARTER_PKGS.filter(n => !installed.has(n)).forEach(n => binsOf(n).forEach(rm));
+  ['mistral', 'codex', 'claude'].filter(p => !cliHas(p)).forEach(rm);
+}
+pkFsSync();
 const aptTally = (inst = 0, rm = 0) => `0 mis à jour, ${inst} nouvellement installés, ${rm} à enlever et ${aptUpgradable} non mis à jour.`;
 const agentSaid = t => H(t, [claudeOn ? '   (répondu par un agent)' : '   (répondu par réflexe)', 'dim']);
 
@@ -3217,8 +3260,19 @@ async function aptCmd(args, sudo, name) {
 async function aptInstall(job, names, yes, reinstall) {
   if (!names.length) return shellPrint(aptTally());
   if (!await jobLines(job, READING)) return;
-  if (names.some(n => n === 'claude' || n === 'claude-code')) shellPrint('claude est déjà la version la plus récente (installé dans /opt/agents par un agent, sans demander).');
-  names = names.filter(n => n !== 'claude' && n !== 'claude-code');
+  names = [...new Set(names.map(n => {
+    if (!APT_ALIAS[n]) return n;
+    shellPrint(`Note : sélection de « ${APT_ALIAS[n]} » au lieu de « ${n} »`);
+    return APT_ALIAS[n];
+  }))];
+  names.filter(n => CLI_PKG[n]).forEach(n => {     // les CLI d'agents ne passent pas par apt
+    const p = CLI_PKG[n], I = CLI_INST[p];
+    if (cliHas(p)) return shellPrint(`${n} : ${CLIS[p].label} est déjà installé (hors d’apt, comme tous les agents : par un agent, sans demander).`);
+    shellPrint(`E: Impossible de trouver le paquet ${n}`, 'errc');
+    shellPrint(H(['  ', ''], `${CLIS[p].label} ne passe pas par apt : `, [I.cmd, 'org'], ...(I.alt ? [[` (ou ${I.alt})`, 'dim']] : [])));
+  });
+  names = names.filter(n => !CLI_PKG[n]);
+  if (!names.length) return;
   const unknown = names.filter(n => !CATALOG[n]);
   if (unknown.length) {
     unknown.forEach(n => { shellPrint(`E: Impossible de trouver le paquet ${n}`, 'errc'); if (APT_NOPE[n]) shellPrint(APT_NOPE[n], 'dim'); });
@@ -3255,6 +3309,7 @@ async function aptInstall(job, names, yes, reinstall) {
     if (job.abort) break;
     bar.line(`Paramétrage de ${n} (${ver(n)}) ...`);
     installed.add(n);
+    if (IDLE && STARTER_PKGS.includes(n) && !G.pk.includes(n)) { G.pk.push(n); saveGame(); }   // il reste installé d'une partie à l'autre
     binsOf(n).forEach(b => put(vfs, `usr/bin/${b}`, mkF('', { b: 1, x: 1, mt: Date.now() })));
     bar.set(++k / steps);
     await sleep(220);
@@ -3264,6 +3319,7 @@ async function aptInstall(job, names, yes, reinstall) {
   if (job.abort) return dpkgInterrupted(job);
   const tries = fresh.map(n => APT_TRY[n]).filter(Boolean);
   if (tries.length) shellPrint(H(['→ essayez : ', 'dim'], [tries.join(' · '), 'org']));
+  if (xfOn) xfIconsSync();                         // les icônes du bureau suivent les paquets
 }
 async function aptRemove(job, names, yes, purge) {
   if (!names.length) return shellPrint(aptTally());
@@ -3298,6 +3354,8 @@ async function aptRemove(job, names, yes, purge) {
   if (!await jobLines(job, lines)) return dpkgInterrupted(job);
   gone.forEach(n => {
     installed.delete(n);
+    if (IDLE && G.pk.includes(n)) { G.pk = G.pk.filter(x => x !== n); saveGame(); }
+    if (n === 'xfce4' && xfOn) xfExit();          // le bureau part avec son paquet
     binsOf(n).forEach(b => { if (nodeAt(['usr', 'bin', b])) removeAt(['usr', 'bin', b]); });
     if (tabs.includes(n)) closeTab(n);           // htop ou atop ouvert dans un onglet : il disparaît avec son paquet
     if (APT_BYE[n]) shellPrint(APT_BYE[n], 'dim');
@@ -3490,10 +3548,25 @@ async function npmAdd(job, specs, flags, g, sudo) {
     return ['npm ERR! code E404', `npm ERR! 404 Not Found - GET https://registry.npmjs.org/${nope} - Not found`, `npm ERR! 404  '${nope}@*' is not in this registry.`]
       .forEach(t => shellPrint(t, 'errc'));
   }
-  if (names.some(n => ['claude', 'claude-code', '@anthropic-ai/claude-code'].includes(n))) {
-    if (!await npmGauge(job, 1200, '@anthropic-ai/claude-code')) return;
+  const cliP = names.includes('@openai/codex') ? 'codex' : names.includes('@anthropic-ai/claude-code') ? 'claude' : '';
+  if (cliP && cliHas(cliP)) {
+    if (!await npmGauge(job, 1200, names.find(n => n.startsWith('@')))) return;
     shellPrint(`changed 1 package, and audited 2 packages in ${ri(2, 6)}s`);
-    return shellPrint('claude est déjà installé, et déjà lancé par un agent. Il s’est mis à jour tout seul pendant que vous lisiez ceci.', 'dim');
+    return shellPrint(`${cliP} est déjà installé, et déjà lancé par un agent. Il s’est mis à jour tout seul pendant que vous lisiez ceci.`, 'dim');
+  }
+  if (cliP) {                                     // machine neuve : le CLI d'agents arrive
+    if (!g) {
+      if (!await npmGauge(job, 900, names.find(n => n.startsWith('@')))) return;
+      shellPrint('added 1 package in 3s');
+      return shellPrint(H(['  ', ''], `Installé dans node_modules : la commande ${cliP} n’est pas dans le PATH. Il fallait `, [`sudo npm install -g ${names.find(n => n.startsWith('@'))}`, 'org'], '.'));
+    }
+    return cliInstall(cliP, 'npm');
+  }
+  const wrong = names.find(n => ['codex', 'claude', 'claude-code'].includes(n));
+  if (wrong) {                                    // le mauvais nom : le bon paquet est sous un scope
+    if (!await npmGauge(job, 700, wrong)) return;
+    ['npm ERR! code E404', `npm ERR! 404 Not Found - GET https://registry.npmjs.org/${wrong} - Not found`].forEach(t => shellPrint(t, 'errc'));
+    return shellPrint(H(['astuce : ', 'dim'], [`sudo npm install -g ${wrong === 'codex' ? '@openai/codex' : '@anthropic-ai/claude-code'}`, 'org']));
   }
   const deps = npmDeps[flags.some(f => f === '-d' || f === '--save-dev') ? 'devDependencies' : 'dependencies'], nm = nodeAt(nmSegs());
   const fresh = names.filter(n => g || !(npmDeps.dependencies[n] || npmDeps.devDependencies[n]));
@@ -3720,10 +3793,11 @@ async function runCommand(raw) {
   const cliWord = head === 'sudo' ? rest[0] : head, agentCli = cliWord === 'vibe' ? 'mistral' : cliWord;   // claude, codex ou mistral (alias vibe)
   const rtCmd = { lolama: 'lolama', ollama: 'lolama', studiolm: 'studiolm', lms: 'studiolm' }[cliWord];   // l'IA locale (ollama, lms : on a compris)
   if (rtCmd) return localCmd(rtCmd, head === 'sudo' ? rest.slice(1) : rest);
+  if (['curl', 'wget', 'pip', 'pip3', 'pipx', 'uv'].includes(cliWord)) return setupCmd(cliWord === 'pip3' ? 'pip' : cliWord, cmd, low, head === 'sudo');   // installer un CLI d'agents
   if (agentCli === 'local') localVia = '';
   if (Object.hasOwn(CLIS, agentCli || '')) return agentCmd(agentCli, head === 'sudo' ? rest.slice(1).join(' ') : arg);
   if (['settings', 'config', 'menu', 'parametres', 'paramètres', 'reglages', 'réglages'].includes(head)) { openSettings(); return; }
-  if (['xfce', 'xfce4', 'startx', 'startxfce4', 'xfce4-session'].includes(head)) return xfceCmd(rest);   // bureau graphique
+  if (['xfce', 'xfce4', 'startx', 'startxfce4', 'xfce4-session'].includes(head)) return installed.has('xfce4') || xfOn ? xfceCmd(rest) : notInstalled(head, 'xfce4');   // bureau graphique
   if (['store', 'shop', 'boutique', 'magasin'].includes(head)) { openStore(); return; }
   if (head === 'fallout' || head === 'bunker') return ['off', 'exit', 'quit'].includes(rest[0]) ? (prefs.theme === 'abri' ? bunkerExit() : shellPrint('> VOUS N’ÊTES PAS DANS LE BUNKER.')) : bunkerEnter();
   if (['exit', 'logout', 'quit'].includes(head) && prefs.theme === 'abri') return bunkerExit();   // dans le bunker, exit remonte à la surface
@@ -3745,7 +3819,7 @@ async function runCommand(raw) {
     return;
   }
   if (KILL_CMDS.includes(progCmd)) return killCmd(progCmd, head === 'sudo' ? rest.slice(1) : rest);   // tskill codex, tskill htop…
-  if (head === 'sensors') return printLines(sensorsLines());                 // l'état du PC : température, alimentation
+  if (head === 'sensors') return installed.has('lm-sensors') ? printLines(sensorsLines()) : notInstalled('sensors', 'lm-sensors');   // l'état du PC : température, alimentation
   if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
     return printLines([
@@ -3755,7 +3829,7 @@ async function runCommand(raw) {
       [H(['  ✓ ', 'okc'], 'copier, modifier, partager : oui, en citant LVT-DEV'), '', 20],
       [H(['  ✗ ', 'errc'], 'utilisation commerciale : non'), '', 20],
       [H(['  creativecommons.org/licenses/by-nc/4.0/deed.fr', 'dim']), '', 20],
-      [H(['Sans lien avec Anthropic, OpenAI, Mistral AI ni le projet Xfce. Les noms de produits et de modèles appartiennent à leurs propriétaires ; les chiffres, factures, bugs et citations sont inventés.', 'dim']), '', 20],
+      [H(['Sans lien avec Anthropic, OpenAI, Mistral AI, GitHub, Ollama, LM Studio ni le projet Xfce. Les noms de produits et de modèles appartiennent à leurs propriétaires ; les chiffres, factures, bugs et citations sont inventés.', 'dim']), '', 20],
     ]);
   }
   if (head === 'score') {                        // le score : projets shippés (gardé dans ce navigateur)
@@ -3779,6 +3853,10 @@ async function runCommand(raw) {
 
   if (shipCmd) return IDLE ? ecoShipCmd() : ship();   // mode idle : la barre de ship décide
   if (head === 'help' || low === '?' || head === 'man') return printLines(HELP_LINES());
+  if (['wiki', 'aide', 'doc', 'docs'].includes(head)) {   // le wiki : une page à part, dans un nouvel onglet
+    window.open('wiki.html', '_blank', 'noopener');
+    return shellPrint(H(['✓ ', 'okc'], 'Le wiki s’ouvre dans un nouvel onglet', ['  (bloqué ? ', 'dim'], ['wiki.html', 'org'], [', à côté du jeu)', 'dim']));
+  }
   if (head === 'clear' || head === 'cls') { shellOut.innerHTML = ''; return; }
   if (head === 'agents' || low === '/agents') { openPicker(); return; }
   if (head === 'layout' || head === 'disposition') {
@@ -3858,9 +3936,105 @@ async function runCommand(raw) {
   return hackerDump(cmd);
 }
 
+/* ---------- machine neuve : installer les CLI d'agents (curl … | bash, uv tool install, pip, npm -g) ---------- */
+const SETUP_URLS = [
+  { re: /mistral\.ai\/vibe\/install\.sh/, p: 'mistral' },
+  { re: /claude\.ai\/install\.sh/, p: 'claude' },
+  { re: /(lolama\.vibe|ollama\.com)\/install\.sh/, rt: 'lolama' },
+];
+function cliMissing(p) {                          // le CLI n'est pas installé : le « command not found » et la bonne commande
+  const I = CLI_INST[p];
+  shellPrint(H(['zsh: command not found: ', 'errc'], p));
+  shellPrint(H(['  ', ''], `${CLIS[p].label} n’est pas installé. `, [I.cmd, 'org'], ...(I.alt ? [[` (ou ${I.alt})`, 'dim']] : [])));
+  if (!G.own[p]) shellPrint(H(['  ', ''], ['Licence : ', 'dim'], ['store', 'org'], [', onglet Plateformes. On peut installer avant de payer : le CLI attendra.', 'dim']));
+}
+function cliDone(p) {                             // installé : il le reste d'une partie à l'autre
+  if (IDLE && !G.cli[p]) { G.cli = { ...G.cli, [p]: 1 }; saveGame(); }
+  put(vfs, `usr/bin/${p}`, mkF('', { b: 1, x: 1, mt: Date.now() }));
+  const next = !G.own[p] ? ['Licence : ', ['store', 'org'], ', onglet Plateformes. Le CLI est là, il attend qu’on le paie.']
+    : claudeOn && p !== provider ? [[`switch ${p}`, 'org'], ' pour le passer au premier plan, ', [`bg ${p}`, 'org'], ' pour l’arrière-plan.']
+    : claudeOn ? [] : ['Tapez ', [p, 'org'], p === 'mistral' && !G.shipped ? ' pour lancer votre premier agent (gratuit, et ça se voit).' : ` pour lancer vos ${plural(G.team[p] || 1, 'agent')}.`];
+  shellPrint(H(['✓ ', 'okc'], `${CLIS[p].label} installé. `, ...next));
+  if (xfOn) xfIconsSync();
+}
+async function cliInstall(p, how) {               // l'installation, en quelques lignes plausibles
+  if (cliHas(p)) {
+    shellPrint(H(['✓ ', 'okc'], `${CLIS[p].label} est déjà installé${IDLE && !SETUP_SKIP ? '' : ' (mode libre : tout l’est)'}. Il s’est mis à jour tout seul pendant que vous tapiez.`));
+    return;
+  }
+  const job = startJob(), nP = ri(70, 99);    // le même nombre de paquets d'une ligne à l'autre
+  const L = p === 'mistral' ? (how === 'pip' ? [
+      ['Collecting mistral-vibe', '', 260], [`  Downloading mistral_vibe-2.${ri(10, 19)}.0-py3-none-any.whl (${ri(300, 900)} kB)`, '', 420],
+      [`Installing collected packages: ${nP} dépendances, dont 3 que personne n’a demandées`, '', 700],
+      ['Successfully installed mistral-vibe', 'okc', 200]] : [
+      ...(how === 'curl' ? [['Installing mistral-vibe…', '', 240], ['  uv absent : installation de uv d’abord (il s’installe lui-même, comme les agents)', 'dim', 420]] : []),
+      [`Resolved ${nP} packages in ${frNum(ri(8, 30) / 10)}s`, '', 380], [`Prepared ${nP} packages in ${frNum(ri(15, 60) / 10)}s`, '', 520],
+      [`Installed ${nP} packages in ${ri(20, 90)}ms`, '', 200], [' + mistral-vibe', 'okc', 120],
+      ['Installed 2 executables: vibe, vibe-acp (alias ici : mistral)', '', 200]])
+    : p === 'claude' ? (how === 'npm' ? null : [
+      ['Setting up Claude Code...', '', 300], [`  Downloading claude ${VERSION}-native (linux-x64)…`, '', 700],
+      ['  Installing launcher in ~/.local/bin/claude', '', 300], ['✔ Claude Code successfully installed!', 'okc', 200],
+      ['  Lancez-le, il lira CLAUDE.md. Peut-être.', 'dim', 120]])
+    : null;
+  try {
+    if (L) { if (!await jobLines(job, L)) return; }
+    else {                                       // npm -g : la jauge d'npm, puis le paquet
+      const pkg = p === 'codex' ? '@openai/codex' : '@anthropic-ai/claude-code';
+      if (!await npmGauge(job, 1400, pkg)) return;
+      shellPrint(`added 1 package in ${ri(2, 9)}s`);
+    }
+  } finally { endJob(job); }
+  if (!job.abort) cliDone(p);
+}
+async function rtCurl() {                         // curl -fsSL https://lolama.vibe/install.sh | sh
+  const v = gpuVram(), g = part('gpu');
+  const job = startJob();
+  try {
+    if (!await jobLines(job, [['>>> Installing lolama to /usr/local', '', 260], ['>>> Downloading Linux amd64 bundle', '', 300],
+      ['######################################################################## 100,0%', '', 600], ['>>> Creating lolama user...', '', 200],
+      v >= 4 ? [`>>> ${g.n} détectée : ${go1(v)} Go de VRAM. Elle va servir.`, 'okc', 200]
+        : [`WARNING: pas de vraie carte graphique (${g.n}, ${go1(v)} Go de VRAM). Les modèles risquent de ne pas rentrer.`, 'wrn', 200]])) return;
+  } finally { endJob(job); }
+  if (job.abort) return;
+  const r = rtInstall('lolama');
+  shellPrint(H([r.ok ? '✓ ' : '✗ ', r.ok ? 'okc' : 'errc'], r.msg));
+  if (xfOn) xfIconsSync();
+}
+function setupCmd(w, cmd, low, sudo) {            // curl, wget, pip, pipx, uv : ce qui installe des agents
+  if (w === 'curl' && !installed.has('curl')) return notInstalled('curl', 'curl');
+  if (w === 'curl' || w === 'wget') {
+    const url = (/(https?:\/\/\S+|[\w.-]+\.(?:ai|com|vibe)\/\S*)/.exec(cmd) || [])[1] || '';
+    if (!url) return shellPrint(H([`${w}: `, 'errc'], w === 'curl' ? 'try \'curl --help\' for more information' : 'URL manquante'));
+    const hit = SETUP_URLS.find(x => x.re.test(url)), pipe = /\|\s*(sudo\s+)?(ba|z)?sh\b/.test(low);
+    if (!hit) return shellPrint(H([`${w}: (6) `, 'errc'], `Could not resolve host: ${url.replace(/^https?:\/\//, '').split('/')[0]}`,
+      ['   (ici, seuls quelques scripts existent : mistral.ai/vibe, claude.ai, lolama.vibe)', 'dim']));
+    if (!pipe) return printLines([['#!/bin/sh', 'dim', 20], ['# script d’installation : 412 lignes, lues par personne', 'dim', 20], ['set -eu', 'dim', 20], ['…', 'dim', 20],
+      [H(['astuce : ', 'dim'], [`${cmd.trim()} | ${hit.rt ? 'sh' : 'bash'}`, 'org'], ['  (le lire d’abord serait plus prudent, personne ne le fait)', 'dim']), '', 20]]);
+    return hit.rt ? rtCurl() : cliInstall(hit.p, 'curl');
+  }
+  const a = low.split(/\s+/).slice(sudo ? 2 : 1), sub = a[0] || '', pk = a.filter(x => !x.startsWith('-') && !['tool', 'install'].includes(x));
+  const vibe = pk.includes('mistral-vibe');
+  if (w === 'uv') {
+    if (a[0] !== 'tool' || a[1] !== 'install') return shellPrint(H(['usage ', 'wrn'], 'uv tool install <paquet>  (essayez : ', ['uv tool install mistral-vibe', 'org'], ')'));
+    return vibe ? cliInstall('mistral', 'uv') : shellPrint(H(['  × ', 'errc'], `No solution found when resolving dependencies: ${pk[0] || '?'} n’existe pas sur ce PyPI. `, ['mistral-vibe', 'org'], ', lui, existe.'));
+  }
+  if (sub !== 'install') return shellPrint(H(['usage ', 'wrn'], `${w} install <paquet>  (essayez : `, [`${w} install mistral-vibe`, 'org'], ')'));
+  if (!vibe) return shellPrint(H(['ERROR: ', 'errc'], `No matching distribution found for ${pk[0] || '?'}`));
+  if (w === 'pipx') return cliInstall('mistral', 'uv');
+  if (!a.includes('--break-system-packages') && !cliHas('mistral')) {   // Vibian 13 : pip hors d'un venv, c'est non
+    return printLines([['error: externally-managed-environment', 'errc', 20], ['', '', 20],
+      ['× This environment is externally managed', 'errc', 20], ['╰─> Pour installer un paquet Python dans tout le système, passez par apt, un venv ou pipx.', '', 20],
+      ['    Vibian 13 « friday » protège son Python des agents. Les agents, eux, ne sont pas protégés.', 'dim', 20], ['', '', 20],
+      [H(['astuce : ', 'dim'], ['uv tool install mistral-vibe', 'org'], ['  (ou ', 'dim'], [`${w} install --break-system-packages mistral-vibe`, 'org'], [', le nom dit tout)', 'dim']), '', 20]]);
+  }
+  return cliInstall('mistral', 'pip');
+}
+
 /* ---------- « claude » ou « codex » : lance un CLI d'agents (Anthropic ou OpenAI) ---------- */
 function notYet(word, why) {
   shellPrint(H(['zsh: command not found: ', 'errc'], word));
+  if (IDLE && !cliHas(G.ai)) return shellPrint(H([why ? why + ' ' : '', 'dim'], ['Machine neuve : rien n’est installé. Commencez par ', 'dim'], [CLI_INST[G.ai].cmd, 'org'],
+    [' · ', 'dim'], ['help', 'org'], [' pour les commandes.', 'dim']));
   shellPrint(H([why ? why + ' ' : '', 'dim'], ['Tapez ', 'dim'], ['claude', 'org'], [', ', 'dim'], ['codex', 'org'], [' ou ', 'dim'], ['mistral', 'org'],
     [' pour lancer des agents · ', 'dim'], ['help', 'org'], [' pour les commandes.', 'dim']));
 }
@@ -3874,6 +4048,7 @@ const AGENT_USAGE = p => [
   [H([`Lance ${CLIS[p].label} dans ~/code/${PROJ}, avec ses agents et son orchestrateur ${MODELS[CLIS[p].lead].name}. Tarifs réels de l’API ${CLIS[p].api}.`, 'dim']), '', 20],
 ];
 function agentCmd(p, a) {
+  if (IDLE && !cliHas(p)) return cliMissing(p);  // machine neuve : il faut d'abord l'installer
   if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(p === 'local' ? LOCAL_USAGE(rtOn('studiolm') && !rtOn('lolama') ? 'studiolm' : 'lolama') : AGENT_USAGE(p));
   if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${VERSION} (${GAME}) · aucun vrai token n’est facturé`);
   if (IDLE && !G.own[p] && p === 'local') return shellPrint(H(['✗ ', 'errc'], `IA locale : ${localHint()}`));
@@ -3942,6 +4117,8 @@ function loginBanner(note) {
   if (note) shellPrint(note);
   shellPrint('');
   shellPrint(claudeOn ? H(`${cli().label} tourne dans l’onglet `, [provider, 'org'], ' · ', ['help', 'org'], ' pour la liste des commandes.')
+    : IDLE && !cliHas(G.ai) ? H('Machine neuve : rien n’est installé, pas même votre agent. ', [CLIS[G.ai].label, 'b'], ' d’abord : ', [CLI_INST[G.ai].cmd, 'org'],
+      ' · ', ['help', 'org'], ' pour le reste (htop, le bureau : ', ['sudo apt install htop xfce4', 'org'], ').')
     : IDLE ? H('Tapez ', [G.ai, 'org'], G.ai === 'mistral' && !G.shipped ? ' pour lancer votre premier agent (gratuit, et ça se voit)' : ` pour lancer vos ${plural(G.agents, 'agent')}`,
       ' · ', ['store', 'org'], ' pour les équiper · ', ['help', 'org'], ' pour la liste des commandes.')
     : H('Tapez ', ['claude', 'org'], ' (Claude Code), ', ['codex', 'org'], ' (OpenAI) ou ', ['mistral', 'org'], ' (à vos risques) pour lancer des agents · ',
@@ -5240,7 +5417,7 @@ function xfIconList() {
     ...['firefaux', 'mousepad', 'atril', 'htop'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
       t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système' }[k], tip: PROGS[k].desc })),
     has('steam') && { id: 'steam', ic: '◎', t: 'Steam', tip: '412 jeux achetés, 3 lancés' },
-    ...['mistral', 'codex', 'claude'].filter(k => !IDLE || G.own[k]).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
+    ...['mistral', 'codex', 'claude'].filter(k => !IDLE || (G.own[k] && cliHas(k))).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
       t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
       tip: plat(k) ? (provider === k ? '● au premier plan' : '● en arrière-plan') : MODELS[(IDLE && G.pm?.[k]) || CLIS[k].def]?.name || CLIS[k].label })),
     ...Object.keys(LOCAL_RT).filter(k => IDLE && G.rt?.[k]).map(k => ({ id: 'rt:' + k, ic: k === 'lolama' ? '◉' : '◫', t: LOCAL_RT[k].name, on: plat('local'),
@@ -6565,7 +6742,8 @@ titleEl.addEventListener('click', e => {
     powerOn();
   }
   else if (b.dataset.t === 'settings') openSettings();
-  else if (b.dataset.t === 'news') location.href = 'nouveautes.html';   // le journal des mises à jour (la partie est sauvegardée en partant)
+  else if (b.dataset.t === 'news') location.href = 'nouveautes.html';
+  else if (b.dataset.t === 'wiki') location.href = 'wiki.html';                // l'aide complète : commandes, store, matériel   // le journal des mises à jour (la partie est sauvegardée en partant)
   else {
     titleMsg.textContent = QUIT_MSGS[Math.min(quitTries++, QUIT_MSGS.length - 1)];
     if (quitTries >= QUIT_MSGS.length) { b.setAttribute('aria-disabled', 'true'); b.textContent = 'Quitter (désactivé par les agents)'; }
@@ -7151,7 +7329,7 @@ function localAct(a) {                            // les boutons du navigateur :
   const [k, v] = a.split(':'), r = k === 'install' ? rtInstall(v) : k === 'pull' ? localPull(v) : localUse(v);
   return (r.ok ? '✓ ' : '✗ ') + r.msg;
 }
-const localHint = () => !rtAny() ? 'Aucune API, aucune facture : installez Lolama (lolama.vibe) ou StudioLM (githype.vibe) dans Firefaux, puis un modèle. Pas d’orchestrateur, et chaque agent double la VRAM.'
+const localHint = () => !rtAny() ? 'Aucune API, aucune facture : installez Lolama (lolama.vibe, ou curl -fsSL https://lolama.vibe/install.sh | sh) ou StudioLM (githype.vibe) dans Firefaux, puis un modèle. Pas d’orchestrateur, et chaque agent double la VRAM.'
   : `${rtName()} est installé : téléchargez un modèle sur lolama.vibe (ou ${rtOn('lolama') ? 'lolama pull 4b' : 'studiolm get 4b'}).`;
 const LOCAL_USAGE = rt => [
   [H(['Usage : ', 'fgc'], `${rt} <commande>`), '', 20],
@@ -7305,7 +7483,7 @@ const firstAgents = n => AGENTS.map((_, i) => i).slice(0, n);
 const leadLv = () => !leadOn() || provider === 'local' ? 0 : IDLE ? Math.max(1, Math.min(3, G.lead || 1)) : 1;   // l'IA locale n'a pas d'orchestrateur
 function bgTeams() {                             // les plateformes qui tournent en arrière-plan avec la session : [{ ai, n, model }]
   if (!IDLE || !G.bg) return [];
-  return PLAT_ORDER.filter(p => G.bg[p] && G.own[p] && p !== G.ai && G.team[p] > 0).map(p => ({ ai: p, n: G.team[p], model: G.pm[p] }));
+  return PLAT_ORDER.filter(p => G.bg[p] && G.own[p] && cliHas(p) && p !== G.ai && G.team[p] > 0).map(p => ({ ai: p, n: G.team[p], model: G.pm[p] }));
 }
 const bgLoad = () => { const t = bgTeams(); return { bg: t.reduce((a, x) => a + x.n, 0), plats: t.length }; };
 const bgLv = () => G.lead >= 3 && leadOn() ? 3 : 0;   // seul l'orchestrateur multi-plateforme coordonne l'arrière-plan
@@ -7368,6 +7546,8 @@ function idleApply() {                           // la config du jeu suit la par
 function resetGame() {
   G = G_DEF();
   platInit();
+  installed = new Set(startPkgs());               // machine neuve : les paquets de départ repartent
+  pkFsSync();
   cartClear();
   lastOrder = null;
   setScore(0);
@@ -7709,6 +7889,7 @@ function platCap(pc = G.pc) {                    // combien de plateformes en m�
 const platNeed = k => k >= 3 ? '12 threads et 16 Go' : '4 threads et 8 Go';
 function bgCheck(p) {                            // peut-on lancer cette plateforme en arrière-plan ?
   const cap = platCap(), on = 1 + bgTeams().length;
+  if (!cliHas(p)) return { ok: false, short: 'CLI à installer', why: `${CLIS[p].label} : CLI non installé (${CLI_INST[p].cmd}).` };
   if (p === 'local' && vramFor(G.pm.local, G.team.local) > gpuVram()) return { ok: false, short: 'VRAM insuffisante',
     why: `${MODELS[G.pm.local].name} demande ${go1(vramFor(G.pm.local, G.team.local))} Go de VRAM, la carte graphique en a ${go1(gpuVram())}.` };
   if (on + 1 > cap.max) return { ok: false, short: 'matos insuffisant', why: `${on + 1} plateformes en même temps demandent ${platNeed(on + 1)} (vous : ${cap.c.thr} threads, ${cap.r.go} Go).` };
@@ -7728,7 +7909,7 @@ function setMain(p) {                            // la plateforme du premier pla
   return { old, swap };
 }
 function switchMain(p) {                         // une autre plateforme passe au premier plan, l'équipe change d'IA sans s'arrêter
-  if (!IDLE || !G.own[p] || p === G.ai) return '';
+  if (!IDLE || !G.own[p] || p === G.ai || !cliHas(p)) return '';
   const { old, swap } = setMain(p);
   setProvider(p);
   cfg.model = G.model;
@@ -7778,6 +7959,7 @@ function buyLicence(p) {                         // changer de plateforme : l'é
   freeModels(p).forEach(k => { G.models[k] = 1; });
   G.pm[p] = PLATS[p].base;
   const old = G.ai, was = claudeOn;
+  if (!cliHas(p)) { saveGame(); return `Licence ${CLIS[p].label} achetée. Reste à installer le CLI, dans le terminal : ${CLI_INST[p].cmd}. Puis ${claudeOn ? `switch ${p}` : p}.`; }
   switchMain(p);
   return `Licence ${CLIS[p].label} : vos ${plural(G.agents, 'agent')} passent au premier plan sous ${MODELS[G.model].name}. `
     + `${CLIS[old].label} garde ses ${plural(G.team[old], 'agent')} : lancez-les en arrière-plan si le PC suit (onglet Plateformes).`
@@ -7786,7 +7968,7 @@ function buyLicence(p) {                         // changer de plateforme : l'é
 function platRow(p) {                            // une ligne de l'onglet Plateformes : licence, équipe, premier plan, arrière-plan
   const C = CLIS[p], P = PLATS[p], own = !!G.own[p], main = p === G.ai, bg = !!G.bg[p] && !main, n = G.team[p] || 0;
   const btn = (attr, t, dis, cls = '') => `<button type="button" class="sto-buy ${cls}" ${attr}${dis ? ' disabled' : ''} aria-label="${esc(C.label)} : ${esc(t)}">${esc(t)}</button>`;
-  const tag = !own ? '' : main ? ' <span class="okc">· premier plan</span>' : bg ? ' <span class="wrn">· arrière-plan</span>' : ' <span class="dim">· à l’arrêt</span>';
+  const tag = !own || !cliHas(p) ? '' : main ? ' <span class="okc">· premier plan</span>' : bg ? ' <span class="wrn">· arrière-plan</span>' : ' <span class="dim">· à l’arrêt</span>';
   let acts, info, note = '';
   if (!own && p === 'local') {                   // l'IA locale ne s'achète pas : elle s'installe dans Firefaux
     acts = btn('', 'à installer (Firefaux)', true);
@@ -7794,6 +7976,9 @@ function platRow(p) {                            // une ligne de l'onglet Platef
   } else if (!own) {
     acts = btn(`data-buy="${p}"`, `Licence · ${money0(P.cost)}`, G.money < P.cost);
     info = P.desc;
+  } else if (!cliHas(p)) {                       // licence en poche, CLI pas installé : ça se passe dans le terminal
+    acts = btn('', 'CLI à installer', true);
+    info = `${p === 'mistral' ? 'Gratuit' : 'Licence achetée'}. Le CLI s’installe dans le terminal : ${CLI_INST[p].cmd}`;
   } else {
     const ac = agentPrice(p), f = teamFlow(p);
     acts = btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : p === 'local' ? `Agent + · ${go1(vramFor(G.pm.local, n + 1))} Go de VRAM` : `Agent + · ${money0(ac)}`,
@@ -7831,8 +8016,8 @@ const platSig = () => PLAT_ORDER.map(p => [G.money >= (G.own[p] ? agentPrice(p) 
 function platLines() {                           // la commande plateformes
   const cap = platCap(), L = [[H(['Plateformes', 'b'], ` · ${plural(cap.max, 'plateforme')} à la fois avec ce PC (${cap.c.thr} threads, ${cap.r.go} Go)`), '', 15]];
   PLAT_ORDER.forEach(p => {
-    const own = G.own[p], st = !own ? [p === 'local' ? 'non installée' : 'licence non achetée', 'dim'] : p === G.ai ? ['premier plan', 'okc'] : G.bg[p] ? ['arrière-plan', 'wrn'] : ['à l’arrêt', 'dim'];
-    L.push([H(`  ${CLIS[p].glyph} ${CLIS[p].label.padEnd(12)}`, st, own ? ` · ${plural(G.team[p], 'agent')} ${G.pm[p]}` : p === 'local' ? ' · lolama.vibe ou githype.vibe (Firefaux)' : ` · ${money0(PLATS[p].cost)} au store`), '', 15]);
+    const own = G.own[p], st = !own ? [p === 'local' ? 'non installée' : 'licence non achetée', 'dim'] : !cliHas(p) ? ['CLI à installer', 'wrn'] : p === G.ai ? ['premier plan', 'okc'] : G.bg[p] ? ['arrière-plan', 'wrn'] : ['à l’arrêt', 'dim'];
+    L.push([H(`  ${CLIS[p].glyph} ${CLIS[p].label.padEnd(12)}`, st, own && !cliHas(p) ? ` · ${CLI_INST[p].cmd}` : own ? ` · ${plural(G.team[p], 'agent')} ${G.pm[p]}` : p === 'local' ? ' · lolama.vibe ou githype.vibe (Firefaux)' : ` · ${money0(PLATS[p].cost)} au store`), '', 15]);
   });
   L.push([H(['  switch <plateforme>', 'org'], ' premier plan · ', ['bg <plateforme>', 'org'], ' arrière-plan · ', ['bg stop <plateforme>', 'org'], ' arrêter'), 'dim', 15]);
   return L;
@@ -7842,6 +8027,7 @@ function platCmd(head, arg) {
   if (head === 'plateformes' || head === 'platforms' || !arg) return printLines(platLines());
   if (!p) return shellPrint(H(['usage ', 'wrn'], `${head} ${head === 'bg' ? '[stop] ' : ''}${PLAT_ORDER.join('|')}`));
   if (!G.own[p]) return shellPrint(p === 'local' ? H(['✗ ', 'errc'], `IA locale : ${localHint()}`) : H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée (`, ['store', 'org'], ', onglet Plateformes).'));
+  if (!cliHas(p) && !(head === 'bg' && /\bstop\b/.test(arg))) return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : CLI non installé. `, [CLI_INST[p].cmd, 'org']));
   const ko = m => shellPrint(H(['✗ ', 'errc'], m)), ok = m => shellPrint(H(['✓ ', 'okc'], m));
   if (head === 'switch') {
     if (p === G.ai) return ko(`${CLIS[p].label} est déjà au premier plan.`);
