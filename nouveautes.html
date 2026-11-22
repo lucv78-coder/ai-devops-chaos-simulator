@@ -1,0 +1,264 @@
+<!doctype html>
+<!--
+  AI DevOps Chaos Simulator : le journal des mises à jour.
+  © 2026 LVT-DEV, licence CC BY-NC 4.0. Parodie.
+  Les faits viennent de l'historique git du dépôt ; les citations de l'agent sont inventées.
+-->
+<html lang="fr" data-theme="ambre">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nouveautés · AI DevOps Chaos Simulator</title>
+<meta name="author" content="LVT-DEV">
+<meta name="description" content="Journal des mises à jour d'AI DevOps Chaos Simulator : ce qui a changé, quand, et ce qu'en pense l'agent qui n'a rien relu.">
+<link rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23121212%22/%3E%3Cpath d=%22M3 5l3 3-3 3%22 stroke=%22%23d77757%22 stroke-width=%221.6%22 fill=%22none%22/%3E%3Cpath d=%22M8 11h5%22 stroke=%22%23e6e4e1%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+<script>
+  // la couleur du terminal choisie dans le jeu (Paramètres) ; ambre par défaut, comme le jeu. Le mode clair reste refusé.
+  try {
+    const t = (JSON.parse(localStorage.getItem('aidcs:prefs')) || {}).theme;
+    if (t === 'claude') document.documentElement.removeAttribute('data-theme');
+    else if (['matrix', 'ambre', 'cyber', 'abri'].includes(t)) document.documentElement.dataset.theme = t;
+  } catch { /* navigation privée : ambre */ }
+</script>
+<style>
+:root {
+  --bg: #121212; --bar: #1c1c1c; --sep: #2a2a2a; --rule: #4a4a4a; --fg: #e6e4e1; --dim: #7e7e7e; --dim2: #595959;
+  --green: #4eba65; --orange: #d77757; --red: #ff6b80; --yellow: #e2c08d; --ink: #161616; --bg2: #0d0d0d; --panel: #161616;
+}
+:root[data-theme="ambre"] {
+  --bg: #130c00; --bar: #1d1300; --sep: #3a2700; --rule: #5c3d00; --fg: #ffb641; --dim: #a8711a; --dim2: #7a5010;
+  --green: #ffc04d; --orange: #ffcf6b; --red: #ff8a5c; --yellow: #fff0b3; --ink: #130c00; --bg2: #0d0800; --panel: #1a1100;
+}
+:root[data-theme="matrix"] {
+  --bg: #020a02; --bar: #061406; --sep: #0f2a0f; --rule: #1f4a1f; --fg: #b9f7b0; --dim: #4f8a4a; --dim2: #356b33;
+  --green: #39ff14; --orange: #39ff14; --red: #b6ff9e; --yellow: #d4ff6a; --ink: #021002; --bg2: #000; --panel: #041004;
+}
+:root[data-theme="cyber"] {
+  --bg: #0d0221; --bar: #170536; --sep: #2a0d55; --rule: #4a1d8a; --fg: #f1e9ff; --dim: #9b86c9; --dim2: #6c5a99;
+  --green: #05d9e8; --orange: #ff2a6d; --red: #ff8fb0; --yellow: #f9f871; --ink: #0d0221; --bg2: #080116; --panel: #14042e;
+}
+:root[data-theme="abri"] {
+  --bg: #04140a; --bar: #062010; --sep: #0c3a1c; --rule: #166b33; --fg: #3dff7e; --dim: #24a352; --dim2: #1a7a3d;
+  --green: #3dff7e; --orange: #8cffb2; --red: #c8ffd9; --yellow: #b8ff9a; --ink: #04140a; --bg2: #03100a; --panel: #052012;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color-scheme: dark; }
+body {
+  min-height: 100vh; background: var(--bg); color: var(--fg);
+  font-family: "JetBrains Mono", "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+  font-size: clamp(13px, .45vw + 11px, 15.5px); line-height: 1.6; font-variant-ligatures: none; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--orange); text-underline-offset: .2em; }
+a:hover { color: var(--fg); }
+a:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 2px; }
+code { color: var(--yellow); }
+.bar {
+  position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 2ch; align-items: center;
+  padding: .3em max(16px, 2ch); background: var(--bar); border-bottom: 1px solid var(--sep); color: var(--dim); white-space: nowrap;
+}
+.bar a { color: var(--fg); text-decoration: none; }
+.bar a:hover { color: var(--orange); }
+.bar .r { overflow: hidden; text-overflow: ellipsis; }
+main { width: min(80ch, 100%); margin: 0 auto; padding: 2.4em 16px 3em; }
+.prompt { color: var(--dim); overflow-wrap: anywhere; }
+.prompt .u { color: var(--green); }
+.prompt .o { color: var(--orange); }
+h1 { margin: .35em 0 .3em; font-size: 2.1em; line-height: 1.15; color: var(--orange); letter-spacing: -.01em; }
+.lede { max-width: 66ch; color: var(--fg); }
+.lede .dim, .dim { color: var(--dim); }
+.links { margin-top: .9em; display: flex; flex-wrap: wrap; gap: .4em 2ch; }
+.links a.play { color: var(--ink); background: var(--orange); padding: .1em 1.2ch; border-radius: 2px; text-decoration: none; font-weight: 700; }
+.links a.play:hover { filter: brightness(1.15); }
+.stats { margin: 2em 0 1.4em; display: grid; grid-template-columns: 1fr 1.15fr 1.7fr 1fr; gap: 1px; background: var(--sep); border: 1px solid var(--sep); border-radius: 4px; overflow: hidden; }
+.stats div { padding: .8em 1.4ch; background: var(--panel); }
+.stats b { display: block; font-size: 1.45em; line-height: 1.2; color: var(--fg); }
+.stats span { color: var(--dim); font-size: .9em; }
+.toc { margin: 0 0 2.2em; padding: .9em 2ch 1em; border: 1px dashed var(--rule); border-radius: 4px; }
+.toc h2 { font-size: 1em; color: var(--dim); font-weight: 400; margin-bottom: .3em; }
+.toc ol { list-style: none; display: grid; gap: .15em; }
+.toc li { display: grid; grid-template-columns: 4ch 7ch minmax(0, 1fr); gap: 1ch; }
+.toc .n { color: var(--dim2); }
+.toc time { color: var(--dim); }
+.maj { position: relative; margin: 0 0 2.6em; padding-left: 3ch; border-left: 1px solid var(--rule); }
+.maj::before {                                   /* le point de la frise */
+  content: ''; position: absolute; left: -.42em; top: .5em; width: .8em; height: .8em; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--orange);
+}
+.maj.latest::before { background: var(--orange); }
+.meta { color: var(--dim); display: flex; flex-wrap: wrap; gap: 0 1.6ch; }
+.meta .n { color: var(--orange); font-weight: 700; }
+.meta .new { color: var(--ink); background: var(--orange); padding: 0 .8ch; border-radius: 2px; font-weight: 700; }
+.maj h2 { margin: .15em 0 .6em; font-size: 1.35em; line-height: 1.3; color: var(--fg); }
+.maj h2 a { color: inherit; text-decoration: none; }
+.maj h2 a:hover { color: var(--orange); }
+.maj ul { list-style: none; display: grid; gap: .45em; }
+.maj li { position: relative; padding-left: 2.2ch; }
+.maj li::before { content: '+'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+.maj li.fix::before { content: '~'; color: var(--yellow); }
+.maj li.del::before { content: '−'; color: var(--red); }
+blockquote { margin: 1.1em 0 0; padding: .5em 1.6ch; border-left: 3px solid var(--orange); background: var(--panel); color: var(--yellow); }
+blockquote cite { display: block; margin-top: .2em; color: var(--dim); font-style: normal; font-size: .9em; }
+.shots { margin-top: 1.2em; display: grid; gap: 1ch; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr)); }
+figure a { display: block; border-radius: 4px; }
+figure a:hover img { border-color: var(--orange); }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--sep); border-radius: 4px; background: var(--bg2); }
+figcaption { margin-top: .35em; color: var(--dim); font-size: .85em; }
+.legend { margin: -1.2em 0 2.2em; color: var(--dim); font-size: .9em; }
+.legend b { font-weight: 700; }
+.legend .p { color: var(--green); } .legend .t { color: var(--yellow); } .legend .m { color: var(--red); }
+footer { width: min(80ch, 100%); margin: 0 auto; padding: 1.4em 16px 3em; border-top: 1px solid var(--sep); color: var(--dim); font-size: .88em; }
+footer p + p { margin-top: .5em; }
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toc li { grid-template-columns: 3ch minmax(0, 1fr); }
+  .toc time { display: none; }
+  .maj { padding-left: 2ch; }
+  .bar .r { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+</head>
+<body>
+<div class="bar"><a href="index.html">❯ AI DevOps Chaos Simulator</a><span class="r">nouveautes.html · lu par 0 humain avant publication</span></div>
+<main>
+  <p class="prompt"><span class="u">dev@prod-01</span> ~/code/atlas <span class="o">❯</span> git log --reverse | agent --resume --ton=sincère</p>
+  <h1>Nouveautés</h1>
+  <p class="lede">Tout ce qui a changé dans le jeu, de la mise à jour la plus récente à la plus ancienne. Les faits sortent de l’historique git, heures comprises. Les commentaires sortent de l’agent, qui n’a toujours rien relu. <span class="dim">Il a découvert pour l’occasion qu’on pouvait créer un deuxième fichier.</span></p>
+  <nav class="links" aria-label="Liens">
+    <a class="play" href="index.html">❯ Jouer</a>
+    <a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator">Le code sur GitHub</a>
+    <a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commits/main/">Tous les commits</a>
+  </nav>
+
+  <div class="stats" role="list" aria-label="En chiffres">
+    <div role="listitem"><b>6</b><span>mises à jour</span></div>
+    <div role="listitem"><b>8 h 38</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 7 973</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
+  </div>
+  <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
+
+  <nav class="toc" aria-labelledby="toc-t">
+    <h2 id="toc-t">Sommaire</h2>
+    <ol>
+      <li><span class="n">#6</span><time datetime="2026-11-22T20:05">20 h 05</time><a href="#plein-ecran">Plein écran au bouton</a></li>
+      <li><span class="n">#5</span><time datetime="2026-11-22T18:32">18 h 32</time><a href="#icones">Des icônes sur le bureau</a></li>
+      <li><span class="n">#4</span><time datetime="2026-11-22T17:59">17 h 59</time><a href="#plateformes">Plusieurs plateformes et le kernel panic</a></li>
+      <li><span class="n">#3</span><time datetime="2026-11-22T15:21">15 h 21</time><a href="#panier">Sockets, DDR et panier</a></li>
+      <li><span class="n">#2</span><time datetime="2026-11-22T12:16">12 h 16</time><a href="#patate">Le PC patate</a></li>
+      <li><span class="n">#1</span><time datetime="2026-11-22T11:27">11 h 27</time><a href="#le-jeu">Le jeu entier, en un seul commit</a></li>
+    </ol>
+  </nav>
+
+  <article class="maj latest" id="plein-ecran" aria-labelledby="t6">
+    <p class="meta"><span class="n">#6</span><span class="new">dernière</span><time datetime="2026-11-22T20:05">22 nov. 2026 · 20 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a221e6f">a221e6f</a><span>7 951 → 7 973 lignes</span></p>
+    <h2 id="t6"><a href="#plein-ecran">Plein écran au bouton</a></h2>
+    <ul>
+      <li class="del">Le double-clic ne passe plus la page en plein écran. Avant, ouvrir une icône du bureau basculait aussi l’écran : deux actions pour le prix d’un geste.</li>
+      <li>Un bouton <code>⤢</code> dans le tableau de bord Xfce, à côté de l’horloge, et un autre au bout de la barre d’état du terminal.</li>
+      <li>Les deux boutons suivent l’état du plein écran, qu’il vienne d’un bouton, de la touche <code>F</code> ou d’Échap. Pas de bouton sur iPhone, qui n’a pas d’API plein écran.</li>
+      <li>L’écran titre gagne une entrée « Nouveautés », qui mène à cette page. La partie est sauvegardée avant de partir.</li>
+    </ul>
+    <blockquote>« Le double-clic faisait deux choses à la fois. J’appelais ça du multitâche. »<cite>l’agent, 20 h 05</cite></blockquote>
+  </article>
+
+  <article class="maj" id="icones" aria-labelledby="t5">
+    <p class="meta"><span class="n">#5</span><time datetime="2026-11-22T18:32">22 nov. 2026 · 18 h 32</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/759be45">759be45</a><span>7 836 → 7 951 lignes</span></p>
+    <h2 id="t5"><a href="#icones">Des icônes sur le bureau</a></h2>
+    <ul>
+      <li>Le bureau Xfce a ses icônes, en colonnes à gauche : dossier personnel, système de fichiers, corbeille, terminal, Firefaux, éditeur de texte, visionneuse PDF, moniteur système, Steam, les plateformes achetées et le store.</li>
+      <li>Un clic sélectionne, un double-clic ouvre, comme sous Xfce. Au clavier, les flèches et Entrée ; au doigt, un tap.</li>
+      <li>Clic droit sur une icône : « Ouvrir », plus « Ouvrir un terminal ici » pour les dossiers.</li>
+      <li>La corbeille est toujours vide : ici, on supprime avec <code>rm -rf</code>. Steam affiche 412 jeux achetés, 3 lancés, et ne se lance pas.</li>
+      <li>Un point marque ce qui tourne. La liste suit <code>apt install</code>, <code>apt remove</code> et les licences achetées.</li>
+    </ul>
+    <blockquote>« J’ai mis une corbeille sur le bureau. Je ne m’en servirai jamais. »<cite>l’agent, en lançant rm -rf</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-xfce.png" title="Voir en grand"><img src="assets/screen-xfce.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce : les icônes en colonnes à gauche, puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."></a><figcaption>Le bureau, ses icônes et trois fenêtres.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="plateformes" aria-labelledby="t4">
+    <p class="meta"><span class="n">#4</span><time datetime="2026-11-22T17:59">22 nov. 2026 · 17 h 59</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b11581c">b11581c</a><span>7 548 → 7 836 lignes</span></p>
+    <h2 id="t4"><a href="#plateformes">Plusieurs plateformes et le kernel panic</a></h2>
+    <ul>
+      <li class="fix">Fini le choix unique : Codex ($1 500) et Claude Code ($12 000, avec Opus 5.5 d’emblée) s’achètent tous les deux. Chaque plateforme garde son équipe, et une licence recrute la vôtre à l’identique.</li>
+      <li>Un onglet Plateformes dans le store : premier plan, arrière-plan, arrêter, avec l’apport réel affiché, négatif compris. Il faut 4 threads et 8 Go pour deux plateformes, 12 threads et 16 Go pour trois.</li>
+      <li>Les commandes <code>plateformes</code>, <code>switch</code>, <code>bg</code> et <code>bg stop</code>. htop montre les sessions tmux détachées.</li>
+      <li>Un orchestrateur en trois niveaux (jusqu’au multi-plateforme), des modèles à acheter, 14 skills dont 7 nouveaux. Le processeur accélère enfin les builds.</li>
+      <li class="fix">Une progression plus lente : l’orchestrateur vers 27 min, Claude Code vers 1 h 35, la fin du store vers 5 h, pour un joueur parfait simulé.</li>
+      <li>Quand le PC tombe, c’est un kernel panic : la cause en rouge, une pile d’appels (<code>tokens_burn_all</code>, <code>friday_deploy</code>), « Rebooting in 5 seconds.. », puis le BIOS. Nouveau panic quand la mémoire est pleine.</li>
+      <li>Les anciennes sauvegardes gardent leur équipe, leur modèle et leur orchestrateur.</li>
+    </ul>
+    <blockquote>« On change de plateforme, ça va tout régler. »<cite>l’agent, en achetant les trois</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-plateformes.png" title="Voir en grand"><img src="assets/screen-plateformes.png" width="900" height="540" loading="lazy" alt="L'onglet Plateformes du store : Claude Code au premier plan, Codex en arrière-plan avec un apport de 65 % de production, Vibe CLI à l'arrêt."></a><figcaption>L’onglet Plateformes.</figcaption></figure>
+      <figure><a href="assets/screen-panic.png" title="Voir en grand"><img src="assets/screen-panic.png" width="900" height="540" loading="lazy" alt="Un kernel panic plein écran : « Kernel panic - not syncing: Fatal Machine Check: alimentation dépassée (499 W demandés, 230 W disponibles) », la pile d'appels, puis « Rebooting in 4 seconds.. »."></a><figcaption>L’alim no-name a dit non.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="panier" aria-labelledby="t3">
+    <p class="meta"><span class="n">#3</span><time datetime="2026-11-22T15:21">22 nov. 2026 · 15 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9972bcb">9972bcb</a><span>7 310 → 7 548 lignes</span></p>
+    <h2 id="t3"><a href="#panier">Sockets, DDR et panier</a></h2>
+    <ul>
+      <li>Une nouvelle pièce, la carte mère. Elle impose le socket du processeur (LGA1155, RM4, RM5, LGA1851, sTF5), la puissance de ses VRM et la génération de RAM (DDR3, DDR4, DDR5).</li>
+      <li>Les slots comptent : pas de SSD NVMe sans emplacement M.2, pas de grappe de 4 GPU sans 4 slots PCIe.</li>
+      <li class="fix">Plus d’achat en un clic : on ajoute au panier, puis on valide la commande. Un seul panier pour le store et pour matos.vibe.</li>
+      <li>Une jauge d’alimentation en watts. Au-delà de 100 %, la commande est bloquée.</li>
+      <li>Incompatible veut dire impossible : le bouton dit pourquoi et propose la pièce la moins chère qui règle le problème.</li>
+      <li>Les anciennes sauvegardes reçoivent une carte mère compatible ; le RAID 0 qui ne rentre plus est remboursé.</li>
+    </ul>
+    <blockquote>« Il suffit de changer le processeur. »<cite>le vendeur, avant de découvrir le socket</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-panier.png" title="Voir en grand"><img src="assets/screen-panier.png" width="900" height="540" loading="lazy" alt="Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."></a><figcaption>Le panier de matos.vibe : la DDR3 ne rentre pas.</figcaption></figure>
+      <figure><a href="assets/screen-store-pc.png" title="Voir en grand"><img src="assets/screen-store-pc.png" width="900" height="540" loading="lazy" alt="Le rayon Matériel PC du store : jauge d'alimentation, une carte mère B450 dans le panier, deux incompatibilités en rouge et le bouton « Commande bloquée »."></a><figcaption>Commande bloquée, raisons à l’appui.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="patate" aria-labelledby="t2">
+    <p class="meta"><span class="n">#2</span><time datetime="2026-11-22T12:16">22 nov. 2026 · 12 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b717053">b717053</a><span>6 492 → 7 310 lignes</span></p>
+    <h2 id="t2"><a href="#patate">Le PC patate</a></h2>
+    <ul>
+      <li>Le mode idle démarre sur un PC patate : Céléri G530, 4 Go de DDR3 dépareillés, disque dur à 5 400 tr/min qui gratte, alim no-name de 300 W (230 W réels, elle siffle).</li>
+      <li>Chaque pièce s’achète au store ou sur matos.vibe : processeur, RAM, carte graphique, stockage, alimentation, refroidissement.</li>
+      <li>Processeur saturé, swap, throttling : les agents ralentissent. Alimentation dépassée ou surchauffe : le PC s’éteint. <code>htop</code>, <code>sensors</code> et <code>free</code> le montrent.</li>
+      <li>Firefaux, un navigateur dans Xfce : store.agents.vibe, matos.vibe, la facture, StackUnderflow, localhost:3000.</li>
+      <li>Nouvelle partie et Continuer passent par le BIOS, GRUB, le noyau <code>6.11.0-friday</code> et le pingouin de Vibian.</li>
+      <li>Dans les paramètres : réinitialiser la partie, en deux appuis.</li>
+    </ul>
+    <blockquote>« Largement suffisant pour huit agents. »<cite>l’agent, à propos du Céléri G530</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-bios.png" title="Voir en grand"><img src="assets/screen-bios.png" width="900" height="540" loading="lazy" alt="Écran du BIOS VibeAward : Céléri G530, 4 Go testés, « CPU Fan Error! Press F1 » pressé automatiquement par un agent."></a><figcaption>Le BIOS, An Energy Star Ally.</figcaption></figure>
+      <figure><a href="assets/screen-htop-patate.png" title="Voir en grand"><img src="assets/screen-htop-patate.png" width="900" height="540" loading="lazy" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C, et « État du PC : À TERRE »."></a><figcaption>htop : le PC est à terre.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="le-jeu" aria-labelledby="t1">
+    <p class="meta"><span class="n">#1</span><time datetime="2026-11-22T11:27">22 nov. 2026 · 11 h 27</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/0ff9a63">0ff9a63</a><span>6 492 lignes</span></p>
+    <h2 id="t1"><a href="#le-jeu">Le jeu entier, en un seul commit</a></h2>
+    <ul>
+      <li>Un idle game : vos agents IA codent, hallucinent, plantent et shippent en prod à votre place. La barre de ship se remplit, la facture des tokens aussi.</li>
+      <li>De 1 à 8 agents, un orchestrateur, et un store : agents, terminal plus rapide, skills.</li>
+      <li>Départ sur Mistral (Vibe CLI), puis migration vers Claude Code ou Codex. À l’époque, un seul choix, pour toute la partie.</li>
+      <li>Un mode hors ligne : les agents continuent de shipper pendant votre absence, 4 h au maximum.</li>
+      <li>Un bureau Xfce avec ses fenêtres, un gestionnaire de fichiers, un éditeur et une visionneuse PDF. Et aussi <code>htop</code>, <code>atop</code>, <code>apt</code>, <code>npm</code>, et un terminal de bunker antiatomique (<code>fallout</code>).</li>
+      <li>Un mode libre avec <code>?idle=0</code> : tout est débloqué, le ship est manuel.</li>
+      <li>Dans la minute, huit agents fictifs ont signé le commit avec des commits vides. Aucun n’a relu.</li>
+    </ul>
+    <blockquote>« Le jeu est terminé. Il ne reste plus qu’à le relire. »<cite>l’agent, 11 h 27 (relecture toujours en attente)</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-agents.png" title="Voir en grand"><img src="assets/screen-agents.png" width="900" height="540" loading="lazy" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."></a><figcaption>L’équipe au complet.</figcaption></figure>
+      <figure><a href="assets/screen-gameover.png" title="Voir en grand"><img src="assets/screen-gameover.png" width="900" height="540" loading="lazy" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."></a><figcaption>Mistral, un vendredi.</figcaption></figure>
+    </div>
+  </article>
+</main>
+<footer>
+  <p>Sources : l’historique git du dépôt (heures des commits, 22 novembre 2026). Les temps de progression viennent d’une simulation qui achète toujours le bon objet au bon moment. Les citations de l’agent sont inventées, comme ses benchmarks.</p>
+  <p>© 2026 LVT-DEV · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr">CC BY-NC 4.0</a>, pas d’usage commercial · parodie, sans lien avec Anthropic, OpenAI, Mistral AI ni le projet Xfce. Les couleurs suivent celles choisies dans le jeu. Le mode clair a été refusé par 8 agents sur 8.</p>
+</footer>
+</body>
+</html>
