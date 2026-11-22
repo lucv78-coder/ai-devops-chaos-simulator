@@ -96,6 +96,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #foot { background: var(--bar); color: var(--green); }
 #foot .r { color: var(--fg); }
 .tools { display: flex; gap: .4ch; }
+/* plein écran : un bouton dans la barre tmux et dans le tableau de bord Xfce (le double-clic est réservé aux icônes du bureau) */
+.fs-btn { flex: none; padding: 0 .6ch; border-radius: 2px; color: var(--dim); line-height: 1; }
+.fs-btn:hover, .fs-btn:focus-visible { outline: none; color: var(--fg); background: rgba(255, 255, 255, .1); }
+.fs-btn[aria-pressed="true"] { color: var(--orange); }
+.fs-btn[hidden] { display: none; }
 .tbtn { padding: 0 .6ch; border-radius: 2px; color: var(--dim); white-space: pre; }
 .tbtn kbd { font: inherit; color: var(--orange); }
 .tbtn:hover { color: var(--fg); background: rgba(255, 255, 255, .06); }
@@ -886,14 +891,14 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   </section>
   <div id="foot" class="bar">
     <span class="l">[<span class="proj"></span>] <nav id="tabs" aria-label="Onglets"></nav></span>
-    <span class="r" id="foot-r"></span>
+    <span class="r"><span id="foot-r"></span><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button></span>
   </div>
 </div>
 <div id="xfce" hidden>
   <div class="xf-panel" role="toolbar" aria-label="Tableau de bord Xfce">
     <button type="button" class="xf-apps" aria-haspopup="menu" aria-expanded="false" aria-controls="xf-menu">▦ Applications</button>
     <nav class="xf-tasks" aria-label="Fenêtres ouvertes"></nav>
-    <span class="xf-sys"><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><span class="xf-clock"></span><span class="xf-user"></span></span>
+    <span class="xf-sys"><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button><span class="xf-clock"></span><span class="xf-user"></span></span>
   </div>
   <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div><div class="xf-icons" role="group" aria-label="Icônes du bureau"></div></div>
   <div class="xf-menu" id="xf-menu" role="menu" aria-label="Applications" hidden></div>
@@ -932,6 +937,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <button type="button" data-t="continue" hidden>Continuer</button>
     <button type="button" data-t="start">Nouvelle partie</button>
     <button type="button" data-t="settings">Paramètres</button>
+    <button type="button" data-t="news">Nouveautés</button>
     <button type="button" data-t="quit">Quitter</button>
   </nav>
   <p class="t-msg" role="status"></p>
@@ -6451,6 +6457,7 @@ titleEl.addEventListener('click', e => {
     powerOn();
   }
   else if (b.dataset.t === 'settings') openSettings();
+  else if (b.dataset.t === 'news') location.href = 'nouveautes.html';   // le journal des mises à jour (la partie est sauvegardée en partant)
   else {
     titleMsg.textContent = QUIT_MSGS[Math.min(quitTries++, QUIT_MSGS.length - 1)];
     if (quitTries >= QUIT_MSGS.length) { b.setAttribute('aria-disabled', 'true'); b.textContent = 'Quitter (désactivé par les agents)'; }
@@ -6855,6 +6862,17 @@ function toggleFullscreen() {
   if (document.fullscreenElement) document.exitFullscreen();
   else document.documentElement.requestFullscreen?.().catch(() => {});
 }
+function fsSync() {                              // les boutons plein écran suivent l'état (F, Échap, bouton : peu importe d'où ça vient)
+  const on = !!document.fullscreenElement;
+  document.querySelectorAll('.fs-btn').forEach(b => {
+    b.hidden = !document.fullscreenEnabled;      // iPhone : pas d'API plein écran, pas de bouton
+    b.setAttribute('aria-pressed', on);
+    b.title = on ? 'Quitter le plein écran (F ou Échap)' : 'Plein écran (F)';
+    b.setAttribute('aria-label', on ? 'Quitter le plein écran' : 'Plein écran');
+  });
+}
+document.addEventListener('fullscreenchange', fsSync);
+fsSync();
 function cycleLayout() {
   cfg.layout = LAYOUTS[(LAYOUTS.indexOf(cfg.layout) + 1) % LAYOUTS.length];
   saveCfg();
@@ -6867,6 +6885,11 @@ function cycleLead() {
 }
 let shipQueued = false;
 function act(name) {
+  if (name === 'fullscreen') {                   // toujours permis, même en game over
+    toggleFullscreen();
+    if (view === 'zsh' && !xfOn && !shellForm.hidden) shellIn.focus({ preventScroll: true });   // la frappe reste au terminal
+    return;
+  }
   if (mode === 'gameover' && !['term', 'ship', 'settings', 'store'].includes(name)) { toast('Game over : tapez <kbd>restart</kbd> dans le terminal.'); openShell(); return; }
   if (name === 'settings') openSettings();
   else if (name === 'agents') openPicker();
@@ -6918,7 +6941,6 @@ addEventListener('keydown', e => {
   else if (k === 'h' || k === '?') toast(HELP, 5000);
   else if (k === 'escape' && !shell.hidden) closeShell();
 });
-addEventListener('dblclick', e => { if (!e.target.closest('#shell, #top, #foot, .prog, dialog, .xf-panel, .xf-menu, .xw-bar') && e.target !== deskEl) toggleFullscreen(); });
 shell.addEventListener('click', () => {          // zsh plein écran : un clic n'importe où remet le curseur dans l'invite
   if (view === 'zsh' && !shellForm.hidden && !String(getSelection())) shellIn.focus({ preventScroll: true });
 });
