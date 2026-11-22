@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 973">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 8 084">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -45,6 +45,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Token-aware.** Chaque ship rapporte de l'argent, moins la facture des tokens. Spoiler : la facture gagne souvent.
 - **Store intégré.** Trois rayons : agents IA, plateformes, matériel PC. Trois niveaux d'orchestrateur, des modèles plus chers, un terminal plus rapide et 14 skills, de « tests unitaires » à « lire CLAUDE.md (pour de vrai) », à un million de dollars.
 - **Multi-plateforme.** Démarrez sur le pire agent, puis achetez Codex et Claude Code. Chaque plateforme garde son équipe : une au premier plan, les autres en arrière-plan, si le PC suit. Avant, c'était un choix irréversible, comme un mariage. Maintenant, c'est trois factures de tokens.
+- **Modes boost.** `ultracode` pour Claude Code, `xhigh` pour Codex, `flash` pour Mistral : achetés au store, une minute par jour, prolongeables jusqu'à trois. L'agent a demandé un mode boost pour le mode boost. On lui a dit de revenir demain.
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
@@ -55,7 +56,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 7 973 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier.
+- **Monolithe artisanal.** 1 fichier, 8 084 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier.
 
 ## Le matériel
 
@@ -102,6 +103,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 - **Premier plan, arrière-plan.** Une plateforme tient l'onglet des agents, les autres travaillent en fond. Il faut 4 threads et 8 Go pour deux plateformes, 12 threads et 16 Go pour trois. La RAM, l'alim et la chauffe sont vérifiées avant le lancement.
 - **Le store affiche l'effet réel** (« apport : +65 % de production »). Sur un PC trop juste, il prévient que tout le monde ralentit. En fin de partie, Mistral en arrière-plan fait reculer la barre : ses bugs coûtent plus que ce qu'il produit. C'est affiché en négatif, en toute transparence.
 - **Dans le terminal**, entre deux sessions : `plateformes`, `switch codex`, `bg mistral`, `bg stop codex`.
+- **Les modes boost**, une fois par jour : Flash Answers pour Vibe CLI ($400 : ×2,5 de travail, ×2 de bugs), raisonnement xhigh pour Codex ($4 000 : ×2,2 de travail, bugs divisés par deux, ×2,5 de tokens), `ultracode` pour Claude Code ($30 000 : ×3 de travail, ×4 de tokens). Une minute, quatre prolongations de 30 s au plus, retour à minuit. On les lance avec la commande ou la touche `U`, quand l'équipe tourne.
 - **L'orchestrateur** monte en trois niveaux : Orchestrateur ($350, dès 3 agents), Plan mode ($8 000, dès 5 agents), Multi-plateforme ($150 000, avec deux plateformes). Le dernier coordonne aussi l'arrière-plan. Il facture sa coordination en tokens, évidemment.
 
 | Jalon (joueur parfait, simulé) | Quand | Revenus |
@@ -119,7 +121,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 973 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (8 084 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -157,12 +159,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | `T` | ouvrir le terminal |
 | `S` | shipper (en mode libre) |
 | `B` | le store |
+| `U` | mode boost (ultracode, xhigh ou flash), une fois par jour |
 | `M` | le menu |
 | `F` | plein écran (ou le bouton `⤢`, en bas à droite du terminal et dans la barre de Xfce) |
 
 **Commandes à essayer** (`help` les liste toutes) :
 - `htop` ;
 - `plateformes`, `switch codex` et `bg mistral` ;
+- `ultracode` (ou `xhigh`, `flash`), une fois le mode acheté ;
 - `sensors` et `free` ;
 - `firefaux` (ou `firefox`, il ne fait pas la différence) ;
 - `tskill codex` ;
@@ -215,6 +219,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Un kernel panic, pour que le PC puisse enfin dire ce qu'il pense
 - [x] Des icônes sur le bureau, à double-cliquer comme en 2004
 - [x] Une page de nouveautés, pour savoir ce qui a cassé, et à quelle heure
+- [x] Des modes boost, une minute par jour, comme les pauses café
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -224,14 +229,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 7 973 lignes ?**
+**Pourquoi un seul fichier de 8 084 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 7 973 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 8 084 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
