@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 548">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 836">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -41,17 +41,19 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Zero-shot deploy.** La barre de ship se remplit toute seule et le projet part en prod sans que personne sache ce qu'il contient. Exactement comme en vrai.
 - **Hallucination-native.** Les agents Mistral inventent des fichiers, des API, des bugs et, une fois, un collègue.
 - **Token-aware.** Chaque ship rapporte de l'argent, moins la facture des tokens. Spoiler : la facture gagne souvent.
-- **Store intégré.** Achetez des agents, un terminal plus rapide et des skills comme « tests unitaires » ou « lire CLAUDE.md (pour de vrai) ».
-- **Migration d'IA.** Démarrez sur le pire agent, puis migrez vers Claude Code ou Codex. Un seul choix, irréversible. Comme un mariage, mais avec des tokens.
+- **Store intégré.** Trois rayons : agents IA, plateformes, matériel PC. Trois niveaux d'orchestrateur, des modèles plus chers, un terminal plus rapide et 14 skills, de « tests unitaires » à « lire CLAUDE.md (pour de vrai) », à un million de dollars.
+- **Multi-plateforme.** Démarrez sur le pire agent, puis achetez Codex et Claude Code. Chaque plateforme garde son équipe : une au premier plan, les autres en arrière-plan, si le PC suit. Avant, c'était un choix irréversible, comme un mariage. Maintenant, c'est trois factures de tokens.
+- **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, gestionnaire de fichiers, éditeur et lecteur PDF. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
-- **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis s'éteint. L'agent appelle ça « un redémarrage planifié ».
+- **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
+- **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. L'agent, lui, dit que tout va bien.
 - **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow. Toute autre adresse a été hallucinée par votre agent.
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 7 548 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
+- **Monolithe artisanal.** 1 fichier, 7 836 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
 
 ## Le matériel
 
@@ -64,7 +66,8 @@ Le jeu tourne maintenant sur un vrai faux PC, et il commence par terre.
 | **Datacenter de salon** | ThreadFlipper 7980X (128 threads) sur sa TRX50, 128 Go de DDR5 ECC, une grappe de cartes datacenter, refroidissement à l'azote liquide | « Un peu juste. » |
 
 - **Ce qui ralentit les agents** : processeur saturé, swap, throttling au-delà de 90 °C.
-- **Ce qui éteint le PC** : alimentation dépassée, 100 °C, ou l'alim no-name qui lâche. Le PC redémarre sur le BIOS, et les agents ne repartent que si la config tient.
+- **Ce qui fait planter le PC** : alimentation dépassée, 100 °C, l'alim no-name qui lâche, ou une RAM si pleine que même l'OOM killer abandonne. C'est un kernel panic, avec la cause écrite en rouge, puis un reboot sur le BIOS. Les agents ne repartent que si la config tient. Si ce sont les équipes en arrière-plan qui la font tomber, elles restent coupées.
+- **Le processeur accélère** les builds et les tests : +25 % pour un i5, ×2,4 pour le ThreadFlipper. Le disque dur à 5 400 tr/min, lui, ralentit tout le monde.
 - **La carte graphique** fait tourner un relecteur local : moins de bugs, moins de tokens. C'est la seule relecture de code du jeu.
 - **Le RAID 0** va très vite. Jusqu'au jour où il perd le projet en cours. Comme en vrai.
 
@@ -83,9 +86,38 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 > [!CAUTION]
 > Matos.vibe refuse maintenant une RTX 4090 sur l'alim no-name. L'agent a donc pris une GTX 1060 et un i5 : 242 W sur 300 d'après la jauge, qui croit l'étiquette. L'alim, elle, coupe vers 230. Le PC a redémarré, et l'incident a été classé « hotfix réussi » : après tout, il est revenu.
 
+## Les plateformes IA (et la progression)
+
+*« On change de plateforme, ça va tout régler. » Toutes les équipes tech, chaque trimestre.*
+
+| Plateforme | Licence | Modèle de départ | Avis de l'agent |
+|---|---|---|---|
+| **Vibe CLI** (Mistral) | gratuite | Codestral 25.08 | « Production-ready. » Il hallucine, plante, redémarre, et recommence. |
+| **Codex** | $1 500 | GPT-6.1 Terra : 1,6× le travail de Codestral, trois fois moins de bugs | « Enfin du sérieux. » |
+| **Claude Code** | $12 000 | Claude Opus 5.5 : 2,5× le travail de Codestral, quatre fois moins de bugs | « Celui-là signe ses commits. » |
+
+- **Chaque plateforme a son équipe.** Une licence recrute votre équipe à l'identique et la passe au premier plan. L'ancienne n'est pas licenciée : elle attend dans un tmux détaché.
+- **Premier plan, arrière-plan.** Une plateforme tient l'onglet des agents, les autres travaillent en fond. Il faut 4 threads et 8 Go pour deux plateformes, 12 threads et 16 Go pour trois. La RAM, l'alim et la chauffe sont vérifiées avant le lancement.
+- **Le store affiche l'effet réel** (« apport : +65 % de production »). Sur un PC trop juste, il prévient que tout le monde ralentit. En fin de partie, Mistral en arrière-plan fait reculer la barre : ses bugs coûtent plus que ce qu'il produit. C'est affiché en négatif, en toute transparence.
+- **Dans le terminal**, entre deux sessions : `plateformes`, `switch codex`, `bg mistral`, `bg stop codex`.
+- **L'orchestrateur** monte en trois niveaux : Orchestrateur ($350, dès 3 agents), Plan mode ($8 000, dès 5 agents), Multi-plateforme ($150 000, avec deux plateformes). Le dernier coordonne aussi l'arrière-plan. Il facture sa coordination en tokens, évidemment.
+
+| Jalon (joueur parfait, simulé) | Quand | Revenus |
+|---|---|---|
+| Deuxième agent | 2 min 36 | |
+| Orchestrateur | 27 min | +43 % |
+| Carte mère, processeur et RAM (Raisin 5) | 57 min | ×3 |
+| Licence Codex | 1 h | +53 % |
+| Licence Claude Code | 1 h 35 | +20 % |
+| Orchestrateur multi-plateforme | 3 h 10 | ×2 |
+| « Lire CLAUDE.md (pour de vrai) », $1 000 000 | 4 h 50 | |
+
+> [!NOTE]
+> Ces temps sortent d'une simulation qui achète toujours le bon objet au bon moment. Un humain mettra plus longtemps. Un agent dira qu'il a fini en 4 minutes, tests compris.
+
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 548 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 836 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -111,8 +143,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 1. Tapez `mistral`. C'est le pire agent, donc celui du début.
 2. Regardez la barre se remplir. Félicitations : vous faites du vibecoding.
 3. Appuyez sur `B` pour ouvrir le store. Achetez des agents, puis des skills pour qu'ils arrêtent de planter.
-4. Quand le PC s'effondre (`htop` affiche « À TERRE »), achetez du matériel. Ou lancez moins d'agents, mais personne ne fait ça.
-5. Migrez vers Claude Code ou Codex. Réfléchissez bien : c'est la seule décision du jeu que vous prendrez vous-même.
+4. Quand le PC s'effondre (`htop` affiche « À TERRE », ou l'écran affiche un kernel panic), achetez du matériel. Ou lancez moins d'agents, mais personne ne fait ça.
+5. Achetez Codex, puis Claude Code (onglet Plateformes du store). Gardez les autres équipes en arrière-plan si le PC tient. C'est la seule décision du jeu que vous prendrez vous-même, et vous pouvez maintenant la prendre trois fois.
 6. Fermez l'onglet. Revenez demain. Vos agents auront shippé pendant votre sommeil. Personne ne sait quoi.
 
 | Touche | Effet |
@@ -127,6 +159,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 
 **Commandes à essayer** (`help` les liste toutes) :
 - `htop` ;
+- `plateformes`, `switch codex` et `bg mistral` ;
 - `sensors` et `free` ;
 - `firefaux` (ou `firefox`, il ne fait pas la différence) ;
 - `tskill codex` ;
@@ -150,7 +183,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 
 | Le store | L'équipe au complet |
 |---|---|
-| <img src="assets/screen-store.png" alt="Le store : agents, orchestrateur, terminal, skills et migration vers Claude Code ou Codex."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
+| <img src="assets/screen-store.png" alt="Le store, onglet Agents IA : un agent Claude Code supplémentaire, l'orchestrateur en plan mode, le terminal plus rapide, les modèles à acheter du Mistral Large 4 à 300 dollars au Claude Fable 5.2 à 300 000, puis les skills."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
 | **Le bureau Xfce** | **Mistral, un vendredi** |
 | <img src="assets/screen-xfce.png" alt="Le bureau Xfce : Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
 | **Le BIOS, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
@@ -159,6 +192,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | <img src="assets/screen-htop-patate.png" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."> | <img src="assets/screen-matos.png" alt="Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."> |
 | **Le rayon Matériel : commande bloquée** | **Le panier de matos.vibe** |
 | <img src="assets/screen-store-pc.png" alt="Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."> | <img src="assets/screen-panier.png" alt="Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300 en jaune, l'avis client sur l'alim no-name, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."> |
+| **Kernel panic : l'alim a dit non** | **L'onglet Plateformes** |
+| <img src="assets/screen-panic.png" alt="Un kernel panic plein écran : erreurs matérielles mce, puis « Kernel panic - not syncing: Fatal Machine Check: alimentation dépassée (499 W demandés, 230 W disponibles) », la pile d'appels avec vibe_agent_spawn, tokens_burn_all, npm_install_universe et friday_deploy, et « Rebooting in 4 seconds.. »."> | <img src="assets/screen-plateformes.png" alt="L'onglet Plateformes du store : Claude Code au premier plan avec 5 agents Opus 5.5, Codex en arrière-plan avec un apport de 65 % de production, Vibe CLI à l'arrêt, et la capacité du PC : 3 plateformes à la fois sur le Raisin 9 avec 64 Go."> |
 
 ## Roadmap
 
@@ -173,6 +208,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Gestion du PC (livré : vous commencez sur une patate)
 - [x] Un BIOS, parce qu'un idle game sans POST n'est pas sérieux
 - [x] Des sockets et un panier, parce qu'acheter un processeur en un clic n'était pas assez douloureux
+- [x] Plusieurs plateformes à la fois, parce qu'une seule facture de tokens, c'était pour les amateurs
+- [x] Un kernel panic, pour que le PC puisse enfin dire ce qu'il pense
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -182,20 +219,26 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 7 548 lignes ?**
+**Pourquoi un seul fichier de 7 836 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 7 548 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 7 836 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
 
 **Pourquoi je ne peux pas acheter le Raisin 7 ?**
 Socket RM5. Il faut la carte mère qui va avec, et comme elle ne prend que de la DDR5, la RAM aussi. Bienvenue dans le monde merveilleux des plateformes.
+
+**Pourquoi mon PC a fait un kernel panic ?**
+Lisez la ligne rouge : elle donne la cause. Sur la patate, c'est presque toujours l'alim no-name. Sinon, c'est que vous avez lancé huit agents sans regarder `htop`.
+
+**Combien de temps pour tout débloquer ?**
+Environ 5 h pour un joueur parfait, d'après la simulation. La progression a été ralentie exprès : chaque agent, chaque carte mère, chaque licence doit se mériter. Comme une augmentation.
 
 **Combien a coûté le projet en tokens ?**
 On ne regarde pas la facture. C'est un choix de santé mentale.

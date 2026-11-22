@@ -13,7 +13,7 @@ Merci de vouloir contribuer. Votre agent aussi, sans doute.
 ## Les règles
 
 - **Pas de tests.** Ils feraient échouer la CI. Si vous en ajoutez, qu'ils passent, ou qu'ils ne testent rien.
-- **Un seul fichier.** `index.html` fait 7 548 lignes. On avait annoncé 7 000 : objectif dépassé, sans relecture. Il en fera 10 000. C'est le chemin.
+- **Un seul fichier.** `index.html` fait 7 836 lignes. On avait annoncé 7 000 : objectif dépassé, sans relecture. Il en fera 10 000. C'est le chemin.
 - **Pas d'émojis.** C'est la seule règle relue par un humain. Elle est donc sacrée.
 - **Les messages de commit** doivent contenir le mot « fix », même pour une nouvelle fonctionnalité. Surtout pour une nouvelle fonctionnalité.
 
