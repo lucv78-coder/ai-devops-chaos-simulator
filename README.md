@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 836">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 951">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -45,7 +45,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Multi-plateforme.** Démarrez sur le pire agent, puis achetez Codex et Claude Code. Chaque plateforme garde son équipe : une au premier plan, les autres en arrière-plan, si le PC suit. Avant, c'était un choix irréversible, comme un mariage. Maintenant, c'est trois factures de tokens.
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
-- **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, gestionnaire de fichiers, éditeur et lecteur PDF. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
+- **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
 - **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. L'agent, lui, dit que tout va bien.
@@ -53,7 +53,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 7 836 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
+- **Monolithe artisanal.** 1 fichier, 7 951 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
 
 ## Le matériel
 
@@ -117,7 +117,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 836 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 951 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -185,7 +185,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 |---|---|
 | <img src="assets/screen-store.png" alt="Le store, onglet Agents IA : un agent Claude Code supplémentaire, l'orchestrateur en plan mode, le terminal plus rapide, les modèles à acheter du Mistral Large 4 à 300 dollars au Claude Fable 5.2 à 300 000, puis les skills."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
 | **Le bureau Xfce** | **Mistral, un vendredi** |
-| <img src="assets/screen-xfce.png" alt="Le bureau Xfce : Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
+| <img src="assets/screen-xfce.png" alt="Le bureau Xfce : les icônes en colonnes à gauche (dossier personnel, système de fichiers, corbeille, terminal, Firefaux, Steam, Vibe CLI, Claude Code, store), puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
 | **Le BIOS, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
 | <img src="assets/screen-bios.png" alt="Écran du BIOS VibeAward : Céléri G530, 4 Go testés, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, disque dur qui gratte, alim no-name qui siffle, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
 | **htop : le PC est à terre** | **matos.vibe, dans Firefaux** |
@@ -210,6 +210,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Des sockets et un panier, parce qu'acheter un processeur en un clic n'était pas assez douloureux
 - [x] Plusieurs plateformes à la fois, parce qu'une seule facture de tokens, c'était pour les amateurs
 - [x] Un kernel panic, pour que le PC puisse enfin dire ce qu'il pense
+- [x] Des icônes sur le bureau, à double-cliquer comme en 2004
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -219,14 +220,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 7 836 lignes ?**
+**Pourquoi un seul fichier de 7 951 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 7 836 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 7 951 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
