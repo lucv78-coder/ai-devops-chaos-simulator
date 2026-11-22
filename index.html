@@ -785,6 +785,12 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 #hud.bug .hud-fill { background: var(--red); }
 #hud.ok .hud-fill { background: var(--orange-hi); }
 #hud.bug .hud-info { color: var(--red); }
+/* modes boost (ultracode, xhigh, flash) : le compte à rebours, la barre qui brille, le bouton U allumé */
+.hud-boost { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--ink); background: var(--yellow); font-weight: 700; }
+.hud-boost[hidden] { display: none; }
+#hud.boost .hud-fill { background: var(--yellow); box-shadow: 0 0 .7em var(--yellow); }
+.tbtn.boost.on { color: var(--ink); background: var(--yellow); }
+.tbtn.boost.on kbd { color: inherit; }
 #hud.ok .hud-info { color: var(--green); }
 .hud-info { flex: 1 1 30ch; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--dim); }
 .hud-store { flex: none; }
@@ -847,6 +853,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
         <button class="tbtn" type="button" data-act="lead" aria-keyshortcuts="O"><kbd>O</kbd><span class="lbl"> orchestrateur</span></button>
         <button class="tbtn" type="button" data-act="term" aria-keyshortcuts="T"><kbd>T</kbd><span class="lbl"> terminal</span></button>
         <button class="tbtn" type="button" data-act="settings" aria-keyshortcuts="M"><kbd>M</kbd><span class="lbl"> menu</span></button>
+        <button class="tbtn boost" type="button" data-act="boost" aria-keyshortcuts="U" hidden><kbd>U</kbd><span class="lbl"> ultracode</span></button>
         <button class="tbtn ship" type="button" data-act="ship" aria-keyshortcuts="S"><kbd>S</kbd><span class="lbl"> ship</span></button>
       </span>
       <span id="score" title="Score : projets shippés (gardé dans ce navigateur)"><b id="score-n">0</b> shipped <span class="dim">·</span></span>
@@ -857,6 +864,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div id="hud" hidden>
     <span class="hud-money" title="Trésorerie : gains des projets shippés, moins la facture des tokens">$<b id="hud-money">0.00</b></span>
     <span class="hud-ship"><span id="hud-ver"></span><span class="hud-bar" role="progressbar" aria-label="Avancement du projet : ship automatique à 100 %" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="hud-fill"></span></span><b id="hud-pct">0 %</b><span class="dim" id="hud-eta"></span></span>
+    <span class="hud-boost" id="hud-boost" hidden></span>
     <span class="hud-info" id="hud-info" aria-live="off"></span>
     <button class="tbtn hud-store" type="button" data-act="store" aria-keyshortcuts="B"><kbd>B</kbd><span class="lbl"> store</span></button>
   </div>
@@ -1680,6 +1688,7 @@ function platInit() {                            // plateformes : une équipe ch
     if (MODELS[G.model]?.prov === CLIS[G.ai].prov) G.pm[G.ai] = G.model;
   }
   G.bg = G.bg || {};
+  G.boost = G.boost || {};                        // modes boost : { own, lvl (prolongations), day (dernier usage), left (secondes restantes) }
   G.lead = Math.min(3, G.lead || 0);
   G.agents = G.team[G.ai] || 1;
   G.model = G.pm[G.ai];
@@ -2238,7 +2247,7 @@ function toast(h, ms = 1600) {
   toastTimer = setTimeout(() => toastEl.classList.remove('on'), ms);
 }
 const HELP = '<kbd>A</kbd> agents · <kbd>L</kbd> disposition · <kbd>O</kbd> orchestrateur · <kbd>T</kbd> terminal · <kbd>S</kbd> ship · <kbd>M</kbd> menu · <kbd>0</kbd>–<kbd>9</kbd> onglets · '
-  + '<kbd>Espace</kbd> pause · <kbd>+</kbd> <kbd>−</kbd> vitesse · <kbd>F</kbd> plein écran · <kbd>P</kbd> autre page · <kbd>H</kbd> aide';
+  + '<kbd>Espace</kbd> pause · <kbd>+</kbd> <kbd>−</kbd> vitesse · <kbd>U</kbd> mode boost · <kbd>F</kbd> plein écran · <kbd>H</kbd> aide';
 
 /* ---------- terminal interactif ---------- */
 const shell = $('#shell'), shellOut = $('#shell-out'), shellForm = $('#shell-form'), shellIn = $('#shell-in');
@@ -2306,7 +2315,8 @@ const PRE_HELP_LINES = () => [
   [H(['    --agents <n>    ', 'org'], `de 1 à ${AGENTS.length} agents, quel que soit le fournisseur`), '', 20],
   [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free)'), '', 20],
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
-    [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20]] : []),
+    [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
+    [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
@@ -2333,7 +2343,8 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['  cost             ', 'org'], 'la facture détaillée, aux tarifs réels de chaque modèle'), '', 20],
   [H(['  htop · atop      ', 'org'], 'voir la machine souffrir · q pour quitter'), '', 20],
   ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, orchestrateur, modèles, skills, plateformes, matériel · la barre shippe toute seule'), '', 20],
-    [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20]] : []),
+    [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20],
+    [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
   [H(['  settings         ', 'org'], 'réglages : couleurs, taille, graphismes, nom (touche M)'), '', 20],
@@ -2895,7 +2906,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3765,6 +3776,7 @@ async function runCommand(raw) {
     return shellPrint(H(['✓ ', 'okc'], `orchestrateur : ${arg}`));
   }
   if (IDLE && ['plateformes', 'platforms', 'switch', 'bg'].includes(head)) return platCmd(head, arg);
+  if (Object.hasOwn(BOOST_BY_CMD, head)) return boostCmd(BOOST_BY_CMD[head]);   // ultracode, xhigh, flash
   if (head === 'model' || head === '/model') {
     const key = modelsOf().find(k => arg.includes(k)), other = Object.keys(MODELS).find(k => arg.includes(k));
     if (!key && other) {                         // un modèle de l'autre fournisseur : pas sous ce CLI
@@ -6897,6 +6909,7 @@ function act(name) {
   else if (name === 'lead') cycleLead();
   else if (name === 'term') toggleShell();
   else if (name === 'store') openStore();
+  else if (name === 'boost') { const r = boostStart(provider); toast(esc(r.msg), 3600); }
   else if (name === 'ship') {
     if (mode === 'gameover') { openShell(); shellPrint(H(['GAME OVER. ', 'errc'], 'Tapez ', ['restart', 'org'], '.')); }
     else if (mode === 'idle' && !shipQueued) { shipQueued = true; typeIntoShell('npm run ship').finally(() => { shipQueued = false; }); }
@@ -6930,7 +6943,6 @@ addEventListener('keydown', e => {
   else if (k === '+' || k === '=' || k === 'arrowup') setSpeed(si + 1);
   else if (k === '-' || k === '_' || k === 'arrowdown') setSpeed(si - 1);
   else if (k === 'f') toggleFullscreen();
-  else if (k === 'p') location.href = 'fable.html?boot=0&help=0';
   else if (k === 'a') { e.preventDefault(); act('agents'); }
   else if (k === 'l') act('layout');
   else if (k === 'o') act('lead');
@@ -6938,6 +6950,7 @@ addEventListener('keydown', e => {
   else if (k === 's') { e.preventDefault(); act('ship'); }
   else if (k === 'm') { e.preventDefault(); act('settings'); }
   else if (k === 'b') { e.preventDefault(); act('store'); }
+  else if (k === 'u' && IDLE) { e.preventDefault(); act('boost'); }
   else if (k === 'h' || k === '?') toast(HELP, 5000);
   else if (k === 'escape' && !shell.hidden) closeShell();
 });
@@ -7009,6 +7022,69 @@ const SKILLS = {
   subagents: { name: 'sous-agents', cost: 300000, work: 1.2, tin: 1.25, desc: '+20 % de travail : chaque agent délègue à des sous-agents, qui délèguent aussi. La facture adore.' },
   claudemd: { name: 'lire CLAUDE.md (pour de vrai)', cost: 1000000, bug: .75, crash: .75, desc: '−25 % de bugs et de crashs. Personne n’y croyait.' },
 };
+/* les modes boost : un par plateforme. Achetés une fois au store, utilisables une fois par jour (jour local), 1 min,
+   prolongeables par tranches de 30 s. Le chrono ne tourne que quand l'équipe travaille (pause, arrêt : il attend). */
+const BOOST = {
+  mistral: { cmd: 'flash', name: 'Flash Answers', cost: 400, work: 2.5, tok: 1.2, bug: 2, crash: 1.5,
+    desc: '1 000 mots par seconde, dont certains justes : ×2,5 de travail, mais deux fois plus de bugs et 50 % de crashs en plus.',
+    on: 'Flash Answers : 1 000 mots par seconde, relecture désactivée', off: 'Flash Answers terminé : Vibe CLI reprend son rythme (et ses bugs habituels).' },
+  codex: { cmd: 'xhigh', name: 'raisonnement xhigh', cost: 4000, work: 2.2, tok: 2.5, bug: .5, crash: 1,
+    desc: 'Effort de raisonnement maximal : ×2,2 de travail et deux fois moins de bugs. Il réfléchit à voix haute, et la réflexion se facture : ×2,5 de tokens.',
+    on: 'reasoning effort : xhigh · il réfléchit très fort', off: 'Raisonnement xhigh terminé : Codex repasse en effort medium (il dit « high »).' },
+  claude: { cmd: 'ultracode', name: 'ultracode', cost: 30000, work: 3, tok: 4, bug: 1, crash: 1,
+    desc: 'Chaque tâche part à un essaim de sous-agents : ×3 de travail. Chacun relit tout le dépôt de son côté : ×4 de tokens.',
+    on: 'ultracode : un essaim de sous-agents sur chaque tâche', off: 'ultracode terminé : les sous-agents rentrent, la facture reste.' },
+};
+const BOOST_BASE = 60, BOOST_STEP = 30, BOOST_EXT = [.5, 1.25, 3, 7.5];   // 1 min, +30 s par prolongation (4 au plus), prix × celui du mode
+const BOOST_BY_CMD = Object.fromEntries(Object.entries(BOOST).map(([p, b]) => [b.cmd, p]));
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const untilMidnight = () => { const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); return Math.ceil((m - d) / 1000); };
+const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+const boostDur = p => BOOST_BASE + BOOST_STEP * (G.boost?.[p]?.lvl || 0);
+const boostOn = p => IDLE && (G.boost?.[p]?.left || 0) > 0;
+const boostRunning = p => claudeOn && (p === provider || bgTeams().some(t => t.ai === p));
+function boostCheck(p) {                          // peut-on lancer le mode de cette plateforme maintenant ?
+  const B = BOOST[p], st = G.boost?.[p], C = CLIS[p];
+  if (!IDLE) return { ok: false, short: 'idle', why: `Le mode ${B.name} s’achète au store, en mode idle (sans ?idle=0).` };
+  if (!G.own[p]) return { ok: false, short: 'licence', why: `${C.label} : licence non achetée (store, onglet Plateformes).` };
+  if (!st?.own) return { ok: false, short: 'à acheter', why: `Mode ${B.name} non acheté : store, onglet Agents IA, section Modes.` };
+  if (st.left > 0) return { ok: false, short: 'actif', why: `${B.name} est déjà actif : encore ${mmss(st.left)}.` };
+  if (st.day === today()) return { ok: false, short: 'demain', why: `${B.name} a déjà servi aujourd’hui. Il revient à minuit, dans ${fmtEta(untilMidnight())}.` };
+  if (!boostRunning(p)) return { ok: false, short: 'équipe à l’arrêt', why: `${C.label} doit tourner (premier plan ou arrière-plan) : le chrono ne part qu’avec l’équipe.` };
+  if (mode !== 'idle' || paused) return { ok: false, short: 'pas maintenant', why: `Pas maintenant : ${paused ? 'le jeu est en pause' : 'attendez que les agents travaillent'}.` };
+  return { ok: true, short: B.cmd, why: '' };
+}
+function boostStart(p) {
+  const k = boostCheck(p);
+  if (!k.ok) return { ok: false, msg: k.why };
+  const B = BOOST[p], st = G.boost[p], C = CLIS[p];
+  st.day = today();
+  st.left = boostDur(p);
+  if (p === provider) panes.forEach(x => { if (x.state !== 'down') { emit(x, { k: 'done', c: 'wrn', t: `${C.glyph} ${B.on}` }, true); ping(x); } });
+  if (leadOn()) leadLog(H([`${C.glyph} `, 'wrn'], `${B.cmd} on for ${mmss(st.left)}. `
+    + (p === 'claude' ? `Fanning out ${ri(8, 24)} subagents per task.` : p === 'codex' ? 'Thinking very, very hard.' : 'Speed over correctness.')));
+  hudNote(`${C.glyph} ${B.name} : ×${frx(B.work)} de travail pendant ${mmss(st.left)}${B.tok > 1 ? ` · ×${frx(B.tok)} de tokens` : ''}`, 'ok');
+  saveGame();
+  renderHud();
+  return { ok: true, msg: `${B.name} activé pour ${C.label} : ${mmss(st.left)} à ×${frx(B.work)} de travail. Une fois par jour : le prochain, demain.` };
+}
+function boostTick(dt) {                          // le chrono : il ne tourne que quand l'équipe travaille
+  if (!IDLE || !G.boost) return;
+  for (const p of PLAT_ORDER) {
+    const st = G.boost[p];
+    if (!st?.left || !boostRunning(p)) continue;
+    st.left = Math.max(0, st.left - dt);
+    if (st.left) continue;
+    const B = BOOST[p], C = CLIS[p];
+    if (p === provider) panes.forEach(x => { if (x.state !== 'down') emit(x, { k: 'done', c: 'dim', t: `${C.glyph} ${B.off}` }, true); });
+    hudNote(`${C.glyph} ${B.off}`, 'ok');
+    saveGame();
+  }
+}
+function boostCmd(p) {                            // ultracode, xhigh, flash dans le terminal
+  const r = boostStart(p);
+  shellPrint(H([r.ok ? '✓ ' : '✗ ', r.ok ? 'okc' : 'errc'], r.msg));
+}
 const ECO_CRASH = ['Context window overflow : un million de tokens, pas un de plus', 'Rate limit 429 : l’API exige une pause',
   'Boucle infinie d’appels d’outils, coupée au 400e', 'Le worktree est en conflit avec lui-même', 'Timeout : le test e2e attend encore le bouton',
   'Segmentation fault dans un script Python « temporaire »'];
@@ -7037,11 +7113,12 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
   const ai = o.ai || provider, model = o.model || cfg.model, lv = o.lv ?? leadLv(), T = LEAD_TIER[lv];
   const a = ECO.ai[ai], m = MODELS[model], lm = MODELS[CLIS[ai].lead];
   const hw = o.hw || (IDLE ? hwState(off ? { n, lead: lv ? 1 : 0, ...bgLoad(), off: true } : {}) : { f: 1, rev: 1, tok: 1, boost: 1, down: false });
-  const sp = speed * hw.f, tk = skillMult('tok') * hw.tok;   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
+  const B = !off && boostOn(ai) ? BOOST[ai] : null;   // mode boost en cours (ultracode, xhigh, flash) : jamais hors ligne
+  const sp = speed * hw.f, tk = skillMult('tok') * hw.tok * (B?.tok ?? 1);   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
   const tin = ECO.tin * sp * tk * skillMult('tin'), tout = ECO.tout * sp * tk, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
-    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work'),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
-    crash: a.crash * skillMult('crash') * speed, down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug, fail: a.fail * skillMult('fail'),
+    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
+    crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1), fail: a.fail * skillMult('fail'),
     tin, tout, cost: (tin * m.in + tout * m.out) / 1e6, lv, leadK, lead: leadK * (tin * lm.in + tout * lm.out) / 1e6,
     hw,
   };
@@ -7245,6 +7322,17 @@ function renderHud() {
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
     : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
+  const on = PLAT_ORDER.filter(boostOn), hb = $('#hud-boost'), ub = $('.tbtn.boost'), own = !!G.boost?.[provider]?.own;
+  hb.hidden = !on.length;
+  if (on.length) hb.textContent = on.map(p => `${CLIS[p].glyph} ${BOOST[p].cmd} ${mmss(G.boost[p].left)}`).join(' · ');
+  hudEl.classList.toggle('boost', claudeOn && boostOn(provider));
+  ub.hidden = !own;
+  if (own) {
+    const lbl = ' ' + BOOST[provider].cmd + (boostOn(provider) ? ` ${mmss(G.boost[provider].left)}` : '');
+    if (ub.querySelector('.lbl').textContent !== lbl) ub.querySelector('.lbl').textContent = lbl;
+    ub.classList.toggle('on', boostOn(provider));
+    ub.title = boostCheck(provider).why || `Lancer ${BOOST[provider].name} (une fois par jour)`;
+  }
 }
 let ecoLast = performance.now(), ecoSaved = 0;
 function ecoTick() {
@@ -7257,6 +7345,7 @@ function ecoTick() {
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
       if (o.ships) hudNote(`En arrière-plan : ${plural(o.ships, 'projet')} shippé${o.ships > 1 ? 's' : ''}, +$${usd(o.gain)}`, 'ok');
     } else ecoLive(dt, now);
+    boostTick(Math.min(dt, ECO.offlineMax));      // onglet masqué : le chrono tourne quand même (l'équipe travaille, sans le bonus)
   }
   renderHud();
   updateFoot();
@@ -7267,7 +7356,8 @@ setInterval(ecoTick, 250);
 addEventListener('pagehide', saveGame);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
 
-/* le store : trois onglets. Agents IA (équipe, orchestrateur, terminal, modèles, skills), Plateformes (licences, premier plan, arrière-plan), Matériel PC */
+/* le store : trois onglets. Agents IA (équipe, orchestrateur, terminal, modèles, modes boost, skills), Plateformes (licences, premier plan,
+   arrière-plan, lancement des modes), Matériel PC */
 const storeDlg = $('#store');
 let stoTab = 'ia';                               // rayon affiché : agents IA ou matériel PC
 function aiItems() {
@@ -7285,6 +7375,14 @@ function aiItems() {
     it.push({ cat: 'Modèles', id: 'model:' + k, ic: CLIS[p].glyph, name: `${m.name} (${CLIS[p].label})`, done: !!G.models[k], cost: MODEL_UP[k],
       desc: `${frx((ECO.q[k] / ECO.q[PLATS[p].base]).toFixed(2))}× le travail de ${b.name.replace('Claude ', '')}, à ${price(m.in)} / ${price(m.out)} par M tokens${m.tag ? `, ${m.tag}` : ''}. Sélectionné dès l’achat (commande model pour revenir en arrière).` });
   }));
+  PLAT_ORDER.filter(p => G.own[p]).forEach(p => {   // un mode boost par plateforme : 1 min par jour, prolongeable
+    const B = BOOST[p], st = G.boost?.[p], C = CLIS[p], cat = 'Modes boost · une fois par jour';
+    if (!st?.own) return it.push({ cat, id: 'boost:' + p, ic: C.glyph, name: `Mode ${B.name} (${C.label})`, cost: B.cost,
+      desc: `${B.desc} ${mmss(BOOST_BASE)} par jour, à lancer avec ${B.cmd} (ou la touche U) quand l’équipe tourne.` });
+    const lv = st.lvl || 0, max = lv >= BOOST_EXT.length, d = boostDur(p);
+    it.push({ cat, id: 'boostx:' + p, ic: C.glyph, name: `Prolonger ${B.name} (${C.label})`, lvl: `${mmss(d)} par jour`, done: max, cost: max ? 0 : Math.round(B.cost * BOOST_EXT[lv]),
+      desc: max ? `${mmss(d)} par jour, le maximum. Au-delà, l’agent parle de « semaine de quatre jours ».` : `${mmss(d)} → ${mmss(d + BOOST_STEP)} par activation. Toujours une fois par jour.` });
+  });
   Object.entries(SKILLS).forEach(([id, s]) => it.push({ cat: 'Skills', id, ic: '◇', name: `Skill : ${s.name}`, done: !!G.sk[id], cost: s.cost, desc: s.desc }));
   return it;
 }
@@ -7304,7 +7402,7 @@ function storeItems() { return stoTab === 'pc' ? pcItems() : stoTab === 'plat' ?
 let platSeen = '';
 function itemState(it) {
   if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
@@ -7381,6 +7479,15 @@ function buy(id) {
       G.pm[p] = k;
       if (p === G.ai) { G.model = k; cfg.model = k; if (claudeOn) { saveCfg(); rebuild(); } }
       msg = `${MODELS[k].name} débloqué pour ${CLIS[p].label}${p === G.ai ? ', vos agents l’utilisent déjà' : ''}. ${price(MODELS[k].in)} / ${price(MODELS[k].out)} par M tokens : la facture aussi passe au niveau supérieur.`;
+    } else if (id.startsWith('boost:')) {
+      const p = id.slice(6), B = BOOST[p];
+      G.boost[p] = { own: 1, lvl: 0, day: '', left: 0 };
+      msg = `Mode ${B.name} débloqué pour ${CLIS[p].label} : ${B.cmd} dans le terminal (ou la touche U), quand l’équipe tourne. ${mmss(BOOST_BASE)}, une fois par jour.`;
+    } else if (id.startsWith('boostx:')) {
+      const p = id.slice(7), st = G.boost[p];
+      st.lvl = (st.lvl || 0) + 1;
+      if (st.left > 0) st.left += BOOST_STEP;
+      msg = `${BOOST[p].name} dure maintenant ${mmss(boostDur(p))} par jour.${st.left > 0 ? ' Le mode en cours gagne 30 s.' : ''}`;
     } else { G.sk[id] = 1; msg = `${it.name} : acheté.`; }
   }
   if (!msg) return '';
@@ -7488,6 +7595,10 @@ function platRow(p) {                            // une ligne de l'onglet Platef
         + (bg ? btn(`data-plat="stop:${p}"`, 'Arrêter', false) : btn(`data-plat="bg:${p}"`, k.ok ? 'Arrière-plan' : k.short, !k.ok));
       if (k && !k.ok) note = k.why;
     }
+    if (G.boost?.[p]?.own) {                      // le mode boost de la plateforme : prêt, actif, ou demain
+      const k = boostCheck(p);
+      acts += btn(`data-plat="boost:${p}"`, k.ok ? BOOST[p].cmd : `${BOOST[p].cmd} · ${k.short}`, !k.ok, k.short === 'actif' ? 'owned' : '');
+    }
     const sg = `${f.rel >= 0 ? '+' : '−'}${Math.round(Math.abs(f.rel))} %`;
     info = `${plural(n, 'agent')} ${MODELS[G.pm[p]].name} · ` + (f.main ? `${f.rel >= 99.5 ? 'toute la production' : `${Math.round(f.rel)} % de la production`} · $${usd(f.usd)} de tokens par minute (toutes équipes)`
       : `${bg ? 'apport' : 'si lancé'} : ${sg} de production, ${f.usd >= 0 ? '+' : '−'}$${usd(Math.abs(f.usd))} de tokens par minute`)
@@ -7502,7 +7613,7 @@ function platHtml() {
     + `Deux plateformes : ${platNeed(2)} ; trois : ${platNeed(3)}. Votre PC (${esc(cap.c.n)}, ${cap.r.go} Go) : ${plural(cap.max, 'plateforme')} à la fois.</p>`
     + `<p class="sto-cat">Plateformes · ${on} sur ${cap.max} en cours</p>` + PLAT_ORDER.map(platRow).join('');
 }
-const platSig = () => PLAT_ORDER.map(p => [G.money >= (G.own[p] ? agentPrice(p) : PLATS[p].cost), G.ai === p, !!G.bg[p], G.team[p]].join()).join('|');
+const platSig = () => PLAT_ORDER.map(p => [G.money >= (G.own[p] ? agentPrice(p) : PLATS[p].cost), G.ai === p, !!G.bg[p], G.team[p], G.boost?.[p]?.own ? boostCheck(p).short : ''].join()).join('|');
 function platLines() {                           // la commande plateformes
   const cap = platCap(), L = [[H(['Plateformes', 'b'], ` · ${plural(cap.max, 'plateforme')} à la fois avec ce PC (${cap.c.thr} threads, ${cap.r.go} Go)`), '', 15]];
   PLAT_ORDER.forEach(p => {
@@ -7542,7 +7653,7 @@ $('#sto-list').addEventListener('click', e => {
   const b = e.target.closest('[data-buy]'), d = e.target.closest('[data-cart-del]'), c = e.target.closest('[data-cart]'), pl = e.target.closest('[data-plat]');
   if (pl) {                                      // plateformes : premier plan, arrière-plan, arrêt
     if (pl.disabled) return;
-    const [k, p] = pl.dataset.plat.split(':'), m = k === 'main' ? switchMain(p) : k === 'bg' ? bgStart(p) : bgStop(p);
+    const [k, p] = pl.dataset.plat.split(':'), m = k === 'main' ? switchMain(p) : k === 'bg' ? bgStart(p) : k === 'boost' ? boostStart(p).msg : bgStop(p);
     renderStore();
     $('#sto-msg').textContent = m;
     return;
