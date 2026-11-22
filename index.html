@@ -471,6 +471,32 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 }
 .xf-wall .t-art { margin: 0; font-size: min(16px, calc(70vw / 44), calc(42dvh / 21)); }
 .xf-wall p { color: var(--dim); }
+/* icônes du bureau (xfdesktop) : en colonnes à gauche, sous les fenêtres ; le fond reste cliquable entre elles */
+.xf-icons {
+  position: absolute; top: .6em; bottom: .6em; left: .6ch; z-index: 0; pointer-events: none;
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, 6.2em); grid-auto-columns: 11ch; gap: .2em .6ch;
+}
+.xf-ico {
+  pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: .25em; min-width: 0; height: 6.2em;
+  padding: .3em .3ch; border: 1px solid transparent; border-radius: 3px; color: var(--fg); text-align: center;
+}
+.xf-ico .g {
+  position: relative; display: grid; place-items: center; flex: none; width: 1.45em; height: 1.45em; font-size: 1.9em; line-height: 1;
+  color: var(--orange); background: color-mix(in srgb, var(--orange) 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--orange) 45%, transparent); border-radius: 4px; box-shadow: 0 .2em .6em rgba(0, 0, 0, .45);
+}
+.xf-ico .l {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; max-width: 100%;
+  padding: 0 .4ch; border-radius: 2px; font-size: .88em; line-height: 1.25; text-shadow: 0 1px 2px #000;
+}
+.xf-ico.on .g::after {                           /* le programme tourne */
+  content: ''; position: absolute; right: -.18em; top: -.18em; width: .3em; height: .3em; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 0 2px var(--bg2);
+}
+.xf-ico:hover { background: rgba(255, 255, 255, .06); border-color: var(--rule); }
+.xf-ico:focus { outline: none; }
+.xf-ico:focus-visible { border-color: var(--orange); border-style: dotted; }
+.xf-ico.sel .l { background: var(--orange); color: var(--ink); text-shadow: none; }
 .xf-menu {
   position: absolute; top: calc(var(--lh) + .5em); left: .5ch; z-index: 3;
   width: min(60ch, calc(100vw - 1ch)); max-height: calc(100% - var(--lh) - 1.2em); overflow: auto; padding: .3em 0 .4em;
@@ -869,7 +895,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <nav class="xf-tasks" aria-label="Fenêtres ouvertes"></nav>
     <span class="xf-sys"><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><span class="xf-clock"></span><span class="xf-user"></span></span>
   </div>
-  <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div></div>
+  <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div><div class="xf-icons" role="group" aria-label="Icônes du bureau"></div></div>
   <div class="xf-menu" id="xf-menu" role="menu" aria-label="Applications" hidden></div>
   <div class="xf-ctx" id="xf-ctx" role="menu" aria-label="Menu contextuel" hidden></div>
 </div>
@@ -4813,8 +4839,10 @@ function afterResize() {
    Un bureau par-dessus le terminal : chaque onglet (zsh, claude, htop, atop…) devient une fenêtre qu'on déplace,
    redimensionne, réduit, agrandit ou ferme ; le tableau de bord porte le menu Applications, les fenêtres ouvertes
    et l'horloge. C'est la même page : thème, taille et graphismes (tube cathodique compris) s'appliquent tels quels.
-   Les éléments du terminal (#shell, #top + #work, .prog) sont déplacés dans les fenêtres, puis remis en place à la sortie. */
+   Les éléments du terminal (#shell, #top + #work, .prog) sont déplacés dans les fenêtres, puis remis en place à la sortie.
+   Sur le bureau, les icônes des programmes installés et des plateformes achetées : double-clic pour ouvrir, comme sous Xfce. */
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
+const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
 const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
@@ -4851,6 +4879,8 @@ async function xfEnter() {
   xfceEl.hidden = false;
   $('.xf-wall').innerHTML = `<div class="t-art">${asciiTitle()}</div><p>prod-01 · Vibian GNU/Linux 13 (friday) · ${GAME} v${VERSION}</p>`;
   $('.xf-user').textContent = USER;
+  xfIconSel = '';
+  xfIconsSync(true);
   crtFlash();
   [...tabs.filter(t => t !== 'zsh'), 'zsh'].forEach(xfEnsure);   // tout ce qui tourne a sa fenêtre ; le terminal par-dessus
   xfFocus('zsh');
@@ -5038,6 +5068,7 @@ function xfSync() {                              // après chaque changement d'o
     return `<button type="button" class="xf-task${on ? ' on' : ''}${w.min ? ' min' : ''}" data-w="${t}" title="${esc(xfTitle(t))}"`
       + `${on ? ' aria-current="true"' : ''}><span class="xw-ic">${esc(xfIcon(t))}</span> ${esc(xfName(t))}</button>`;
   }).join('');
+  xfIconsSync();                                 // le point vert des icônes suit les programmes ouverts
 }
 xfTasksEl.addEventListener('click', e => {       // barre des tâches : un clic passe devant, un second réduit
   const b = e.target.closest('[data-w]');
@@ -5052,6 +5083,7 @@ function xfPanelTick() {
   c.hidden = !claudeOn;
   if (claudeOn) c.textContent = `${cli().glyph} $${usd(usage.usd)}`;
   for (const n in xw) xfLabel(n);
+  xfIconsSync();
 }
 setInterval(xfPanelTick, 1000);
 
@@ -5149,6 +5181,89 @@ deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'éc
     { ic: '↩', t: 'Déconnexion', run: () => xfExit() },
   ]);
 });
+
+/* icônes du bureau (xfdesktop) : les programmes installés, les plateformes achetées, le store.
+   Un clic sélectionne, un double-clic ouvre ; au clavier Entrée ouvre et les flèches se déplacent ; au doigt, un tap suffit.
+   La liste suit apt install / remove et les licences : elle est recalculée à chaque tic du tableau de bord. */
+let xfIconSel = '', xfIconSig = '', xfIconTap = false;
+function xfIconList() {
+  const has = k => installed.has(k), open = k => tabs.includes(k);
+  const plat = k => claudeOn && (provider === k || (IDLE && !!G.bg?.[k]));
+  return [
+    has('thunar') && { id: 'home', ic: '⌂', t: 'Dossier personnel', tip: absPath(HOME) },
+    has('thunar') && { id: 'root', ic: '/', t: 'Système de fichiers', tip: '/ · ne rien supprimer (vraiment)' },
+    { id: 'trash', ic: '▥', t: 'Corbeille', tip: 'vide : ici, on supprime avec rm -rf' },
+    { id: 'zsh', ic: '❯', t: 'Terminal', tip: `zsh · ${tildePath(cwd)}` },
+    ...['firefaux', 'mousepad', 'atril', 'htop'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
+      t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système' }[k], tip: PROGS[k].desc })),
+    has('steam') && { id: 'steam', ic: '◎', t: 'Steam', tip: '412 jeux achetés, 3 lancés' },
+    ...['mistral', 'codex', 'claude'].filter(k => !IDLE || G.own[k]).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
+      t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
+      tip: plat(k) ? (provider === k ? '● au premier plan' : '● en arrière-plan') : MODELS[(IDLE && G.pm?.[k]) || CLIS[k].def]?.name || CLIS[k].label })),
+    IDLE && { id: 'store', ic: '$', t: 'Store des agents', tip: 'agents, plateformes, matériel' },
+  ].filter(Boolean);
+}
+function xfIconsSync(force) {                    // ne reconstruit que si la liste a changé (la sélection et le focus survivent)
+  if (!xfOn) return;
+  const list = xfIconList(), sig = list.map(i => `${i.id}${i.on ? '*' : ''}:${i.tip}`).join('|');
+  if (sig === xfIconSig && !force) return;
+  xfIconSig = sig;
+  const cur = document.activeElement?.closest?.('.xf-ico')?.dataset.ico;
+  if (!list.some(i => i.id === xfIconSel)) xfIconSel = '';
+  xfIconsEl.innerHTML = list.map(i => `<button type="button" class="xf-ico${i.on ? ' on' : ''}${i.id === xfIconSel ? ' sel' : ''}" data-ico="${i.id}"`
+    + ` title="${esc(i.tip)}" aria-label="${esc(i.t)}${i.on ? ', ouvert' : ''}"><span class="g" aria-hidden="true">${esc(i.ic)}</span>`
+    + `<span class="l" aria-hidden="true">${esc(i.t)}</span></button>`).join('');
+  if (cur) xfIconsEl.querySelector(`[data-ico="${cur}"]`)?.focus({ preventScroll: true });
+}
+function xfIconSelect(id) {
+  xfIconSel = id;
+  xfIconsEl.querySelectorAll('.xf-ico').forEach(b => b.classList.toggle('sel', b.dataset.ico === id));
+}
+function xfIconOpen(id) {
+  if (id === 'trash') return toast('La corbeille est vide. Ici, on supprime avec <kbd>rm -rf</kbd>, sans filet.', 2600);
+  if (id === 'steam') return toast('Steam : 412 jeux achetés, 3 lancés. Pas ce soir : les agents ont réservé la carte graphique.', 2600);
+  if (id === 'home' || id === 'root') {
+    xfLaunch('thunar');
+    if (tabs.includes('thunar')) PROGS.thunar.go(id === 'home' ? '~' : '/');
+    return;
+  }
+  xfLaunch(id);
+}
+xfIconsEl.addEventListener('pointerdown', e => { xfIconTap = e.pointerType === 'touch'; });
+xfIconsEl.addEventListener('click', e => {
+  const b = e.target.closest('.xf-ico');
+  if (!b) return;
+  xfIconSelect(b.dataset.ico);
+  if (e.detail === 0 || xfIconTap) xfIconOpen(b.dataset.ico);   // Entrée ou Espace (detail 0), ou un tap
+});
+xfIconsEl.addEventListener('dblclick', e => {
+  const b = e.target.closest('.xf-ico');
+  if (b && !xfIconTap) xfIconOpen(b.dataset.ico);
+});
+xfIconsEl.addEventListener('keydown', e => {     // flèches : haut et bas dans la colonne, gauche et droite d'une colonne à l'autre
+  const items = [...xfIconsEl.querySelectorAll('.xf-ico')], i = items.indexOf(document.activeElement);
+  if (i < 0) return;
+  const col = items.filter(b => b.offsetLeft === items[0].offsetLeft).length;
+  const d = { ArrowDown: 1, ArrowUp: -1, ArrowRight: col, ArrowLeft: -col }[e.key];
+  if (!d) return;
+  e.preventDefault();
+  const t = items[Math.min(items.length - 1, Math.max(0, i + d))];
+  t.focus();
+  xfIconSelect(t.dataset.ico);
+});
+xfIconsEl.addEventListener('contextmenu', e => {
+  const b = e.target.closest('.xf-ico');
+  if (!b) return;
+  e.preventDefault();
+  const id = b.dataset.ico, ic = b.querySelector('.g').textContent;
+  xfIconSelect(id);
+  xfCtxOpen(e.clientX, e.clientY, [
+    { ic, t: 'Ouvrir', k: 'Entrée', run: () => xfIconOpen(id) },
+    ...(id === 'trash' ? [{ ic: '✗', t: 'Vider la corbeille', run: () => toast('Déjà vide. Les agents ne passent jamais par la corbeille.', 2400) }] : []),
+    ...(id === 'home' || id === 'root' ? [{ ic: '❯', t: 'Ouvrir un terminal ici', run: () => { xfFocus('zsh'); typeIntoShell(id === 'home' ? 'cd ~' : 'cd /'); } }] : []),
+  ]);
+});
+deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) xfIconSelect(''); });   // un clic sur le fond désélectionne
 
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
    Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés.
