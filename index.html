@@ -670,6 +670,32 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-res { display: grid; gap: .1em; }
 .wp-res .u { color: var(--green); font-size: .9em; overflow-wrap: anywhere; }
 @container (max-width: 60ch) { .wb-marks { display: none; } .wb-page { padding: 1em 1.5ch; } .wp-grid { grid-template-columns: minmax(0, 1fr); } }
+/* matériel : jauge d'alimentation et panier (store du jeu et matos.vibe) */
+.pw { display: grid; gap: .3em; margin: .3em 0 .5em; padding: .5em 1.4ch; border: 1px solid var(--sep); border-radius: 4px; background: var(--bg2); white-space: normal; }
+.pw-ok { --pw: var(--green); } .pw-mid { --pw: var(--yellow); } .pw-bad { --pw: var(--red); }
+.pw-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .1em 2ch; }
+.pw-val { font-weight: 700; color: var(--pw); }
+.pw-bar { position: relative; display: flex; gap: 2px; height: .85em; border: 1px solid var(--dim2); border-radius: 2px; overflow: hidden; }
+.pw-bar i { display: block; flex: none; height: 100%; }
+.pw-now { background: var(--pw); }
+.pw-add { background: repeating-linear-gradient(135deg, var(--pw) 0 3px, transparent 3px 6px); }
+.pw-cap { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--fg); }
+.pw-leg { color: var(--dim); }
+.pw-note { color: var(--yellow); }
+.sto-hint { margin: .2em 0 .3em; white-space: normal; }
+.cart { display: grid; gap: .35em; margin-top: .8em; padding: .6em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; white-space: normal; }
+.cart .cart-h { font-weight: 700; color: var(--orange); }
+.cart-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 1.5ch; align-items: baseline; padding-bottom: .2em; border-bottom: 1px dashed var(--sep); }
+.cart-price { color: var(--orange); font-weight: 700; }
+.cart-del { padding: 0 1ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--dim); }
+.cart-del:hover { color: var(--fg); border-color: var(--fg); }
+.cart .cart-bad { color: var(--red); }
+.cart .cart-warn { color: var(--yellow); }
+.cart-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5em 2ch; margin-top: .2em; }
+.cart-acts { display: flex; flex-wrap: wrap; gap: 1ch; align-items: center; }
+.wp-cartbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5em 2ch; padding: .5em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--panel); }
+.wp-card.in-cart { border-color: var(--orange); }
+.wp-in { display: inline-flex; flex-wrap: wrap; gap: 1ch; align-items: center; }
 /* store : deux rayons */
 .sto-tabs { display: flex; gap: .6ch; margin: .1em 0 .3em; }
 .sto-tabs button { padding: .1em 1.4ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--dim); }
@@ -1603,9 +1629,10 @@ let chaos = false;
    Claude Code ou Codex. ?idle=0 : bac à sable, tout débloqué (les tests s'en servent). Partie sauvegardée dans ce navigateur. */
 const IDLE = Q.get('idle') !== '0';
 const SAVE_KEY = 'aidcs:save';
-const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
+const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, t: Date.now() });
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...o } : G_DEF(); } catch { return G_DEF(); } })();
+const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
 const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
 function saveGame() {
@@ -3570,7 +3597,7 @@ function fetchLines() {                          // neofetch / fastfetch : la vr
   const s = sysSample(), up = Math.floor(s.up), d = Math.floor(up / 86400), h = Math.floor(up % 86400 / 3600), m = Math.floor(up % 3600 / 60);
   const info = [
     tx(USER, 'org b') + '@' + tx('prod-01', 'org b'), esc('-'.repeat(USER.length + 8)),
-    ['OS', 'Vibian GNU/Linux 13 (friday) x86_64'], ['Host', `prod-01 (${pcDiag().host})`], ['Kernel', '6.11.0-friday'],
+    ['OS', 'Vibian GNU/Linux 13 (friday) x86_64'], ['Host', `${part('mobo').n} (${pcDiag().host})`], ['Kernel', '6.11.0-friday'],
     ['Uptime', `${d ? d + ' days, ' : ''}${h} hours, ${m} mins`], ['Packages', `${2150 + installed.size} (dpkg), ${num(nmCount())} (npm)`],
     ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', `${part('cpu').n} (${HW.threads}) @ ${part('cpu').ghz.toFixed(3)}GHz`],
     ['GPU', part('gpu').n], ['Memory', `${Math.round(s.used)}MiB / ${Math.round(HW.mem)}MiB`], ['Disk (/)', part('disk').n],
@@ -4054,25 +4081,34 @@ let bootT = Date.now() - ri(3 * 86400, 9 * 86400) * 1000;                       
 /* ---------- le matériel de prod-01 : en mode idle, on démarre sur un PC patate, et matos.vibe vend mieux ----------
    Chaque agent charge le processeur et la mémoire (plus le terminal va vite, plus il en demande). La carte graphique fait
    tourner un relecteur local : moins de bugs, un peu moins de tokens. Le refroidissement encaisse la chaleur du processeur,
-   l'alimentation doit tenir le tout. Processeur saturé, swap, throttling : les agents ralentissent. Alimentation dépassée ou
+   l'alimentation doit tenir le tout ; la carte mère décide quel processeur et quelle RAM rentrent. Processeur saturé, swap, throttling : les agents ralentissent. Alimentation dépassée ou
    100 °C : le PC tombe et redémarre (BIOS compris). htop, sensors et free montrent tout ça. */
 const PARTS = {
   cpu: { name: 'Processeur', ic: '▦', t: [
-    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', thr: 2, cap: 1, ghz: 2.4, tdp: 65, cost: 0 },
-    { n: 'Corps i5-4590 (Leboncoin)', s: '4 cœurs · 3,3 GHz · 84 W', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké.', thr: 4, cap: 2.6, ghz: 3.3, tdp: 84, cost: 45 },
-    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W', d: 'Le raisin, c’est bon pour le code. Et pour le moral.', thr: 12, cap: 5, ghz: 4.4, tdp: 65, cost: 260 },
-    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W', d: 'Du cache empilé jusqu’au plafond. Les agents se sentent pousser des ailes.', thr: 16, cap: 8, ghz: 5.05, tdp: 120, cost: 950 },
-    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi.', thr: 24, cap: 12, ghz: 5.7, tdp: 250, cost: 3200 },
-    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent.', thr: 32, cap: 17, ghz: 5.7, tdp: 170, cost: 9500 },
-    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable.', thr: 128, cap: 34, ghz: 5.1, tdp: 350, cost: 32000 },
+    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W · socket LGA1155', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', so: 'LGA1155', thr: 2, cap: 1, ghz: 2.4, tdp: 65, cost: 0 },
+    { n: 'Corps i5-3570 (Leboncoin)', s: '4 cœurs · 3,4 GHz · 77 W · socket LGA1155', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké. Même socket que le Céléri : il rentre dans la carte mère d’origine.', so: 'LGA1155', thr: 4, cap: 2.6, ghz: 3.4, tdp: 77, cost: 45 },
+    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W · socket RM4', d: 'Le raisin, c’est bon pour le code. Et pour le moral. Demande une carte mère RM4, donc de la DDR4.', so: 'RM4', thr: 12, cap: 5, ghz: 4.4, tdp: 65, cost: 260 },
+    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W · socket RM5', d: 'Du cache empilé jusqu’au plafond. Socket RM5 : nouvelle carte mère, et DDR5 obligatoire.', so: 'RM5', thr: 16, cap: 8, ghz: 5.05, tdp: 120, cost: 950 },
+    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W · socket LGA1851', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi. Socket LGA1851 : encore une carte mère.', so: 'LGA1851', thr: 24, cap: 12, ghz: 5.7, tdp: 250, cost: 3200 },
+    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W · socket RM5', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent. 170 W : il lui faut des VRM costauds.', so: 'RM5', thr: 32, cap: 17, ghz: 5.7, tdp: 170, cost: 9500 },
+    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W · socket sTF5', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable. Socket grand comme une tartine.', so: 'sTF5', thr: 128, cap: 34, ghz: 5.1, tdp: 350, cost: 32000 },
+  ] },
+  mobo: { name: 'Carte mère', ic: '▧', t: [
+    { n: 'H61 OEM', s: 'LGA1155 · DDR3 · VRM 95 W · 1 PCIe x16 · 0 M.2', d: 'Récupérée dans un PC de bureau de 2011. Deux slots de RAM, dont un qui marche quand on appuie dessus.', so: 'LGA1155', ddr: 3, vrm: 95, pcie: 1, m2: 0, cost: 0 },
+    { n: 'Raisinboard B450', s: 'RM4 · DDR4 · VRM 105 W · 1 PCIe x16 · 1 M.2', d: 'La porte de sortie de 2011. Le BIOS se met à jour tout seul, parfois pendant qu’on s’en sert.', so: 'RM4', ddr: 4, vrm: 105, pcie: 1, m2: 1, cost: 70 },
+    { n: 'Raisinboard B650', s: 'RM5 · DDR5 · VRM 130 W · 1 PCIe x16 · 2 M.2 PCIe 5', d: 'DDR5 uniquement. Premier démarrage en 45 secondes : elle « entraîne la mémoire ». Comme les agents.', so: 'RM5', ddr: 5, vrm: 130, pcie: 1, m2: 2, gen5: 1, cost: 180 },
+    { n: 'Corpsboard Z890', s: 'LGA1851 · DDR5 · VRM 280 W · 2 PCIe x16 · 4 M.2 PCIe 5', d: 'Pour le Corps Ultra. Quatorze ports USB, dont treize que personne n’utilisera.', so: 'LGA1851', ddr: 5, vrm: 280, pcie: 2, m2: 4, gen5: 1, cost: 420 },
+    { n: 'Raisinboard X870E Extrême', s: 'RM5 · DDR5 · VRM 230 W · 2 PCIe x16 · 4 M.2 PCIe 5 · RGB', d: 'Des VRM qui tiennent un Raisin 9, et assez de RGB pour éclairer la cave.', so: 'RM5', ddr: 5, vrm: 230, pcie: 2, m2: 4, gen5: 1, cost: 600 },
+    { n: 'ThreadFlipper TRX50', s: 'sTF5 · DDR5 · VRM 400 W · 4 PCIe x16 · 4 M.2 PCIe 5', d: 'Quatre slots PCIe x16 et un manuel de 300 pages, que l’agent a résumé en « ça va ».', so: 'sTF5', ddr: 5, vrm: 400, pcie: 4, m2: 4, gen5: 1, cost: 1500 },
   ] },
   ram: { name: 'Mémoire', ic: '▤', t: [
-    { n: '4 Go DDR3', s: '2 barrettes dépareillées', d: 'Une de 2012, une de 2014. Elles ne se parlent pas.', go: 4, cost: 0 },
-    { n: '8 Go DDR4', s: '2 × 4 Go · 2 400 MHz', d: 'Assez pour un agent et un onglet de documentation.', go: 8, cost: 30 },
-    { n: '16 Go DDR4', s: '2 × 8 Go · 3 200 MHz', d: 'Le minimum vital d’après les agents. D’après Firefaux aussi.', go: 16, cost: 120 },
-    { n: '32 Go DDR5', s: '2 × 16 Go · 6 000 MHz', d: 'Huit agents, un orchestrateur, et encore de la place pour le doute.', go: 32, cost: 480 },
-    { n: '64 Go DDR5 RGB', s: '2 × 32 Go · 6 400 MHz', d: 'La RAM qui brille va plus vite. C’est scientifique (source : l’agent).', go: 64, cost: 1600 },
-    { n: '128 Go DDR5 ECC', s: '4 × 32 Go · corrige ses erreurs', d: 'La seule chose du projet qui corrige ses propres erreurs.', go: 128, cost: 5200 },
+    { n: '4 Go DDR3', s: '2 barrettes dépareillées · DDR3', d: 'Une de 2012, une de 2014. Elles ne se parlent pas.', ddr: 3, go: 4, cost: 0 },
+    { n: '8 Go DDR3', s: '2 × 4 Go · 1 600 MHz · DDR3', d: 'Trouvée dans un tiroir, avec un câble VGA. Rentre dans la carte mère d’origine.', ddr: 3, go: 8, cost: 25 },
+    { n: '16 Go DDR4', s: '2 × 8 Go · 3 200 MHz · DDR4', d: 'Le minimum vital d’après les agents. Ne rentre que dans une carte mère DDR4.', ddr: 4, go: 16, cost: 60 },
+    { n: '32 Go DDR4', s: '2 × 16 Go · 3 600 MHz · DDR4', d: 'Huit agents, un orchestrateur, et encore de la place pour le doute.', ddr: 4, go: 32, cost: 140 },
+    { n: '32 Go DDR5', s: '2 × 16 Go · 6 000 MHz · DDR5', d: 'La même chose qu’en DDR4, en plus cher : le progrès. Obligatoire sur les cartes mères RM5 et LGA1851.', ddr: 5, go: 32, cost: 380 },
+    { n: '64 Go DDR5 RGB', s: '2 × 32 Go · 6 400 MHz · DDR5', d: 'La RAM qui brille va plus vite. C’est scientifique (source : l’agent).', ddr: 5, go: 64, cost: 1600 },
+    { n: '128 Go DDR5 ECC', s: '4 × 32 Go · DDR5 · corrige ses erreurs', d: 'La seule chose du projet qui corrige ses propres erreurs.', ddr: 5, go: 128, cost: 5200 },
   ] },
   gpu: { name: 'Carte graphique', ic: '▣', t: [
     { n: 'Chipset graphique intégré', s: 'mémoire partagée · 15 W', d: 'Affiche un terminal. La plupart du temps.', vram: .5, tdp: 15, rev: 1, tok: 1, llm: '', cost: 0 },
@@ -4081,22 +4117,22 @@ const PARTS = {
     { n: 'Radian RX 7800 XT', s: '16 Go · 263 W', d: 'Un vrai relecteur local : −28 % de bugs, −8 % de tokens. Demande une vraie alim.', vram: 16, tdp: 263, rev: .72, tok: .92, llm: 'relecteur-14b:q4', cost: 750 },
     { n: 'GéFarce RTX 4090', s: '24 Go · 450 W', d: 'Câble d’alimentation qui fond inclus. −42 % de bugs, −14 % de tokens.', vram: 24, tdp: 450, rev: .58, tok: .86, llm: 'relecteur-32b:q4', cost: 2600 },
     { n: 'GéFarce RTX 5090 Ti Super Duper', s: '32 Go · 600 W', d: 'Chauffe la pièce, la maison et un peu le quartier. −55 % de bugs.', vram: 32, tdp: 600, rev: .45, tok: .8, llm: 'relecteur-70b:q4', cost: 9800 },
-    { n: 'Grappe de 4 GPU de datacenter', s: '4 × 80 Go · 1 400 W', d: 'Louée à l’heure, branchée sur une multiprise. Le relecteur local relit même les commentaires.', vram: 320, tdp: 1400, rev: .32, tok: .7, llm: 'relecteur-405b:fp8', cost: 42000 },
+    { n: 'Grappe de 4 GPU de datacenter', s: '4 × 80 Go · 1 400 W · 4 slots PCIe x16', cards: 4, d: 'Louée à l’heure, branchée sur une multiprise. Le relecteur local relit même les commentaires.', vram: 320, tdp: 1400, rev: .32, tok: .7, llm: 'relecteur-405b:fp8', cost: 42000 },
   ] },
   disk: { name: 'Stockage', ic: '▥', t: [
     { n: 'Disque dur 500 Go', s: '5 400 tr/min · SATA II', d: 'Il gratte. Il a toujours gratté. npm install prend une nuit.', io: .8, boot: 1.7, dev: 'WDC WD5000AAKS 500GB 5400RPM (il gratte)', cost: 0 },
     { n: 'SSD SATA 240 Go', s: 'marque inconnue · 500 Mo/s', d: 'Fabriqué par « Kingstone ». Démarrage deux fois plus rapide.', io: .92, boot: 1, dev: 'KINGSTONE SSD 240GB', cost: 35 },
-    { n: 'SSD NVMe 1 To', s: 'PCIe 4 · 7 000 Mo/s', d: 'node_modules s’installe avant que l’agent ait fini sa phrase.', io: 1, boot: .7, dev: 'NVMe VIBE 1TB PCIe4', cost: 130 },
-    { n: 'NVMe PCIe 5 4 To', s: '14 000 Mo/s · radiateur intégré', d: 'Plus chaud que le processeur. Plus rapide aussi.', io: 1.05, boot: .55, dev: 'NVMe VIBE 4TB PCIe5', cost: 650 },
-    { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 0 sauvegarde', d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.12, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
+    { n: 'SSD NVMe 1 To', s: 'M.2 PCIe 4 · 7 000 Mo/s', m2: 1, d: 'node_modules s’installe avant que l’agent ait fini sa phrase.', io: 1, boot: .7, dev: 'NVMe VIBE 1TB PCIe4', cost: 130 },
+    { n: 'NVMe PCIe 5 4 To', s: 'M.2 PCIe 5 · 14 000 Mo/s · radiateur intégré', m2: 1, gen5: 1, d: 'Plus chaud que le processeur. Plus rapide aussi.', io: 1.05, boot: .55, dev: 'NVMe VIBE 4TB PCIe5', cost: 650 },
+    { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 4 M.2 PCIe 5 · 0 sauvegarde', m2: 4, gen5: 1, d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.12, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
   ] },
   psu: { name: 'Alimentation', ic: '≈', t: [
-    { n: 'Alim no-name 300 W', s: '230 W réels · elle siffle', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien.', w: 230, noname: 1, cost: 0 },
-    { n: 'Alim 450 W 80+ Bronze', s: '450 W', d: 'Une vraie alimentation, avec de vrais condensateurs.', w: 450, cost: 40 },
-    { n: 'Alim 650 W 80+ Gold', s: '650 W', d: 'De quoi nourrir une carte graphique sérieuse.', w: 650, cost: 120 },
-    { n: 'Alim 850 W 80+ Platinum', s: '850 W', d: 'Silencieuse, efficace, et plus chère que le PC de départ.', w: 850, cost: 260 },
-    { n: 'Alim 1 200 W 80+ Titanium', s: '1 200 W', d: 'Pour la RTX 5090 et son câble qui fond.', w: 1200, cost: 650 },
-    { n: 'Alim 2 000 W', s: '2 000 W · prise dédiée', d: 'Le compteur électrique tourne si vite qu’il produit du vent.', w: 2000, cost: 2400 },
+    { n: 'Alim no-name 300 W', s: '300 W (sur l’étiquette) · elle siffle', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien.', w: 230, lbl: 300, noname: 1, cost: 0 },
+    { n: 'Alim 450 W 80+ Bronze', s: '450 W', d: 'Une vraie alimentation, avec de vrais condensateurs.', w: 450, lbl: 450, cost: 40 },
+    { n: 'Alim 650 W 80+ Gold', s: '650 W', d: 'De quoi nourrir une carte graphique sérieuse.', w: 650, lbl: 650, cost: 120 },
+    { n: 'Alim 850 W 80+ Platinum', s: '850 W', d: 'Silencieuse, efficace, et plus chère que le PC de départ.', w: 850, lbl: 850, cost: 260 },
+    { n: 'Alim 1 200 W 80+ Titanium', s: '1 200 W', d: 'Pour la RTX 5090 et son câble qui fond.', w: 1200, lbl: 1200, cost: 650 },
+    { n: 'Alim 2 000 W', s: '2 000 W · prise dédiée', d: 'Le compteur électrique tourne si vite qu’il produit du vent.', w: 2000, lbl: 2000, cost: 2400 },
   ] },
   cool: { name: 'Refroidissement', ic: '✱', t: [
     { n: 'Ventirad d’origine', s: '60 W · poussiéreux', d: 'De 2011, avec la poussière d’origine. Le processeur chauffe dès qu’on le regarde.', w: 60, cost: 0 },
@@ -4108,7 +4144,7 @@ const PARTS = {
   ] },
 };
 const SLOTS = Object.keys(PARTS), SWAP_GO = 2;
-const SANDBOX_PC = { cpu: 3, ram: 4, gpu: 4, disk: 3, psu: 4, cool: 3 };   // mode libre : la machine de rêve (7800X3D, 64 Go, RTX 4090)
+const SANDBOX_PC = { cpu: 3, mobo: 2, ram: 5, gpu: 4, disk: 3, psu: 4, cool: 3 };   // mode libre : la machine de rêve (7800X3D, 64 Go, RTX 4090)
 const PC = () => IDLE ? G.pc : SANDBOX_PC;
 const part = (slot, pc = PC()) => PARTS[slot].t[pc[slot]];
 const PCS = { temp: 36, oomAt: 0 };              // la température, en direct
@@ -4162,6 +4198,169 @@ function pcDiag(pc = PC()) {                     // le verdict du vendeur
     : { label: 'datacenter de salon', host: 'un datacenter dans un placard' };
 }
 const pcLine = (pc = PC()) => SLOTS.map(s => part(s, pc).n).join(' · ');
+
+/* ---------- compatibilité et panier : matos.vibe et le store du jeu partagent le même panier ----------
+   Le processeur suit le socket de la carte mère (et ses VRM), la RAM sa génération de DDR ; les cartes graphiques multiples
+   et les SSD NVMe demandent des slots. La jauge d'alimentation compare la consommation max (processeur + carte graphique
+   + 45 W pour le reste) à l'étiquette de l'alim : l'alim no-name annonce 300 W et coupe vers 230 (la jauge croit l'étiquette).
+   Carte mère et alimentation entrent toujours dans le panier, elles décident du reste ; une autre pièce n'y entre que si elle
+   est compatible avec la config prévue (installée + panier). La commande ne passe que sans aucune incompatibilité. */
+const pcPeakW = pc => 45 + part('cpu', pc).tdp + part('gpu', pc).tdp + (part('disk', pc).raid ? 25 : 0);
+const lcPart = s => s.replace(/^(Grappe|Chipset|Disque)\b/, w => w.toLowerCase());
+function pcIssues(pc) {                          // ce qui empêche une config de fonctionner (vide : tout est compatible)
+  const c = part('cpu', pc), m = part('mobo', pc), r = part('ram', pc), g = part('gpu', pc), d = part('disk', pc), ps = part('psu', pc), out = [];
+  const add = (kind, slots, need, msg, o = {}) => out.push({ kind, slots, need, msg, ...o });
+  if (c.so !== m.so) add('socket', ['cpu', 'mobo'], `carte mère ${c.so} requise`, `Le ${c.n} (socket ${c.so}) ne rentre pas dans la ${m.n} (socket ${m.so}).`);
+  else if (c.tdp > m.vrm) add('vrm', ['cpu', 'mobo'], 'VRM trop faibles', `Les VRM de la ${m.n} (${m.vrm} W) ne tiennent pas les ${c.tdp} W du ${c.n}.`);
+  if (r.ddr !== m.ddr) add('ddr', ['ram', 'mobo'], `carte mère DDR${r.ddr} requise`, `La RAM ${r.n} ne rentre pas dans la ${m.n} (DDR${m.ddr} uniquement).`);
+  if ((g.cards || 1) > m.pcie) add('pcie', ['gpu', 'mobo'], `${g.cards} slots PCIe requis`, `La ${lcPart(g.n)} demande ${g.cards} slots PCIe x16 ; la ${m.n} n’en a que ${m.pcie}.`);
+  if ((d.m2 || 0) > m.m2) add('m2', ['disk', 'mobo'], 'M.2 requis', `Le ${lcPart(d.n)} demande ${d.m2 > 1 ? `${d.m2} emplacements M.2` : 'un emplacement M.2'} ; la ${m.n} ${m.m2 ? `n’en a que ${m.m2}` : 'n’en a aucun (elle date de 2011)'}.`);
+  else if (d.gen5 && !m.gen5) add('gen5', ['disk', 'mobo'], 'PCIe 5 requis', `Le ${lcPart(d.n)} veut du PCIe 5 ; la ${m.n} s’arrête au PCIe 4.`);
+  const peak = pcPeakW(pc);
+  if (peak > ps.lbl) add('pw', ['cpu', 'gpu', 'disk', 'psu'], 'alim trop faible', `Consommation max ≈ ${peak} W pour une alim de ${ps.lbl} W.`, { peak });
+  return out;
+}
+const MOBO_KINDS = ['socket', 'vrm', 'ddr', 'pcie', 'm2', 'gen5'];
+function pcSuggest(slot, pc, kind) {             // la pièce la moins chère qui règle le problème (texte prêt à afficher)
+  const base = PC(), pool = PARTS[slot].t.map((p, t) => ({ p, t })).filter(({ t }) => t > 0 && t !== pc[slot] && (slot === 'mobo' || t > base[slot]));
+  const fits = ks => pool.filter(({ t }) => !pcIssues({ ...pc, [slot]: t }).some(i => ks.includes(i.kind)));
+  let ok = fits(slot === 'mobo' ? MOBO_KINDS : slot === 'cpu' ? ['socket', 'vrm'] : [kind]);
+  if (!ok.length) ok = fits([kind]);
+  const p = ok.sort((a, b) => a.p.cost - b.p.cost)[0]?.p;
+  return p ? ` (par exemple : ${p.n}, ${money0(p.cost)})` : '';
+}
+function issueFix(i, pc, block) {                // block : la pièce est refusée au panier ; sinon : le panier ne passe pas
+  const c = part('cpu', pc), m = part('mobo', pc), r = part('ram', pc), g = part('gpu', pc), d = part('disk', pc);
+  const S = slot => pcSuggest(slot, pc, i.kind), unMobo = CART.mobo != null ? ', ou retirez la carte mère du panier' : '';
+  if (i.kind === 'socket') return block ? `Il faut d’abord une carte mère ${c.so}${S('mobo')}.`
+    : `Prenez un processeur ${m.so}${S('cpu')}${unMobo || `, ou une carte mère ${c.so}${S('mobo')}`}.`;
+  if (i.kind === 'vrm') return `Il faut une carte mère ${c.so} aux VRM plus costauds${S('mobo')}.`;
+  if (i.kind === 'ddr') return block ? `Il faut d’abord une carte mère DDR${r.ddr}${S('mobo')}.` : `Prenez de la DDR${m.ddr}${S('ram')}${unMobo}.`;
+  if (i.kind === 'pcie') return `Il faut une carte mère à ${g.cards} slots PCIe x16${S('mobo')}.`;
+  if (i.kind === 'm2') return `${block ? 'Il faut d’abord' : 'Prenez un SSD SATA, ou'} une carte mère avec ${d.m2 > 1 ? `${d.m2} emplacements M.2` : 'un emplacement M.2'}${S('mobo')}.`;
+  if (i.kind === 'gen5') return `Il faut une carte mère PCIe 5${S('mobo')}.`;
+  return `Il faut ${block ? 'd’abord ' : ''}une alimentation d’au moins ${i.peak} W${S('psu')}.`;
+}
+const CART = {};                                 // emplacement → niveau ; pas sauvegardé (un panier, ça s'oublie)
+let cartVer = 0, lastOrder = null;               // cartVer : les pages ouvertes se redessinent quand le panier change
+const pcCart = () => ({ ...PC(), ...CART });
+const cartLines = () => SLOTS.filter(s => CART[s] != null).map(s => ({ slot: s, tier: CART[s], p: PARTS[s].t[CART[s]], old: part(s, G.pc) }));
+const cartTotal = () => cartLines().reduce((a, l) => a + l.p.cost, 0);
+function partBlock(slot, tier) {                 // pourquoi la pièce ne peut pas entrer dans le panier (null : elle peut)
+  if (slot === 'mobo' || slot === 'psu') return null;
+  const P = pcCart(), C = { ...P, [slot]: tier }, before = new Set(pcIssues(P).map(i => i.msg)), peakP = pcPeakW(P);
+  const b = pcIssues(C).find(i => i.slots.includes(slot) && (i.kind === 'pw' ? i.peak > peakP : !before.has(i.msg)));
+  return b ? { ...b, hint: issueFix(b, C, true) } : null;
+}
+function pcWarns(pc) {                           // ce qui passe la commande mais fera souffrir le PC, avec toute l'équipe au travail
+  const k = pcCheck(pc), ps = part('psu', pc), out = [];
+  if (k.psuKo) out.push({ k: 'psu', m: `L’alim no-name annonce ${ps.lbl} W mais coupe vers ${ps.w} W : avec toute l’équipe, ≈ ${Math.round(k.draw)} W. Le PC tombera.` });
+  if (k.melt) out.push({ k: 'heat', m: `Refroidissement insuffisant : ${Math.round(k.temp)} °C prévus avec toute l’équipe. Surchauffe assurée.` });
+  else if (k.hot) out.push({ k: 'heat', m: `Throttling probable (${Math.round(k.temp)} °C prévus) : un meilleur refroidissement serait prudent.` });
+  return out;
+}
+function partWarn(slot, tier) {                  // seulement ce que cette pièce ajoute
+  const had = new Set(pcWarns(pcCart()).map(w => w.k));
+  return pcWarns({ ...pcCart(), [slot]: tier }).filter(w => !had.has(w.k)).map(w => w.m).join(' ');
+}
+function cartAdd(slot, tier) {
+  const p = PARTS[slot]?.t[tier];
+  if (!IDLE || !p || tier === 0 || tier === G.pc[slot]) return '';
+  const blk = partBlock(slot, tier);
+  if (blk) return `Impossible : ${blk.msg} ${blk.hint}`;
+  const was = CART[slot] != null;
+  CART[slot] = tier;
+  cartVer++;
+  const iss = pcIssues(pcCart());
+  return `${was ? `Panier mis à jour : ${p.n} remplace l’article précédent.` : `Ajouté au panier : ${p.n}.`}${iss.length ? ` À régler avant de commander : ${issueFix(iss[0], pcCart(), false)}` : ''}`;
+}
+function cartDel(slot) {
+  if (CART[slot] == null) return '';
+  const n = PARTS[slot].t[CART[slot]].n;
+  delete CART[slot];
+  cartVer++;
+  return `Retiré du panier : ${n}.`;
+}
+function cartClear() {
+  SLOTS.forEach(s => delete CART[s]);
+  cartVer++;
+  return 'Panier vidé. Comme la prod, un vendredi.';
+}
+function cartState() {                           // le bouton « Valider la commande » : actif, ou pourquoi pas
+  const n = cartLines().length, tot = cartTotal(), iss = n ? pcIssues(pcCart()) : [];
+  if (!n) return { dis: true, t: 'Valider la commande', note: 'panier vide' };
+  if (iss.length) return { dis: true, t: 'Commande bloquée', note: `${plural(iss.length, 'incompatibilité')} à régler` };
+  if (G.money < tot) return { dis: true, t: 'Pas assez d’argent', note: `il manque ${money0(tot - G.money)}` };
+  return { dis: false, t: 'Valider la commande', note: `trésorerie après : ${money0(G.money - tot)}` };
+}
+function cartCheckout() {
+  const lines = cartLines(), st = cartState();
+  if (!IDLE || st.dis) return { ok: false, msg: `${st.t} : ${st.note}.` };
+  const tot = cartTotal(), warn = pcWarns(pcCart()).map(w => w.m), mobo = lines.some(l => l.slot === 'mobo');
+  G.money -= tot;
+  lines.forEach(l => { G.pc[l.slot] = l.tier; });
+  SLOTS.forEach(s => delete CART[s]);
+  cartVer++;
+  lastOrder = { id: `VIBE-${ri(1000, 9999)}`, lines, tot, warn };
+  syncHW();
+  saveGame();
+  renderHud();
+  updateFoot();
+  return { ok: true, msg: `Commande ${lastOrder.id} validée (${money0(tot)}) : ${plural(lines.length, 'pièce')} installée${lines.length > 1 ? 's' : ''} à chaud`
+    + `${mobo ? ', carte mère comprise (un agent a tenu le PC pendant l’opération)' : ''}. Ne faites pas ça chez vous.${warn.length ? ' ' + warn[0] : ''}` };
+}
+function pwGauge() {                             // la jauge d'alimentation : config installée, plus le panier, face à l'étiquette de l'alim
+  const pc = pcCart(), now = pcPeakW(PC()), peak = pcPeakW(pc), ps = part('psu', pc), cap = ps.lbl, c = part('cpu', pc), g = part('gpu', pc);
+  const max = Math.max(cap, peak), pct = Math.round(peak / cap * 100), lvl = peak > cap ? 'bad' : pct >= 80 ? 'mid' : 'ok', dW = peak - now;
+  const a = Math.min(now, peak) / max * 100, b = Math.max(0, dW) / max * 100, rest = 45 + (part('disk', pc).raid ? 25 : 0);
+  return `<div class="pw pw-${lvl}" role="meter" aria-label="Jauge d’alimentation" aria-valuemin="0" aria-valuemax="${cap}" aria-valuenow="${peak}" aria-valuetext="${peak} W sur ${cap} W">`
+    + `<div class="pw-top"><b>Jauge d’alimentation</b><span class="pw-val">${peak} W / ${cap} W · ${pct} %${lvl === 'bad' ? ' · commande bloquée' : lvl === 'mid' ? ' · ça chauffe' : ''}</span></div>`
+    + `<div class="pw-bar" aria-hidden="true"><i class="pw-now" style="width:${a.toFixed(1)}%"></i>${b > 0 ? `<i class="pw-add" style="width:${b.toFixed(1)}%"></i>` : ''}`
+    + `${peak > cap ? `<i class="pw-cap" style="left:${(cap / max * 100).toFixed(1)}%"></i>` : ''}</div>`
+    + `<div class="pw-leg">Consommation max : processeur ${c.tdp} W + carte graphique ${g.tdp} W + le reste ${rest} W. Installé : ${now} W`
+    + `${cartLines().length ? ` · avec le panier : ${dW >= 0 ? '+' : '−'}${Math.abs(dW)} W` : ''} · ${esc(ps.n)}${CART.psu != null ? ' (dans le panier)' : ''}.</div>`
+    + (ps.noname ? `<div class="pw-note">Avis client sur cette alim : « ${cap} W sur l’étiquette, elle coupe vers ${ps.w}. » 1 sur 5. La jauge, elle, croit l’étiquette.</div>` : '')
+    + '</div>';
+}
+function cartHtml(btn) {                         // le panier, en HTML : btn = classe du bouton de commande (sto-buy ou wp-buy)
+  const lines = cartLines();
+  if (!lines.length) return '<div class="cart"><p class="cart-h">Panier vide</p><p class="dim">Ajoutez des pièces, puis validez la commande. Votre panier est vide, comme vos tests.</p></div>';
+  const pc = pcCart(), iss = pcIssues(pc), st = cartState();
+  const warn = pcWarns(pc).filter(w => !(w.k === 'psu' && iss.some(i => i.kind === 'pw')));   // la jauge bloque déjà : pas de doublon
+  return `<div class="cart"><p class="cart-h">Panier · ${plural(lines.length, 'article')}</p>`
+    + lines.map(l => `<div class="cart-row"><span><b>${esc(l.p.n)}</b> <span class="dim">· ${esc(PARTS[l.slot].name.toLowerCase())}, remplace ${esc(l.old.n)}</span></span>`
+      + `<span class="cart-price">${money0(l.p.cost)}</span><button type="button" class="cart-del" data-cart-del="${l.slot}" aria-label="Retirer ${esc(l.p.n)} du panier">retirer</button></div>`).join('')
+    + iss.map(i => `<p class="cart-bad">✗ Incompatible : ${esc(i.msg)} ${esc(issueFix(i, pc, false))}</p>`).join('')
+    + warn.map(w => `<p class="cart-warn">⚠ ${esc(w.m)}</p>`).join('')
+    + `<div class="cart-foot"><span>Total : <b>${money0(cartTotal())}</b> <span class="dim" data-cart-note>· ${esc(st.note)}</span></span>`
+    + `<span class="cart-acts"><button type="button" class="cart-del" data-cart="clear">vider le panier</button>`
+    + `<button type="button" class="${btn}" data-cart="checkout"${st.dis ? ' disabled' : ''}>${esc(st.t)}</button></span></div></div>`;
+}
+function cartLive(root) {                        // l'argent monte : le bouton de commande suit, sans redessiner
+  const b = root.querySelector('[data-cart="checkout"]'), n = root.querySelector('[data-cart-note]'), st = cartState();
+  if (b && (b.disabled !== st.dis || b.textContent !== st.t)) { b.disabled = st.dis; b.textContent = st.t; }
+  if (n && n.textContent !== `· ${st.note}`) n.textContent = `· ${st.note}`;
+}
+function pcMigrate() {                           // les sauvegardes d'avant la carte mère : un agent en installe une compatible (offerte)
+  const pc = G.pc, M = PARTS.mobo.t, R = PARTS.ram.t;
+  pc.ram = [0, 1, 2, 4, 5, 6][pc.ram] ?? 0;      // l'ancienne gamme : 4 DDR3, 8, 16 DDR4, 32, 64, 128 DDR5
+  const c = part('cpu', pc), fit = M.map((m, i) => ({ m, i })).filter(({ m }) => m.so === c.so && m.vrm >= c.tdp).sort((a, b) => a.m.cost - b.m.cost);
+  pc.mobo = fit[0]?.i ?? 0;
+  const m = part('mobo', pc), go = part('ram', pc).go;
+  if (part('ram', pc).ddr !== m.ddr) {           // la bonne génération, au moins la même capacité
+    const same = R.map((r, i) => ({ r, i })).filter(({ r }) => r.ddr === m.ddr);
+    pc.ram = (same.find(({ r }) => r.go >= go) || same[same.length - 1]).i;
+  }
+  const back = (slot, kind) => {                 // ce qui ne rentre toujours pas : repris au prix payé, remplacé par ce qui rentre
+    while (pc[slot] > 0 && pcIssues(pc).some(i => i.kind === kind || (kind === 'm2' && i.kind === 'gen5'))) {
+      G.money += PARTS[slot].t[pc[slot]].cost - PARTS[slot].t[pc[slot] - 1].cost;
+      pc[slot]--;
+    }
+  };
+  back('disk', 'm2');
+  back('gpu', 'pcie');
+}
+if (PC_LEGACY) pcMigrate();
 // [clé, utilisateur, commande, %CPU visé, RES Mo, VIRT Mo, threads, PID]
 const BASE_PROCS = [
   ['systemd', 'root', '/sbin/init splash', .02, 14, 168, 1, 1],
@@ -5438,7 +5637,8 @@ function makeViewer() {
 
 /* ---------- navigateur web (Firefaux) : un faux Web, avec le store des agents et une boutique de matériel ----------
    Une page = une entrée de WEB_SITES (motif d'adresse → fonction qui rend { title, html }). Les liens portent data-href,
-   les achats data-buy (store IA) ou data-part="slot:niveau" (matériel) ; data-live : un morceau rafraîchi chaque seconde. */
+   les achats data-buy (store IA) ; le matériel passe par le panier (data-cart-add="slot:niveau", data-cart-del, data-cart) ;
+   data-live : un morceau rafraîchi chaque seconde. */
 const WEB_HOME = 'vibe://accueil';
 const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vibe/'], ['Matos.vibe', 'https://matos.vibe/'],
   ['Facture', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
@@ -5469,7 +5669,7 @@ function webHome() {
     <p class="dim">Résultats générés par un agent qui ne sait pas non plus.</p></div>
     <div class="wp-tiles">
       ${tile('https://store.agents.vibe/', 'store.agents.vibe', 'agents, terminal, skills, migration')}
-      ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, RAM, cartes graphiques, alims')}
+      ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, cartes mères, RAM, cartes graphiques, alims')}
       ${tile('https://facture.vibe/', 'facture.vibe', 'ce que coûtent vos agents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
@@ -5479,7 +5679,7 @@ function webSearch(u) {
   const q = decodeURIComponent((/[?&]q=([^&]*)/.exec(u) || [, ''])[1]).trim(), lq = q.toLowerCase();
   const res = [];
   const hit = (href, t, d) => res.push(`<div class="wp-res"><a data-href="${esc(href)}">${esc(t)}</a><span class="u">${esc(href)}</span><span class="dim">${esc(d)}</span></div>`);
-  if (/cpu|processeur|ram|m[ée]moire|gpu|carte graph|alim|ssd|disque|pc|ventirad|refroid|composant|patate|chauff|siffl|htop|lent/.test(lq))
+  if (/cpu|processeur|ram|m[ée]moire|gpu|carte graph|carte m[èe]re|socket|ddr|vrm|panier|alim|ssd|nvme|disque|pc|ventirad|refroid|composant|patate|chauff|siffl|htop|lent/.test(lq))
     hit('https://matos.vibe/', 'Matos.vibe : composants PC pour vibecoders', 'Votre PC est une patate ? Nous aussi, au début. Livraison en 0 seconde, installation à chaud.');
   if (/agent|claude|codex|mistral|skill|terminal|orchestr|store|ia\b|llm/.test(lq))
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
@@ -5507,28 +5707,54 @@ function webStoreAI() {
     ${IDLE ? `<p class="wp-band">Trésorerie : <b data-live="money">$${usd(G.money)}</b> · ${plural(G.agents, 'agent')} ${esc(CLIS[G.ai].label)} · ${esc(ECO.termName[G.term])} ×${frx(ECO.term[G.term])}</p>` : ''}${out}
     <p class="dim">Le même rayon existe dans le jeu : touche <b>B</b>, ou commande store.</p></div>` };
 }
-function webMatos() {
-  const pc = PC(), diag = pcDiag(pc);
+function matosBand(pc) {                         // le bandeau commun : config, verdict du vendeur, trésorerie, état en direct
+  const diag = pcDiag(pc);
+  return `<div class="wp-band ${diag.label === 'patate' ? 'bad' : 'ok'}">Votre config : ${esc(pcLine(pc))}<br>Diagnostic du vendeur : <b>${esc(diag.label)}</b>.
+      ${IDLE ? `Trésorerie : <b data-live="money">$${usd(G.money)}</b>.` : 'Mode libre : votre PC est déjà une machine de rêve.'}<br><span data-live="pcnow">${WEB_LIVE.pcnow()}</span></div>`;
+}
+function webMatos() {                            // le catalogue : ajouter au panier ; une pièce incompatible ne s'ajoute pas
+  const pc = PC(), n = cartLines().length, iss = n ? pcIssues(pcCart()) : [];
   const nav = SLOTS.map(s => `<button type="button" data-jump="${s}">${esc(PARTS[s].name)}</button>`).join('');
   const sections = SLOTS.map(slot => {
     const P = PARTS[slot], cur = pc[slot];
     return `<h2 id="wb-${slot}">${esc(P.name)}</h2><div class="wp-grid">` + P.t.map((p, i) => {
-      const own = i === cur, old = i < cur, chk = i > cur ? pcCheck({ ...pc, [slot]: i }) : null;
-      const warn = !chk ? '' : chk.psuKo ? `<span class="warn bad">Alim insuffisante : ≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W. Le PC tombera.</span>`
-        : chk.melt ? '<span class="warn bad">Surchauffe assurée avec votre refroidissement actuel.</span>'
-        : chk.hot ? '<span class="warn">Throttling probable : prévoyez un meilleur refroidissement.</span>' : '';
-      const btn = own ? '<span class="tag">dans votre PC</span>' : old ? '<span class="dim">moins bien que le vôtre</span>'
-        : !IDLE ? '<span class="dim">mode libre</span>' : wbBuyBtn(`data-part="${slot}:${i}"`, G.money < p.cost ? 'Pas assez d’argent' : 'Acheter et installer', G.money < p.cost);
-      return `<div class="wp-card${own ? ' own' : ''}${old ? ' old' : ''}"><span class="nm">${esc(p.n)}</span><span class="spec">${esc(p.s)}</span>`
-        + `<span class="dim">${esc(p.d)}</span>${warn || '<span></span>'}<div class="row"><span class="price">${own || old ? '' : money0(p.cost)}</span>${btn}</div></div>`;
+      const own = i === cur, sold = !own && i === 0, old = !own && !sold && i < cur && slot !== 'mobo', inCart = CART[slot] === i;
+      const open = IDLE && !own && !old && !sold, blk = open && !inCart ? partBlock(slot, i) : null, warn = open && !blk && !inCart ? partWarn(slot, i) : '';
+      const note = blk ? `<span class="warn bad">${esc(blk.msg)} ${esc(blk.hint)}</span>` : warn ? `<span class="warn">${esc(warn)}</span>` : '<span></span>';
+      const btn = own ? '<span class="tag">dans votre PC</span>' : sold ? '<span class="dim">épuisé (trouvé sur le trottoir)</span>'
+        : old ? '<span class="dim">moins bien que le vôtre</span>' : !IDLE ? '<span class="dim">mode libre</span>'
+        : inCart ? `<span class="wp-in"><span class="tag">au panier</span><button type="button" class="cart-del" data-cart-del="${slot}">retirer</button></span>`
+        : wbBuyBtn(blk ? '' : `data-cart-add="${slot}:${i}"`, blk ? blk.need : CART[slot] != null ? 'Remplacer dans le panier' : 'Ajouter au panier', !!blk);
+      return `<div class="wp-card${own ? ' own' : ''}${old || sold ? ' old' : ''}${inCart ? ' in-cart' : ''}"><span class="nm">${esc(p.n)}</span><span class="spec">${esc(p.s)}</span>`
+        + `<span class="dim">${esc(p.d)}</span>${note}<div class="row"><span class="price">${own || old || sold ? '' : money0(p.cost)}</span>${btn}</div></div>`;
     }).join('') + '</div>';
   }).join('');
+  const bar = !IDLE ? '' : `<div class="wp-cartbar"><span>Panier : <b>${plural(n, 'article')}</b> · ${money0(cartTotal())}`
+    + `${iss.length ? ` · <span class="errc">${plural(iss.length, 'incompatibilité')}</span>` : ''}</span>`
+    + `<button type="button" class="wp-buy" data-href="https://matos.vibe/panier"${n ? '' : ' disabled'}>Voir le panier et commander</button></div>`;
   return { title: 'Matos.vibe · composants PC pour vibecoders', html: `<div class="wp"><h1>Matos.vibe</h1>
-    <p class="dim">Composants PC pour vibecoders. Livraison en 0 seconde, installation à chaud, garantie 0 jour.</p>
-    <div class="wp-band ${diag.label === 'patate' ? 'bad' : 'ok'}">Votre config : ${esc(pcLine(pc))}<br>Diagnostic du vendeur : <b>${esc(diag.label)}</b>.
-      ${IDLE ? `Trésorerie : <b data-live="money">$${usd(G.money)}</b>.` : 'Mode libre : votre PC est déjà une machine de rêve.'}<br><span data-live="pcnow">${WEB_LIVE.pcnow()}</span></div>
+    <p class="dim">Composants PC pour vibecoders. Compatibilité vérifiée : si ça ne rentre pas, ça ne part pas. Livraison en 0 seconde, garantie 0 jour.</p>
+    ${matosBand(pc)}${pwGauge()}${bar}
     <div class="wp-nav">${nav}</div>${sections}
     <p class="dim">Paiement en tokens refusé. Retours refusés aussi : l’agent a déjà jeté le carton.</p></div>` };
+}
+function webCart() {
+  const body = !IDLE ? '<p class="wp-band">Mode libre : rien à acheter, tout est déjà dans le PC.</p>'
+    : `${pwGauge()}${cartHtml('wp-buy')}`;
+  return { title: 'Votre panier · Matos.vibe', html: `<div class="wp"><h1>Votre panier</h1>
+    <p class="dim">Vérification de compatibilité automatique : socket, DDR, slots, alimentation. Si ça ne rentre pas, ça ne part pas. Même pour un agent.</p>
+    ${body}<p><a data-href="https://matos.vibe/">← Continuer mes achats</a></p></div>` };
+}
+function webOrder() {
+  const o = lastOrder;
+  if (!o) return { title: 'Commande · Matos.vibe', html: `<div class="wp"><h1>Aucune commande</h1>
+    <p class="dim">Rien commandé pour l’instant. Votre PC reste ce qu’il est, en toute sérénité.</p><p><a data-href="https://matos.vibe/">Voir le catalogue</a></p></div>` };
+  return { title: `Commande ${o.id} · Matos.vibe`, html: `<div class="wp"><h1>Commande ${esc(o.id)} validée</h1>
+    <p class="wp-band ok">Payé : <b>${money0(o.tot)}</b> · Livraison : 0 seconde · Installation : à chaud, par un agent qui n’a pas lu la notice.</p>
+    <ul>${o.lines.map(l => `<li><b>${esc(l.p.n)}</b> <span class="dim">· remplace ${esc(l.old.n)}. L’ancienne pièce est partie sur Leboncoin, donnée par l’agent.</span></li>`).join('')}</ul>
+    ${o.warn.map(w => `<p class="wp-band bad">${esc(w)}</p>`).join('')}
+    <p class="dim">Un mail de confirmation a été envoyé à ${esc(USER)}@prod-01. Un agent l’a lu, puis archivé.</p>
+    <p><a data-href="https://matos.vibe/">Retour au catalogue</a></p></div>` };
 }
 function webBill() {
   const avg = shipped ? G.spent / shipped : 0;
@@ -5544,7 +5770,9 @@ function webSO() {
     ['Mon PC siffle quand je lance trois agents, c’est grave ?', 12, 'C’est votre alimentation no-name. Au-delà de 80 % de charge, elle siffle, puis elle s’éteint. Une vraie alim sur matos.vibe, et le sifflement part avec.', true],
     ['htop affiche 100 % sur mes deux cœurs et 95 °C', 8, 'Votre processeur sature et cuit : il ralentit tout seul (throttling). Un ventirad à 25 $, puis un vrai processeur. Les agents vous remercieront (ils ne remercient jamais).', true],
     ['Le swap est plein et l’OOM killer tue mes agents', 5, 'Chaque agent prend de la mémoire, l’orchestrateur et Firefaux aussi. Plus de RAM, ou moins d’agents.', true],
-    ['J’ai acheté une RTX 4090 et le PC s’éteint dès que les agents démarrent', 21, 'Elle tire 450 W. Votre alim de 300 W en délivre 230. Faites le calcul, ou laissez un agent le faire (il se trompera).', true],
+    ['Matos.vibe refuse ma RTX 4090 : « alim trop faible »', 21, 'Elle tire 450 W, votre alim en annonce 300. Mettez une alim plus puissante dans le panier d’abord, la carte passera ensuite. La jauge d’alimentation ne ment pas (contrairement à l’étiquette de l’alim no-name).', true],
+    ['La jauge disait 242 W sur 300, et le PC s’éteint quand même', 17, 'L’alim no-name annonce 300 W et en délivre 230. La jauge croit l’étiquette. Vous, ne la croyez pas.', true],
+    ['Impossible de commander un Raisin 7 : « carte mère RM5 requise »', 9, 'Le socket a changé. Carte mère RM5 dans le panier, et comme elle ne prend que de la DDR5, la RAM aussi. Bienvenue dans le monde merveilleux des plateformes.', true],
     ['Comment empêcher mon agent de supprimer la prod ?', -3, 'Question fermée : doublon de « Comment empêcher mon agent de supprimer la prod ? ».', false],
     ['Mon agent dit que les tests passent, mais il n’y a pas de tests', 42, 'Réponse acceptée : c’est normal. 0 test sur 0, ça fait bien 100 %.', false],
     ['Comment centrer une div ?', 4127, 'Question fermée : trop subjective.', false],
@@ -5566,7 +5794,8 @@ function web404(u) {
 }
 const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch],
-  [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
+  [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
+  [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
   [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/localhost:3000/i, () => ({ title: `${PROJ} · localhost:3000`, html: `<div class="wp" data-live="local">${webLocalBody()}</div>` })],
 ];
@@ -5584,7 +5813,7 @@ function makeBrowser() {
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
     + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-status" role="status"></div>';
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
-  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0;
+  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1;
   const flash = t => { if (!t) return; note = t; noteUntil = performance.now() + 6000; stat(); };
   function stat() {
     const on = performance.now() < noteUntil;
@@ -5593,6 +5822,7 @@ function makeBrowser() {
   }
   function draw(keep) {
     const r = webRoute(url), top = page.scrollTop;
+    seen = cartVer;
     title = r.title;
     doc.innerHTML = r.html;
     page.scrollTop = keep ? top : 0;
@@ -5626,19 +5856,18 @@ function makeBrowser() {
     }, ms);
   }
   function live() {                              // l'argent monte : boutons et chiffres à jour, sans redessiner la page
+    if (seen !== cartVer && /^https?:\/\/(www\.)?matos\.vibe/i.test(url)) return draw(true);   // le panier a changé ailleurs (le store du jeu)
     doc.querySelectorAll('[data-live]').forEach(n => { const f = WEB_LIVE[n.dataset.live]; if (f) { const h = f(); if (n.innerHTML !== h) n.innerHTML = h; } });
     doc.querySelectorAll('[data-buy]').forEach(b => {
       const it = aiItems().find(x => x.id === b.dataset.buy);
       if (it) { const dis = itemState(it).dis; if (b.disabled !== dis) { b.disabled = dis; b.textContent = it.excl || it.need ? itemState(it).t : dis ? 'Pas assez d’argent' : 'Acheter'; } }
     });
-    doc.querySelectorAll('[data-part]').forEach(b => {
-      const [s, i] = b.dataset.part.split(':'), dis = G.money < PARTS[s].t[+i].cost;
-      if (b.disabled !== dis) { b.disabled = dis; b.textContent = dis ? 'Pas assez d’argent' : 'Acheter et installer'; }
-    });
+    cartLive(doc);
     stat();
   }
   el.addEventListener('click', e => {
-    const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), p = e.target.closest('[data-part]'), j = e.target.closest('[data-jump]');
+    const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), j = e.target.closest('[data-jump]');
+    const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]');
     if (w) {
       const k = w.dataset.wb;
       if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
@@ -5647,7 +5876,12 @@ function makeBrowser() {
       else if (k === 'home') go(WEB_HOME);
     } else if (h) go(h.dataset.href);
     else if (b && !b.disabled) { flash(buy(b.dataset.buy)); draw(true); }
-    else if (p && !p.disabled) { const [s, i] = p.dataset.part.split(':'); flash(buyPart(s, +i)); draw(true); }
+    else if (ca && !ca.disabled) { const [s, i] = ca.dataset.cartAdd.split(':'); flash(cartAdd(s, +i)); draw(true); }
+    else if (cd) { flash(cartDel(cd.dataset.cartDel)); draw(true); }
+    else if (cc && !cc.disabled) {
+      if (cc.dataset.cart === 'clear') { flash(cartClear()); draw(true); }
+      else { const r = cartCheckout(); flash(r.msg); if (r.ok) go('https://matos.vibe/commande'); else draw(true); }
+    }
     else if (j) q(`#wb-${j.dataset.jump}`)?.scrollIntoView({ block: 'start' });
   });
   el.addEventListener('submit', e => {
@@ -6613,6 +6847,8 @@ function idleApply() {                           // la config du jeu suit la par
 }
 function resetGame() {
   G = G_DEF();
+  cartClear();
+  lastOrder = null;
   setScore(0);
   idleApply();
   syncHW();
@@ -6799,18 +7035,19 @@ function aiItems() {
     desc: 'Agents GPT-6.2 Sol : 2× plus productifs, deux fois moins chers que Claude ($2 / $10 par M), un peu moins fiables.' });
   return it;
 }
-function pcItems() {                             // matériel : le niveau suivant de chaque pièce (matos.vibe a tout le catalogue)
+function pcItems() {                             // matériel : par emplacement, la pièce du panier, sinon la prochaine qui rentre (matos.vibe a tout le catalogue)
   return SLOTS.map(slot => {
-    const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], next = P.t[i + 1];
-    if (!next) return { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, ic: P.ic, name: cur.n, lvl: 'le meilleur', done: true, cost: 0, desc: cur.d };
-    const chk = pcCheck({ ...G.pc, [slot]: i + 1 });
-    const warn = chk.psuKo ? ` Attention : alim insuffisante (≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W).` : chk.melt ? ' Attention : surchauffe assurée avec votre refroidissement.'
-      : chk.hot ? ' Throttling probable : prévoyez un meilleur refroidissement.' : '';
-    return { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, ic: P.ic, name: next.n, lvl: `actuel : ${cur.n}`, cost: next.cost, desc: `${next.s}. ${next.d}${warn}` };
+    const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], base = { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, pc: 1, ic: P.ic };
+    const inCart = CART[slot] != null;
+    if (i >= P.t.length - 1 && !inCart) return { ...base, name: cur.n, lvl: 'le meilleur', done: true, cost: 0, desc: cur.d };
+    const t = inCart ? CART[slot] : P.t.map((_, k) => k).find(k => k > i && !partBlock(slot, k)) ?? i + 1, p = P.t[t], blk = inCart ? null : partBlock(slot, t);
+    return { ...base, name: p.n, lvl: `actuel : ${cur.n}`, cost: p.cost, inCart, tier: t, block: blk?.need || '', desc: `${p.s}. ${p.d}`,
+      bad: blk ? `${blk.msg} ${blk.hint}` : '', warn: blk || inCart ? '' : partWarn(slot, t) };
   });
 }
 function storeItems() { return stoTab === 'pc' ? pcItems() : aiItems(); }
 function itemState(it) {
+  if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
   if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id.startsWith('pc:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
@@ -6821,12 +7058,17 @@ const storeSub = () => stoTab === 'pc' ? `Trésorerie : $${usd(G.money)} · PC �
 function renderStore(focusId) {
   let cat = '';
   $('#sto-sub').textContent = storeSub();
-  $('#sto-list').innerHTML = storeItems().map(it => {
+  const rows = storeItems().map(it => {
     const st = itemState(it), head = it.cat !== cat ? `<p class="sto-cat">${esc(cat = it.cat)}</p>` : '';
     return head + `<div class="sto-row${it.done ? ' done' : ''}"><span class="sto-ic" aria-hidden="true">${esc(it.ic)}</span>`
-      + `<span class="sto-txt"><b>${esc(it.name)}</b>${it.lvl ? ` <span class="dim">· ${esc(it.lvl)}</span>` : ''}<br><span class="dim">${esc(it.desc)}</span></span>`
+      + `<span class="sto-txt"><b>${esc(it.name)}</b>${it.lvl ? ` <span class="dim">· ${esc(it.lvl)}</span>` : ''}<br><span class="dim">${esc(it.desc)}</span>`
+      + `${it.bad ? `<br><span class="errc">${esc(it.bad)}</span>` : ''}${it.warn ? `<br><span class="wrn">${esc(it.warn)}</span>` : ''}</span>`
       + `<button type="button" class="sto-buy ${st.cls}" data-buy="${it.id}"${st.dis ? ' disabled' : ''} aria-label="${esc(it.name)} : ${esc(st.t)}">${esc(st.t)}</button></div>`;
   }).join('');
+  $('#sto-list').innerHTML = stoTab !== 'pc' ? rows
+    : '<p class="dim sto-hint">Une pièce qui ne rentre pas ne passe pas : le processeur suit le socket de la carte mère, la RAM sa DDR, et le tout '
+      + 'doit tenir dans l’alim. Ajoutez au panier, puis validez la commande. Catalogue complet : matos.vibe, dans Firefaux.</p>'
+      + pwGauge() + cartHtml('sto-buy') + rows;
   const f = focusId && $(`#sto-list [data-buy="${focusId}"]:not(:disabled)`);
   (f || $('#sto-list .sto-buy:not(:disabled)') || $('#sto-close')).focus({ preventScroll: true });
 }
@@ -6837,6 +7079,7 @@ function refreshStore() {                        // l'argent monte pendant qu'on
     if (b && b.disabled !== st.dis) b.disabled = st.dis;
     if (b && b.textContent !== st.t) { b.textContent = st.t; b.setAttribute('aria-label', `${it.name} : ${st.t}`); }
   });
+  if (stoTab === 'pc') cartLive($('#sto-list'));
 }
 function openStore(tab) {
   if (!IDLE) return toast('Le store n’existe qu’en mode idle (sans <kbd>?idle=0</kbd>).');
@@ -6850,9 +7093,9 @@ function openStore(tab) {
 function buy(id) {
   const it = [...aiItems(), ...pcItems()].find(x => x.id === id);
   if (!it || itemState(it).dis) return '';
-  if (id.startsWith('pc:')) {                    // matériel : le niveau suivant
-    const slot = id.slice(3), m = buyPart(slot, G.pc[slot] + 1);
-    if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = `✓ ${m}`; }
+  if (id.startsWith('pc:')) {                    // matériel : dans le panier ; la commande se valide en bas du rayon
+    const m = cartAdd(id.slice(3), it.tier);
+    if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = m; }
     return m;
   }
   G.money -= it.cost;
@@ -6894,22 +7137,6 @@ function buy(id) {
   updateFoot();
   return msg;
 }
-function buyPart(slot, tier) {                   // matériel : installé à chaud (ne faites pas ça chez vous)
-  const p = PARTS[slot]?.t[tier];
-  if (!IDLE || !p || tier <= G.pc[slot] || G.money < p.cost) return '';
-  G.money -= p.cost;
-  G.pc[slot] = tier;
-  syncHW();
-  const chk = pcCheck(G.pc);
-  let msg = `${p.n} installé à chaud. Ne faites pas ça chez vous.`;
-  if (chk.psuKo) msg += ` Attention : l’alimentation ne suivra pas (≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W) : le PC va tomber.`;
-  else if (chk.melt) msg += ' Attention : le refroidissement ne suivra pas, surchauffe en vue.';
-  else if (chk.hot) msg += ' Le processeur va chauffer : un meilleur refroidissement serait prudent.';
-  saveGame();
-  renderHud();
-  updateFoot();
-  return msg;
-}
 function stoTabs() { document.querySelectorAll('[data-sto]').forEach(b => b.setAttribute('aria-selected', b.dataset.sto === stoTab)); }
 $('.sto-tabs').addEventListener('click', e => {
   const b = e.target.closest('[data-sto]');
@@ -6919,7 +7146,17 @@ $('.sto-tabs').addEventListener('click', e => {
   $('#sto-msg').textContent = '';
   renderStore();
 });
-$('#sto-list').addEventListener('click', e => { const b = e.target.closest('[data-buy]'); if (b) buy(b.dataset.buy); });
+$('#sto-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-buy]'), d = e.target.closest('[data-cart-del]'), c = e.target.closest('[data-cart]');
+  if (b) return buy(b.dataset.buy);
+  if (!d && (!c || c.disabled)) return;
+  let m = '';
+  if (d) m = cartDel(d.dataset.cartDel);
+  else if (c.dataset.cart === 'clear') m = cartClear();
+  else { const r = cartCheckout(); m = (r.ok ? '✓ ' : '✗ ') + r.msg; }
+  renderStore();
+  $('#sto-msg').textContent = m;
+});
 $('#sto-close').addEventListener('click', () => storeDlg.close());
 storeDlg.addEventListener('close', () => { if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true }); });
 
@@ -6975,7 +7212,7 @@ async function biosBoot(o = {}) {
   const add = (h, cls = '', box = el) => { const d = document.createElement('div'); d.className = 'ln' + (cls ? ' ' + cls : ''); d.innerHTML = h; box.appendChild(d); return d; };
   const hint = () => add('Une touche ou un clic : passer le démarrage', 'bi-skip');
   o.during?.();                                  // sous l'écran noir : on coupe ce qui tournait
-  const pc = PC(), c = part('cpu'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
+  const pc = PC(), c = part('cpu'), mb = part('mobo'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
   if (o.crash) {                                 // ce qu'on voit juste avant le noir
     if (o.crash.kind === 'heat') {
       const up = (Date.now() - bootT) / 1000;
@@ -7001,10 +7238,11 @@ async function biosBoot(o = {}) {
   add('', '', post);
   add('PROD-01 BIOS rev. 2026.11 « friday »', '', post);
   add('', '', post);
+  add(`Motherboard    : ${esc(mb.n)} · socket ${esc(mb.so)} · DDR${mb.ddr}`, '', post);
   add(`Main Processor : ${esc(c.n)} ${frx(c.ghz)} GHz (${c.thr} threads)`, '', post);
   const mem = add('Memory Testing :', '', post), total = r.go * 1048576;
   for (let i = 1; i <= 14; i++) { mem.textContent = `Memory Testing : ${String(Math.round(total * i / 14)).padStart(10)}K`; await wait(34 * slow); }
-  mem.textContent += ' OK';
+  mem.textContent += ` OK (DDR${r.ddr})`;
   if (o.crash) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
     : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
     : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
