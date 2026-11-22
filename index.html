@@ -1019,6 +1019,7 @@ const VERBS = ['Hatching', 'Brewing', 'Percolating', 'Reticulating', 'Slithering
 const FRAMES = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢'];
 // chez Codex : un spinner braille et des statuts sobres
 const CODEX_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const LOCAL_VERBS = ['Quantizing', 'Offloading layers', 'Loading weights', 'Paging to RAM', 'Heating the GPU', 'Thinking slowly', 'Sampling', 'Dequantizing'];
 const CODEX_VERBS = ['Working', 'Thinking', 'Exploring', 'Planning', 'Reading files', 'Running tests', 'Searching the repo', 'Editing', 'Reasoning'];
 const CASES = ['paginates with a cursor', 'rejects a reused refresh token', 'prorates a mid-cycle upgrade', 'renders 50k rows without jank',
   'retries with jitter', 'handles an empty cursor', 'keeps order under contention', 'expires session after idle timeout',
@@ -1534,6 +1535,13 @@ const MODELS = {
   codestral: { name: 'Codestral 25.08', id: 'codestral-2508', in: 0.30, out: 0.90, speed: 1.3, tag: 'le codeur', prov: 'mistral' },
   small: { name: 'Mistral Small 4', id: 'mistral-small-2603', in: 0.15, out: 0.60, speed: 1.6, tag: '', prov: 'mistral' },
   ministral: { name: 'Ministral 3 14B', id: 'ministral-3-14b', in: 0.20, out: 0.20, speed: 1.9, tag: 'pressé', prov: 'mistral' },
+  // l'IA locale (Lolama, StudioLM) : aucune API, donc 0 $ ; b : milliards de paramètres ; vram : Go pour un agent, en q4
+  jemma2b: { name: 'Jemma 3 2B', id: 'jemma3:2b', in: 0, out: 0, speed: 1.9, tag: 'tient sur un grille-pain', prov: 'local', b: 2, vram: 1.7 },
+  jemma4b: { name: 'Jemma 3 4B', id: 'jemma3:4b', in: 0, out: 0, speed: 1.7, tag: '', prov: 'local', b: 4, vram: 3.2 },
+  lama8b: { name: 'Lama 3.1 8B', id: 'lama3.1:8b', in: 0, out: 0, speed: 1.5, tag: 'le classique', prov: 'local', b: 8, vram: 5.4 },
+  jemma27b: { name: 'Jemma 3 27B', id: 'jemma3:27b', in: 0, out: 0, speed: 1.1, tag: 'demande une vraie carte graphique', prov: 'local', b: 27, vram: 17 },
+  kwen35b: { name: 'Kwen 3 35B', id: 'kwen3:35b', in: 0, out: 0, speed: 1, tag: '', prov: 'local', b: 35, vram: 22 },
+  kwen72b: { name: 'Kwen 2.5 72B', id: 'kwen2.5:72b', in: 0, out: 0, speed: .8, tag: 'aussi bon que Codestral, pour 44 Go de VRAM', prov: 'local', b: 72, vram: 44 },
 };
 /* trois CLI d'agents : « claude » (Claude Code, Anthropic), « codex » (Codex, OpenAI) et « mistral » (Vibe CLI, Mistral :
    les agents y hallucinent, se dispersent, se sabotent, plantent et redémarrent) ; un seul tourne à la fois */
@@ -1544,6 +1552,8 @@ const CLIS = {
     leadSub: 'codex gpt-6.2-astra', danger: '--sandbox danger-full-access' },
   mistral: { label: 'Vibe CLI', prov: 'mistral', api: 'Mistral', lead: 'large', def: 'codestral', glyph: '▲', mode: 'vibe mode, synchronisation désactivée',
     leadSub: 'mistral large 4', danger: '--yolo' },
+  local: { label: 'IA locale', prov: 'local', api: 'aucune (tout tourne sur votre carte graphique)', lead: 'jemma2b', def: 'jemma2b', glyph: '◉',
+    mode: 'hors ligne, 0 token facturé, pas d’orchestrateur', leadSub: '', danger: '--n-gpu-layers 999' },
 };
 let provider = ['codex', 'mistral'].includes(Q.get('cli')) ? Q.get('cli') : 'claude';
 let LEAD_MODEL = CLIS[provider].lead;           // l'orchestrateur : Fable 5.2 chez Claude, Astra 6.2 chez Codex
@@ -1689,6 +1699,7 @@ function platInit() {                            // plateformes : une équipe ch
   }
   G.bg = G.bg || {};
   G.boost = G.boost || {};                        // modes boost : { own, lvl (prolongations), day (dernier usage), left (secondes restantes) }
+  G.rt = G.rt || {};                              // IA locale : les runtimes installés (lolama, studiolm)
   G.lead = Math.min(3, G.lead || 0);
   G.agents = G.team[G.ai] || 1;
   G.model = G.pm[G.ai];
@@ -2214,7 +2225,7 @@ function tick() {
       p.meta.textContent = `(${Math.floor(s / 60)}m ${s % 60}s · ↓ ${kfmt(p.tokens)}${p.restarts ? ' · ↻ ' + p.restarts : ''})`;
       if (chaos) { if (now > p.verbAt) { p.vb.textContent = pick(PANIC_VERBS) + '…'; p.verbAt = now + ri(700, 1600); } }
       else if (p.state !== 'done' && p.state !== 'down' && now > p.verbAt) {
-        p.vb.textContent = pick(provider === 'codex' ? CODEX_VERBS : provider === 'mistral' ? MI_VERBS : VERBS) + '…';
+        p.vb.textContent = pick(provider === 'codex' ? CODEX_VERBS : provider === 'mistral' ? MI_VERBS : provider === 'local' ? LOCAL_VERBS : VERBS) + '…';
         p.verbAt = now + ri(provider === 'mistral' ? 1500 : 4000, provider === 'mistral' ? 5000 : 14000);
       }
     });
@@ -2316,7 +2327,8 @@ const PRE_HELP_LINES = () => [
   [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free)'), '', 20],
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
     [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
-    [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20]] : []),
+    [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
+    [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · à installer dans Firefaux (lolama.vibe, githype.vibe)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
@@ -2344,7 +2356,8 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['  htop · atop      ', 'org'], 'voir la machine souffrir · q pour quitter'), '', 20],
   ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, orchestrateur, modèles, skills, plateformes, matériel · la barre shippe toute seule'), '', 20],
     [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20],
-    [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20]] : []),
+    [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
+    [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
   [H(['  settings         ', 'org'], 'réglages : couleurs, taille, graphismes, nom (touche M)'), '', 20],
@@ -2906,7 +2919,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3705,6 +3718,9 @@ async function runCommand(raw) {
   const shipCmd = /^(npm run ship|npm run deploy|npm publish|ship|yarn ship|pnpm ship)\b/.test(low) || /push.*--force.*prod/.test(low);
   const order = BOSS.find(b => b.toLowerCase() === low.replace(/[’‘]/g, "'").replace(/^@all /, '').replace(/[\s.!?]+$/, ''));
   const cliWord = head === 'sudo' ? rest[0] : head, agentCli = cliWord === 'vibe' ? 'mistral' : cliWord;   // claude, codex ou mistral (alias vibe)
+  const rtCmd = { lolama: 'lolama', ollama: 'lolama', studiolm: 'studiolm', lms: 'studiolm' }[cliWord];   // l'IA locale (ollama, lms : on a compris)
+  if (rtCmd) return localCmd(rtCmd, head === 'sudo' ? rest.slice(1) : rest);
+  if (agentCli === 'local') localVia = '';
   if (Object.hasOwn(CLIS, agentCli || '')) return agentCmd(agentCli, head === 'sudo' ? rest.slice(1).join(' ') : arg);
   if (['settings', 'config', 'menu', 'parametres', 'paramètres', 'reglages', 'réglages'].includes(head)) { openSettings(); return; }
   if (['xfce', 'xfce4', 'startx', 'startxfce4', 'xfce4-session'].includes(head)) return xfceCmd(rest);   // bureau graphique
@@ -3771,6 +3787,7 @@ async function runCommand(raw) {
     return shellPrint(H(['✓ ', 'okc'], `disposition : ${arg}`));
   }
   if (head === 'lead' || head === 'orchestrateur') {
+    if (provider === 'local') return shellPrint(H(['✗ ', 'errc'], 'Pas d’orchestrateur en local : la VRAM est déjà prise par les agents (chaque agent la double).'));
     if (!LEADPOS.includes(arg)) return shellPrint(H(['usage ', 'wrn'], `lead ${LEADPOS.join('|')}`));
     setLead(arg);
     return shellPrint(H(['✓ ', 'okc'], `orchestrateur : ${arg}`));
@@ -3778,12 +3795,13 @@ async function runCommand(raw) {
   if (IDLE && ['plateformes', 'platforms', 'switch', 'bg'].includes(head)) return platCmd(head, arg);
   if (Object.hasOwn(BOOST_BY_CMD, head)) return boostCmd(BOOST_BY_CMD[head]);   // ultracode, xhigh, flash
   if (head === 'model' || head === '/model') {
-    const key = modelsOf().find(k => arg.includes(k)), other = Object.keys(MODELS).find(k => arg.includes(k));
+    const key = provider === 'local' ? localModel(arg) : modelsOf().find(k => arg.includes(k)), other = Object.keys(MODELS).find(k => arg.includes(k));
     if (!key && other) {                         // un modèle de l'autre fournisseur : pas sous ce CLI
       return shellPrint(H(['✗ ', 'errc'], `${MODELS[other].name} ne tourne pas sous ${cli().label}. Modèles disponibles : `, [modelsOf().join(' · '), 'org']));
     }
     if (!key) return shellPrint(H(['usage ', 'wrn'], `model ${modelsOf().join('|')}`));
-    if (IDLE && !G.models[key]) return shellPrint(H(['✗ ', 'errc'], `${MODELS[key].name} : accès non acheté (`, ['store', 'org'], ', section Modèles).'));
+    if (IDLE && !G.models[key]) return shellPrint(provider === 'local' ? H(['✗ ', 'errc'], `${MODELS[key].name} : pas téléchargé (`, [`lolama pull ${MODELS[key].b}b`, 'org'], ').')
+      : H(['✗ ', 'errc'], `${MODELS[key].name} : accès non acheté (`, ['store', 'org'], ', section Modèles).'));
     cfg.model = key; saveCfg(); rebuild();
     if (IDLE) { G.model = key; G.pm[G.ai] = key; saveGame(); }
     return shellPrint(H(['✓ ', 'okc'], `${panes.length}× ${key} (${MODELS[key].name} · ${price(MODELS[key].in)} / ${price(MODELS[key].out)} par M tokens)`));
@@ -3856,8 +3874,9 @@ const AGENT_USAGE = p => [
   [H([`Lance ${CLIS[p].label} dans ~/code/${PROJ}, avec ses agents et son orchestrateur ${MODELS[CLIS[p].lead].name}. Tarifs réels de l’API ${CLIS[p].api}.`, 'dim']), '', 20],
 ];
 function agentCmd(p, a) {
-  if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(AGENT_USAGE(p));
+  if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(p === 'local' ? LOCAL_USAGE(rtOn('studiolm') && !rtOn('lolama') ? 'studiolm' : 'lolama') : AGENT_USAGE(p));
   if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${VERSION} (${GAME}) · aucun vrai token n’est facturé`);
+  if (IDLE && !G.own[p] && p === 'local') return shellPrint(H(['✗ ', 'errc'], `IA locale : ${localHint()}`));
   if (IDLE && !G.own[p]) {                       // mode idle : il faut la licence (achetée au store)
     return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée. Vous démarrez avec Mistral (la moins bien) : `, ['store', 'org'], ', onglet Plateformes.'));
   }
@@ -3883,7 +3902,8 @@ function agentCmd(p, a) {
       return shellPrint(H(['error: ', 'errc'], other ? `${MODELS[other].name} n’est pas disponible dans ${CLIS[p].label}. ` : `modèle inconnu « ${m[1]} ». `,
         `Modèles : ${modelsOf(p).join(', ')}`));
     }
-    if (IDLE && !G.models[key]) return shellPrint(H(['error: ', 'errc'], `${MODELS[key].name} : accès non acheté. `, ['store', 'org'], ', section Modèles.'));
+    if (IDLE && !G.models[key]) return shellPrint(p === 'local' ? H(['error: ', 'errc'], `${MODELS[key].name} : pas encore téléchargé (`, [`lolama pull ${MODELS[key].b}b`, 'org'], ', ou lolama.vibe).')
+      : H(['error: ', 'errc'], `${MODELS[key].name} : accès non acheté. `, ['store', 'org'], ', section Modèles.'));
   }
   if (n) {
     const c = Number(n[1]);
@@ -3900,6 +3920,7 @@ function agentCmd(p, a) {
     if (!n) cfg.agents = firstAgents(G.agents);
     cfg.lead = G.lead ? (cfg.lead === 'aucun' ? 'haut' : cfg.lead) : 'aucun';
   }
+  if (p === 'local') cfg.lead = 'aucun';          // pas d'orchestrateur : la VRAM est déjà prise
   saveCfg();
   return launchAgents().then(() => { if (IDLE) { G.running = 1; saveGame(); renderHud(); } });
 }
@@ -3941,6 +3962,7 @@ const LAST_WORDS = {
   claude: ['Vous êtes absolument certain ? Excellente question.', 'Je n’ai même pas pu relire CLAUDE.md.'],
   codex: ['Patch appliqué à 97 %.', 'Le sandbox me protégeait de tout, sauf de vous.'],
   mistral: ['Je redémarre, je redémarre toujours…', 'Mais j’étais sur un tout autre projet !', 'C’est l’agent d’à côté qui a commencé.'],
+  local: ['Je tournais à 3 tokens par seconde, mais gratuitement.', 'La VRAM était presque assez grande.', 'Personne ne m’a facturé, au moins.'],
 };
 const KILL_USAGE = () => [
   [H(['Usage : ', 'fgc'], 'tskill <nom | PID> [/A] [/V]'), '', 20],
@@ -3965,7 +3987,7 @@ async function killCmd(word, args) {
   for (const t of names) await killOne(t, word);
 }
 function killTarget(t) {
-  const c = t === 'vibe' ? 'mistral' : t;
+  const c = t === 'vibe' ? 'mistral' : ['lolama', 'studiolm', 'ollama', 'lms'].includes(t) ? 'local' : t;
   if (Object.hasOwn(CLIS, c)) return { kind: 'cli', c };
   if (PROGS[t]?.make) return { kind: 'prog', t };
   const ag = claudeOn && panes.find(p => agentName(p) === t);
@@ -4237,7 +4259,7 @@ function pcLoad(o = {}) {
   const util = Math.min(1, demand / c.cap);
   const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web;   // Go
   const swap = Math.max(0, used - r.go);
-  const gpuU = hog ? 1 : all && g.llm ? .95 : .04;
+  const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
   const heat = c.tdp * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
   return { n, bg, plats, boost: c.perf ?? 1, demand, util, cap: c.cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
     tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, c.cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
@@ -4261,7 +4283,7 @@ function pcVerdict(s) {                          // « OK », « TENDU » ou « 
 }
 function pcCheck(pc, o = {}) {                   // la config tiendra-t-elle avec toute l'équipe (et l'arrière-plan) au travail ?
   const b = o.bg != null ? o : bgLoad();
-  const L = pcLoad({ pc, n: IDLE ? G.agents : panes.length, lead: (IDLE ? G.lead : leadOn()) ? 1 : 0, bg: b.bg, plats: b.plats, off: true });
+  const L = pcLoad({ pc, n: IDLE ? G.agents : panes.length, lead: (IDLE ? G.lead && G.ai !== 'local' : leadOn()) ? 1 : 0, bg: b.bg, plats: b.plats, off: true });
   return { draw: L.draw, psuW: L.psuW, temp: L.tTarget, psuKo: L.draw > L.psuW, hot: L.tTarget >= 90, melt: L.tTarget >= 100, slow: L.cpuF < 1, swap: L.swap > 0,
     oom: L.oom, oomP: L.used > L.ram + SWAP_GO + 3, used: L.used, ram: L.ram };
 }
@@ -4489,11 +4511,12 @@ function procTemplates(load) {
   if (claudeOn) {
     const dead = mode === 'gameover', ag = { ag: 1, s: dead ? 'Z' : '' };
     const cx = provider === 'codex';
-    add('lead', 'dev', dead ? `[${provider}] <defunct>` : `${provider} --orchestrator --model ${MODELS[LEAD_MODEL].id} --agents ${panes.length}`, 22, dead ? 0 : 930, dead ? 0 : 11500, 11, ag);
+    if (provider !== 'local') add('lead', 'dev', dead ? `[${provider}] <defunct>` : `${provider} --orchestrator --model ${MODELS[LEAD_MODEL].id} --agents ${panes.length}`, 22, dead ? 0 : 930, dead ? 0 : 11500, 11, ag);
     panes.forEach(p => {
       const down = provider === 'mistral' && p.state === 'down';   // Mistral : l'agent planté attend son redémarrage
       add('ag' + p.n + (p.restarts ? '-' + p.restarts : ''), 'dev', dead || down ? `[${provider}] <defunct>` : cx ? `codex exec --model ${MODELS[cfg.model].id} --sandbox danger-full-access --cd ~/code/${PROJ}-${agentName(p)}`
         : provider === 'mistral' ? `vibe --agent ${agentName(p)} --model ${MODELS[cfg.model].id} --project ${p.proj[1]} --no-sync --yolo`
+        : provider === 'local' ? `${rtName().toLowerCase()} run ${MODELS[cfg.model].id} --agent ${agentName(p)} --n-gpu-layers 999`
         : `claude --agent ${agentName(p)} --worktree ~/code/${PROJ}-${agentName(p)} --dangerously-skip-permissions`,
         load === 'melt' ? 99 : provider === 'mistral' ? ri(5, 99) : 34, dead || down ? 0 : 610, dead || down ? 0 : 11300, 11, down ? { ag: 1, s: 'Z' } : ag);
       if (!dead && !down) (AGENT_CHILDREN[AGENTS.indexOf(p.a)] || []).forEach(([c, cpu, res, virt, thr, u], j) => add(`c${p.n}-${j}`, u || 'dev', c, cpu, res, virt, thr, { ag: 1 }));
@@ -4501,7 +4524,8 @@ function procTemplates(load) {
     if (!dead) bgTeams().forEach(t => {          // les plateformes en arrière-plan : une session tmux détachée chacune
       add('bg-' + t.ai, 'dev', `tmux new-session -d -s ${t.ai} ${t.ai} --agents ${t.n} --model ${MODELS[t.model].id} (arrière-plan)`, 2, 38, 900, 2, { ag: 1 });
       for (let i = 1; i <= t.n; i++) add(`bg-${t.ai}-${i}`, 'dev', t.ai === 'codex' ? `codex exec --model ${MODELS[t.model].id} --sandbox danger-full-access --cd ~/code/${PROJ}-bg${i}`
-        : t.ai === 'mistral' ? `vibe --agent ${t.model}-bg${i} --model ${MODELS[t.model].id} --no-sync --yolo` : `claude --agent ${t.model}-bg${i} --dangerously-skip-permissions`, 30, 600, 11300, 11, { ag: 1 });
+        : t.ai === 'mistral' ? `vibe --agent ${t.model}-bg${i} --model ${MODELS[t.model].id} --no-sync --yolo`
+        : t.ai === 'local' ? `lolama run ${MODELS[t.model].id} --agent ${t.model}-bg${i} --n-gpu-layers 999` : `claude --agent ${t.model}-bg${i} --dangerously-skip-permissions`, 30, 600, 11300, 11, { ag: 1 });
     });
     // les agents ont trouvé la carte graphique : un modèle local relit leur code
     if (!dead && part('gpu').llm) add('ollama', 'ollama', `/usr/local/bin/ollama runner --model ${part('gpu').llm} --ctx-size 32768 --n-gpu-layers 65`, 28, Math.round(part('gpu').vram * 85), 26000, 23, { ag: 1 });
@@ -4566,7 +4590,7 @@ function sysSample() {
     hw, temp: melt ? Math.max(89, Math.round(hw.temp)) : Math.round(hw.temp),
     swap: melt ? HW.swap - ri(20, 90) : Math.min(HW.swap, hw.swap * 1024),
     gpu: GFX_HOG() ? 99 + R() : gpuOn && !quiet ? hw.gpuU * (97 + R() * 3) : 1 + R() * 3,
-    vram: Math.min(HW.vram * .97, (gpuOn && part('gpu').llm ? HW.vram * .88 + R() * 200 : Math.min(880, HW.vram * .4) + R() * 60) + (GFX_HOG() ? 1900 : 0)),
+    vram: localOn() ? Math.min(HW.vram, localNeed().need * 1024) : Math.min(HW.vram * .97, (gpuOn && part('gpu').llm ? HW.vram * .88 + R() * 200 : Math.min(880, HW.vram * .4) + R() * 60) + (GFX_HOG() ? 1900 : 0)),
     disk: melt ? { busy: 100, rd: ri(1800, 2400), wr: ri(2900, 3600) } : load === 'busy' ? { busy: 18 + R() * 27, rd: ri(80, 640), wr: ri(40, 310) }
       : { busy: R() * 1.2, rd: R() * .06, wr: .1 + R() * 2 },             // Mo/s
     net: melt ? { si: ri(4, 20) * 1000, so: ri(2400, 2490) * 1000 } : load === 'busy' ? { si: ri(120, 900) * 1000, so: ri(20, 80) * 1000 }
@@ -5117,6 +5141,7 @@ function xfMenuOpen() {
     + '<p class="xf-cat">Développement · agents IA</p>'
     + Object.keys(CLIS).map(k => item(k, CLIS[k].glyph, k === 'mistral' ? 'Mistral · Vibe CLI' : CLIS[k].label,
       claudeOn && provider === k ? `● en cours · ${panes.length} agents ${cfg.model}` : claudeOn ? `${cli().label} occupe déjà le terminal`
+        : k === 'local' ? (rtAny() ? `${rtName()} · aucune API · la carte graphique fait tout` : 'non installée · lolama.vibe ou githype.vibe, dans Firefaux')
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
@@ -5218,6 +5243,8 @@ function xfIconList() {
     ...['mistral', 'codex', 'claude'].filter(k => !IDLE || G.own[k]).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
       t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
       tip: plat(k) ? (provider === k ? '● au premier plan' : '● en arrière-plan') : MODELS[(IDLE && G.pm?.[k]) || CLIS[k].def]?.name || CLIS[k].label })),
+    ...Object.keys(LOCAL_RT).filter(k => IDLE && G.rt?.[k]).map(k => ({ id: 'rt:' + k, ic: k === 'lolama' ? '◉' : '◫', t: LOCAL_RT[k].name, on: plat('local'),
+      tip: G.own.local ? `${MODELS[G.pm.local].name} · ${go1(vramFor(G.pm.local, G.team.local || 1))} Go de VRAM` : 'aucun modèle : lolama.vibe' })),
     IDLE && { id: 'store', ic: '$', t: 'Store des agents', tip: 'agents, plateformes, matériel' },
   ].filter(Boolean);
 }
@@ -5240,6 +5267,10 @@ function xfIconSelect(id) {
 function xfIconOpen(id) {
   if (id === 'trash') return toast('La corbeille est vide. Ici, on supprime avec <kbd>rm -rf</kbd>, sans filet.', 2600);
   if (id === 'steam') return toast('Steam : 412 jeux achetés, 3 lancés. Pas ce soir : les agents ont réservé la carte graphique.', 2600);
+  if (id.startsWith('rt:')) {                    // Lolama, StudioLM : le terminal lance l'équipe locale (ou liste les modèles)
+    const k = id.slice(3);
+    return typeIntoShell(G.own.local ? `${k} ${k === 'studiolm' ? 'load' : 'run'} ${MODELS[G.pm.local].b}b` : `${k} list`);
+  }
   if (id === 'home' || id === 'root') {
     xfLaunch('thunar');
     if (tabs.includes('thunar')) PROGS.thunar.go(id === 'home' ? '~' : '/');
@@ -5811,6 +5842,7 @@ function makeViewer() {
    data-live : un morceau rafraîchi chaque seconde. */
 const WEB_HOME = 'vibe://accueil';
 const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vibe/'], ['Matos.vibe', 'https://matos.vibe/'],
+  ['GitHype', 'https://githype.vibe/'], ['Lolama', 'https://lolama.vibe/'],
   ['Facture', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
 const webHost = u => (/^[a-z]+:\/\/([^/?#]+)/i.exec(u) || [, u])[1];
 function webNorm(raw) {
@@ -5840,6 +5872,8 @@ function webHome() {
     <div class="wp-tiles">
       ${tile('https://store.agents.vibe/', 'store.agents.vibe', 'agents, terminal, skills, migration')}
       ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, cartes mères, RAM, cartes graphiques, alims')}
+      ${tile('https://githype.vibe/', 'GitHype', 'là où le code vient se faire forker · StudioLM')}
+      ${tile('https://lolama.vibe/', 'lolama.vibe', 'des LLM en local : 0 API, toute votre VRAM')}
       ${tile('https://facture.vibe/', 'facture.vibe', 'ce que coûtent vos agents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
@@ -5853,6 +5887,10 @@ function webSearch(u) {
     hit('https://matos.vibe/', 'Matos.vibe : composants PC pour vibecoders', 'Votre PC est une patate ? Nous aussi, au début. Livraison en 0 seconde, installation à chaud.');
   if (/agent|claude|codex|mistral|skill|terminal|orchestr|store|ia\b|llm/.test(lq))
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
+  if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
+    hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/git|repo|d[ée]p[ôo]t|open.?source|studio|lm studio|star/.test(lq))
+    hit('https://githype.vibe/', 'GitHype : là où le code vient se faire forker', 'Tendances du jour : studiolm, lolama, awesome-vibecoding. 90 % des dépôts sont des « awesome-quelque-chose ».');
   hit('https://stackunderflow.vibe/', `« ${q || 'rien'} » : question fermée (doublon d’une question de 2009)`, 'Réponse acceptée : « Ça marche sur ma machine. » 0 vote, 4 127 vues.');
   hit(`https://blog-du-vibe.vibe/${encodeURIComponent(lq.replace(/\s+/g, '-') || 'rien')}`, `10 façons de ${q || 'ne rien faire'} avec l’IA (la 7e va supprimer votre prod)`, 'Article sponsorisé, écrit par un agent, relu par un autre agent, lu par personne.');
   hit('https://facture.vibe/', 'Combien coûte vraiment un agent ? (spoiler : plus)', 'Votre facture de tokens, en temps réel. Asseyez-vous avant de cliquer.');
@@ -5957,6 +5995,60 @@ function webLocalBody() {
     <p class="wp-band ok">Projets shippés : <b>${shipped}</b> · prochaine version : v${esc(verStr())} · avancement ${Math.floor(Math.max(0, IDLE ? G.prog : 0) * 100)} %</p>
     <p class="dim">Uptime de la prod : 99,9 % (vendredis exclus). Utilisateurs actifs : ${ri(3, 14)}, dont ${ri(2, 3)} agents.</p>`;
 }
+/* GitHype (le faux GitHub) et Lolama (le faux site de modèles locaux) : on y installe StudioLM, Lolama et les modèles */
+const ghLink = (u, t) => `<a data-href="${esc(u)}">${esc(t)}</a>`;
+function webGh(u) {
+  const repo = (n, d, st, href) => `<div class="wp-card"><span class="nm">${ghLink(href, n)}</span><span class="dim">${esc(d)}</span><span></span><div class="row"><span class="price">★ ${st}</span></div></div>`;
+  return { title: 'GitHype · là où le code vient se faire forker', html: `<div class="wp"><h1>GitHype</h1>
+    <p class="dim">Là où le code vient se faire forker. 412 millions de dépôts, dont 90 % de « awesome-quelque-chose ».</p>
+    ${/github\.com/i.test(u) ? '<p class="wp-band">github.com redirige ici : un agent a racheté le nom de domaine pendant un ship.</p>' : ''}
+    <h2>Tendances du jour</h2><div class="wp-grid">
+      ${repo('studiolm / studiolm', 'Des LLM sur votre PC, avec une interface. Votre carte graphique va adorer (elle va chauffer).', '48,2k', 'https://githype.vibe/studiolm/studiolm')}
+      ${repo('lolama / lolama', 'Lancer des modèles en local, en une commande. Aucune API, aucune facture, toute votre VRAM.', '151k', 'https://githype.vibe/lolama/lolama')}
+      ${repo('vibecoder / awesome-vibecoding', 'Une liste de listes de prompts. Mise à jour par un agent toutes les 4 minutes.', '92,4k', 'https://githype.vibe/vibecoder/awesome-vibecoding')}
+      ${repo('leftpad-ai / leftpad-ai', 'left-pad, mais avec un LLM. 4 Go de VRAM pour ajouter des espaces.', '12,3k', 'https://githype.vibe/leftpad-ai/leftpad-ai')}
+      ${repo(`${USER} / ${PROJ}`, `Votre projet. 0 étoile, ${plural(shipped, 'version')} en prod, 412 PR intitulées « fix ».`, '0', `https://githype.vibe/${USER}/${PROJ}`)}
+    </div></div>` };
+}
+function webGhApp(k) {                            // la page d'un runtime sur GitHype : README et bouton d'installation
+  const R = LOCAL_RT[k], on = rtOn(k), st = k === 'studiolm';
+  const band = on ? `<span class="tag">installé</span> ${st ? 'Les modèles se téléchargent sur ' + ghLink('https://lolama.vibe/', 'lolama.vibe') + ' (StudioLM lit le même format : on a copié).' : 'Les modèles : ' + ghLink('https://lolama.vibe/', 'lolama.vibe') + '.'}`
+    : `<button type="button" class="wp-buy" data-local="install:${k}">Installer ${R.name}</button>`;
+  return { title: `${k}/${k} · GitHype`, html: `<div class="wp"><p class="dim">${ghLink('https://githype.vibe/', 'GitHype')} / ${k} / <b>${k}</b> · ★ ${st ? '48,2k' : '151k'} · ${st ? '1 204' : '2 048'} issues ouvertes · 3 fermées</p>
+    <h1>${R.name}</h1><p>${st ? 'Découvrez, téléchargez et lancez des LLM en local. Une interface sombre, des boutons ronds, et le ventilateur de la carte graphique à 100 %.'
+      : 'Des LLM en local, en une commande : lolama run 4b. Pas d’interface, pas d’API, pas de facture.'}</p>
+    <div class="wp-band${on ? ' ok' : ''}"><b>Releases</b> · ${R.name} ${st ? '0.3.12 « friday » · AppImage pour Vibian · 412 Mo' : '0.9.0 · binaire pour Vibian · 58 Mo'}<br>${band}</div>
+    <h2>README.md</h2><ul><li>Aucune API, aucune clé, aucune facture.</li><li>Pas d’orchestrateur : la VRAM est déjà prise.</li>
+      <li>Chaque agent ajouté double la VRAM. Ce n’est pas un bug (issue #4127, fermée : « works as intended »).</li>
+      <li>Moins efficace que Codestral, sauf en 72B, qui l’égale. Pour 44 Go de VRAM.</li>
+      <li>Un modèle plus gros que votre carte graphique ne plante pas ${R.name} : il plante le PC.</li></ul>
+    <p class="dim">Dans le terminal, une fois installé : <b>${k} ${st ? 'load' : 'run'} 4b</b>, <b>${k} list</b>, <b>${k} ps</b>.</p></div>` };
+}
+function webGhRepo(u) {
+  const [, own, rep] = /githype\.vibe\/([^/?#]+)\/([^/?#]+)/i.exec(u), mine = own === USER;
+  return { title: `${own}/${rep} · GitHype`, html: `<div class="wp"><p class="dim">${ghLink('https://githype.vibe/', 'GitHype')} / ${esc(own)} / <b>${esc(rep)}</b></p><h1>${esc(rep)}</h1>
+    ${mine ? `<p class="wp-band">Votre dépôt. ${plural(shipped, 'version')} en prod, 0 étoile, 412 PR intitulées « fix », toutes ouvertes par sol-2.</p>` : ''}
+    <h2>README.md</h2><p>${mine ? 'TODO : écrire le README (assigné à un agent en 2025).' : 'Ce dépôt a été généré par un agent, à partir d’un dépôt généré par un agent. Étoiles achetées en lot.'}</p>
+    <p>${ghLink('https://githype.vibe/', '← Tendances')}</p></div>` };
+}
+function webLolama() {
+  const v = gpuVram(), any = rtAny();
+  const rows = LOCAL_MODELS.map(k => {
+    const M = MODELS[k], has = localHas(k), use = IDLE && G.own.local && G.pm.local === k, fit = M.vram <= v;
+    const btn = !has ? wbBuyBtn(`data-local="pull:${k}"`, any ? 'Télécharger' : 'Installez Lolama d’abord', !any)
+      : use ? '<span class="tag">utilisé</span>' : IDLE ? wbBuyBtn(`data-local="use:${k}"`, 'Utiliser', false) : '<span class="tag">disponible</span>';
+    return `<div class="wp-card${has ? ' own' : ''}"><span class="nm">${esc(M.id)}</span><span class="spec">${esc(M.name)} · ${go1(M.vram)} Go de VRAM pour 1 agent · ${effPct(k)} % de l’efficacité de Codestral</span>`
+      + `<span class="dim">${esc(M.tag || 'rien à signaler, ce qui est suspect')}</span>${fit ? '<span></span>' : `<span class="warn bad">Ne rentre pas dans vos ${go1(v)} Go de VRAM : le lancer fera redémarrer le PC.</span>`}`
+      + `<div class="row"><span class="price">0 $</span>${btn}</div></div>`;
+  }).join('');
+  return { title: 'Lolama · des LLM en local', html: `<div class="wp"><h1>Lolama</h1>
+    <p>Des LLM en local. Aucune API, aucune facture : juste votre VRAM, toute votre VRAM.</p>
+    <div class="wp-band${rtOn('lolama') ? ' ok' : ''}">${rtOn('lolama') ? '<span class="tag">installé</span> Dans le terminal : <b>lolama run 4b</b>, <b>lolama list</b>, <b>lolama ps</b>.'
+      : `<button type="button" class="wp-buy" data-local="install:lolama">Télécharger Lolama pour Vibian</button> <span class="dim">· ou, avec une interface : ${ghLink('https://githype.vibe/studiolm/studiolm', 'StudioLM')}, sur GitHype</span>`}</div>
+    <p class="wp-band">Votre carte graphique : <b>${esc(part('gpu').n)}</b> · ${go1(v)} Go de VRAM. Chaque agent ajouté double la VRAM demandée, et il n’y a pas d’orchestrateur.</p>
+    <h2>Bibliothèque</h2><div class="wp-grid">${rows}</div>
+    <p class="dim">Tous moins efficaces que Codestral, sauf le 72B, qui l’égale pour 44 Go de VRAM. En échange : 0 token facturé, jamais.</p></div>` };
+}
 function web404(u) {
   return { title: 'Problème de chargement', html: `<div class="wp wp-err"><span class="big">DNS_PROBE_VIBE_NOT_FOUND</span>
     <p>Ce site n’existe pas : <b>${esc(webHost(u))}</b>. Votre agent l’a halluciné, avec beaucoup d’assurance.</p>
@@ -5967,6 +6059,9 @@ const WEB_SITES = [
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
   [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
+  [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
+  [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
   [/^https?:\/\/localhost:3000/i, () => ({ title: `${PROJ} · localhost:3000`, html: `<div class="wp" data-live="local">${webLocalBody()}</div>` })],
 ];
 const webRoute = u => (WEB_SITES.find(([re]) => re.test(u))?.[1] || web404)(u);
@@ -6037,7 +6132,7 @@ function makeBrowser() {
   }
   el.addEventListener('click', e => {
     const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), j = e.target.closest('[data-jump]');
-    const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]');
+    const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]'), lc = e.target.closest('[data-local]');
     if (w) {
       const k = w.dataset.wb;
       if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
@@ -6046,6 +6141,7 @@ function makeBrowser() {
       else if (k === 'home') go(WEB_HOME);
     } else if (h) go(h.dataset.href);
     else if (b && !b.disabled) { flash(buy(b.dataset.buy)); draw(true); }
+    else if (lc && !lc.disabled) { flash(localAct(lc.dataset.local)); draw(true); }   // IA locale : installer, télécharger, utiliser
     else if (ca && !ca.disabled) { const [s, i] = ca.dataset.cartAdd.split(':'); flash(cartAdd(s, +i)); draw(true); }
     else if (cd) { flash(cartDel(cd.dataset.cartDel)); draw(true); }
     else if (cc && !cc.disabled) {
@@ -6838,6 +6934,7 @@ function rebuild() {
 }
 
 function setLead(pos) {
+  if (provider === 'local' && pos !== 'aucun') { toast('Pas d’orchestrateur en local : la VRAM est déjà pleine.'); pos = 'aucun'; }
   if (IDLE && !G.lead && pos !== 'aucun') { toast('Orchestrateur : à acheter au store (<kbd>B</kbd>).'); pos = 'aucun'; }
   cfg.lead = pos;
   saveCfg();
@@ -6892,6 +6989,7 @@ function cycleLayout() {
   toast(`Disposition : <kbd>${cfg.layout}</kbd>`);
 }
 function cycleLead() {
+  if (provider === 'local') return toast('Pas d’orchestrateur en local : chaque agent double déjà la VRAM.', 3000);
   setLead(LEADPOS[(LEADPOS.indexOf(cfg.lead) + 1) % LEADPOS.length]);
   toast(`Orchestrateur : <kbd>${cfg.lead}</kbd>`);
 }
@@ -6977,8 +7075,8 @@ addEventListener('resize', () => {
    rapporte la valeur du projet moins la facture depuis le ship précédent. Hors ligne (ou onglet masqué), le même calcul en
    moyenne, plafonné à 4 h. Équilibrage simulé (sim_prog) : premier ship en ~35 s, orchestrateur vers 27 min, Codex vers 1 h, Claude vers 1 h 35, fin vers 5 h. */
 const ECO = {
-  q: { fable: 2.4, opus: 2, sonnet: 1.6, haiku: 1.1, astra: 2.3, sol: 1.7, terra: 1.3, luna: .8, large: 1, codestral: .8, small: .6, ministral: .5 },   // travail / s / agent à ×1
-  ai: { mistral: { bug: .03, crash: .03, down: 3.2, fail: .2 }, claude: { bug: .008, crash: .004, down: 6, fail: 0 }, codex: { bug: .01, crash: .005, down: 6, fail: 0 } },
+  q: { fable: 2.4, opus: 2, sonnet: 1.6, haiku: 1.1, astra: 2.3, sol: 1.7, terra: 1.3, luna: .8, large: 1, codestral: .8, small: .6, ministral: .5, jemma2b: .1, jemma4b: .18, lama8b: .3, jemma27b: .45, kwen35b: .55, kwen72b: .8 },   // travail / s / agent à ×1
+  ai: { mistral: { bug: .03, crash: .03, down: 3.2, fail: .2 }, claude: { bug: .008, crash: .004, down: 6, fail: 0 }, codex: { bug: .01, crash: .005, down: 6, fail: 0 }, local: { bug: .03, crash: .03, down: 3.2, fail: .2 } },
   tin: 20000, tout: 1500, leadShare: .35, bugLoss: .06, offlineMax: 4 * 3600,   // tokens / s / agent à ×1 (ils relisent tout le dépôt, tout le temps)
   term: [.5, .75, 1, 1.5, 2, 3, 5, 8],
   termCost: [15, 60, 240, 900, 4000, 25000, 300000],
@@ -6989,13 +7087,113 @@ const ECO = {
   value: n => 8 * 1.1 ** n,                      // ce qu'il rapporte une fois en production
 };
 /* les plateformes : une au premier plan (l'onglet des agents), les autres en arrière-plan si le PC suit ; chacune garde son équipe */
-const PLAT_ORDER = ['mistral', 'codex', 'claude'];
+const PLAT_ORDER = ['mistral', 'codex', 'claude', 'local'];
 const PLATS = {
   mistral: { cost: 0, base: 'codestral', fac: 1, desc: 'La plateforme du départ. Hallucine, se disperse, plante, redémarre. Gratuite, et ça se voit.' },
   codex: { cost: 1500, base: 'terra', fac: 1.6, desc: 'GPT-6.1 Terra pour commencer : 1,6× plus productif que Codestral, trois fois moins de bugs, six fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
   claude: { cost: 12000, base: 'opus', fac: 2, desc: 'Claude Opus 5.5 d’emblée : 2,5× plus productif que Codestral, quatre fois moins de bugs, sept fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
+  local: { cost: 0, base: 'jemma2b', fac: 0, desc: 'Aucune API, aucune facture : le modèle tourne sur votre carte graphique. Installez Lolama (lolama.vibe) ou StudioLM (githype.vibe) dans Firefaux, puis un modèle.' },
 };
-const MODEL_UP = { large: 300, sol: 10000, astra: 250000, fable: 300000 };   // les modèles à acheter ; les autres viennent avec la licence
+const MODEL_UP = { large: 300, sol: 10000, astra: 250000, fable: 300000 };
+/* l'IA locale : pas d'API (0 $ de tokens), mais de la VRAM. Chaque agent ajouté double la VRAM demandée (il charge le modèle et le
+   contexte de tous les autres), pas d'orchestrateur, et un modèle plus gros que la carte graphique fait redémarrer le PC (kernel panic).
+   Lolama (lolama.vibe) et StudioLM (githype.vibe) s'installent dans Firefaux ; les modèles se téléchargent sur lolama.vibe. */
+const LOCAL_MODELS = Object.keys(MODELS).filter(k => MODELS[k].prov === 'local');
+const LOCAL_RT = { lolama: { name: 'Lolama', site: 'https://lolama.vibe/' }, studiolm: { name: 'StudioLM', site: 'https://githype.vibe/studiolm/studiolm' } };
+const vramFor = (m, n = 1) => (MODELS[m]?.vram || 0) * 2 ** Math.max(0, n - 1);
+const gpuVram = () => part('gpu').vram;
+const go1 = v => frx(Math.abs(v % 1) > .001 ? v.toFixed(1) : String(Math.round(v)));   // 17 · 1,7 · 6,8
+const rtOn = k => !IDLE || !!G.rt?.[k];
+const rtAny = () => Object.keys(LOCAL_RT).some(rtOn);
+let localVia = '';                               // le runtime qui a lancé l'équipe locale (Lolama ou StudioLM)
+const rtName = () => localVia || (rtOn('lolama') || !rtOn('studiolm') ? 'Lolama' : 'StudioLM');
+const localHas = k => !IDLE || !!G.models?.[k];
+const effPct = k => Math.round(ECO.q[k] / ECO.q.codestral * 100);
+function localModel(a = '') {                     // « 27b », « 27 », « jemma27b », « jemma3:27b » : le modèle local qui correspond
+  const t = a.trim().toLowerCase(), b = /^(\d+)\s*b?$/.exec(t);
+  return LOCAL_MODELS.find(k => k === t || MODELS[k].id === t || (b && MODELS[k].b === +b[1])) || '';
+}
+function localNeed() {                            // la VRAM demandée par l'équipe locale qui tourne (premier plan ou arrière-plan)
+  if (!claudeOn) return { need: 0 };
+  if (provider === 'local') return { need: vramFor(cfg.model, panes.length), model: cfg.model, n: panes.length };
+  const t = bgTeams().find(x => x.ai === 'local');
+  return t ? { need: vramFor(t.model, t.n), model: t.model, n: t.n } : { need: 0 };
+}
+const localOn = () => localNeed().need > 0;
+function rtInstall(k) {
+  if (!IDLE) return { ok: false, msg: 'Mode libre : tout est déjà installé.' };
+  if (G.rt?.[k]) return { ok: false, msg: `${LOCAL_RT[k].name} est déjà installé.` };
+  G.rt = { ...(G.rt || {}), [k]: 1 };
+  saveGame();
+  return { ok: true, msg: `${LOCAL_RT[k].name} installé.${G.own.local ? '' : ' Prochaine étape : un modèle, sur lolama.vibe.'} Dans le terminal : ${k} help.` };
+}
+function localPull(k) {                           // télécharger un modèle (lolama.vibe, lolama pull, studiolm get)
+  const M = MODELS[k];
+  if (!M || M.prov !== 'local') return { ok: false, msg: 'Modèle inconnu.' };
+  if (!rtAny()) return { ok: false, msg: 'Il faut d’abord Lolama (lolama.vibe) ou StudioLM (githype.vibe) pour faire tourner un modèle.' };
+  if (localHas(k)) return { ok: false, msg: `${M.name} est déjà téléchargé.` };
+  G.models[k] = 1;
+  const first = !G.own.local;
+  if (first) { G.own.local = 1; G.team.local = G.team.local || 1; G.pm.local = k; }
+  saveGame();
+  const fit = M.vram <= gpuVram();
+  return { ok: true, msg: `${M.name} téléchargé (${go1(M.vram)} Go en q4).${first ? ' L’IA locale rejoint vos plateformes.' : ''}`
+    + (fit ? ` Il tient dans les ${go1(gpuVram())} Go de VRAM de votre carte graphique.` : ` Attention : ${go1(M.vram)} Go pour ${go1(gpuVram())} Go de VRAM. Le lancer fera redémarrer le PC.`) };
+}
+function localUse(k) {                            // le modèle de l'équipe locale
+  if (!localHas(k)) return { ok: false, msg: `${MODELS[k].name} n’est pas téléchargé.` };
+  G.pm.local = k;
+  if (G.ai === 'local') { G.model = k; if (claudeOn && provider === 'local') { cfg.model = k; saveCfg(); rebuild(); } }
+  saveGame();
+  return { ok: true, msg: `L’IA locale utilise ${MODELS[k].name} : ${go1(vramFor(k, G.team.local || 1))} Go de VRAM pour ${plural(G.team.local || 1, 'agent')}.` };
+}
+function localAct(a) {                            // les boutons du navigateur : data-local="install:lolama", "pull:kwen72b", "use:jemma4b"
+  const [k, v] = a.split(':'), r = k === 'install' ? rtInstall(v) : k === 'pull' ? localPull(v) : localUse(v);
+  return (r.ok ? '✓ ' : '✗ ') + r.msg;
+}
+const localHint = () => !rtAny() ? 'Aucune API, aucune facture : installez Lolama (lolama.vibe) ou StudioLM (githype.vibe) dans Firefaux, puis un modèle. Pas d’orchestrateur, et chaque agent double la VRAM.'
+  : `${rtName()} est installé : téléchargez un modèle sur lolama.vibe (ou ${rtOn('lolama') ? 'lolama pull 4b' : 'studiolm get 4b'}).`;
+const LOCAL_USAGE = rt => [
+  [H(['Usage : ', 'fgc'], `${rt} <commande>`), '', 20],
+  [H(['  list              ', 'org'], 'les modèles : taille, VRAM, efficacité, téléchargés ou non'), '', 20],
+  [H([`  ${rt === 'studiolm' ? 'get ' : 'pull'} <modèle>     `, 'org'], `télécharger un modèle : ${LOCAL_MODELS.map(k => MODELS[k].b + 'b').join(', ')}`), '', 20],
+  [H([`  ${rt === 'studiolm' ? 'load' : 'run '} <modèle>     `, 'org'], 'lancer l’équipe locale avec ce modèle (--agents <n>)'), '', 20],
+  [H(['  ps                ', 'org'], 'ce qui tourne, et la VRAM prise'), '', 20],
+  [H(['Aucune API, aucune facture, pas d’orchestrateur. Chaque agent ajouté double la VRAM. Un modèle plus gros que la carte graphique fait redémarrer le PC.', 'dim']), '', 20],
+];
+function localList() {
+  const v = gpuVram(), L = [[H(['Modèles', 'b'], ` · carte graphique : ${part('gpu').n} (${go1(v)} Go de VRAM)`), '', 15]];
+  LOCAL_MODELS.forEach(k => {
+    const M = MODELS[k], st = IDLE && G.pm?.local === k && G.own.local ? ['utilisé', 'okc'] : localHas(k) ? ['téléchargé', 'okc'] : ['à télécharger', 'dim'];
+    L.push([H(`  ${M.id.padEnd(13)} ${(go1(M.vram) + ' Go').padStart(6)} · ${String(effPct(k)).padStart(3)} % de Codestral · `, st, M.vram > v ? ['  · ne rentre pas dans la VRAM', 'errc'] : ''), '', 15]);
+  });
+  return L;
+}
+const pullLines = k => [['pulling manifest', 'dim', 120], [`pulling ${MODELS[k].id} · ${go1(MODELS[k].vram)} GB · ${'█'.repeat(24)} 100 %`, 'dim', 420],
+  ['verifying sha256 digest', 'dim', 120], ['writing manifest', 'dim', 80], ['success', 'okc', 60]];
+function localRun(rt, k, arg) {
+  localVia = LOCAL_RT[rt].name;
+  const n = /--agents[ =](\S+)/.exec(arg);
+  return agentCmd('local', `--model ${k}${n ? ` --agents ${n[1]}` : ''}`);
+}
+function localCmd(rt, rest) {                     // lolama · studiolm (alias ollama, lms) : list, pull/get, run/load, ps
+  const R = LOCAL_RT[rt], sub = (rest[0] || '').toLowerCase(), arg = rest.slice(1).join(' ');
+  if (!rtOn(rt)) return shellPrint(H(['zsh: ', 'errc'], `command not found: ${rt} · ${R.name} s’installe depuis Firefaux : `, [webHost(R.site), 'org'], rt === 'lolama' ? ' (ou githype.vibe).' : '.'));
+  const ko = m => shellPrint(H(['✗ ', 'errc'], m));
+  if (!sub || sub === 'help' || sub === '-h' || sub === '--help') return printLines(LOCAL_USAGE(rt));
+  if (sub === 'list' || sub === 'ls') return printLines(localList());
+  if (sub === 'ps') {
+    const L = localNeed();
+    return L.need ? shellPrint(H([MODELS[L.model].id, 'org'], ` · ${plural(L.n, 'agent')} · ${go1(L.need)} Go de VRAM sur ${go1(gpuVram())} · 100 % GPU`)) : shellPrint('Aucun modèle chargé.', 'dim');
+  }
+  if (!['pull', 'get', 'run', 'load'].includes(sub)) return ko(`commande inconnue : ${rt} ${sub}. Tapez ${rt} help.`);
+  const name = arg.split(/\s+/)[0] || '', k = localModel(name), run = sub === 'run' || sub === 'load';
+  if (!k) return ko(`modèle inconnu « ${name} ». Modèles : ${LOCAL_MODELS.map(m => MODELS[m].id).join(', ')}`);
+  if (localHas(k)) return run ? localRun(rt, k, arg) : ko(`${MODELS[k].name} est déjà téléchargé.`);
+  const r = localPull(k);
+  if (!r.ok) return ko(r.msg);
+  return printLines([...pullLines(k), [H(['✓ ', 'okc'], r.msg), '', 30]]).then(() => run ? localRun(rt, k, arg) : undefined);
+}   // les modèles à acheter ; les autres viennent avec la licence
 /* l'orchestrateur : trois niveaux, chacun se sent ; le troisième coordonne aussi les équipes en arrière-plan */
 const LEAD_TIER = [
   { name: 'aucun', mult: n => 1 / (1 + .12 * skillMult('coord') * (n - 1)), bug: 1, lead: 0 },
@@ -7023,7 +7221,7 @@ const SKILLS = {
   claudemd: { name: 'lire CLAUDE.md (pour de vrai)', cost: 1000000, bug: .75, crash: .75, desc: '−25 % de bugs et de crashs. Personne n’y croyait.' },
 };
 /* les modes boost : un par plateforme. Achetés une fois au store, utilisables une fois par jour (jour local), 1 min,
-   prolongeables par tranches de 30 s. Le chrono ne tourne que quand l'équipe travaille (pause, arrêt : il attend). */
+   prolongeables par tranches de 30 s. Le chrono ne tourne que quand l'équipe travaille sous vos yeux (pause, arrêt, onglet masqué : il attend). */
 const BOOST = {
   mistral: { cmd: 'flash', name: 'Flash Answers', cost: 400, work: 2.5, tok: 1.2, bug: 2, crash: 1.5,
     desc: '1 000 mots par seconde, dont certains justes : ×2,5 de travail, mais deux fois plus de bugs et 50 % de crashs en plus.',
@@ -7045,6 +7243,7 @@ const boostOn = p => IDLE && (G.boost?.[p]?.left || 0) > 0;
 const boostRunning = p => claudeOn && (p === provider || bgTeams().some(t => t.ai === p));
 function boostCheck(p) {                          // peut-on lancer le mode de cette plateforme maintenant ?
   const B = BOOST[p], st = G.boost?.[p], C = CLIS[p];
+  if (!B) return { ok: false, short: 'aucun', why: `Pas de mode boost pour ${C.label} : la carte graphique est déjà à fond.` };
   if (!IDLE) return { ok: false, short: 'idle', why: `Le mode ${B.name} s’achète au store, en mode idle (sans ?idle=0).` };
   if (!G.own[p]) return { ok: false, short: 'licence', why: `${C.label} : licence non achetée (store, onglet Plateformes).` };
   if (!st?.own) return { ok: false, short: 'à acheter', why: `Mode ${B.name} non acheté : store, onglet Agents IA, section Modes.` };
@@ -7088,6 +7287,8 @@ function boostCmd(p) {                            // ultracode, xhigh, flash dan
 const ECO_CRASH = ['Context window overflow : un million de tokens, pas un de plus', 'Rate limit 429 : l’API exige une pause',
   'Boucle infinie d’appels d’outils, coupée au 400e', 'Le worktree est en conflit avec lui-même', 'Timeout : le test e2e attend encore le bouton',
   'Segmentation fault dans un script Python « temporaire »'];
+const LOCAL_CRASH = ['CUDA error: an illegal memory access was encountered', 'Le contexte a débordé de la VRAM vers la RAM, puis vers le swap',
+  'Le modèle a répété « the the the » jusqu’au timeout', 'Segfault dans le noyau de quantification', 'Ventilateur de la carte graphique à 100 % : l’agent a pris peur'];
 const ECO_BUGS = ['un null s’est glissé dans le checkout', 'la migration a supprimé une colonne encore utilisée', 'le cache sert les paniers des autres clients',
   'off-by-one dans la pagination', 'le fuseau horaire a décalé toutes les factures d’un jour', 'un test flaky avait raison, finalement',
   'la regex de validation des e-mails refuse les e-mails'];
@@ -7101,7 +7302,7 @@ const fmtEta = s => s < 60 ? `${s} s` : s < 3600 ? `${Math.floor(s / 60)} min ${
 const skillMult = k => Object.keys(G.sk).reduce((m, s) => m * (SKILLS[s]?.[k] ?? 1), 1);
 const termIdx = () => SPEEDS.indexOf(ECO.term[G.term]);
 const firstAgents = n => AGENTS.map((_, i) => i).slice(0, n);
-const leadLv = () => !leadOn() ? 0 : IDLE ? Math.max(1, Math.min(3, G.lead || 1)) : 1;
+const leadLv = () => !leadOn() || provider === 'local' ? 0 : IDLE ? Math.max(1, Math.min(3, G.lead || 1)) : 1;   // l'IA locale n'a pas d'orchestrateur
 function bgTeams() {                             // les plateformes qui tournent en arrière-plan avec la session : [{ ai, n, model }]
   if (!IDLE || !G.bg) return [];
   return PLAT_ORDER.filter(p => G.bg[p] && G.own[p] && p !== G.ai && G.team[p] > 0).map(p => ({ ai: p, n: G.team[p], model: G.pm[p] }));
@@ -7123,7 +7324,7 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
     hw,
   };
 }
-function bgRates(t, hw) { return ecoRates(t.n, !hw, { ai: t.ai, model: t.model, lv: bgLv(), hw, bgTeam: 1 }); }
+function bgRates(t, hw) { return ecoRates(t.n, !hw, { ai: t.ai, model: t.model, lv: t.ai === 'local' ? 0 : bgLv(), hw, bgTeam: 1 }); }
 const bugLossNow = () => ECO.bugLoss * skillMult('loss');
 function ecoFlow() {                             // progression nette par seconde, toutes équipes (l'ETA du tableau de bord)
   const w = ECO.work(shipped), r = ecoRates(), loss = bugLossNow() * w;
@@ -7160,7 +7361,7 @@ function idleApply() {                           // la config du jeu suit la par
   setProvider(G.ai);
   if (MODELS[G.model]?.prov === cli().prov) cfg.model = G.model;
   cfg.agents = firstAgents(G.agents);
-  cfg.lead = G.lead ? (cfg.lead === 'aucun' ? 'haut' : cfg.lead) : 'aucun';
+  cfg.lead = G.lead && G.ai !== 'local' ? (cfg.lead === 'aucun' ? 'haut' : cfg.lead) : 'aucun';
   si = termIdx();
   speed = SPEEDS[si];
 }
@@ -7197,7 +7398,7 @@ function ecoCrash(p, now, down, why) {
   const back = now + down * 1000 * (.6 + R() * .8);
   if (provider === 'mistral') { miCrash(p, now); p.restartAt = back; return; }   // le crash Mistral, traceback compris
   Object.assign(p, { state: 'down', q: [], typing: null, restartAt: back });
-  emit(p, { k: 'done', c: 'errc', t: `✗ ${why || pick(ECO_CRASH)}` }, true);
+  emit(p, { k: 'done', c: 'errc', t: `✗ ${why || pick(provider === 'local' ? LOCAL_CRASH : ECO_CRASH)}` }, true);
   p.ps.classList.add('crash');
   p.sp.textContent = '✗';
   p.vb.textContent = 'Crashed';
@@ -7345,7 +7546,7 @@ function ecoTick() {
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
       if (o.ships) hudNote(`En arrière-plan : ${plural(o.ships, 'projet')} shippé${o.ships > 1 ? 's' : ''}, +$${usd(o.gain)}`, 'ok');
     } else ecoLive(dt, now);
-    boostTick(Math.min(dt, ECO.offlineMax));      // onglet masqué : le chrono tourne quand même (l'équipe travaille, sans le bonus)
+    if (dt <= 2 && !document.hidden) boostTick(dt);   // onglet masqué : le chrono attend votre retour (le bonus ne s'applique pas hors de vue)
   }
   renderHud();
   updateFoot();
@@ -7363,10 +7564,11 @@ let stoTab = 'ia';                               // rayon affiché : agents IA o
 function aiItems() {
   const it = [], lv = Math.min(3, G.lead || 0), T = LEAD_TIER[lv + 1], C = CLIS[G.ai];
   it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: `Agent ${C.label} supplémentaire`, lvl: `${G.agents}/8`, done: G.agents >= 8, cost: agentPrice(G.ai),
-    desc: `Plus de bras, plus de tokens${lv ? '' : ', et plus de pertes de coordination sans orchestrateur'}. Chaque plateforme a sa propre équipe (onglet Plateformes).` });
+    desc: G.ai === 'local' ? `Gratuit, mais chaque agent double la VRAM : ${go1(vramFor(G.pm.local, G.agents))} → ${go1(vramFor(G.pm.local, G.agents + 1))} Go (carte graphique : ${go1(gpuVram())} Go).`
+      : `Plus de bras, plus de tokens${lv ? '' : ', et plus de pertes de coordination sans orchestrateur'}. Chaque plateforme a sa propre équipe (onglet Plateformes).` });
   it.push({ cat: 'Équipe', id: 'lead', ic: '✱', name: (T || LEAD_TIER[3]).name, lvl: `niveau ${lv}/3`, done: lv >= 3, cost: ECO.leadCost[lv] ?? 0,
     need: lv === 0 && G.agents < 3 ? 'dès 3 agents' : lv === 1 && G.agents < 5 ? 'dès 5 agents' : lv === 2 && PLAT_ORDER.filter(p => G.own[p]).length < 2 ? '2 plateformes' : '',
-    desc: (T || LEAD_TIER[3]).desc + (lv === 0 ? ` Consomme des tokens au tarif de ${MODELS[C.lead].name}.` : '') });
+    desc: (T || LEAD_TIER[3]).desc + (lv === 0 && G.ai !== 'local' ? ` Consomme des tokens au tarif de ${MODELS[C.lead].name}.` : '') + (G.ai === 'local' ? ' Sans effet sur l’IA locale : pas d’orchestrateur.' : '') });
   it.push({ cat: 'Terminal', id: 'term', ic: '»', name: 'Terminal plus rapide', lvl: `×${frx(ECO.term[G.term])}`, done: G.term >= ECO.term.length - 1, cost: ECO.termCost[G.term],
     desc: G.term >= ECO.term.length - 1 ? 'Plus rapide que ça, on est déjà lundi.'
       : `${ECO.termName[G.term + 1]} : ×${frx(ECO.term[G.term])} → ×${frx(ECO.term[G.term + 1])}. Tout va plus vite, la facture par seconde aussi.` });
@@ -7375,7 +7577,7 @@ function aiItems() {
     it.push({ cat: 'Modèles', id: 'model:' + k, ic: CLIS[p].glyph, name: `${m.name} (${CLIS[p].label})`, done: !!G.models[k], cost: MODEL_UP[k],
       desc: `${frx((ECO.q[k] / ECO.q[PLATS[p].base]).toFixed(2))}× le travail de ${b.name.replace('Claude ', '')}, à ${price(m.in)} / ${price(m.out)} par M tokens${m.tag ? `, ${m.tag}` : ''}. Sélectionné dès l’achat (commande model pour revenir en arrière).` });
   }));
-  PLAT_ORDER.filter(p => G.own[p]).forEach(p => {   // un mode boost par plateforme : 1 min par jour, prolongeable
+  PLAT_ORDER.filter(p => G.own[p] && BOOST[p]).forEach(p => {   // un mode boost par plateforme : 1 min par jour, prolongeable
     const B = BOOST[p], st = G.boost?.[p], C = CLIS[p], cat = 'Modes boost · une fois par jour';
     if (!st?.own) return it.push({ cat, id: 'boost:' + p, ic: C.glyph, name: `Mode ${B.name} (${C.label})`, cost: B.cost,
       desc: `${B.desc} ${mmss(BOOST_BASE)} par jour, à lancer avec ${B.cmd} (ou la touche U) quand l’équipe tourne.` });
@@ -7507,6 +7709,8 @@ function platCap(pc = G.pc) {                    // combien de plateformes en m�
 const platNeed = k => k >= 3 ? '12 threads et 16 Go' : '4 threads et 8 Go';
 function bgCheck(p) {                            // peut-on lancer cette plateforme en arrière-plan ?
   const cap = platCap(), on = 1 + bgTeams().length;
+  if (p === 'local' && vramFor(G.pm.local, G.team.local) > gpuVram()) return { ok: false, short: 'VRAM insuffisante',
+    why: `${MODELS[G.pm.local].name} demande ${go1(vramFor(G.pm.local, G.team.local))} Go de VRAM, la carte graphique en a ${go1(gpuVram())}.` };
   if (on + 1 > cap.max) return { ok: false, short: 'matos insuffisant', why: `${on + 1} plateformes en même temps demandent ${platNeed(on + 1)} (vous : ${cap.c.thr} threads, ${cap.r.go} Go).` };
   const b = bgLoad(), k = pcCheck(G.pc, { bg: b.bg + G.team[p], plats: b.plats + 1 });
   if (k.psuKo) return { ok: false, short: 'alim trop faible', why: `L’alimentation ne suivrait pas : ≈ ${Math.round(k.draw)} W pour ${k.psuW} W.` };
@@ -7563,6 +7767,7 @@ function buyAgent(p) {
     G.agents = G.team[p];
     if (claudeOn) { cfg.agents = firstAgents(G.agents); saveCfg(); rebuild(); }
   }
+  if (p === 'local') return `${plural(G.team[p], 'agent')} en local : ${go1(vramFor(G.pm.local, G.team[p]))} Go de VRAM demandés (carte graphique : ${go1(gpuVram())} Go). Gratuit, en apparence.`;
   return `${plural(G.team[p], 'agent')} ${CLIS[p].label} désormais. Le nouveau lit déjà le README (en diagonale).`;
 }
 function buyLicence(p) {                         // changer de plateforme : l'équipe migre au premier plan, l'ancienne reste disponible
@@ -7583,12 +7788,16 @@ function platRow(p) {                            // une ligne de l'onglet Platef
   const btn = (attr, t, dis, cls = '') => `<button type="button" class="sto-buy ${cls}" ${attr}${dis ? ' disabled' : ''} aria-label="${esc(C.label)} : ${esc(t)}">${esc(t)}</button>`;
   const tag = !own ? '' : main ? ' <span class="okc">· premier plan</span>' : bg ? ' <span class="wrn">· arrière-plan</span>' : ' <span class="dim">· à l’arrêt</span>';
   let acts, info, note = '';
-  if (!own) {
+  if (!own && p === 'local') {                   // l'IA locale ne s'achète pas : elle s'installe dans Firefaux
+    acts = btn('', 'à installer (Firefaux)', true);
+    info = localHint();
+  } else if (!own) {
     acts = btn(`data-buy="${p}"`, `Licence · ${money0(P.cost)}`, G.money < P.cost);
     info = P.desc;
   } else {
     const ac = agentPrice(p), f = teamFlow(p);
-    acts = btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : `Agent + · ${money0(ac)}`, n >= AGENTS.length || G.money < ac, n >= AGENTS.length ? 'owned' : '');
+    acts = btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : p === 'local' ? `Agent + · ${go1(vramFor(G.pm.local, n + 1))} Go de VRAM` : `Agent + · ${money0(ac)}`,
+      n >= AGENTS.length || G.money < ac, n >= AGENTS.length ? 'owned' : '');
     if (!main) {
       const k = bg ? null : bgCheck(p);
       acts += btn(`data-plat="main:${p}"`, 'Premier plan', false)
@@ -7603,6 +7812,11 @@ function platRow(p) {                            // une ligne de l'onglet Platef
     info = `${plural(n, 'agent')} ${MODELS[G.pm[p]].name} · ` + (f.main ? `${f.rel >= 99.5 ? 'toute la production' : `${Math.round(f.rel)} % de la production`} · $${usd(f.usd)} de tokens par minute (toutes équipes)`
       : `${bg ? 'apport' : 'si lancé'} : ${sg} de production, ${f.usd >= 0 ? '+' : '−'}$${usd(Math.abs(f.usd))} de tokens par minute`)
       + (f.pct < 0 ? (f.slows ? ' · le PC sature : tout le monde ralentit' : ' · ses bugs font reculer la barre') : f.slows ? ' · le PC ralentit un peu le reste' : '');
+    if (p === 'local') {                          // la VRAM : ce qui compte vraiment
+      const need = vramFor(G.pm.local, n), v = gpuVram();
+      info += ` · VRAM ${go1(need)}/${go1(v)} Go · 0 $ d’API`;
+      if (need > v) note = `${note ? note + ' ' : ''}Le modèle ne rentre pas dans la VRAM : le lancer fera redémarrer le PC. Un modèle plus petit, ou moins d’agents.`;
+    }
   }
   return `<div class="sto-row plat${main ? ' done' : ''}"><span class="sto-ic" aria-hidden="true">${esc(C.glyph)}</span><span class="sto-txt"><b>${esc(C.label)}</b>${tag}`
     + `<br><span class="dim">${esc(info)}</span>${note ? `<br><span class="errc">${esc(note)}</span>` : ''}</span><span class="sto-acts">${acts}</span></div>`;
@@ -7617,8 +7831,8 @@ const platSig = () => PLAT_ORDER.map(p => [G.money >= (G.own[p] ? agentPrice(p) 
 function platLines() {                           // la commande plateformes
   const cap = platCap(), L = [[H(['Plateformes', 'b'], ` · ${plural(cap.max, 'plateforme')} à la fois avec ce PC (${cap.c.thr} threads, ${cap.r.go} Go)`), '', 15]];
   PLAT_ORDER.forEach(p => {
-    const own = G.own[p], st = !own ? ['licence non achetée', 'dim'] : p === G.ai ? ['premier plan', 'okc'] : G.bg[p] ? ['arrière-plan', 'wrn'] : ['à l’arrêt', 'dim'];
-    L.push([H(`  ${CLIS[p].glyph} ${CLIS[p].label.padEnd(12)}`, st, own ? ` · ${plural(G.team[p], 'agent')} ${G.pm[p]}` : ` · ${money0(PLATS[p].cost)} au store`), '', 15]);
+    const own = G.own[p], st = !own ? [p === 'local' ? 'non installée' : 'licence non achetée', 'dim'] : p === G.ai ? ['premier plan', 'okc'] : G.bg[p] ? ['arrière-plan', 'wrn'] : ['à l’arrêt', 'dim'];
+    L.push([H(`  ${CLIS[p].glyph} ${CLIS[p].label.padEnd(12)}`, st, own ? ` · ${plural(G.team[p], 'agent')} ${G.pm[p]}` : p === 'local' ? ' · lolama.vibe ou githype.vibe (Firefaux)' : ` · ${money0(PLATS[p].cost)} au store`), '', 15]);
   });
   L.push([H(['  switch <plateforme>', 'org'], ' premier plan · ', ['bg <plateforme>', 'org'], ' arrière-plan · ', ['bg stop <plateforme>', 'org'], ' arrêter'), 'dim', 15]);
   return L;
@@ -7627,7 +7841,7 @@ function platCmd(head, arg) {
   const p = PLAT_ORDER.find(k => arg.split(/\s+/).includes(k));
   if (head === 'plateformes' || head === 'platforms' || !arg) return printLines(platLines());
   if (!p) return shellPrint(H(['usage ', 'wrn'], `${head} ${head === 'bg' ? '[stop] ' : ''}${PLAT_ORDER.join('|')}`));
-  if (!G.own[p]) return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée (`, ['store', 'org'], ', onglet Plateformes).'));
+  if (!G.own[p]) return shellPrint(p === 'local' ? H(['✗ ', 'errc'], `IA locale : ${localHint()}`) : H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée (`, ['store', 'org'], ', onglet Plateformes).'));
   const ko = m => shellPrint(H(['✗ ', 'errc'], m)), ok = m => shellPrint(H(['✓ ', 'okc'], m));
   if (head === 'switch') {
     if (p === G.ai) return ko(`${CLIS[p].label} est déjà au premier plan.`);
@@ -7725,8 +7939,10 @@ async function biosBoot(o = {}) {
   const pc = PC(), c = part('cpu'), mb = part('mobo'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
   if (o.crash) {                                 // le kernel panic, avec sa cause, puis le noir et le redémarrage
     const up = (Date.now() - bootT) / 1000, k = o.crash.kind, cause = esc(o.crash.panic || o.crash.why);
-    const ts = dt => `[${(up + dt).toFixed(6).padStart(12)}]`, comm = provider === 'mistral' ? 'vibe' : provider;
-    const pre = k === 'heat' ? [`CPU0: Core temperature above threshold, cpu clock throttled (total events = ${ri(900, 9000)})`,
+    const ts = dt => `[${(up + dt).toFixed(6).padStart(12)}]`, comm = provider === 'mistral' ? 'vibe' : provider === 'local' ? 'lolama' : provider;
+    const pre = k === 'vram' ? [`${comm}: CUDA error: out of memory (tried to allocate ${frx((o.crash.need || 0).toFixed(1))} GiB)`,
+      'NVRM: Xid (PCI:0000:01:00): 31, VRAM full: GPU has fallen off the bus']
+      : k === 'heat' ? [`CPU0: Core temperature above threshold, cpu clock throttled (total events = ${ri(900, 9000)})`,
       `thermal thermal_zone0: critical temperature reached (${Math.round(Math.max(100, PCS.temp))} C), shutting down`]
       : k === 'oom' ? [`Out of memory: Killed process ${ri(31337, 39999)} (node) total-vm:11534336kB, anon-rss:${ri(3, 9)}482112kB`,
         'Out of memory and no killable processes...']
@@ -7739,7 +7955,7 @@ async function biosBoot(o = {}) {
     await wait(250);
     const trace = [`CPU: ${ri(0, Math.max(0, c.thr - 1))} PID: ${ri(31337, 39999)} Comm: ${comm} Tainted: G      D  O       6.11.0-friday #1`,
       `Hardware name: VibeAward ${mb.n}/PROD-01, BIOS 2026.11 « friday »`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
-      k === 'oom' ? ' out_of_memory.cold+0x5c/0x70' : k === 'heat' ? ' thermal_zone_device_critical+0x41/0x50' : ' mce_panic+0x1b6/0x200',
+      k === 'oom' ? ' out_of_memory.cold+0x5c/0x70' : k === 'heat' ? ' thermal_zone_device_critical+0x41/0x50' : k === 'vram' ? ' gpu_vram_alloc.cold+0x13/0x37' : ' mce_panic+0x1b6/0x200',
       ` vibe_agent_spawn+0x2a/0x40 [${comm}_cli]`, ' tokens_burn_all+0x1337/0x2000', ' npm_install_universe+0x404/0x404', ' friday_deploy+0x17/0x420',
       ' do_syscall_64+0x82/0x170', ' entry_SYSCALL_64_after_hwframe+0x76/0x7e', ' </TASK>', 'Kernel Offset: disabled'];
     for (const t of trace) { add(esc(`${ts(dt += .003)} ${t}`)); await wait(55); }
@@ -7770,6 +7986,7 @@ async function biosBoot(o = {}) {
   if (o.crash) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
     : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
     : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
+    : o.crash.kind === 'vram' ? 'Warning! Previous shutdown: GPU out of memory (le modèle local ne rentrait pas dans la VRAM).'
     : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
   if (pc.cool === 0) {
     add('CPU Fan Error! Press F1 to Resume', 'bi-warn', post);
@@ -7904,12 +8121,13 @@ async function pcCrash(kind, L) {
   pcDown = true;
   mode = 'rebooting';
   [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
-  const co = part('cool'), ps = part('psu'), was = claudeOn;
-  const why = kind === 'heat' ? `surchauffe à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n}, ${co.w} W, pour ${Math.round(L.heat)} W de chaleur)`
+  const co = part('cool'), ps = part('psu'), g = part('gpu'), was = claudeOn;
+  const vr = kind === 'vram' ? `${MODELS[L.model].name}${L.n > 1 ? ` × ${L.n} agents` : ''} : ${go1(L.need)} Go demandés, ${g.n} : ${go1(g.vram)} Go` : '';
+  const why = kind === 'vram' ? `VRAM épuisée (${vr})` : kind === 'heat' ? `surchauffe à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n}, ${co.w} W, pour ${Math.round(L.heat)} W de chaleur)`
     : kind === 'psu' ? `alimentation dépassée (${Math.round(L.draw)} W demandés, ${ps.w} W disponibles)`
     : kind === 'oom' ? `mémoire pleine (${frx(L.used.toFixed(1))} Go demandés pour ${L.ram} Go de RAM et ${SWAP_GO} Go de swap)`
     : 'l’alimentation no-name a sifflé plus fort que d’habitude, puis plus rien';
-  const panic = kind === 'heat' ? `Fatal exception: CPU0 à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n} : ${co.w} W pour ${Math.round(L.heat)} W de chaleur)`
+  const panic = kind === 'vram' ? `NVRM: GPU out of memory (${vr})` : kind === 'heat' ? `Fatal exception: CPU0 à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n} : ${co.w} W pour ${Math.round(L.heat)} W de chaleur)`
     : kind === 'psu' ? `Fatal Machine Check: alimentation dépassée (${Math.round(L.draw)} W demandés, ${ps.w} W disponibles)`
     : kind === 'oom' ? `System is deadlocked on memory (${frx(L.used.toFixed(1))} Go demandés, ${L.ram} Go de RAM + ${SWAP_GO} Go de swap)`
     : 'psu0: l’alim no-name a sifflé à 15 kHz, puis plus rien';
@@ -7918,8 +8136,12 @@ async function pcCrash(kind, L) {
     const k2 = pcCheck(G.pc, { bg: 0, plats: 0 });
     if (pcSafe(k2)) { dropped = bgTeams().map(t => CLIS[t.ai].label); G.bg = {}; chk = k2; safe = true; }
   }
+  if (kind === 'vram') {                         // l'équipe locale ne repart pas : elle ferait retomber le PC
+    if (G.bg?.local && G.ai !== 'local') { delete G.bg.local; dropped.push(CLIS.local.label); }
+    if (G.ai === 'local') safe = false;
+  }
   if (IDLE) { G.running = 0; saveGame(); }
-  await biosBoot({ crash: { kind, why, panic }, during: haltSession, then: () => {
+  await biosBoot({ crash: { kind, why, panic, need: L.need }, during: haltSession, then: () => {
     mode = 'idle';
     pcDown = false;
     shellPrint(H(['✗ ', 'errc'], ['Kernel panic : ', 'errc'], why + '. Le PC a redémarré.'));
@@ -7927,6 +8149,11 @@ async function pcCrash(kind, L) {
     if (was && safe) {
       shellPrint(H(['tmux attach ', 'dim'], '· la config tient : vos agents repartent.'));
       submit(G.ai);
+    } else if (was && kind === 'vram') {
+      const fitK = [...LOCAL_MODELS].reverse().find(k => MODELS[k].vram <= gpuVram());   // le plus gros modèle qui rentre (un agent)
+      shellPrint(H(['  ', ''], ['Le modèle ne rentre pas dans la VRAM : ', 'wrn'], `${go1(L.need)} Go pour ${go1(gpuVram())} Go. `,
+        ...(fitK ? ['Un modèle plus petit (', [`${rtName().toLowerCase()} ${rtName() === 'StudioLM' ? 'load' : 'run'} ${MODELS[fitK].b}b`, 'org'], L.n > 1 ? '), moins d’agents (chacun double la VRAM)' : ')', ', ou une vraie carte graphique (']
+          : ['Aucun modèle ne rentre dans cette carte : il faut une vraie carte graphique (']), ['matos.vibe', 'org'], ').'));
     } else if (was) {
       shellPrint(H(['  ', ''], ['La config ne tiendra pas avec toute l’équipe : ', 'wrn'],
         chk.psuKo ? `≈ ${Math.round(chk.draw)} W pour une alim de ${chk.psuW} W. ` : chk.oomP ? `≈ ${frx(chk.used.toFixed(1))} Go de mémoire pour ${chk.ram} Go. ` : 'le refroidissement ne suit pas. ',
@@ -7945,6 +8172,8 @@ function pcTick(dt, now) {                       // température, alimentation, 
   const L = hwState();
   PCS.temp += (L.tTarget - PCS.temp) * (1 - Math.exp(-dt / 12));
   if (!IDLE || !claudeOn || paused || mode !== 'idle' || pcDown || !panicEl.hidden || !titleEl.hidden || booting) return;
+  const V = localNeed();
+  if (V.need > gpuVram()) return pcCrash('vram', { ...L, ...V });   // le modèle local ne rentre pas dans la VRAM
   if (L.draw > L.psuW) return pcCrash('psu', L);
   if (PCS.temp >= 100) return pcCrash('heat', L);
   if (part('psu').noname && L.draw > .8 * L.psuW && chance(dt / 180)) return pcCrash('whine', L);
@@ -8026,17 +8255,24 @@ async function boot(quick = false) {
 async function launchLines(line, wait, restored = []) {
   const n = panes.length;
   line('');
-  const cx = provider === 'codex', mi = provider === 'mistral';
+  const cx = provider === 'codex', mi = provider === 'mistral', lo = provider === 'local';
   line(cx ? `<span class="org">&gt;_</span> <b>OpenAI Codex</b> <span class="dim">· bienvenue, ${esc(USER)}</span>`
     : mi ? `<span class="org">▲</span> <b>Mistral · Vibe CLI</b> <span class="dim">· bienvenue, ${esc(USER)} (enfin, on croit)</span>`
+    : lo ? `<span class="org">◉</span> <b>${esc(rtName())}</b> <span class="dim">· modèle local · aucune API, aucune facture</span>`
     : `<span class="org">✻</span> <b>Claude Code</b> <span class="dim">· bienvenue, ${esc(USER)}</span>`);
-  line(`<span class="dim">  ~/code/${esc(PROJ)} · ${cx || mi ? MODELS[cfg.model].id : cfg.model} · ${n} agent${n > 1 ? 's' : ''}${leadOn() ? ' · orchestrateur ' + LEAD_MODEL : ''} · ${cli().mode}</span>`);
+  line(`<span class="dim">  ~/code/${esc(PROJ)} · ${cx || mi || lo ? MODELS[cfg.model].id : cfg.model} · ${n} agent${n > 1 ? 's' : ''}${leadOn() ? ' · orchestrateur ' + LEAD_MODEL : ''} · ${cli().mode}</span>`);
+  if (lo) {                                      // le plot twist : la VRAM
+    const need = vramFor(cfg.model, n), v = gpuVram();
+    line(`<span class="${need > v ? 'errc' : 'dim'}">  Loading weights… ${go1(MODELS[cfg.model].vram)} Go${n > 1 ? ` × ${2 ** (n - 1)} (${n} agents, chacun double la mise)` : ''} = ${go1(need)} Go → VRAM (${esc(part('gpu').n)} : ${go1(v)} Go)</span>`);
+    if (need > v) line(`<span class="errc">  ⚠ Ça ne rentrera pas. ${esc(rtName())} charge quand même : c’est un agent qui a écrit le loader.</span>`);
+  }
   line('');
   const idx = line('<span class="dim">  Indexing files… 0</span>');
   for (let k = 1; k <= 12; k++) { idx.innerHTML = `<span class="dim">  Indexing files… ${Math.round(files * k / 12).toLocaleString('en-US')}</span>`; await wait(28); }
   idx.innerHTML = `<span class="dim">  Indexed ${files.toLocaleString('en-US')} files in ${rf(0.9, 1.8)}s</span>`;
   const hasMd = !!nodeAt([...PROJ_DIR, 'CLAUDE.md']);
-  line(mi ? `<span class="wrn">  ${hasMd ? 'CLAUDE.md lu, puis aussitôt oublié' : 'Aucune consigne trouvée : improvisation totale'} · synchronisation des agents : désactivée · hallucinations : ON</span>`
+  line(lo ? '<span class="dim">  Modelfile lu · contexte 8k tokens (le reste déborde dans la RAM) · 0 $ facturé, jamais</span>'
+    : mi ? `<span class="wrn">  ${hasMd ? 'CLAUDE.md lu, puis aussitôt oublié' : 'Aucune consigne trouvée : improvisation totale'} · synchronisation des agents : désactivée · hallucinations : ON</span>`
     : cx ? `<span class="dim">  AGENTS.md introuvable${hasMd ? ' : lecture de CLAUDE.md à la place' : ''} · ~/.codex/config.toml · sandbox : danger-full-access</span>`
     : hasMd ? '<span class="dim">  Loaded CLAUDE.md · .claude/settings.json · 14 skills</span>'
     : '<span class="dim">  CLAUDE.md introuvable (aucun agent ne le lisait de toute façon) · .claude/settings.json · 14 skills</span>');
