@@ -696,6 +696,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-cartbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5em 2ch; padding: .5em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--panel); }
 .wp-card.in-cart { border-color: var(--orange); }
 .wp-in { display: inline-flex; flex-wrap: wrap; gap: 1ch; align-items: center; }
+/* store : l'onglet Plateformes (plusieurs boutons par ligne) */
+.sto-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .35em 1ch; max-width: 40ch; }
+.sto-row.plat .sto-buy { min-width: 0; }
+.sto-row.plat.done b { color: var(--fg); }
+@media (max-width: 760px) { .sto-row.plat { grid-template-columns: minmax(0, 1fr); } .sto-acts { justify-content: flex-start; max-width: none; } }
 /* store : deux rayons */
 .sto-tabs { display: flex; gap: .6ch; margin: .1em 0 .3em; }
 .sto-tabs button { padding: .1em 1.4ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--dim); }
@@ -922,7 +927,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 <dialog id="store" aria-labelledby="sto-title">
   <p class="pk-title" id="sto-title">Store des agents</p>
   <p class="pk-sub" id="sto-sub"></p>
-  <div class="sto-tabs" role="tablist" aria-label="Rayons"><button type="button" role="tab" data-sto="ia" aria-selected="true">Agents IA</button><button type="button" role="tab" data-sto="pc" aria-selected="false">Matériel PC</button></div>
+  <div class="sto-tabs" role="tablist" aria-label="Rayons"><button type="button" role="tab" data-sto="ia" aria-selected="true">Agents IA</button><button type="button" role="tab" data-sto="plat" aria-selected="false">Plateformes</button><button type="button" role="tab" data-sto="pc" aria-selected="false">Matériel PC</button></div>
   <div id="sto-list"></div>
   <p class="st-desc" id="sto-msg" aria-live="polite"></p>
   <div class="pk-actions"><button type="button" class="primary" id="sto-close">Fermer</button></div>
@@ -1634,6 +1639,20 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...o } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
+function platInit() {                            // plateformes : une équipe chacune, les modèles achetés (et les sauvegardes d'avant)
+  if (!G.team) G.team = { mistral: G.ai === 'mistral' ? G.agents : 1, claude: G.own.claude ? G.agents : 0, codex: G.own.codex ? G.agents : 0 };
+  if (!G.models) G.models = { codestral: 1, small: 1, ministral: 1, ...(G.own.claude ? { sonnet: 1, haiku: 1, opus: 1 } : {}),
+    ...(G.own.codex ? { terra: 1, luna: 1, sol: 1 } : {}), ...(MODELS[G.model] ? { [G.model]: 1 } : {}) };
+  if (!G.pm) {
+    G.pm = { mistral: 'codestral', claude: 'opus', codex: G.own.codex ? 'sol' : 'terra' };
+    if (MODELS[G.model]?.prov === CLIS[G.ai].prov) G.pm[G.ai] = G.model;
+  }
+  G.bg = G.bg || {};
+  G.lead = Math.min(3, G.lead || 0);
+  G.agents = G.team[G.ai] || 1;
+  G.model = G.pm[G.ai];
+}
+platInit();
 const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
 function saveGame() {
   if (!IDLE) return;
@@ -2254,7 +2273,8 @@ const PRE_HELP_LINES = () => [
   [H(['    --model <nom>   ', 'org'], modelsOf('mistral').join(' · ')), '', 20],
   [H(['    --agents <n>    ', 'org'], `de 1 à ${AGENTS.length} agents, quel que soit le fournisseur`), '', 20],
   [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free)'), '', 20],
-  ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, Claude Code ou Codex'), '', 20]] : []),
+  ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
+    [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
@@ -2280,7 +2300,8 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['  model <nom>      ', 'org'], modelsOf().join(' · ')), '', 20],
   [H(['  cost             ', 'org'], 'la facture détaillée, aux tarifs réels de chaque modèle'), '', 20],
   [H(['  htop · atop      ', 'org'], 'voir la machine souffrir · q pour quitter'), '', 20],
-  ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, terminal, skills, orchestrateur, migration · la barre shippe toute seule'), '', 20]] : []),
+  ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, orchestrateur, modèles, skills, plateformes, matériel · la barre shippe toute seule'), '', 20],
+    [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
   [H(['  settings         ', 'org'], 'réglages : couleurs, taille, graphismes, nom (touche M)'), '', 20],
@@ -2842,7 +2863,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'plateformes', 'switch', 'bg', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3601,7 +3622,7 @@ function fetchLines() {                          // neofetch / fastfetch : la vr
     ['Uptime', `${d ? d + ' days, ' : ''}${h} hours, ${m} mins`], ['Packages', `${2150 + installed.size} (dpkg), ${num(nmCount())} (npm)`],
     ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', `${part('cpu').n} (${HW.threads}) @ ${part('cpu').ghz.toFixed(3)}GHz`],
     ['GPU', part('gpu').n], ['Memory', `${Math.round(s.used)}MiB / ${Math.round(HW.mem)}MiB`], ['Disk (/)', part('disk').n],
-    ['Agents', claudeOn ? `${panes.length} × ${cfg.model} via ${cli().label} (orchestrateur ${MODELS[LEAD_MODEL].name})` : 'aucun (ni claude, ni codex, ni mistral lancé)'],
+    ['Agents', claudeOn ? `${panes.length} × ${cfg.model} via ${cli().label} (orchestrateur ${MODELS[LEAD_MODEL].name})${bgTeams().map(t => ` + ${t.n} × ${t.model} via ${CLIS[t.ai].label} (arrière-plan)`).join('')}` : 'aucun (ni claude, ni codex, ni mistral lancé)'],
     '', ['errc', 'wrn', 'okc', 'cy', 'blu', 'mg', 'org', 'fgc'].map(c => tx('███', c)).join(''),
   ];
   const logo = [...SHADOW.V, '', '  VIBIAN'];
@@ -3711,14 +3732,16 @@ async function runCommand(raw) {
     setLead(arg);
     return shellPrint(H(['✓ ', 'okc'], `orchestrateur : ${arg}`));
   }
+  if (IDLE && ['plateformes', 'platforms', 'switch', 'bg'].includes(head)) return platCmd(head, arg);
   if (head === 'model' || head === '/model') {
     const key = modelsOf().find(k => arg.includes(k)), other = Object.keys(MODELS).find(k => arg.includes(k));
     if (!key && other) {                         // un modèle de l'autre fournisseur : pas sous ce CLI
       return shellPrint(H(['✗ ', 'errc'], `${MODELS[other].name} ne tourne pas sous ${cli().label}. Modèles disponibles : `, [modelsOf().join(' · '), 'org']));
     }
     if (!key) return shellPrint(H(['usage ', 'wrn'], `model ${modelsOf().join('|')}`));
+    if (IDLE && !G.models[key]) return shellPrint(H(['✗ ', 'errc'], `${MODELS[key].name} : accès non acheté (`, ['store', 'org'], ', section Modèles).'));
     cfg.model = key; saveCfg(); rebuild();
-    if (IDLE) { G.model = key; saveGame(); }
+    if (IDLE) { G.model = key; G.pm[G.ai] = key; saveGame(); }
     return shellPrint(H(['✓ ', 'okc'], `${panes.length}× ${key} (${MODELS[key].name} · ${price(MODELS[key].in)} / ${price(MODELS[key].out)} par M tokens)`));
   }
   if (head === 'status') {
@@ -3792,9 +3815,11 @@ function agentCmd(p, a) {
   if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(AGENT_USAGE(p));
   if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${VERSION} (${GAME}) · aucun vrai token n’est facturé`);
   if (IDLE && !G.own[p]) {                       // mode idle : il faut la licence (achetée au store)
-    const other = p === 'claude' ? 'codex' : 'claude';
-    return shellPrint(G.own[other] ? H(['✗ ', 'errc'], `${CLIS[p].label} : vous avez choisi ${CLIS[other].label}. La migration, c’était une seule fois (les agents ont la rancune tenace).`)
-      : H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée. Vous démarrez avec Mistral (la moins bien) : `, ['store', 'org'], ' pour migrer.'));
+    return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée. Vous démarrez avec Mistral (la moins bien) : `, ['store', 'org'], ', onglet Plateformes.'));
+  }
+  if (claudeOn && p !== provider && IDLE) {      // une seule plateforme dans l'onglet des agents, les autres en arrière-plan
+    return shellPrint(H(['✗ ', 'errc'], `${cli().label} occupe déjà l’onglet des agents. `, [`switch ${p}`, 'org'], ` pour passer ${CLIS[p].label} au premier plan, `,
+      [`bg ${p}`, 'org'], ' pour le lancer en arrière-plan (si le PC suit).'));
   }
   if (claudeOn && p !== provider) {              // un seul chef par terminal
     return shellPrint(H(['✗ ', 'errc'], `${cli().label} tourne déjà dans l’onglet ${provider}. Deux IA dans le même terminal, c’est la guerre. `,
@@ -3814,18 +3839,20 @@ function agentCmd(p, a) {
       return shellPrint(H(['error: ', 'errc'], other ? `${MODELS[other].name} n’est pas disponible dans ${CLIS[p].label}. ` : `modèle inconnu « ${m[1]} ». `,
         `Modèles : ${modelsOf(p).join(', ')}`));
     }
+    if (IDLE && !G.models[key]) return shellPrint(H(['error: ', 'errc'], `${MODELS[key].name} : accès non acheté. `, ['store', 'org'], ', section Modèles.'));
   }
   if (n) {
     const c = Number(n[1]);
     if (!Number.isInteger(c) || c < 1 || c > AGENTS.length) return shellPrint(H(['error: ', 'errc'], `--agents attend un nombre entre 1 et ${AGENTS.length}`));
-    if (IDLE && c > G.agents) return shellPrint(H(['error: ', 'errc'], `vous avez ${plural(G.agents, 'agent')}. Les autres s’achètent au `, ['store', 'org'], '.'));
+    if (IDLE && c > (G.team[p] || 1)) return shellPrint(H(['error: ', 'errc'], `vous avez ${plural(G.team[p] || 1, 'agent')} ${CLIS[p].label}. Les autres s’achètent au `, ['store', 'org'], '.'));
     cfg.agents = AGENTS.map((_, i) => i).slice(0, c);
   }
   setProvider(p);                                // orchestrateur, modèle par défaut et onglet du bon fournisseur
   if (key) cfg.model = key;
   if (IDLE) {                                    // mode idle : l'équipe achetée, l'orchestrateur s'il est acheté
-    G.ai = p;
-    G.model = cfg.model;
+    setMain(p);
+    if (key) { G.model = key; G.pm[p] = key; }
+    cfg.model = G.model;
     if (!n) cfg.agents = firstAgents(G.agents);
     cfg.lead = G.lead ? (cfg.lead === 'aucun' ? 'haut' : cfg.lead) : 'aucun';
   }
@@ -3962,7 +3989,7 @@ async function stopAgents(word) {                // le CLI s'arrête : retour au
   if (provider === 'mistral') shellPrint(H(['  ▲ ', 'wrn'], [`${agentName(pick(panes))} tente de redémarrer… plus de processus parent. Adieu.`, 'dim']));
   claudeOn = false;
   if (IDLE) { G.running = 0; saveGame(); }       // plus personne ne travaille : plus de production, plus de facture
-  for (const k of MON.procs.keys()) if (/^(lead|ollama|ag\d|c\d)/.test(k)) MON.procs.delete(k);   // le prochain CLI aura ses propres PID
+  for (const k of MON.procs.keys()) if (/^(lead|ollama|ag\d|c\d|bg-)/.test(k)) MON.procs.delete(k);   // le prochain CLI aura ses propres PID
   if (view === 'claude') switchTab('zsh');
   if (tabs.includes('claude')) tabs.splice(tabs.indexOf('claude'), 1);
   if (lastView === 'claude') lastView = '';
@@ -4085,13 +4112,13 @@ let bootT = Date.now() - ri(3 * 86400, 9 * 86400) * 1000;                       
    100 °C : le PC tombe et redémarre (BIOS compris). htop, sensors et free montrent tout ça. */
 const PARTS = {
   cpu: { name: 'Processeur', ic: '▦', t: [
-    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W · socket LGA1155', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', so: 'LGA1155', thr: 2, cap: 1, ghz: 2.4, tdp: 65, cost: 0 },
-    { n: 'Corps i5-3570 (Leboncoin)', s: '4 cœurs · 3,4 GHz · 77 W · socket LGA1155', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké. Même socket que le Céléri : il rentre dans la carte mère d’origine.', so: 'LGA1155', thr: 4, cap: 2.6, ghz: 3.4, tdp: 77, cost: 45 },
-    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W · socket RM4', d: 'Le raisin, c’est bon pour le code. Et pour le moral. Demande une carte mère RM4, donc de la DDR4.', so: 'RM4', thr: 12, cap: 5, ghz: 4.4, tdp: 65, cost: 260 },
-    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W · socket RM5', d: 'Du cache empilé jusqu’au plafond. Socket RM5 : nouvelle carte mère, et DDR5 obligatoire.', so: 'RM5', thr: 16, cap: 8, ghz: 5.05, tdp: 120, cost: 950 },
-    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W · socket LGA1851', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi. Socket LGA1851 : encore une carte mère.', so: 'LGA1851', thr: 24, cap: 12, ghz: 5.7, tdp: 250, cost: 3200 },
-    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W · socket RM5', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent. 170 W : il lui faut des VRM costauds.', so: 'RM5', thr: 32, cap: 17, ghz: 5.7, tdp: 170, cost: 9500 },
-    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W · socket sTF5', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable. Socket grand comme une tartine.', so: 'sTF5', thr: 128, cap: 34, ghz: 5.1, tdp: 350, cost: 32000 },
+    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W · socket LGA1155', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', so: 'LGA1155', thr: 2, cap: 1, perf: 1, ghz: 2.4, tdp: 65, cost: 0 },
+    { n: 'Corps i5-3570 (Leboncoin)', s: '4 cœurs · 3,4 GHz · 77 W · socket LGA1155', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké. Même socket que le Céléri : il rentre dans la carte mère d’origine.', so: 'LGA1155', thr: 4, cap: 2.6, perf: 1.25, ghz: 3.4, tdp: 77, cost: 45 },
+    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W · socket RM4', d: 'Le raisin, c’est bon pour le code. Et pour le moral. Demande une carte mère RM4, donc de la DDR4.', so: 'RM4', thr: 12, cap: 5, perf: 1.55, ghz: 4.4, tdp: 65, cost: 260 },
+    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W · socket RM5', d: 'Du cache empilé jusqu’au plafond. Socket RM5 : nouvelle carte mère, et DDR5 obligatoire.', so: 'RM5', thr: 16, cap: 8, perf: 1.8, ghz: 5.05, tdp: 120, cost: 950 },
+    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W · socket LGA1851', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi. Socket LGA1851 : encore une carte mère.', so: 'LGA1851', thr: 24, cap: 12, perf: 2, ghz: 5.7, tdp: 250, cost: 3200 },
+    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W · socket RM5', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent. 170 W : il lui faut des VRM costauds.', so: 'RM5', thr: 32, cap: 17, perf: 2.2, ghz: 5.7, tdp: 170, cost: 9500 },
+    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W · socket sTF5', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable. Socket grand comme une tartine.', so: 'sTF5', thr: 128, cap: 34, perf: 2.4, ghz: 5.1, tdp: 350, cost: 32000 },
   ] },
   mobo: { name: 'Carte mère', ic: '▧', t: [
     { n: 'H61 OEM', s: 'LGA1155 · DDR3 · VRM 95 W · 1 PCIe x16 · 0 M.2', d: 'Récupérée dans un PC de bureau de 2011. Deux slots de RAM, dont un qui marche quand on appuie dessus.', so: 'LGA1155', ddr: 3, vrm: 95, pcie: 1, m2: 0, cost: 0 },
@@ -4120,11 +4147,11 @@ const PARTS = {
     { n: 'Grappe de 4 GPU de datacenter', s: '4 × 80 Go · 1 400 W · 4 slots PCIe x16', cards: 4, d: 'Louée à l’heure, branchée sur une multiprise. Le relecteur local relit même les commentaires.', vram: 320, tdp: 1400, rev: .32, tok: .7, llm: 'relecteur-405b:fp8', cost: 42000 },
   ] },
   disk: { name: 'Stockage', ic: '▥', t: [
-    { n: 'Disque dur 500 Go', s: '5 400 tr/min · SATA II', d: 'Il gratte. Il a toujours gratté. npm install prend une nuit.', io: .8, boot: 1.7, dev: 'WDC WD5000AAKS 500GB 5400RPM (il gratte)', cost: 0 },
-    { n: 'SSD SATA 240 Go', s: 'marque inconnue · 500 Mo/s', d: 'Fabriqué par « Kingstone ». Démarrage deux fois plus rapide.', io: .92, boot: 1, dev: 'KINGSTONE SSD 240GB', cost: 35 },
+    { n: 'Disque dur 500 Go', s: '5 400 tr/min · SATA II', d: 'Il gratte. Il a toujours gratté. npm install prend une nuit.', io: .7, boot: 1.7, dev: 'WDC WD5000AAKS 500GB 5400RPM (il gratte)', cost: 0 },
+    { n: 'SSD SATA 240 Go', s: 'marque inconnue · 500 Mo/s', d: 'Fabriqué par « Kingstone ». Démarrage deux fois plus rapide.', io: .9, boot: 1, dev: 'KINGSTONE SSD 240GB', cost: 35 },
     { n: 'SSD NVMe 1 To', s: 'M.2 PCIe 4 · 7 000 Mo/s', m2: 1, d: 'node_modules s’installe avant que l’agent ait fini sa phrase.', io: 1, boot: .7, dev: 'NVMe VIBE 1TB PCIe4', cost: 130 },
-    { n: 'NVMe PCIe 5 4 To', s: 'M.2 PCIe 5 · 14 000 Mo/s · radiateur intégré', m2: 1, gen5: 1, d: 'Plus chaud que le processeur. Plus rapide aussi.', io: 1.05, boot: .55, dev: 'NVMe VIBE 4TB PCIe5', cost: 650 },
-    { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 4 M.2 PCIe 5 · 0 sauvegarde', m2: 4, gen5: 1, d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.12, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
+    { n: 'NVMe PCIe 5 4 To', s: 'M.2 PCIe 5 · 14 000 Mo/s · radiateur intégré', m2: 1, gen5: 1, d: 'Plus chaud que le processeur. Plus rapide aussi.', io: 1.06, boot: .55, dev: 'NVMe VIBE 4TB PCIe5', cost: 650 },
+    { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 4 M.2 PCIe 5 · 0 sauvegarde', m2: 4, gen5: 1, d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.15, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
   ] },
   psu: { name: 'Alimentation', ic: '≈', t: [
     { n: 'Alim no-name 300 W', s: '300 W (sur l’étiquette) · elle siffle', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien.', w: 230, lbl: 300, noname: 1, cost: 0 },
@@ -4160,13 +4187,15 @@ function pcLoad(o = {}) {
   const n = o.n ?? (claudeOn && mode !== 'gameover' && !paused ? panes.filter(p => p.state !== 'down').length : 0);
   const lead = o.lead ?? (claudeOn && !paused && leadOn() ? 1 : 0);
   const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0;
-  const demand = .08 + .5 * sp ** .6 * n + .4 * sp ** .6 * lead + .15 * gui + .3 * web + .6 * hog;
+  const bo = o.bg != null ? o : live && claudeOn && !paused && mode !== 'gameover' ? bgLoad() : { bg: 0, plats: 0 };
+  const bg = bo.bg || 0, plats = bo.plats || 0, all = n + bg;   // les équipes en arrière-plan chargent la machine aussi (et chaque CLI en plus)
+  const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog;
   const util = Math.min(1, demand / c.cap);
-  const used = 1 + 1.2 * sp ** .4 * n + 1.5 * lead + .5 * gui + 1.5 * web;   // Go
+  const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web;   // Go
   const swap = Math.max(0, used - r.go);
-  const gpuU = hog ? 1 : n && g.llm ? .95 : .04;
+  const gpuU = hog ? 1 : all && g.llm ? .95 : .04;
   const heat = c.tdp * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
-  return { n, demand, util, cap: c.cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
+  return { n, bg, plats, boost: c.perf ?? 1, demand, util, cap: c.cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
     tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, c.cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
 }
 function hwState(o = {}) {                       // le rendement de la machine : 1 = rien ne freine les agents ; 0 = PC à terre
@@ -4186,10 +4215,13 @@ function pcVerdict(s) {                          // « OK », « TENDU » ou « 
   const lvl = s.down || s.f < .5 || s.oom || s.temp >= 95 ? 'bad' : why.length ? 'mid' : 'ok';
   return { lvl, label: lvl === 'bad' ? 'À TERRE' : lvl === 'mid' ? 'TENDU' : 'OK', cls: lvl === 'bad' ? 'errc' : lvl === 'mid' ? 'wrn' : 'okc', why: why.join(' · ') || 'tout roule' };
 }
-function pcCheck(pc) {                           // la config tiendra-t-elle avec toute l'équipe au travail ?
-  const L = pcLoad({ pc, n: IDLE ? G.agents : panes.length, lead: IDLE ? G.lead : leadOn() ? 1 : 0, off: true });
-  return { draw: L.draw, psuW: L.psuW, temp: L.tTarget, psuKo: L.draw > L.psuW, hot: L.tTarget >= 90, melt: L.tTarget >= 100, slow: L.cpuF < 1, swap: L.swap > 0 };
+function pcCheck(pc, o = {}) {                   // la config tiendra-t-elle avec toute l'équipe (et l'arrière-plan) au travail ?
+  const b = o.bg != null ? o : bgLoad();
+  const L = pcLoad({ pc, n: IDLE ? G.agents : panes.length, lead: (IDLE ? G.lead : leadOn()) ? 1 : 0, bg: b.bg, plats: b.plats, off: true });
+  return { draw: L.draw, psuW: L.psuW, temp: L.tTarget, psuKo: L.draw > L.psuW, hot: L.tTarget >= 90, melt: L.tTarget >= 100, slow: L.cpuF < 1, swap: L.swap > 0,
+    oom: L.oom, oomP: L.used > L.ram + SWAP_GO + 3, used: L.used, ram: L.ram };
 }
+const pcSafe = k => !k.psuKo && !k.melt && !k.oomP;
 function pcDiag(pc = PC()) {                     // le verdict du vendeur
   const score = SLOTS.reduce((a, s) => a + pc[s] / (PARTS[s].t.length - 1), 0) / SLOTS.length;
   return score < .12 ? { label: 'patate', host: 'un PC trouvé sur le trottoir, promu serveur de prod' }
@@ -4421,6 +4453,11 @@ function procTemplates(load) {
         : `claude --agent ${agentName(p)} --worktree ~/code/${PROJ}-${agentName(p)} --dangerously-skip-permissions`,
         load === 'melt' ? 99 : provider === 'mistral' ? ri(5, 99) : 34, dead || down ? 0 : 610, dead || down ? 0 : 11300, 11, down ? { ag: 1, s: 'Z' } : ag);
       if (!dead && !down) (AGENT_CHILDREN[AGENTS.indexOf(p.a)] || []).forEach(([c, cpu, res, virt, thr, u], j) => add(`c${p.n}-${j}`, u || 'dev', c, cpu, res, virt, thr, { ag: 1 }));
+    });
+    if (!dead) bgTeams().forEach(t => {          // les plateformes en arrière-plan : une session tmux détachée chacune
+      add('bg-' + t.ai, 'dev', `tmux new-session -d -s ${t.ai} ${t.ai} --agents ${t.n} --model ${MODELS[t.model].id} (arrière-plan)`, 2, 38, 900, 2, { ag: 1 });
+      for (let i = 1; i <= t.n; i++) add(`bg-${t.ai}-${i}`, 'dev', t.ai === 'codex' ? `codex exec --model ${MODELS[t.model].id} --sandbox danger-full-access --cd ~/code/${PROJ}-bg${i}`
+        : t.ai === 'mistral' ? `vibe --agent ${t.model}-bg${i} --model ${MODELS[t.model].id} --no-sync --yolo` : `claude --agent ${t.model}-bg${i} --dangerously-skip-permissions`, 30, 600, 11300, 11, { ag: 1 });
     });
     // les agents ont trouvé la carte graphique : un modèle local relit leur code
     if (!dead && part('gpu').llm) add('ollama', 'ollama', `/usr/local/bin/ollama runner --model ${part('gpu').llm} --ctx-size 32768 --n-gpu-layers 65`, 28, Math.round(part('gpu').vram * 85), 26000, 23, { ag: 1 });
@@ -5693,7 +5730,7 @@ function webStoreAI() {
   let cat = '', out = '';
   if (!IDLE) out = '<p class="wp-band">Mode libre (<b>?idle=0</b>) : tout est déjà débloqué. Le store n’ouvre qu’en mode idle.</p>';
   else {
-    aiItems().forEach(it => {
+    webItems().forEach(it => {
       if (it.cat !== cat) { out += `${cat ? '</div>' : ''}<h2>${esc(cat = it.cat)}</h2><div class="wp-grid">`; }
       const st = itemState(it);
       out += `<div class="wp-card${it.done ? ' own' : ''}"><span class="nm">${esc(it.name)}${it.lvl ? ` <span class="dim">· ${esc(it.lvl)}</span>` : ''}</span>`
@@ -5859,7 +5896,7 @@ function makeBrowser() {
     if (seen !== cartVer && /^https?:\/\/(www\.)?matos\.vibe/i.test(url)) return draw(true);   // le panier a changé ailleurs (le store du jeu)
     doc.querySelectorAll('[data-live]').forEach(n => { const f = WEB_LIVE[n.dataset.live]; if (f) { const h = f(); if (n.innerHTML !== h) n.innerHTML = h; } });
     doc.querySelectorAll('[data-buy]').forEach(b => {
-      const it = aiItems().find(x => x.id === b.dataset.buy);
+      const it = webItems().find(x => x.id === b.dataset.buy);
       if (it) { const dis = itemState(it).dis; if (b.disabled !== dis) { b.disabled = dis; b.textContent = it.excl || it.need ? itemState(it).t : dis ? 'Pas assez d’argent' : 'Acheter'; } }
     });
     cartLive(doc);
@@ -6788,26 +6825,52 @@ addEventListener('resize', () => {
    Chaque agent actif produit du travail (selon son modèle et la vitesse du terminal) et consomme des tokens, facturés au
    vrai tarif ; des bugs font reculer la barre, des agents plantent puis redémarrent. Barre pleine : ship automatique, qui
    rapporte la valeur du projet moins la facture depuis le ship précédent. Hors ligne (ou onglet masqué), le même calcul en
-   moyenne, plafonné à 4 h. Équilibrage simulé : premier ship en ~50 s, migration vers Claude ou Codex vers 25 min. */
+   moyenne, plafonné à 4 h. Équilibrage simulé (sim_prog) : premier ship en ~35 s, orchestrateur vers 27 min, Codex vers 1 h, Claude vers 1 h 35, fin vers 5 h. */
 const ECO = {
   q: { fable: 2.4, opus: 2, sonnet: 1.6, haiku: 1.1, astra: 2.3, sol: 1.7, terra: 1.3, luna: .8, large: 1, codestral: .8, small: .6, ministral: .5 },   // travail / s / agent à ×1
   ai: { mistral: { bug: .03, crash: .03, down: 3.2, fail: .2 }, claude: { bug: .008, crash: .004, down: 6, fail: 0 }, codex: { bug: .01, crash: .005, down: 6, fail: 0 } },
   tin: 20000, tout: 1500, leadShare: .35, bugLoss: .06, offlineMax: 4 * 3600,   // tokens / s / agent à ×1 (ils relisent tout le dépôt, tout le temps)
   term: [.5, .75, 1, 1.5, 2, 3, 5, 8],
-  termCost: [12, 40, 130, 450, 1800, 7500, 30000],
+  termCost: [15, 60, 240, 900, 4000, 25000, 300000],
   termName: ['terminal IA lent', 'SSD d’occasion', 'fibre optique', 'NVMe', 'overclocké', 'refroidi à l’azote', 'quantique (bêta)', 'vendredi 17 h'],
-  agentCost: n => 15 * 2.15 ** (n - 1),          // prix du (n+1)e agent
+  agentCost: n => 20 * 2.5 ** (n - 1),          // prix du (n+1)e agent d'une plateforme (× le facteur de la plateforme)
+  leadCost: [350, 8000, 150000],                  // les trois niveaux d'orchestrateur
   work: n => 12 * 1.1 ** n,                      // taille du projet n (unités de travail)
-  value: n => 8 * 1.112 ** n,                    // ce qu'il rapporte une fois en production
+  value: n => 8 * 1.1 ** n,                      // ce qu'il rapporte une fois en production
 };
+/* les plateformes : une au premier plan (l'onglet des agents), les autres en arrière-plan si le PC suit ; chacune garde son équipe */
+const PLAT_ORDER = ['mistral', 'codex', 'claude'];
+const PLATS = {
+  mistral: { cost: 0, base: 'codestral', fac: 1, desc: 'La plateforme du départ. Hallucine, se disperse, plante, redémarre. Gratuite, et ça se voit.' },
+  codex: { cost: 1500, base: 'terra', fac: 1.6, desc: 'GPT-6.1 Terra pour commencer : 1,6× plus productif que Codestral, trois fois moins de bugs, six fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
+  claude: { cost: 12000, base: 'opus', fac: 2, desc: 'Claude Opus 5.5 d’emblée : 2,5× plus productif que Codestral, quatre fois moins de bugs, sept fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
+};
+const MODEL_UP = { large: 300, sol: 10000, astra: 250000, fable: 300000 };   // les modèles à acheter ; les autres viennent avec la licence
+/* l'orchestrateur : trois niveaux, chacun se sent ; le troisième coordonne aussi les équipes en arrière-plan */
+const LEAD_TIER = [
+  { name: 'aucun', mult: n => 1 / (1 + .12 * skillMult('coord') * (n - 1)), bug: 1, lead: 0 },
+  { name: 'Orchestrateur', mult: n => 1 + .08 * (n - 1), bug: .75, lead: 1,
+    desc: 'Coordonne l’équipe : fini les pertes de coordination, +8 % de travail par agent, −25 % de bugs.' },
+  { name: 'Orchestrateur en plan mode', mult: n => 1.2 * (1 + .09 * (n - 1)), bug: .6, lead: 1.3,
+    desc: 'Il planifie avant de déléguer : +20 % de travail, +9 % par agent, −40 % de bugs. La planification se facture : +30 % de tokens d’orchestrateur.' },
+  { name: 'Orchestrateur multi-plateforme', mult: n => 1.3 * (1 + .1 * (n - 1)), bug: .5, lead: 1.6,
+    desc: 'Coordonne aussi les équipes en arrière-plan : elles gagnent les bonus d’orchestration. +30 % de travail, +10 % par agent, −50 % de bugs, et une facture d’orchestrateur à l’avenant.' },
+];
 const SKILLS = {
-  tests: { name: 'tests unitaires', cost: 50, bug: .7, desc: '−30 % de bugs. Les agents écrivent enfin des tests (qui passent, au moins).' },
-  errors: { name: 'gestion des erreurs', cost: 70, crash: .65, desc: '−35 % de crashs : des try / catch, avec de vrais messages dedans.' },
-  watchdog: { name: 'watchdog', cost: 150, down: .5, desc: 'Un agent planté redémarre deux fois plus vite.' },
-  review: { name: 'revue de code', cost: 300, bug: .65, desc: '−35 % de bugs. Un agent relit les diffs des autres (en diagonale).' },
-  context: { name: 'compaction du contexte', cost: 1500, crash: .6, tok: .8, desc: '−40 % de crashs et −20 % de tokens consommés.' },
-  ci: { name: 'intégration continue', cost: 4000, bug: .6, fail: .25, desc: '−40 % de bugs, et quatre fois moins de déploiements ratés.' },
-  claudemd: { name: 'lire CLAUDE.md (pour de vrai)', cost: 15000, bug: .75, crash: .75, desc: '−25 % de bugs et de crashs. Personne n’y croyait.' },
+  tests: { name: 'tests unitaires', cost: 60, bug: .7, desc: '−30 % de bugs. Les agents écrivent enfin des tests (qui passent, au moins).' },
+  errors: { name: 'gestion des erreurs', cost: 90, crash: .65, desc: '−35 % de crashs : des try / catch, avec de vrais messages dedans.' },
+  watchdog: { name: 'watchdog', cost: 200, down: .5, desc: 'Un agent planté redémarre deux fois plus vite.' },
+  cache: { name: 'prompt caching', cost: 450, tin: .6, desc: '−40 % de tokens d’entrée facturés : le dépôt est relu depuis le cache. Il est toujours relu, hein.' },
+  review: { name: 'revue de code', cost: 700, bug: .65, desc: '−35 % de bugs. Un agent relit les diffs des autres (en diagonale).' },
+  hooks: { name: 'hooks pre-commit', cost: 1200, fail: .6, bug: .9, desc: 'Un lint avant chaque commit : −40 % de déploiements ratés, −10 % de bugs. Les agents ont découvert --no-verify, mais pas tous.' },
+  worktrees: { name: 'worktrees parallèles', cost: 1800, coord: .5, desc: 'Chaque agent dans son worktree : deux fois moins de pertes de coordination sans orchestrateur.' },
+  context: { name: 'compaction du contexte', cost: 3000, crash: .6, tok: .8, desc: '−40 % de crashs et −20 % de tokens consommés.' },
+  mcp: { name: 'serveurs MCP', cost: 8000, work: 1.12, tin: 1.1, desc: '+12 % de travail : les agents branchent tout sur tout. Un peu plus de tokens d’entrée.' },
+  sentry: { name: 'monitoring en prod', cost: 15000, loss: .6, desc: 'Les bugs sont repérés plus tôt : chaque bug coûte 40 % de progression en moins.' },
+  ci: { name: 'intégration continue', cost: 30000, bug: .6, fail: .25, desc: '−40 % de bugs, et quatre fois moins de déploiements ratés.' },
+  flags: { name: 'feature flags', cost: 60000, desc: 'Un déploiement raté repart de 80 % au lieu de 50 % : on coupe le flag et on fait comme si de rien n’était.' },
+  subagents: { name: 'sous-agents', cost: 300000, work: 1.2, tin: 1.25, desc: '+20 % de travail : chaque agent délègue à des sous-agents, qui délèguent aussi. La facture adore.' },
+  claudemd: { name: 'lire CLAUDE.md (pour de vrai)', cost: 1000000, bug: .75, crash: .75, desc: '−25 % de bugs et de crashs. Personne n’y croyait.' },
 };
 const ECO_CRASH = ['Context window overflow : un million de tokens, pas un de plus', 'Rate limit 429 : l’API exige une pause',
   'Boucle infinie d’appels d’outils, coupée au 400e', 'Le worktree est en conflit avec lui-même', 'Timeout : le test e2e attend encore le bouton',
@@ -6825,17 +6888,59 @@ const fmtEta = s => s < 60 ? `${s} s` : s < 3600 ? `${Math.floor(s / 60)} min ${
 const skillMult = k => Object.keys(G.sk).reduce((m, s) => m * (SKILLS[s]?.[k] ?? 1), 1);
 const termIdx = () => SPEEDS.indexOf(ECO.term[G.term]);
 const firstAgents = n => AGENTS.map((_, i) => i).slice(0, n);
-function ecoRates(n = panes.length || G.agents, off = false) {  // par seconde, pour la config en cours (off : hors ligne)
-  const a = ECO.ai[provider], tok = skillMult('tok'), m = MODELS[cfg.model], lm = MODELS[LEAD_MODEL];
-  const hw = IDLE ? hwState(off ? { n, lead: leadOn() ? 1 : 0, off: true } : {}) : { f: 1, rev: 1, tok: 1, down: false };
-  const sp = speed * hw.f, tk = tok * hw.tok;    // le matériel freine le travail, les bugs et les tokens (pas les crashs)
+const leadLv = () => !leadOn() ? 0 : IDLE ? Math.max(1, Math.min(3, G.lead || 1)) : 1;
+function bgTeams() {                             // les plateformes qui tournent en arrière-plan avec la session : [{ ai, n, model }]
+  if (!IDLE || !G.bg) return [];
+  return PLAT_ORDER.filter(p => G.bg[p] && G.own[p] && p !== G.ai && G.team[p] > 0).map(p => ({ ai: p, n: G.team[p], model: G.pm[p] }));
+}
+const bgLoad = () => { const t = bgTeams(); return { bg: t.reduce((a, x) => a + x.n, 0), plats: t.length }; };
+const bgLv = () => G.lead >= 3 && leadOn() ? 3 : 0;   // seul l'orchestrateur multi-plateforme coordonne l'arrière-plan
+// par seconde et par agent, pour une équipe (off : hors ligne) ; o.ai, o.model, o.lv : une autre équipe ; o.hw : l'état du PC déjà calculé
+function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
+  const ai = o.ai || provider, model = o.model || cfg.model, lv = o.lv ?? leadLv(), T = LEAD_TIER[lv];
+  const a = ECO.ai[ai], m = MODELS[model], lm = MODELS[CLIS[ai].lead];
+  const hw = o.hw || (IDLE ? hwState(off ? { n, lead: lv ? 1 : 0, ...bgLoad(), off: true } : {}) : { f: 1, rev: 1, tok: 1, boost: 1, down: false });
+  const sp = speed * hw.f, tk = skillMult('tok') * hw.tok;   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
+  const tin = ECO.tin * sp * tk * skillMult('tin'), tout = ECO.tout * sp * tk, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
-    per: (ECO.q[cfg.model] ?? 1) * sp * (leadOn() ? 1 + .03 * (n - 1) : 1 / (1 + .1 * (n - 1))),   // travail d'un agent actif
-    crash: a.crash * skillMult('crash') * speed, down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev, fail: a.fail * skillMult('fail'),
-    tin: ECO.tin * sp * tk, tout: ECO.tout * sp * tk,
-    cost: (ECO.tin * m.in + ECO.tout * m.out) / 1e6 * sp * tk, lead: leadOn() ? ECO.leadShare * (ECO.tin * lm.in + ECO.tout * lm.out) / 1e6 * sp * tk : 0,
+    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work'),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
+    crash: a.crash * skillMult('crash') * speed, down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug, fail: a.fail * skillMult('fail'),
+    tin, tout, cost: (tin * m.in + tout * m.out) / 1e6, lv, leadK, lead: leadK * (tin * lm.in + tout * lm.out) / 1e6,
     hw,
   };
+}
+function bgRates(t, hw) { return ecoRates(t.n, !hw, { ai: t.ai, model: t.model, lv: bgLv(), hw, bgTeam: 1 }); }
+const bugLossNow = () => ECO.bugLoss * skillMult('loss');
+function ecoFlow() {                             // progression nette par seconde, toutes équipes (l'ETA du tableau de bord)
+  const w = ECO.work(shipped), r = ecoRates(), loss = bugLossNow() * w;
+  if (!claudeOn) return 0;
+  let net = (r.per - r.bug * loss) * panes.filter(p => p.state !== 'down').length;
+  bgTeams().forEach(t => { const b = bgRates(t, r.hw), up = 1 / (1 + b.crash * b.down); net += (b.per - b.bug * loss) * t.n * up; });
+  return net;
+}
+function flowTotal(bgSet = G.bg) {               // toutes équipes, avec cet arrière-plan : % du projet en cours par minute, $ de tokens par minute
+  const saved = G.bg;
+  G.bg = bgSet;
+  try {
+    const n = G.agents, hw = hwState({ n, lead: leadLv() ? 1 : 0, ...bgLoad(), off: true }), w = ECO.work(shipped), loss = bugLossNow() * w;
+    const main = ecoRates(n, true, { hw });
+    let net = 0, cost = main.lead, own = 0;
+    [{ k: n, r: main, m: 1 }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))].forEach(({ k, r, m }) => {
+      const up = 1 / (1 + r.crash * r.down), x = (r.per - r.bug * loss) * k * up;
+      net += x; cost += r.cost * k * up;
+      if (m) own = x;
+    });
+    return { pct: net * 60 / w * 100, usd: cost * 60, own: own * 60 / w * 100, f: hw.f };
+  } finally { G.bg = saved; }
+}
+function teamFlow(p) {                           // ce qu'une plateforme change au total (le PC partagé ralentit parfois tout le monde)
+  const now = flowTotal();
+  const share = (a, b) => b > 0 ? a / b * 100 : 0;
+  if (p === G.ai) return { pct: now.own, usd: now.usd, main: 1, rel: share(now.own, now.pct) };
+  const other = { ...G.bg };
+  if (G.bg[p]) delete other[p]; else other[p] = 1;
+  const alt = flowTotal(other), on = !!G.bg[p], base = on ? alt : now, d = on ? now.pct - alt.pct : alt.pct - now.pct;
+  return { pct: d, rel: share(d, base.pct), usd: on ? now.usd - alt.usd : alt.usd - now.usd, slows: (on ? now.f : alt.f) < (on ? alt.f : now.f) - .02 };
 }
 function idleApply() {                           // la config du jeu suit la partie sauvegardée
   setProvider(G.ai);
@@ -6847,6 +6952,7 @@ function idleApply() {                           // la config du jeu suit la par
 }
 function resetGame() {
   G = G_DEF();
+  platInit();
   cartClear();
   lastOrder = null;
   setScore(0);
@@ -6862,9 +6968,15 @@ function ecoLive(dt, now) {
   const r = ecoRates(), act = panes.filter(p => p.state !== 'down');
   G.prog += r.per * act.length * dt / ECO.work(shipped);
   if (act.length) bill(cfg.model, r.tin * act.length * dt, r.tout * act.length * dt);   // bill() ajoute à la facture du prochain ship
-  if (leadOn()) bill(LEAD_MODEL, r.tin * ECO.leadShare * dt, r.tout * ECO.leadShare * dt);
+  if (r.leadK) bill(LEAD_MODEL, r.tin * r.leadK * dt, r.tout * r.leadK * dt);
   act.forEach(p => { if (chance(r.crash * dt)) ecoCrash(p, now, r.down); });
   if (act.length && chance(r.bug * act.length * dt)) ecoBug();
+  bgTeams().forEach(t => {                       // les équipes en arrière-plan : la même économie, en moyenne (pas de volets à l'écran)
+    const b = bgRates(t, r.hw), up = 1 / (1 + b.crash * b.down);
+    G.prog += b.per * t.n * up * dt / ECO.work(shipped);
+    bill(t.model, b.tin * t.n * up * dt, b.tout * t.n * up * dt);
+    if (chance(b.bug * t.n * up * dt)) ecoBug(CLIS[t.ai].label);
+  });
   if (G.prog >= 1) autoShip();
 }
 function ecoCrash(p, now, down, why) {
@@ -6886,20 +6998,20 @@ function ecoRestart(p, now) {                    // Claude Code, Codex (Mistral 
   ping(p);
   updateFoot();
 }
-function ecoBug() {
-  const loss = Math.min(G.prog, ECO.bugLoss), why = pick(ECO_BUGS), p = pick(panes.filter(x => x.state !== 'down'));
+function ecoBug(src) {                           // src : une équipe en arrière-plan (pas de volet à l'écran)
+  const loss = Math.min(G.prog, bugLossNow()), why = pick(ECO_BUGS), p = src ? null : pick(panes.filter(x => x.state !== 'down'));
   G.prog -= loss;
   if (p) { emit(p, { k: 'done', c: 'errc', t: `✗ Bug : ${why} · rollback (−${Math.round(loss * 100)} %)` }, true); ping(p); }
-  if (leadOn()) leadLog(H(['✗ ', 'errc'], `Bug: ${why}. Rolling back.`));
-  hudNote(`✗ bug : ${why} · −${Math.round(loss * 100)} %`, 'bug');
+  if (leadOn()) leadLog(H(['✗ ', 'errc'], `Bug${src ? ` (${src}, background)` : ''}: ${why}. Rolling back.`));
+  hudNote(`✗ bug${src ? ` (${src}, en arrière-plan)` : ''} : ${why} · −${Math.round(loss * 100)} %`, 'bug');
 }
 function autoShip() {                            // barre pleine : en production
   const v = verStr();
   if (chance(ecoRates().fail)) {                 // Mistral : un déploiement sur cinq rate
-    const why = pick(DEPLOY_FAIL);
-    G.prog = .5;
+    const why = pick(DEPLOY_FAIL), back = G.sk.flags ? .8 : .5;
+    G.prog = back;
     panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'errc', t: `✗ Déploiement de ${PROJ}@${v} raté : ${why}` }, true); });
-    return hudNote(`✗ déploiement raté : ${why} · retour à 50 %`, 'bug');
+    return hudNote(`✗ déploiement raté : ${why} · retour à ${back * 100} %${G.sk.flags ? ' (feature flag coupé)' : ''}`, 'bug');
   }
   const val = ECO.value(shipped), cost = G.bill, net = val - cost;
   Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, prog: 0 });
@@ -6918,23 +7030,25 @@ function ecoShipCmd() {                          // npm run ship à la main : la
 }
 /* onglet masqué ou page fermée : la même économie, en moyenne (pas de volets, pas de tirage visuel) */
 function ecoOffline(secs, session = true) {
-  const n = G.agents, r = ecoRates(n, true), up = 1 / (1 + r.crash * r.down);
-  if (r.hw.down) {                               // la config ne tient pas : le PC est tombé juste après le départ
+  const n = G.agents, lv = leadLv(), hw = hwState({ n, lead: lv ? 1 : 0, ...bgLoad(), off: true });
+  if (hw.down) {                                 // la config ne tient pas : le PC est tombé juste après le départ
     G.running = 0;
-    return { ships: 0, gain: 0, cost: 0, fails: 0, down: r.hw.draw > r.hw.psuW ? `alimentation dépassée : ${Math.round(r.hw.draw)} W pour ${r.hw.psuW} W` : 'surchauffe' };
+    return { ships: 0, gain: 0, cost: 0, fails: 0, down: hw.draw > hw.psuW ? `alimentation dépassée : ${Math.round(hw.draw)} W pour ${hw.psuW} W` : 'surchauffe' };
   }
-  const work = r.per * n * up, bugs = r.bug * n * up, costS = r.cost * n * up + r.lead;
-  const out = { ships: 0, gain: 0, cost: 0, fails: 0 };
+  const main = ecoRates(n, true, { hw }), teams = [{ k: n, r: main }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))];
+  let work = 0, bugs = 0, costS = main.lead;
+  teams.forEach(({ k, r }) => { const up = 1 / (1 + r.crash * r.down); work += r.per * k * up; bugs += r.bug * k * up; costS += r.cost * k * up; });
+  const out = { ships: 0, gain: 0, cost: 0, fails: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5;
   const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; if (session) { usage.usd += c; } };
   let t = secs;
   while (t > 0 && out.ships < 10000) {
-    const w = ECO.work(shipped), net = work - bugs * ECO.bugLoss * w;
+    const w = ECO.work(shipped), net = work - bugs * loss * w;
     if (net <= 0) { pay(t); break; }
     const need = (1 - G.prog) * w / net;
     if (need > t) { G.prog += net * t / w; pay(t); break; }
     pay(need);
     t -= need;
-    if (chance(r.fail)) { G.prog = .5; out.fails++; continue; }
+    if (chance(main.fail)) { G.prog = back; out.fails++; continue; }
     const val = ECO.value(shipped);
     Object.assign(G, { money: G.money + val - G.bill, earned: G.earned + val, bill: 0, prog: 0 });
     out.gain += val;
@@ -6982,7 +7096,7 @@ function hudNote(t, cls) {
 function renderHud() {
   if (!IDLE) return;
   const pct = Math.max(0, Math.min(1, G.prog)), r = ecoRates(), w = ECO.work(shipped), pv = pcVerdict(r.hw);
-  const act = claudeOn ? panes.filter(p => p.state !== 'down').length : 0, net = (r.per - r.bug * ECO.bugLoss * w) * act;
+  const net = ecoFlow(), bgT = bgTeams(), bgS = bgT.length ? ` + ${bgT.map(t => `${t.n} ${t.ai}`).join(' + ')} en arrière-plan` : '';
   const next = ECO.value(shipped) - G.bill;
   $('#hud-money').textContent = usd(G.money);
   hudEl.querySelector('.hud-money').classList.toggle('neg', G.money < 0);
@@ -6992,7 +7106,7 @@ function renderHud() {
   $('#hud-pct').textContent = Math.floor(pct * 100) + ' %';
   $('#hud-eta').textContent = !claudeOn ? 'agents à l’arrêt' : paused ? 'en pause' : mode !== 'idle' ? '' : net > 0 ? `≈ ${fmtEta(Math.ceil((1 - pct) * w / net))}` : 'bloqué';
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
-    : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
+    : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
 }
 let ecoLast = performance.now(), ecoSaved = 0;
@@ -7016,25 +7130,29 @@ setInterval(ecoTick, 250);
 addEventListener('pagehide', saveGame);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
 
-/* le store : agents, terminal, skills, orchestrateur, migration (Claude Code ou Codex, au choix, une fois) */
+/* le store : trois onglets. Agents IA (équipe, orchestrateur, terminal, modèles, skills), Plateformes (licences, premier plan, arrière-plan), Matériel PC */
 const storeDlg = $('#store');
 let stoTab = 'ia';                               // rayon affiché : agents IA ou matériel PC
 function aiItems() {
-  const it = [];
-  it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: 'Agent supplémentaire', lvl: `${G.agents}/8`, done: G.agents >= 8, cost: ECO.agentCost(G.agents),
-    desc: `Plus de bras, plus de tokens${G.lead ? '' : ', et un peu plus de pertes de coordination sans orchestrateur'}.` });
-  it.push({ cat: 'Équipe', id: 'lead', ic: '✱', name: 'Orchestrateur', done: !!G.lead, cost: 500, need: G.agents < 3 ? 'dès 3 agents' : '',
-    desc: `Coordonne l’équipe : plus de pertes de coordination, et même +3 % par agent. Consomme des tokens au tarif de ${MODELS[CLIS[G.ai].lead].name}.` });
+  const it = [], lv = Math.min(3, G.lead || 0), T = LEAD_TIER[lv + 1], C = CLIS[G.ai];
+  it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: `Agent ${C.label} supplémentaire`, lvl: `${G.agents}/8`, done: G.agents >= 8, cost: agentPrice(G.ai),
+    desc: `Plus de bras, plus de tokens${lv ? '' : ', et plus de pertes de coordination sans orchestrateur'}. Chaque plateforme a sa propre équipe (onglet Plateformes).` });
+  it.push({ cat: 'Équipe', id: 'lead', ic: '✱', name: (T || LEAD_TIER[3]).name, lvl: `niveau ${lv}/3`, done: lv >= 3, cost: ECO.leadCost[lv] ?? 0,
+    need: lv === 0 && G.agents < 3 ? 'dès 3 agents' : lv === 1 && G.agents < 5 ? 'dès 5 agents' : lv === 2 && PLAT_ORDER.filter(p => G.own[p]).length < 2 ? '2 plateformes' : '',
+    desc: (T || LEAD_TIER[3]).desc + (lv === 0 ? ` Consomme des tokens au tarif de ${MODELS[C.lead].name}.` : '') });
   it.push({ cat: 'Terminal', id: 'term', ic: '»', name: 'Terminal plus rapide', lvl: `×${frx(ECO.term[G.term])}`, done: G.term >= ECO.term.length - 1, cost: ECO.termCost[G.term],
     desc: G.term >= ECO.term.length - 1 ? 'Plus rapide que ça, on est déjà lundi.'
       : `${ECO.termName[G.term + 1]} : ×${frx(ECO.term[G.term])} → ×${frx(ECO.term[G.term + 1])}. Tout va plus vite, la facture par seconde aussi.` });
+  PLAT_ORDER.filter(p => G.own[p]).forEach(p => modelsOf(p).filter(k => MODEL_UP[k]).sort((x, y) => MODEL_UP[x] - MODEL_UP[y]).forEach(k => {
+    const m = MODELS[k], b = MODELS[PLATS[p].base];
+    it.push({ cat: 'Modèles', id: 'model:' + k, ic: CLIS[p].glyph, name: `${m.name} (${CLIS[p].label})`, done: !!G.models[k], cost: MODEL_UP[k],
+      desc: `${frx((ECO.q[k] / ECO.q[PLATS[p].base]).toFixed(2))}× le travail de ${b.name.replace('Claude ', '')}, à ${price(m.in)} / ${price(m.out)} par M tokens${m.tag ? `, ${m.tag}` : ''}. Sélectionné dès l’achat (commande model pour revenir en arrière).` });
+  }));
   Object.entries(SKILLS).forEach(([id, s]) => it.push({ cat: 'Skills', id, ic: '◇', name: `Skill : ${s.name}`, done: !!G.sk[id], cost: s.cost, desc: s.desc }));
-  it.push({ cat: 'Migration (un seul choix)', id: 'claude', ic: '✻', name: 'Migrer vers Claude Code', done: !!G.own.claude, cost: 600, excl: G.own.codex ? 'codex' : '',
-    desc: 'Agents Opus 5.5 : 2,5× plus productifs que Codestral, 4× moins de bugs, 7× moins de crashs. Opus coûte $4 / $20 par M tokens.' });
-  it.push({ cat: 'Migration (un seul choix)', id: 'codex', ic: '◆', name: 'Migrer vers Codex', done: !!G.own.codex, cost: 500, excl: G.own.claude ? 'claude' : '',
-    desc: 'Agents GPT-6.2 Sol : 2× plus productifs, deux fois moins chers que Claude ($2 / $10 par M), un peu moins fiables.' });
   return it;
 }
+const webItems = () => [...aiItems(), ...PLAT_ORDER.filter(p => PLATS[p].cost).map(p => ({ cat: 'Plateformes', id: p, ic: CLIS[p].glyph, name: `Licence ${CLIS[p].label}`,
+  done: !!G.own[p], cost: PLATS[p].cost, desc: PLATS[p].desc + ' Premier plan, arrière-plan : dans le store du jeu (B), onglet Plateformes.' }))];
 function pcItems() {                             // matériel : par emplacement, la pièce du panier, sinon la prochaine qui rentre (matos.vibe a tout le catalogue)
   return SLOTS.map(slot => {
     const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], base = { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, pc: 1, ic: P.ic };
@@ -7045,15 +7163,18 @@ function pcItems() {                             // matériel : par emplacement,
       bad: blk ? `${blk.msg} ${blk.hint}` : '', warn: blk || inCart ? '' : partWarn(slot, t) };
   });
 }
-function storeItems() { return stoTab === 'pc' ? pcItems() : aiItems(); }
+function storeItems() { return stoTab === 'pc' ? pcItems() : stoTab === 'plat' ? [] : aiItems(); }
+let platSeen = '';
 function itemState(it) {
   if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id.startsWith('pc:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
 }
 const storeSub = () => stoTab === 'pc' ? `Trésorerie : $${usd(G.money)} · PC « ${pcDiag().label} » : ${pcLine()}`
+  : stoTab === 'plat' ? `Trésorerie : $${usd(G.money)} · premier plan : ${CLIS[G.ai].label} (${plural(G.agents, 'agent')})`
+    + (bgTeams().length ? ` · arrière-plan : ${bgTeams().map(t => `${CLIS[t.ai].label} (${t.n})`).join(', ')}` : '')
   : `Trésorerie : $${usd(G.money)} · ${plural(G.agents, 'agent')} ${CLIS[G.ai].label} · ${ECO.termName[G.term]} ×${frx(ECO.term[G.term])} · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''}`;
 function renderStore(focusId) {
   let cat = '';
@@ -7065,7 +7186,8 @@ function renderStore(focusId) {
       + `${it.bad ? `<br><span class="errc">${esc(it.bad)}</span>` : ''}${it.warn ? `<br><span class="wrn">${esc(it.warn)}</span>` : ''}</span>`
       + `<button type="button" class="sto-buy ${st.cls}" data-buy="${it.id}"${st.dis ? ' disabled' : ''} aria-label="${esc(it.name)} : ${esc(st.t)}">${esc(st.t)}</button></div>`;
   }).join('');
-  $('#sto-list').innerHTML = stoTab !== 'pc' ? rows
+  if (stoTab === 'plat') platSeen = platSig();
+  $('#sto-list').innerHTML = stoTab === 'plat' ? platHtml() : stoTab !== 'pc' ? rows
     : '<p class="dim sto-hint">Une pièce qui ne rentre pas ne passe pas : le processeur suit le socket de la carte mère, la RAM sa DDR, et le tout '
       + 'doit tenir dans l’alim. Ajoutez au panier, puis validez la commande. Catalogue complet : matos.vibe, dans Firefaux.</p>'
       + pwGauge() + cartHtml('sto-buy') + rows;
@@ -7074,6 +7196,7 @@ function renderStore(focusId) {
 }
 function refreshStore() {                        // l'argent monte pendant qu'on regarde : boutons à jour, sans perdre le focus
   $('#sto-sub').textContent = storeSub();
+  if (stoTab === 'plat') { if (platSig() !== platSeen) renderStore(); return; }
   storeItems().forEach(it => {
     const b = $(`#sto-list [data-buy="${it.id}"]`), st = itemState(it);
     if (b && b.disabled !== st.dis) b.disabled = st.dis;
@@ -7091,51 +7214,183 @@ function openStore(tab) {
   renderStore();
 }
 function buy(id) {
-  const it = [...aiItems(), ...pcItems()].find(x => x.id === id);
-  if (!it || itemState(it).dis) return '';
-  if (id.startsWith('pc:')) {                    // matériel : dans le panier ; la commande se valide en bas du rayon
-    const m = cartAdd(id.slice(3), it.tier);
+  const pcIt = id.startsWith('pc:') && pcItems().find(x => x.id === id);
+  if (pcIt) {                                    // matériel : dans le panier ; la commande se valide en bas du rayon
+    if (itemState(pcIt).dis) return '';
+    const m = cartAdd(id.slice(3), pcIt.tier);
     if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = m; }
     return m;
   }
-  G.money -= it.cost;
-  let msg = `${it.name} : acheté.`;
-  if (id === 'agent') {
-    G.agents++;
-    if (claudeOn) { cfg.agents = firstAgents(G.agents); saveCfg(); rebuild(); }
-    msg = `${plural(G.agents, 'agent')} désormais. Le nouveau lit déjà le README (en diagonale).`;
-  } else if (id === 'lead') {
-    G.lead = 1;
-    if (claudeOn) setLead('haut'); else cfg.lead = 'haut';
-    msg = 'Orchestrateur embauché : il délègue déjà.';
-  } else if (id === 'term') {
-    G.term++;
-    si = termIdx();
-    speed = SPEEDS[si];
-    msg = `Terminal ${ECO.termName[G.term]} : ×${frx(speed)}.`;
-  } else if (id === 'claude' || id === 'codex') {
-    G.own[id] = 1;
-    G.ai = id;
-    G.model = CLIS[id].def;
-    msg = `Migration vers ${CLIS[id].label} : c’est fait. Mistral, merci pour tout (enfin, pour certaines choses).`;
-    if (claudeOn) {                              // l'équipe change d'IA sans s'arrêter
-      setProvider(id);
-      cfg.model = CLIS[id].def;
-      saveCfg();
-      rebuild();
-      renderTabs();
-      updateLabels();
-      shellPrint(H(['✓ ', 'okc'], `Migration terminée : vos ${plural(panes.length, 'agent')} tournent maintenant sous ${cli().label} (${MODELS[cfg.model].name}).`));
-    } else {
-      setProvider(id);
-      shellPrint(H(['✓ ', 'okc'], `Licence ${CLIS[id].label} achetée. Tapez `, [id, 'org'], ' pour lancer vos agents.'));
-    }
-  } else G.sk[id] = 1;
+  let msg = '';
+  if (id === 'agent' || id.startsWith('agent:')) msg = buyAgent(id === 'agent' ? G.ai : id.slice(6));
+  else if (PLATS[id]) msg = buyLicence(id);
+  else {
+    const it = aiItems().find(x => x.id === id);
+    if (!it || itemState(it).dis) return '';
+    G.money -= it.cost;
+    if (id === 'lead') {
+      G.lead = Math.min(3, (G.lead || 0) + 1);
+      if (G.lead === 1) { if (claudeOn) setLead('haut'); else cfg.lead = 'haut'; }
+      msg = G.lead === 1 ? 'Orchestrateur embauché : il délègue déjà.' : G.lead === 2 ? 'Plan mode activé : l’orchestrateur planifie, puis délègue la planification.'
+        : 'Orchestrateur multi-plateforme : il coordonne aussi les équipes en arrière-plan. Il a demandé un deuxième écran.';
+    } else if (id === 'term') {
+      G.term++;
+      si = termIdx();
+      speed = SPEEDS[si];
+      msg = `Terminal ${ECO.termName[G.term]} : ×${frx(speed)}.`;
+    } else if (id.startsWith('model:')) {
+      const k = id.slice(6), p = PLAT_ORDER.find(q => modelsOf(q).includes(k));
+      G.models[k] = 1;
+      G.pm[p] = k;
+      if (p === G.ai) { G.model = k; cfg.model = k; if (claudeOn) { saveCfg(); rebuild(); } }
+      msg = `${MODELS[k].name} débloqué pour ${CLIS[p].label}${p === G.ai ? ', vos agents l’utilisent déjà' : ''}. ${price(MODELS[k].in)} / ${price(MODELS[k].out)} par M tokens : la facture aussi passe au niveau supérieur.`;
+    } else { G.sk[id] = 1; msg = `${it.name} : acheté.`; }
+  }
+  if (!msg) return '';
   saveGame();
   if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = `✓ ${msg}`; }
   renderHud();
   updateFoot();
   return msg;
+}
+/* ---------- plateformes : une au premier plan, les autres en arrière-plan si le PC suit ---------- */
+const agentPrice = p => ECO.agentCost(G.team[p] || 1) * PLATS[p].fac;
+const freeModels = p => modelsOf(p).filter(k => !MODEL_UP[k]);
+function platCap(pc = G.pc) {                    // combien de plateformes en même temps : selon les threads et la RAM
+  const c = part('cpu', pc), r = part('ram', pc), max = c.thr >= 12 && r.go >= 16 ? 3 : c.thr >= 4 && r.go >= 8 ? 2 : 1;
+  return { max, c, r };
+}
+const platNeed = k => k >= 3 ? '12 threads et 16 Go' : '4 threads et 8 Go';
+function bgCheck(p) {                            // peut-on lancer cette plateforme en arrière-plan ?
+  const cap = platCap(), on = 1 + bgTeams().length;
+  if (on + 1 > cap.max) return { ok: false, short: 'matos insuffisant', why: `${on + 1} plateformes en même temps demandent ${platNeed(on + 1)} (vous : ${cap.c.thr} threads, ${cap.r.go} Go).` };
+  const b = bgLoad(), k = pcCheck(G.pc, { bg: b.bg + G.team[p], plats: b.plats + 1 });
+  if (k.psuKo) return { ok: false, short: 'alim trop faible', why: `L’alimentation ne suivrait pas : ≈ ${Math.round(k.draw)} W pour ${k.psuW} W.` };
+  if (k.oom) return { ok: false, short: 'RAM insuffisante', why: `Pas assez de RAM : ≈ ${frx(k.used.toFixed(1))} Go demandés pour ${k.ram} Go (et ${SWAP_GO} Go de swap).` };
+  if (k.melt) return { ok: false, short: 'trop chaud', why: `Le refroidissement ne suivrait pas : ${Math.round(k.temp)} °C prévus.` };
+  return { ok: true, why: k.hot || k.swap || k.slow ? 'Ça passe, mais le PC va souffrir (htop pour vérifier).' : '' };
+}
+function setMain(p) {                            // la plateforme du premier plan (sans toucher aux volets)
+  const old = G.ai, swap = !!G.bg[p];
+  delete G.bg[p];
+  if (swap && old !== p) G.bg[old] = 1;          // échange : l'ancienne passe en arrière-plan à sa place
+  G.ai = p;
+  G.agents = G.team[p] || 1;
+  G.model = G.pm[p];
+  return { old, swap };
+}
+function switchMain(p) {                         // une autre plateforme passe au premier plan, l'équipe change d'IA sans s'arrêter
+  if (!IDLE || !G.own[p] || p === G.ai) return '';
+  const { old, swap } = setMain(p);
+  setProvider(p);
+  cfg.model = G.model;
+  cfg.agents = firstAgents(G.agents);
+  if (claudeOn) { saveCfg(); rebuild(); renderTabs(); updateLabels(); }
+  saveGame();
+  renderHud();
+  updateFoot();
+  const msg = `${CLIS[p].label} au premier plan : ${plural(G.agents, 'agent')} ${MODELS[G.model].name}. `
+    + (swap ? `${CLIS[old].label} prend sa place en arrière-plan.` : `${CLIS[old].label} s’arrête (bg ${old} pour le relancer en arrière-plan, si le PC suit).`);
+  if (claudeOn) shellPrint(H(['✓ ', 'okc'], msg));
+  return msg;
+}
+function bgStart(p) {
+  if (!IDLE || !G.own[p] || p === G.ai || G.bg[p]) return '';
+  const k = bgCheck(p);
+  if (!k.ok) return `Impossible : ${k.why}`;
+  G.bg[p] = 1;
+  saveGame();
+  renderHud();
+  return `${CLIS[p].label} tourne en arrière-plan : ${plural(G.team[p], 'agent')} ${MODELS[G.pm[p]].name}${claudeOn ? '' : ', dès que la session démarre'}.${k.why ? ' ' + k.why : ''}`;
+}
+function bgStop(p) {
+  if (!G.bg[p]) return '';
+  delete G.bg[p];
+  saveGame();
+  renderHud();
+  return `${CLIS[p].label} arrêté en arrière-plan. Ses agents attendent, payés à ne rien faire (non, en fait, ils ne sont pas payés).`;
+}
+function buyAgent(p) {
+  const n = G.team[p] || 0, c = agentPrice(p);
+  if (!IDLE || !G.own[p] || n >= AGENTS.length || G.money < c) return '';
+  G.money -= c;
+  G.team[p] = n + 1;
+  if (p === G.ai) {
+    G.agents = G.team[p];
+    if (claudeOn) { cfg.agents = firstAgents(G.agents); saveCfg(); rebuild(); }
+  }
+  return `${plural(G.team[p], 'agent')} ${CLIS[p].label} désormais. Le nouveau lit déjà le README (en diagonale).`;
+}
+function buyLicence(p) {                         // changer de plateforme : l'équipe migre au premier plan, l'ancienne reste disponible
+  if (!IDLE || G.own[p] || G.money < PLATS[p].cost) return '';
+  G.money -= PLATS[p].cost;
+  G.own[p] = 1;
+  G.team[p] = Math.max(1, G.team[G.ai] || 1);
+  freeModels(p).forEach(k => { G.models[k] = 1; });
+  G.pm[p] = PLATS[p].base;
+  const old = G.ai, was = claudeOn;
+  switchMain(p);
+  return `Licence ${CLIS[p].label} : vos ${plural(G.agents, 'agent')} passent au premier plan sous ${MODELS[G.model].name}. `
+    + `${CLIS[old].label} garde ses ${plural(G.team[old], 'agent')} : lancez-les en arrière-plan si le PC suit (onglet Plateformes).`
+    + (was ? '' : ` Tapez ${p} pour lancer l’équipe.`);
+}
+function platRow(p) {                            // une ligne de l'onglet Plateformes : licence, équipe, premier plan, arrière-plan
+  const C = CLIS[p], P = PLATS[p], own = !!G.own[p], main = p === G.ai, bg = !!G.bg[p] && !main, n = G.team[p] || 0;
+  const btn = (attr, t, dis, cls = '') => `<button type="button" class="sto-buy ${cls}" ${attr}${dis ? ' disabled' : ''} aria-label="${esc(C.label)} : ${esc(t)}">${esc(t)}</button>`;
+  const tag = !own ? '' : main ? ' <span class="okc">· premier plan</span>' : bg ? ' <span class="wrn">· arrière-plan</span>' : ' <span class="dim">· à l’arrêt</span>';
+  let acts, info, note = '';
+  if (!own) {
+    acts = btn(`data-buy="${p}"`, `Licence · ${money0(P.cost)}`, G.money < P.cost);
+    info = P.desc;
+  } else {
+    const ac = agentPrice(p), f = teamFlow(p);
+    acts = btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : `Agent + · ${money0(ac)}`, n >= AGENTS.length || G.money < ac, n >= AGENTS.length ? 'owned' : '');
+    if (!main) {
+      const k = bg ? null : bgCheck(p);
+      acts += btn(`data-plat="main:${p}"`, 'Premier plan', false)
+        + (bg ? btn(`data-plat="stop:${p}"`, 'Arrêter', false) : btn(`data-plat="bg:${p}"`, k.ok ? 'Arrière-plan' : k.short, !k.ok));
+      if (k && !k.ok) note = k.why;
+    }
+    const sg = `${f.rel >= 0 ? '+' : '−'}${Math.round(Math.abs(f.rel))} %`;
+    info = `${plural(n, 'agent')} ${MODELS[G.pm[p]].name} · ` + (f.main ? `${f.rel >= 99.5 ? 'toute la production' : `${Math.round(f.rel)} % de la production`} · $${usd(f.usd)} de tokens par minute (toutes équipes)`
+      : `${bg ? 'apport' : 'si lancé'} : ${sg} de production, ${f.usd >= 0 ? '+' : '−'}$${usd(Math.abs(f.usd))} de tokens par minute`)
+      + (f.pct < 0 ? (f.slows ? ' · le PC sature : tout le monde ralentit' : ' · ses bugs font reculer la barre') : f.slows ? ' · le PC ralentit un peu le reste' : '');
+  }
+  return `<div class="sto-row plat${main ? ' done' : ''}"><span class="sto-ic" aria-hidden="true">${esc(C.glyph)}</span><span class="sto-txt"><b>${esc(C.label)}</b>${tag}`
+    + `<br><span class="dim">${esc(info)}</span>${note ? `<br><span class="errc">${esc(note)}</span>` : ''}</span><span class="sto-acts">${acts}</span></div>`;
+}
+function platHtml() {
+  const cap = platCap(), on = 1 + bgTeams().length;
+  return `<p class="dim sto-hint">Une plateforme au premier plan (l’onglet des agents), les autres en arrière-plan si le PC suit. `
+    + `Deux plateformes : ${platNeed(2)} ; trois : ${platNeed(3)}. Votre PC (${esc(cap.c.n)}, ${cap.r.go} Go) : ${plural(cap.max, 'plateforme')} à la fois.</p>`
+    + `<p class="sto-cat">Plateformes · ${on} sur ${cap.max} en cours</p>` + PLAT_ORDER.map(platRow).join('');
+}
+const platSig = () => PLAT_ORDER.map(p => [G.money >= (G.own[p] ? agentPrice(p) : PLATS[p].cost), G.ai === p, !!G.bg[p], G.team[p]].join()).join('|');
+function platLines() {                           // la commande plateformes
+  const cap = platCap(), L = [[H(['Plateformes', 'b'], ` · ${plural(cap.max, 'plateforme')} à la fois avec ce PC (${cap.c.thr} threads, ${cap.r.go} Go)`), '', 15]];
+  PLAT_ORDER.forEach(p => {
+    const own = G.own[p], st = !own ? ['licence non achetée', 'dim'] : p === G.ai ? ['premier plan', 'okc'] : G.bg[p] ? ['arrière-plan', 'wrn'] : ['à l’arrêt', 'dim'];
+    L.push([H(`  ${CLIS[p].glyph} ${CLIS[p].label.padEnd(12)}`, st, own ? ` · ${plural(G.team[p], 'agent')} ${G.pm[p]}` : ` · ${money0(PLATS[p].cost)} au store`), '', 15]);
+  });
+  L.push([H(['  switch <plateforme>', 'org'], ' premier plan · ', ['bg <plateforme>', 'org'], ' arrière-plan · ', ['bg stop <plateforme>', 'org'], ' arrêter'), 'dim', 15]);
+  return L;
+}
+function platCmd(head, arg) {
+  const p = PLAT_ORDER.find(k => arg.split(/\s+/).includes(k));
+  if (head === 'plateformes' || head === 'platforms' || !arg) return printLines(platLines());
+  if (!p) return shellPrint(H(['usage ', 'wrn'], `${head} ${head === 'bg' ? '[stop] ' : ''}${PLAT_ORDER.join('|')}`));
+  if (!G.own[p]) return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée (`, ['store', 'org'], ', onglet Plateformes).'));
+  const ko = m => shellPrint(H(['✗ ', 'errc'], m)), ok = m => shellPrint(H(['✓ ', 'okc'], m));
+  if (head === 'switch') {
+    if (p === G.ai) return ko(`${CLIS[p].label} est déjà au premier plan.`);
+    const m = switchMain(p);
+    return claudeOn ? undefined : ok(m);         // en session, switchMain l'annonce lui-même
+  }
+  if (/\bstop\b/.test(arg)) { const m = bgStop(p); return m ? ok(m) : ko(`${CLIS[p].label} ne tourne pas en arrière-plan.`); }
+  if (p === G.ai) return ko(`${CLIS[p].label} est au premier plan : il tourne déjà (switch pour en mettre un autre à sa place).`);
+  if (G.bg[p]) return ko(`${CLIS[p].label} tourne déjà en arrière-plan.`);
+  const m = bgStart(p);
+  return /^Impossible/.test(m) ? ko(m) : ok(m);
 }
 function stoTabs() { document.querySelectorAll('[data-sto]').forEach(b => b.setAttribute('aria-selected', b.dataset.sto === stoTab)); }
 $('.sto-tabs').addEventListener('click', e => {
@@ -7147,7 +7402,14 @@ $('.sto-tabs').addEventListener('click', e => {
   renderStore();
 });
 $('#sto-list').addEventListener('click', e => {
-  const b = e.target.closest('[data-buy]'), d = e.target.closest('[data-cart-del]'), c = e.target.closest('[data-cart]');
+  const b = e.target.closest('[data-buy]'), d = e.target.closest('[data-cart-del]'), c = e.target.closest('[data-cart]'), pl = e.target.closest('[data-plat]');
+  if (pl) {                                      // plateformes : premier plan, arrière-plan, arrêt
+    if (pl.disabled) return;
+    const [k, p] = pl.dataset.plat.split(':'), m = k === 'main' ? switchMain(p) : k === 'bg' ? bgStart(p) : bgStop(p);
+    renderStore();
+    $('#sto-msg').textContent = m;
+    return;
+  }
   if (b) return buy(b.dataset.buy);
   if (!d && (!c || c.disabled)) return;
   let m = '';
@@ -7213,18 +7475,32 @@ async function biosBoot(o = {}) {
   const hint = () => add('Une touche ou un clic : passer le démarrage', 'bi-skip');
   o.during?.();                                  // sous l'écran noir : on coupe ce qui tournait
   const pc = PC(), c = part('cpu'), mb = part('mobo'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
-  if (o.crash) {                                 // ce qu'on voit juste avant le noir
-    if (o.crash.kind === 'heat') {
-      const up = (Date.now() - bootT) / 1000;
-      add(esc(`[${up.toFixed(6).padStart(12)}] CPU0: Core temperature above threshold, cpu clock throttled (total events = ${ri(900, 9000)})`), 'bi-warn');
-      await wait(450);
-      add(esc(`[${(up + .4).toFixed(6).padStart(12)}] thermal thermal_zone0: critical temperature reached (${Math.round(Math.max(100, PCS.temp))} C), shutting down`), 'bi-fail');
-      await wait(450);
-      add(esc(`[${(up + .5).toFixed(6).padStart(12)}] reboot: Power down`), 'bi-fail');
-      await wait(900);
-    } else await wait(300);
+  if (o.crash) {                                 // le kernel panic, avec sa cause, puis le noir et le redémarrage
+    const up = (Date.now() - bootT) / 1000, k = o.crash.kind, cause = esc(o.crash.panic || o.crash.why);
+    const ts = dt => `[${(up + dt).toFixed(6).padStart(12)}]`, comm = provider === 'mistral' ? 'vibe' : provider;
+    const pre = k === 'heat' ? [`CPU0: Core temperature above threshold, cpu clock throttled (total events = ${ri(900, 9000)})`,
+      `thermal thermal_zone0: critical temperature reached (${Math.round(Math.max(100, PCS.temp))} C), shutting down`]
+      : k === 'oom' ? [`Out of memory: Killed process ${ri(31337, 39999)} (node) total-vm:11534336kB, anon-rss:${ri(3, 9)}482112kB`,
+        'Out of memory and no killable processes...']
+      : k === 'psu' ? ['mce: [Hardware Error]: CPU 0: Machine Check: 0 Bank 4: b200000000070f0f',
+        `mce: [Hardware Error]: PROCESSOR 0:a20f12 TIME ${Math.floor(Date.now() / 1000)} SOCKET 0 APIC 0 (rail 12 V à 9,8 V)`]
+      : ['psu0: coil whine detected (15 kHz)', 'psu0: 12V rail dropping: 11.1V, 10.4V, 9.6V...'];
+    let dt = 0;
+    for (const t of pre) { add(esc(`${ts(dt += .2)} ${t}`), 'bi-warn'); await wait(300); }
+    add(`${ts(dt += .01)} <b>Kernel panic - not syncing: ${cause}</b>`, 'bi-fail');
+    await wait(250);
+    const trace = [`CPU: ${ri(0, Math.max(0, c.thr - 1))} PID: ${ri(31337, 39999)} Comm: ${comm} Tainted: G      D  O       6.11.0-friday #1`,
+      `Hardware name: VibeAward ${mb.n}/PROD-01, BIOS 2026.11 « friday »`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
+      k === 'oom' ? ' out_of_memory.cold+0x5c/0x70' : k === 'heat' ? ' thermal_zone_device_critical+0x41/0x50' : ' mce_panic+0x1b6/0x200',
+      ` vibe_agent_spawn+0x2a/0x40 [${comm}_cli]`, ' tokens_burn_all+0x1337/0x2000', ' npm_install_universe+0x404/0x404', ' friday_deploy+0x17/0x420',
+      ' do_syscall_64+0x82/0x170', ' entry_SYSCALL_64_after_hwframe+0x76/0x7e', ' </TASK>', 'Kernel Offset: disabled'];
+    for (const t of trace) { add(esc(`${ts(dt += .003)} ${t}`)); await wait(55); }
+    add(`${ts(dt += .002)} ---[ end Kernel panic - not syncing: ${cause} ]---`, 'bi-fail');
+    const cd = add('Rebooting in 5 seconds..');
+    for (let s = 4; s >= 1; s--) { await wait(520); cd.textContent = `Rebooting in ${s} second${s > 1 ? 's' : ''}..`; }
+    await wait(520);
     el.innerHTML = '';
-    await wait(1100);                            // le noir complet, ventilateurs coupés
+    await wait(900);                             // le noir complet, ventilateurs coupés
   }
   // 1. le POST du BIOS
   const top = document.createElement('div');
@@ -7245,6 +7521,7 @@ async function biosBoot(o = {}) {
   mem.textContent += ` OK (DDR${r.ddr})`;
   if (o.crash) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
     : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
+    : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
     : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
   if (pc.cool === 0) {
     add('CPU Fan Error! Press F1 to Resume', 'bi-warn', post);
@@ -7362,7 +7639,7 @@ function haltSession() {
   closeProgs();
   if (claudeOn) {
     claudeOn = false;
-    for (const k of MON.procs.keys()) if (/^(lead|ollama|ag\d|c\d)/.test(k)) MON.procs.delete(k);
+    for (const k of MON.procs.keys()) if (/^(lead|ollama|ag\d|c\d|bg-)/.test(k)) MON.procs.delete(k);
     if (view === 'claude') switchTab('zsh');
     if (tabs.includes('claude')) tabs.splice(tabs.indexOf('claude'), 1);
     if (lastView === 'claude') lastView = '';
@@ -7382,19 +7659,29 @@ async function pcCrash(kind, L) {
   const co = part('cool'), ps = part('psu'), was = claudeOn;
   const why = kind === 'heat' ? `surchauffe à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n}, ${co.w} W, pour ${Math.round(L.heat)} W de chaleur)`
     : kind === 'psu' ? `alimentation dépassée (${Math.round(L.draw)} W demandés, ${ps.w} W disponibles)`
+    : kind === 'oom' ? `mémoire pleine (${frx(L.used.toFixed(1))} Go demandés pour ${L.ram} Go de RAM et ${SWAP_GO} Go de swap)`
     : 'l’alimentation no-name a sifflé plus fort que d’habitude, puis plus rien';
-  const chk = pcCheck(G.pc), safe = !chk.psuKo && !chk.melt;
+  const panic = kind === 'heat' ? `Fatal exception: CPU0 à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n} : ${co.w} W pour ${Math.round(L.heat)} W de chaleur)`
+    : kind === 'psu' ? `Fatal Machine Check: alimentation dépassée (${Math.round(L.draw)} W demandés, ${ps.w} W disponibles)`
+    : kind === 'oom' ? `System is deadlocked on memory (${frx(L.used.toFixed(1))} Go demandés, ${L.ram} Go de RAM + ${SWAP_GO} Go de swap)`
+    : 'psu0: l’alim no-name a sifflé à 15 kHz, puis plus rien';
+  let chk = pcCheck(G.pc), safe = pcSafe(chk), dropped = [];
+  if (!safe && bgTeams().length) {               // sans l'arrière-plan, la config tiendrait : il ne repart pas
+    const k2 = pcCheck(G.pc, { bg: 0, plats: 0 });
+    if (pcSafe(k2)) { dropped = bgTeams().map(t => CLIS[t.ai].label); G.bg = {}; chk = k2; safe = true; }
+  }
   if (IDLE) { G.running = 0; saveGame(); }
-  await biosBoot({ crash: { kind, why }, during: haltSession, then: () => {
+  await biosBoot({ crash: { kind, why, panic }, during: haltSession, then: () => {
     mode = 'idle';
     pcDown = false;
-    shellPrint(H(['✗ ', 'errc'], ['Le PC est tombé : ', 'errc'], why + '.'));
+    shellPrint(H(['✗ ', 'errc'], ['Kernel panic : ', 'errc'], why + '. Le PC a redémarré.'));
+    if (dropped.length) shellPrint(H(['  ', ''], ['Arrière-plan coupé : ', 'wrn'], `${dropped.join(' et ')} ne repart pas, la config ne tiendrait pas avec. `, ['plateformes', 'org'], ' pour voir.'));
     if (was && safe) {
       shellPrint(H(['tmux attach ', 'dim'], '· la config tient : vos agents repartent.'));
       submit(G.ai);
     } else if (was) {
       shellPrint(H(['  ', ''], ['La config ne tiendra pas avec toute l’équipe : ', 'wrn'],
-        chk.psuKo ? `≈ ${Math.round(chk.draw)} W pour une alim de ${chk.psuW} W. ` : 'le refroidissement ne suit pas. ',
+        chk.psuKo ? `≈ ${Math.round(chk.draw)} W pour une alim de ${chk.psuW} W. ` : chk.oomP ? `≈ ${frx(chk.used.toFixed(1))} Go de mémoire pour ${chk.ram} Go. ` : 'le refroidissement ne suit pas. ',
         'Achetez mieux (', ['B', 'org'], ', ou matos.vibe dans Firefaux) ou relancez moins d’agents (', [`${G.ai} --agents 1`, 'org'], ').'));
     }
     shellPrint(H(['  htop', 'org'], [', ', 'dim'], ['sensors', 'org'], [' et ', 'dim'], ['free', 'org'], [' : pour voir si le PC est à terre.', 'dim']));
@@ -7413,6 +7700,7 @@ function pcTick(dt, now) {                       // température, alimentation, 
   if (L.draw > L.psuW) return pcCrash('psu', L);
   if (PCS.temp >= 100) return pcCrash('heat', L);
   if (part('psu').noname && L.draw > .8 * L.psuW && chance(dt / 180)) return pcCrash('whine', L);
+  if (L.used > L.ram + SWAP_GO + 3) return pcCrash('oom', L);   // même l'OOM killer ne suffit plus : kernel panic
   if (L.oom && now > PCS.oomAt) {               // plus de mémoire, plus de swap : le noyau choisit une victime
     PCS.oomAt = now + 7000 + R() * 5000;
     const p = pick(panes.filter(x => x.state !== 'down'));
