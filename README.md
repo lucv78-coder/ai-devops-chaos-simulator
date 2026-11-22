@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 8 084">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 8 320">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -46,17 +46,18 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Store intégré.** Trois rayons : agents IA, plateformes, matériel PC. Trois niveaux d'orchestrateur, des modèles plus chers, un terminal plus rapide et 14 skills, de « tests unitaires » à « lire CLAUDE.md (pour de vrai) », à un million de dollars.
 - **Multi-plateforme.** Démarrez sur le pire agent, puis achetez Codex et Claude Code. Chaque plateforme garde son équipe : une au premier plan, les autres en arrière-plan, si le PC suit. Avant, c'était un choix irréversible, comme un mariage. Maintenant, c'est trois factures de tokens.
 - **Modes boost.** `ultracode` pour Claude Code, `xhigh` pour Codex, `flash` pour Mistral : achetés au store, une minute par jour, prolongeables jusqu'à trois. L'agent a demandé un mode boost pour le mode boost. On lui a dit de revenir demain.
+- **IA locale.** Installez Lolama ou StudioLM depuis Firefaux, puis un modèle de 2 à 72 milliards de paramètres. Zéro token facturé, toute la VRAM prise. Chaque agent ajouté double la VRAM demandée, et un modèle trop gros pour la carte graphique fait redémarrer le PC sur un kernel panic. L'agent appelle ça « de l'inférence souveraine ».
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
 - **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. L'agent, lui, dit que tout va bien.
-- **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow. Toute autre adresse a été hallucinée par votre agent.
+- **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow, GitHype (le GitHub qui a racheté le nom de domaine) et lolama.vibe pour les modèles locaux. Toute autre adresse a été hallucinée par votre agent.
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 8 084 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier.
+- **Monolithe artisanal.** 1 fichier, 8 320 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier.
 
 ## Le matériel
 
@@ -98,12 +99,14 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 | **Vibe CLI** (Mistral) | gratuite | Codestral 25.08 | « Production-ready. » Il hallucine, plante, redémarre, et recommence. |
 | **Codex** | $1 500 | GPT-6.1 Terra : 1,6× le travail de Codestral, trois fois moins de bugs | « Enfin du sérieux. » |
 | **Claude Code** | $12 000 | Claude Opus 5.5 : 2,5× le travail de Codestral, quatre fois moins de bugs | « Celui-là signe ses commits. » |
+| **IA locale** (Lolama ou StudioLM) | gratuite, à installer depuis Firefaux | Jemma 3 2B : 13 % du travail de Codestral, 1,7 Go de VRAM | « Souverain. » Il tourne sur un grille-pain, à la vitesse d'un grille-pain. |
 
 - **Chaque plateforme a son équipe.** Une licence recrute votre équipe à l'identique et la passe au premier plan. L'ancienne n'est pas licenciée : elle attend dans un tmux détaché.
 - **Premier plan, arrière-plan.** Une plateforme tient l'onglet des agents, les autres travaillent en fond. Il faut 4 threads et 8 Go pour deux plateformes, 12 threads et 16 Go pour trois. La RAM, l'alim et la chauffe sont vérifiées avant le lancement.
 - **Le store affiche l'effet réel** (« apport : +65 % de production »). Sur un PC trop juste, il prévient que tout le monde ralentit. En fin de partie, Mistral en arrière-plan fait reculer la barre : ses bugs coûtent plus que ce qu'il produit. C'est affiché en négatif, en toute transparence.
 - **Dans le terminal**, entre deux sessions : `plateformes`, `switch codex`, `bg mistral`, `bg stop codex`.
-- **Les modes boost**, une fois par jour : Flash Answers pour Vibe CLI ($400 : ×2,5 de travail, ×2 de bugs), raisonnement xhigh pour Codex ($4 000 : ×2,2 de travail, bugs divisés par deux, ×2,5 de tokens), `ultracode` pour Claude Code ($30 000 : ×3 de travail, ×4 de tokens). Une minute, quatre prolongations de 30 s au plus, retour à minuit. On les lance avec la commande ou la touche `U`, quand l'équipe tourne.
+- **Les modes boost**, une fois par jour : Flash Answers pour Vibe CLI ($400 : ×2,5 de travail, ×2 de bugs), raisonnement xhigh pour Codex ($4 000 : ×2,2 de travail, bugs divisés par deux, ×2,5 de tokens), `ultracode` pour Claude Code ($30 000 : ×3 de travail, ×4 de tokens). Une minute, quatre prolongations de 30 s au plus, retour à minuit. On les lance avec la commande ou la touche `U`, quand l'équipe tourne. Le chrono s'arrête quand l'onglet est masqué : la minute payée est une minute jouée.
+- **L'IA locale** ne coûte aucun token, mais elle prend la VRAM. Six modèles sur lolama.vibe : Jemma 3 2B (1,7 Go), Jemma 3 4B (3,2 Go), Lama 3.1 8B (5,4 Go), Jemma 3 27B (17 Go), Kwen 3 35B (22 Go) et Kwen 2.5 72B (44 Go). Tous font moins bien que Codestral, sauf le 72B, qui l'égale. Chaque agent ajouté double la VRAM demandée, et il n'y a pas d'orchestrateur, ni de mode boost : la carte graphique est déjà à fond. Un modèle qui ne rentre pas fait tomber le PC : « NVRM: GPU out of memory », puis redémarrage.
 - **L'orchestrateur** monte en trois niveaux : Orchestrateur ($350, dès 3 agents), Plan mode ($8 000, dès 5 agents), Multi-plateforme ($150 000, avec deux plateformes). Le dernier coordonne aussi l'arrière-plan. Il facture sa coordination en tokens, évidemment.
 
 | Jalon (joueur parfait, simulé) | Quand | Revenus |
@@ -121,7 +124,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (8 084 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (8 320 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -167,6 +170,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - `htop` ;
 - `plateformes`, `switch codex` et `bg mistral` ;
 - `ultracode` (ou `xhigh`, `flash`), une fois le mode acheté ;
+- `lolama pull 4b`, `lolama run 4b` et `lolama ps` (ou `studiolm load 4b`), une fois Lolama installé depuis Firefaux ;
 - `sensors` et `free` ;
 - `firefaux` (ou `firefox`, il ne fait pas la différence) ;
 - `tskill codex` ;
@@ -201,6 +205,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | <img src="assets/screen-store-pc.png" alt="Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."> | <img src="assets/screen-panier.png" alt="Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300 en jaune, l'avis client sur l'alim no-name, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."> |
 | **Kernel panic : l'alim a dit non** | **L'onglet Plateformes** |
 | <img src="assets/screen-panic.png" alt="Un kernel panic plein écran : erreurs matérielles mce, puis « Kernel panic - not syncing: Fatal Machine Check: alimentation dépassée (499 W demandés, 230 W disponibles) », la pile d'appels avec vibe_agent_spawn, tokens_burn_all, npm_install_universe et friday_deploy, et « Rebooting in 4 seconds.. »."> | <img src="assets/screen-plateformes.png" alt="L'onglet Plateformes du store : Claude Code au premier plan avec 5 agents Opus 5.5, Codex en arrière-plan avec un apport de 65 % de production, Vibe CLI à l'arrêt, et la capacité du PC : 3 plateformes à la fois sur le Raisin 9 avec 64 Go."> |
+| **lolama.vibe, dans Firefaux** | **Kernel panic : la VRAM a dit non** |
+| <img src="assets/screen-lolama.png" alt="Le site lolama.vibe dans Firefaux : « Des LLM en local. Aucune API, aucune facture : juste votre VRAM, toute votre VRAM. », la GéFarce GTX 1060 et ses 6 Go, puis la bibliothèque des six modèles, de Jemma 3 2B à Kwen 2.5 72B, avec leur VRAM, leur efficacité par rapport à Codestral et, en rouge, « Ne rentre pas dans vos 6 Go de VRAM : le lancer fera redémarrer le PC »."> | <img src="assets/screen-vram.png" alt="Un kernel panic plein écran : « lolama: CUDA error: out of memory (tried to allocate 6,4 GiB) », puis « Kernel panic - not syncing: NVRM: GPU out of memory (Jemma 3 4B × 2 agents : 6,4 Go demandés, GéFarce GTX 1060 : 6 Go) », la pile d'appels avec gpu_vram_alloc et friday_deploy, et « Rebooting in 4 seconds.. »."> |
 
 ## Roadmap
 
@@ -220,6 +226,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Des icônes sur le bureau, à double-cliquer comme en 2004
 - [x] Une page de nouveautés, pour savoir ce qui a cassé, et à quelle heure
 - [x] Des modes boost, une minute par jour, comme les pauses café
+- [x] Des modèles locaux, gratuits, qui font redémarrer le PC
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -229,14 +236,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 8 084 lignes ?**
+**Pourquoi un seul fichier de 8 320 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 8 084 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 8 320 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
@@ -291,6 +298,6 @@ Si vous arrivez à gagner de l'argent avec, c'est que vous avez mieux vibecodé 
 
 ## Avertissement
 
-Ce jeu est une **parodie**, sans lien avec Anthropic, OpenAI, Mistral AI ni le projet Xfce. Les noms de produits et de modèles appartiennent à leurs propriétaires. Les chiffres, factures, bugs, benchmarks et citations sont inventés. Les étoiles GitHub aussi, pour l'instant.
+Ce jeu est une **parodie**, sans lien avec Anthropic, OpenAI, Mistral AI, GitHub, Ollama, LM Studio ni le projet Xfce. Les noms de produits et de modèles appartiennent à leurs propriétaires. Les chiffres, factures, bugs, benchmarks et citations sont inventés. Les étoiles GitHub aussi, pour l'instant.
 
 <p align="center"><sub>Fait avec des prompts, du café et une confiance aveugle. Aucune ligne de ce dépôt n'a été écrite à la main. Celle-ci non plus.</sub></p>

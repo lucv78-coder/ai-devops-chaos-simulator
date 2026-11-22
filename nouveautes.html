@@ -135,9 +135,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>7</b><span>mises à jour</span></div>
-    <div role="listitem"><b>10 h 24</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 8 084</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>8</b><span>mises à jour</span></div>
+    <div role="listitem"><b>12 h 33</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 8 320</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -145,6 +145,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#8</span><time datetime="2026-11-23T00:00">00 h 00</time><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></li>
       <li><span class="n">#7</span><time datetime="2026-11-22T21:51">21 h 51</time><a href="#boost">Les modes boost : ultracode, xhigh et Flash Answers</a></li>
       <li><span class="n">#6</span><time datetime="2026-11-22T20:05">20 h 05</time><a href="#plein-ecran">Plein écran au bouton</a></li>
       <li><span class="n">#5</span><time datetime="2026-11-22T18:32">18 h 32</time><a href="#icones">Des icônes sur le bureau</a></li>
@@ -155,8 +156,27 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="boost" aria-labelledby="t7">
-    <p class="meta"><span class="n">#7</span><span class="new">dernière</span><time datetime="2026-11-22T21:51">22 nov. 2026 · 21 h 51</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d69a16c">d69a16c</a><span>7 973 → 8 084 lignes</span></p>
+  <article class="maj latest" id="ia-locale" aria-labelledby="t8">
+    <p class="meta"><span class="n">#8</span><span class="new">dernière</span><time datetime="2026-11-23T00:00">23 nov. 2026 · 00 h 00</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/43a763b">43a763b</a><span>8 084 → 8 320 lignes</span></p>
+    <h2 id="t8"><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></h2>
+    <ul>
+      <li>GitHype (<code>githype.vibe</code>), le faux GitHub, arrive dans Firefaux : les tendances du jour, et StudioLM à installer depuis sa page. <code>github.com</code> y mène : un agent a racheté le nom de domaine pendant un ship.</li>
+      <li>Lolama (<code>lolama.vibe</code>) et sa bibliothèque de six modèles : Jemma 3 2B (1,7 Go de VRAM), Jemma 3 4B (3,2 Go), Lama 3.1 8B (5,4 Go), Jemma 3 27B (17 Go), Kwen 3 35B (22 Go) et Kwen 2.5 72B (44 Go). <code>ollama.com</code> et <code>lmstudio.ai</code> y mènent aussi.</li>
+      <li>Aucune API : 0 token facturé, la facture reste à $0. En échange, tous font moins bien que Codestral (de 13 % à 69 % de son efficacité), sauf le 72B, son équivalent.</li>
+      <li>Chaque agent ajouté double la VRAM demandée : ×2 avec deux agents, ×4 avec trois. Pas d’orchestrateur, ni de mode boost : la carte graphique est déjà à fond.</li>
+      <li>Un modèle qui ne rentre pas fait tomber le PC : kernel panic « NVRM: GPU out of memory », avec la VRAM demandée et celle de la carte, puis redémarrage. L’équipe locale ne repart pas toute seule, et le conseil donne le plus gros modèle qui rentre.</li>
+      <li>Dans le terminal : <code>lolama list</code>, <code>lolama pull 27b</code>, <code>lolama run 4b</code>, <code>lolama ps</code>, ou <code>studiolm get</code> et <code>studiolm load</code>. <code>ollama</code> et <code>lms</code> marchent aussi. Icônes Lolama et StudioLM sur le bureau, ligne IA locale dans l’onglet Plateformes, VRAM réelle dans <code>htop</code>.</li>
+      <li class="fix">Le chrono des modes boost s’arrête quand l’onglet est masqué. Un ultracode à $30 000 ne s’écoule plus pendant que vous lisez vos mails.</li>
+    </ul>
+    <blockquote>« 0 token facturé. Le PC a redémarré trois fois, mais 0 token facturé. »<cite>l’agent, 00 h 00</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-lolama.png" title="Voir en grand"><img src="assets/screen-lolama.png" width="900" height="540" loading="lazy" alt="Le site lolama.vibe dans Firefaux : la GéFarce GTX 1060 et ses 6 Go de VRAM, puis les six modèles, de Jemma 3 2B à Kwen 2.5 72B, avec leur VRAM et leur efficacité par rapport à Codestral ; les trois plus gros sont marqués en rouge « Ne rentre pas dans vos 6 Go de VRAM »."></a><figcaption>lolama.vibe : six modèles, 0 $, et ce qui rentre dans votre carte.</figcaption></figure>
+      <figure><a href="assets/screen-vram.png" title="Voir en grand"><img src="assets/screen-vram.png" width="900" height="540" loading="lazy" alt="Kernel panic : « lolama: CUDA error: out of memory (tried to allocate 6,4 GiB) », puis « Kernel panic - not syncing: NVRM: GPU out of memory (Jemma 3 4B × 2 agents : 6,4 Go demandés, GéFarce GTX 1060 : 6 Go) » et « Rebooting in 4 seconds.. »."></a><figcaption>Un deuxième agent : 6,4 Go pour 6, le PC redémarre.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="boost" aria-labelledby="t7">
+    <p class="meta"><span class="n">#7</span><time datetime="2026-11-22T21:51">22 nov. 2026 · 21 h 51</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d69a16c">d69a16c</a><span>7 973 → 8 084 lignes</span></p>
     <h2 id="t7"><a href="#boost">Les modes boost : ultracode, xhigh et Flash Answers</a></h2>
     <ul>
       <li>Un mode boost par plateforme, acheté une fois au store (onglet Agents IA, section Modes boost) : Flash Answers pour Vibe CLI ($400), raisonnement xhigh pour Codex ($4 000), <code>ultracode</code> pour Claude Code ($30 000).</li>
@@ -275,8 +295,8 @@ footer p + p { margin-top: .5em; }
   </article>
 </main>
 <footer>
-  <p>Sources : l’historique git du dépôt (heures des commits, 22 novembre 2026). Les temps de progression viennent d’une simulation qui achète toujours le bon objet au bon moment. Les citations de l’agent sont inventées, comme ses benchmarks.</p>
-  <p>© 2026 LVT-DEV · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr">CC BY-NC 4.0</a>, pas d’usage commercial · parodie, sans lien avec Anthropic, OpenAI, Mistral AI ni le projet Xfce. Les couleurs suivent celles choisies dans le jeu. Le mode clair a été refusé par 8 agents sur 8.</p>
+  <p>Sources : l’historique git du dépôt (heures des commits, 22 et 23 novembre 2026). Les temps de progression viennent d’une simulation qui achète toujours le bon objet au bon moment. Les citations de l’agent sont inventées, comme ses benchmarks.</p>
+  <p>© 2026 LVT-DEV · <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.fr">CC BY-NC 4.0</a>, pas d’usage commercial · parodie, sans lien avec Anthropic, OpenAI, Mistral AI, GitHub, Ollama, LM Studio ni le projet Xfce. Les couleurs suivent celles choisies dans le jeu. Le mode clair a été refusé par 8 agents sur 8.</p>
 </footer>
 </body>
 </html>
