@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 6 492">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 310">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -45,12 +45,37 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Migration d'IA.** Démarrez sur le pire agent, puis migrez vers Claude Code ou Codex. Un seul choix, irréversible. Comme un mariage, mais avec des tokens.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, gestionnaire de fichiers, éditeur et lecteur PDF. Vous pouvez supprimer `/bin`. Vous ne devriez pas.
+- **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis s'éteint. L'agent appelle ça « un redémarrage planifié ».
+- **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. L'agent, lui, dit que tout va bien.
+- **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow. Toute autre adresse a été hallucinée par votre agent.
+- **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
-- **Monolithe artisanal.** 1 fichier, 6 492 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
+- **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
+- **Monolithe artisanal.** 1 fichier, 7 310 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
+
+## Le matériel
+
+Le jeu tourne maintenant sur un vrai faux PC, et il commence par terre.
+
+| Config | Composants | Avis de l'agent |
+|---|---|---|
+| **Patate** (départ) | Céléri G530, 4 Go de DDR3 dépareillés, chipset intégré, disque dur à 5 400 tr/min qui gratte, alim no-name de 300 W (230 W réels, elle siffle), ventirad d'origine plein de poussière | « Largement suffisant pour huit agents. » |
+| **Correcte** | Raisin 5 5600, 16 Go, GéFarce GTX 1060, SSD NVMe, alim de marque | « Un peu juste. » |
+| **Datacenter de salon** | ThreadFlipper 7980X (128 threads), 128 Go ECC, une grappe de cartes datacenter, refroidissement à l'azote liquide | « Un peu juste. » |
+
+- **Ce qui ralentit les agents** : processeur saturé, swap, throttling au-delà de 90 °C.
+- **Ce qui éteint le PC** : alimentation dépassée, 100 °C, ou l'alim no-name qui lâche. Le PC redémarre sur le BIOS, et les agents ne repartent que si la config tient.
+- **La carte graphique** fait tourner un relecteur local : moins de bugs, moins de tokens. C'est la seule relecture de code du jeu.
+- **Le RAID 0** va très vite. Jusqu'au jour où il perd le projet en cours. Comme en vrai.
+
+> [!CAUTION]
+> Une RTX 4090 sur l'alim no-name fait redémarrer le PC. L'agent a classé l'incident en « hotfix réussi » : après tout, le PC est revenu.
+
+Les pièces s'achètent au store (touche `B`, rayon « Matériel PC ») ou sur matos.vibe, dans Firefaux. Installation à chaud, garantie zéro jour. Ne faites pas ça chez vous.
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (6 492 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 310 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -76,8 +101,9 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 1. Tapez `mistral`. C'est le pire agent, donc celui du début.
 2. Regardez la barre se remplir. Félicitations : vous faites du vibecoding.
 3. Appuyez sur `B` pour ouvrir le store. Achetez des agents, puis des skills pour qu'ils arrêtent de planter.
-4. Migrez vers Claude Code ou Codex. Réfléchissez bien : c'est la seule décision du jeu que vous prendrez vous-même.
-5. Fermez l'onglet. Revenez demain. Vos agents auront shippé pendant votre sommeil. Personne ne sait quoi.
+4. Quand le PC s'effondre (`htop` affiche « À TERRE »), achetez du matériel. Ou lancez moins d'agents, mais personne ne fait ça.
+5. Migrez vers Claude Code ou Codex. Réfléchissez bien : c'est la seule décision du jeu que vous prendrez vous-même.
+6. Fermez l'onglet. Revenez demain. Vos agents auront shippé pendant votre sommeil. Personne ne sait quoi.
 
 | Touche | Effet |
 |---|---|
@@ -91,6 +117,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 
 **Commandes à essayer** (`help` les liste toutes) :
 - `htop` ;
+- `sensors` et `free` ;
+- `firefaux` (ou `firefox`, il ne fait pas la différence) ;
 - `tskill codex` ;
 - `xfce` ;
 - `sudo apt install sl` ;
@@ -102,6 +130,9 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - Tout est débloqué et le ship est manuel (`npm run ship`).
 - Avec Claude Code ou Codex, le ship finit par passer.
 - Avec Mistral, il finit toujours en game over. C'est voulu. Enfin, on pense.
+- Vous y avez directement la config de rêve. L'agent dit que vous l'avez méritée.
+
+**Pressé ?** `?bios=0` saute la séquence de démarrage. Vous rateriez le pingouin.
 
 ## Captures
 
@@ -112,6 +143,10 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | <img src="assets/screen-store.png" alt="Le store : agents, orchestrateur, terminal, skills et migration vers Claude Code ou Codex."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
 | **Le bureau Xfce** | **Mistral, un vendredi** |
 | <img src="assets/screen-xfce.png" alt="Le bureau Xfce : Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
+| **Le BIOS, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
+| <img src="assets/screen-bios.png" alt="Écran du BIOS VibeAward : Céléri G530, 4 Go testés, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, disque dur qui gratte, alim no-name qui siffle, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
+| **htop : le PC est à terre** | **matos.vibe, dans Firefaux** |
+| <img src="assets/screen-htop-patate.png" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."> | <img src="assets/screen-matos.png" alt="Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."> |
 
 ## Roadmap
 
@@ -123,7 +158,9 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Ajouter une licence (l'agent voulait la MIT, puis la GPL, puis « les deux »)
 - [ ] Relire le code
 - [ ] Écrire des tests. Des vrais, pas `expect(true).toBe(true)`
-- [ ] Gestion du PC et des virus (vraiment prévu, celui-là)
+- [x] Gestion du PC (livré : vous commencez sur une patate)
+- [x] Un BIOS, parce qu'un idle game sans POST n'est pas sérieux
+- [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
 
@@ -132,11 +169,17 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 6 492 lignes ?**
+**Pourquoi un seul fichier de 7 310 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier.
 
 **Est-ce que ça scale ?**
-Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups.
+Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
+
+**Pourquoi le jeu démarre-t-il avec un BIOS ?**
+Charger 7 310 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+
+**Mon PC siffle, c'est normal ?**
+Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
 
 **Combien a coûté le projet en tokens ?**
 On ne regarde pas la facture. C'est un choix de santé mentale.
