@@ -130,14 +130,15 @@ footer p + p { margin-top: .5em; }
   <p class="lede">Tout ce qui a changé dans le jeu, de la mise à jour la plus récente à la plus ancienne. Les faits sortent de l’historique git, heures comprises. Les commentaires sortent de l’agent, qui n’a toujours rien relu. <span class="dim">Il a découvert pour l’occasion qu’on pouvait créer un deuxième fichier.</span></p>
   <nav class="links" aria-label="Liens">
     <a class="play" href="index.html">❯ Jouer</a>
+    <a href="wiki.html">Le wiki</a>
     <a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator">Le code sur GitHub</a>
     <a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commits/main/">Tous les commits</a>
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>8</b><span>mises à jour</span></div>
-    <div role="listitem"><b>12 h 33</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 8 320</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>9</b><span>mises à jour</span></div>
+    <div role="listitem"><b>13 h 09</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 8 506</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -145,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#9</span><time datetime="2026-11-23T00:36">00 h 36</time><a href="#machine-neuve">La machine neuve, et un wiki</a></li>
       <li><span class="n">#8</span><time datetime="2026-11-23T00:00">00 h 00</time><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></li>
       <li><span class="n">#7</span><time datetime="2026-11-22T21:51">21 h 51</time><a href="#boost">Les modes boost : ultracode, xhigh et Flash Answers</a></li>
       <li><span class="n">#6</span><time datetime="2026-11-22T20:05">20 h 05</time><a href="#plein-ecran">Plein écran au bouton</a></li>
@@ -156,8 +158,27 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="ia-locale" aria-labelledby="t8">
-    <p class="meta"><span class="n">#8</span><span class="new">dernière</span><time datetime="2026-11-23T00:00">23 nov. 2026 · 00 h 00</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/43a763b">43a763b</a><span>8 084 → 8 320 lignes</span></p>
+  <article class="maj latest" id="machine-neuve" aria-labelledby="t9">
+    <p class="meta"><span class="n">#9</span><span class="new">dernière</span><time datetime="2026-11-23T00:36">23 nov. 2026 · 00 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/df8a941">df8a941</a><span>8 320 → 8 506 lignes</span></p>
+    <h2 id="t9"><a href="#machine-neuve">La machine neuve, et un wiki</a></h2>
+    <ul>
+      <li>Une nouvelle partie démarre sur une machine neuve : rien n’est installé, pas même votre agent. <code>mistral</code> répond « command not found », avec la commande qui l’installe.</li>
+      <li>Vibe CLI s’installe comme le vrai : <code>curl -LsSf https://mistral.ai/vibe/install.sh | bash</code>, ou <code>uv tool install mistral-vibe</code>. <code>pip install</code> répond « externally-managed-environment », comme sur Debian.</li>
+      <li>Codex : <code>sudo npm install -g @openai/codex</code> (sans sudo : EACCES ; <code>codex</code> tout court : 404). Claude Code : <code>curl -fsSL https://claude.ai/install.sh | bash</code>. Lolama aussi : <code>curl -fsSL https://lolama.vibe/install.sh | sh</code>.</li>
+      <li>Une licence achetée ne bascule plus rien tant que le CLI n’est pas installé : l’onglet Plateformes affiche « CLI à installer ». On peut installer avant de payer.</li>
+      <li>Le bureau et les moniteurs s’installent avec apt : <code>sudo apt install htop atop lm-sensors xfce4 firefaux</code> (<code>xfce</code> et <code>sensors</code> sont compris). Ils restent installés d’une partie continuée à l’autre.</li>
+      <li>Les anciennes parties gardent tout ce qu’elles avaient. <code>?setup=0</code> livre une machine déjà installée.</li>
+      <li>Le wiki (<a href="wiki.html">wiki.html</a>) : toutes les commandes, les touches, l’installation, les plateformes, le store, le matériel et les pannes, avec une recherche. Ses tableaux sont extraits du jeu. On l’ouvre depuis l’écran titre (Aide) ou avec la commande <code>wiki</code>.</li>
+    </ul>
+    <blockquote>« J’ai écrit un wiki. Je ne l’ai pas lu, mais je l’ai écrit. »<cite>l’agent, 00 h 36</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-setup.png" title="Voir en grand"><img src="assets/screen-setup.png" width="900" height="540" loading="lazy" alt="Le terminal d'une partie neuve : « zsh: command not found: mistral », la commande curl qui installe Vibe CLI, pip qui répond externally-managed-environment, puis l'installation de Vibe CLI et de htop."></a><figcaption>Machine neuve : d’abord installer l’agent.</figcaption></figure>
+      <figure><a href="assets/screen-wiki.png" title="Voir en grand"><img src="assets/screen-wiki.png" width="900" height="540" loading="lazy" alt="Le wiki du jeu : le sommaire à gauche, la recherche, et la section des commandes du terminal."></a><figcaption>Le wiki : 12 sections, une recherche.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="ia-locale" aria-labelledby="t8">
+    <p class="meta"><span class="n">#8</span><time datetime="2026-11-23T00:00">23 nov. 2026 · 00 h 00</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/43a763b">43a763b</a><span>8 084 → 8 320 lignes</span></p>
     <h2 id="t8"><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></h2>
     <ul>
       <li>GitHype (<code>githype.vibe</code>), le faux GitHub, arrive dans Firefaux : les tendances du jour, et StudioLM à installer depuis sa page. <code>github.com</code> y mène : un agent a racheté le nom de domaine pendant un ship.</li>

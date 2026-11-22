@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 8 320">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 8 506">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -39,6 +39,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 
 *Liste rédigée par l'agent. Non vérifiée. Probablement vraie à 60 %.*
 
+- **Machine neuve.** Une nouvelle partie démarre sur un PC où rien n'est installé, pas même votre agent. Vibe CLI s'installe avec `curl … | bash`, Codex avec `sudo npm install -g`, le bureau et les moniteurs avec `sudo apt install`. `pip` refuse, comme sur une vraie Debian. L'agent appelle ça « l'onboarding ».
 - **Agentic-first.** De 1 à 8 agents en parallèle, plus un orchestrateur qui délègue tout, y compris la délégation.
 - **Zero-shot deploy.** La barre de ship se remplit toute seule et le projet part en prod sans que personne sache ce qu'il contient. Exactement comme en vrai.
 - **Hallucination-native.** Les agents Mistral inventent des fichiers, des API, des bugs et, une fois, un collègue.
@@ -57,7 +58,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 8 320 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier.
+- **Monolithe artisanal.** 1 fichier, 8 506 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), avec toutes les commandes, le store et le matériel.
 
 ## Le matériel
 
@@ -124,7 +125,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (8 320 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (8 506 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -147,18 +148,19 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 
 ## Comment jouer
 
-1. Tapez `mistral`. C'est le pire agent, donc celui du début.
-2. Regardez la barre se remplir. Félicitations : vous faites du vibecoding.
-3. Appuyez sur `B` pour ouvrir le store. Achetez des agents, puis des skills pour qu'ils arrêtent de planter.
-4. Quand le PC s'effondre (`htop` affiche « À TERRE », ou l'écran affiche un kernel panic), achetez du matériel. Ou lancez moins d'agents, mais personne ne fait ça.
-5. Achetez Codex, puis Claude Code (onglet Plateformes du store). Gardez les autres équipes en arrière-plan si le PC tient. C'est la seule décision du jeu que vous prendrez vous-même, et vous pouvez maintenant la prendre trois fois.
-6. Fermez l'onglet. Revenez demain. Vos agents auront shippé pendant votre sommeil. Personne ne sait quoi.
+1. Installez votre premier agent : `curl -LsSf https://mistral.ai/vibe/install.sh | bash`. La machine est neuve, rien n'y est installé.
+2. Tapez `mistral`. C'est le pire agent, donc celui du début.
+3. Regardez la barre se remplir. Félicitations : vous faites du vibecoding.
+4. Appuyez sur `B` pour ouvrir le store. Achetez des agents, puis des skills pour qu'ils arrêtent de planter.
+5. Quand le PC s'effondre (`htop` affiche « À TERRE », ou l'écran affiche un kernel panic), achetez du matériel. Ou lancez moins d'agents, mais personne ne fait ça.
+6. Achetez Codex, puis Claude Code (onglet Plateformes du store), et installez leur CLI dans le terminal. Gardez les autres équipes en arrière-plan si le PC tient. C'est la seule décision du jeu que vous prendrez vous-même, et vous pouvez maintenant la prendre trois fois.
+7. Fermez l'onglet. Revenez demain. Vos agents auront shippé pendant votre sommeil. Personne ne sait quoi.
 
 | Touche | Effet |
 |---|---|
 | `A` | choisir les agents |
 | `L` | changer la disposition |
-| `O` | parler à l'orchestrateur (il ne vous écoute pas) |
+| `O` | déplacer l'orchestrateur : haut, gauche, droite, aucun (il ne vous écoute pas pour autant) |
 | `T` | ouvrir le terminal |
 | `S` | shipper (en mode libre) |
 | `B` | le store |
@@ -166,7 +168,9 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | `M` | le menu |
 | `F` | plein écran (ou le bouton `⤢`, en bas à droite du terminal et dans la barre de Xfce) |
 
-**Commandes à essayer** (`help` les liste toutes) :
+**Commandes à essayer** (`help` les liste toutes, le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html) les explique) :
+- `sudo apt install htop xfce4 firefaux`, sur la machine neuve ;
+- `curl -fsSL https://claude.ai/install.sh | bash` et `sudo npm install -g @openai/codex`, une fois les licences achetées ;
 - `htop` ;
 - `plateformes`, `switch codex` et `bg mistral` ;
 - `ultracode` (ou `xhigh`, `flash`), une fois le mode acheté ;
@@ -186,7 +190,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - Avec Mistral, il finit toujours en game over. C'est voulu. Enfin, on pense.
 - Vous y avez directement la config de rêve. L'agent dit que vous l'avez méritée.
 
-**Pressé ?** `?bios=0` saute la séquence de démarrage. Vous rateriez le pingouin.
+**Pressé ?** `?bios=0` saute la séquence de démarrage. Vous rateriez le pingouin. `?setup=0` livre la machine déjà installée : paquets et CLI d'agents.
 
 ## Captures
 
@@ -227,6 +231,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Une page de nouveautés, pour savoir ce qui a cassé, et à quelle heure
 - [x] Des modes boost, une minute par jour, comme les pauses café
 - [x] Des modèles locaux, gratuits, qui font redémarrer le PC
+- [x] Une machine neuve, à installer soi-même, comme un vrai lundi
+- [x] Un wiki, que personne ne lira (l'agent non plus)
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -236,14 +242,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 8 320 lignes ?**
+**Pourquoi un seul fichier de 8 506 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 8 320 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 8 506 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
