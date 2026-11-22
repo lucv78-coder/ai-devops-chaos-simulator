@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 310">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 7 548">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -51,7 +51,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 7 310 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
+- **Monolithe artisanal.** 1 fichier, 7 548 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté.
 
 ## Le matériel
 
@@ -59,23 +59,33 @@ Le jeu tourne maintenant sur un vrai faux PC, et il commence par terre.
 
 | Config | Composants | Avis de l'agent |
 |---|---|---|
-| **Patate** (départ) | Céléri G530, 4 Go de DDR3 dépareillés, chipset intégré, disque dur à 5 400 tr/min qui gratte, alim no-name de 300 W (230 W réels, elle siffle), ventirad d'origine plein de poussière | « Largement suffisant pour huit agents. » |
-| **Correcte** | Raisin 5 5600, 16 Go, GéFarce GTX 1060, SSD NVMe, alim de marque | « Un peu juste. » |
-| **Datacenter de salon** | ThreadFlipper 7980X (128 threads), 128 Go ECC, une grappe de cartes datacenter, refroidissement à l'azote liquide | « Un peu juste. » |
+| **Patate** (départ) | Céléri G530 sur une carte mère H61 de 2011, 4 Go de DDR3 dépareillés, chipset intégré, disque dur à 5 400 tr/min qui gratte, alim no-name de 300 W (230 W réels, elle siffle), ventirad d'origine plein de poussière | « Largement suffisant pour huit agents. » |
+| **Correcte** | Raisin 5 5600 sur une Raisinboard B450, 16 Go de DDR4, GéFarce GTX 1060, SSD NVMe, alim de marque | « Un peu juste. » |
+| **Datacenter de salon** | ThreadFlipper 7980X (128 threads) sur sa TRX50, 128 Go de DDR5 ECC, une grappe de cartes datacenter, refroidissement à l'azote liquide | « Un peu juste. » |
 
 - **Ce qui ralentit les agents** : processeur saturé, swap, throttling au-delà de 90 °C.
 - **Ce qui éteint le PC** : alimentation dépassée, 100 °C, ou l'alim no-name qui lâche. Le PC redémarre sur le BIOS, et les agents ne repartent que si la config tient.
 - **La carte graphique** fait tourner un relecteur local : moins de bugs, moins de tokens. C'est la seule relecture de code du jeu.
 - **Le RAID 0** va très vite. Jusqu'au jour où il perd le projet en cours. Comme en vrai.
 
-> [!CAUTION]
-> Une RTX 4090 sur l'alim no-name fait redémarrer le PC. L'agent a classé l'incident en « hotfix réussi » : après tout, le PC est revenu.
+### Acheter du matos (sans tout faire fondre)
 
-Les pièces s'achètent au store (touche `B`, rayon « Matériel PC ») ou sur matos.vibe, dans Firefaux. Installation à chaud, garantie zéro jour. Ne faites pas ça chez vous.
+*« Il suffit de changer le processeur. » Le vendeur, avant de découvrir le socket.*
+
+- **Le panier.** Rien ne s'achète en un clic : on ajoute au panier, puis on valide la commande. C'est le même panier dans le store (touche `B`, rayon « Matériel PC ») et sur matos.vibe, dans Firefaux.
+- **La carte mère décide.** Le processeur suit son socket (LGA1155, RM4, RM5, LGA1851, sTF5) et ses VRM, la RAM sa génération de DDR. Changer de plateforme, c'est carte mère, processeur et RAM d'un coup. L'agent appelle ça « une petite mise à jour ».
+- **Les slots aussi.** Pas de SSD NVMe sans emplacement M.2 (la carte mère de départ n'en a aucun, elle date de 2011), pas de grappe de 4 GPU sans 4 slots PCIe.
+- **La jauge d'alimentation.** Processeur + carte graphique + 45 W pour le reste, face à l'étiquette de l'alim. Au-delà de 100 %, la commande est bloquée.
+- **Incompatible = impossible.** Le bouton dit pourquoi (« carte mère RM5 requise ») et propose la pièce la moins chère qui règle le problème. Seules la carte mère et l'alim entrent toujours dans le panier : ce sont elles qui décident du reste.
+
+Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pas ça chez vous.
+
+> [!CAUTION]
+> Matos.vibe refuse maintenant une RTX 4090 sur l'alim no-name. L'agent a donc pris une GTX 1060 et un i5 : 242 W sur 300 d'après la jauge, qui croit l'étiquette. L'alim, elle, coupe vers 230. Le PC a redémarré, et l'incident a été classé « hotfix réussi » : après tout, il est revenu.
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 310 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (7 548 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -147,6 +157,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | <img src="assets/screen-bios.png" alt="Écran du BIOS VibeAward : Céléri G530, 4 Go testés, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, disque dur qui gratte, alim no-name qui siffle, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
 | **htop : le PC est à terre** | **matos.vibe, dans Firefaux** |
 | <img src="assets/screen-htop-patate.png" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."> | <img src="assets/screen-matos.png" alt="Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."> |
+| **Le rayon Matériel : commande bloquée** | **Le panier de matos.vibe** |
+| <img src="assets/screen-store-pc.png" alt="Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."> | <img src="assets/screen-panier.png" alt="Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300 en jaune, l'avis client sur l'alim no-name, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."> |
 
 ## Roadmap
 
@@ -160,6 +172,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [ ] Écrire des tests. Des vrais, pas `expect(true).toBe(true)`
 - [x] Gestion du PC (livré : vous commencez sur une patate)
 - [x] Un BIOS, parce qu'un idle game sans POST n'est pas sérieux
+- [x] Des sockets et un panier, parce qu'acheter un processeur en un clic n'était pas assez douloureux
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -169,17 +182,20 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 7 310 lignes ?**
+**Pourquoi un seul fichier de 7 548 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 7 310 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 7 548 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
+
+**Pourquoi je ne peux pas acheter le Raisin 7 ?**
+Socket RM5. Il faut la carte mère qui va avec, et comme elle ne prend que de la DDR5, la RAM aussi. Bienvenue dans le monde merveilleux des plateformes.
 
 **Combien a coûté le projet en tokens ?**
 On ne regarde pas la facture. C'est un choix de santé mentale.
