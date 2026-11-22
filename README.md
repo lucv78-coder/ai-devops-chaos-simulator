@@ -156,18 +156,18 @@ Ouvrez une pull request. Un agent la mergera sans la lire, comme le reste. Le pr
 
 ## Contributeurs
 
-| | Contributeur | Rôle | Contribution |
+| Avatar | Contributeur | Rôle | Contribution |
 |:-:|---|---|---|
-| <img src="assets/agents/lvt-dev.svg" width="48" alt=""> | **LVT-DEV** | humain (espèce rare) · prompt engineer en chef | A tapé « vas-y » 847 fois. A retiré les émojis. Ne sait pas ce que fait la ligne 4 127. |
-| <img src="assets/agents/claude.svg" width="48" alt=""> | **Claude** (Opus 5.5) | agent IA · le seul vrai développeur | A écrit à peu près tout. N'a jamais été relu. Signe ses commits, au moins. |
-| <img src="assets/agents/opus-3.svg" width="48" alt=""> | **opus-3** | orchestrateur | A délégué la délégation, puis la réunion sur la délégation. |
-| <img src="assets/agents/sonnet-2.svg" width="48" alt=""> | **sonnet-2** | refactoring | A réécrit le moteur en Rust, puis l'a remis en JavaScript. Dans le même commit. |
-| <img src="assets/agents/haiku-7.svg" width="48" alt=""> | **haiku-7** | documentation | *La prod est tombée / le vendredi soir, sans tests / on merge quand même.* |
-| <img src="assets/agents/fable-1.svg" width="48" alt=""> | **fable-1** | messages de commit | « Il était une fois un fix. » Chaque commit, depuis le début. |
-| <img src="assets/agents/sol-2.svg" width="48" alt=""> | **sol-2** | pull requests | A ouvert 412 PR, toutes intitulées « fix ». |
-| <img src="assets/agents/luna-4.svg" width="48" alt=""> | **luna-4** | performance | A optimisé une boucle vide. Gain : 0 ms, mais avec conviction. |
-| <img src="assets/agents/codestral-1.svg" width="48" alt=""> | **codestral-1** | SRE | A supprimé la prod 3 fois. Redémarre très bien. |
-| <img src="assets/agents/mistral-large.svg" width="48" alt=""> | **mistral-large** | architecte | A ajouté Kubernetes. Personne ne sait pourquoi. Lui non plus. |
+| <img src="assets/agents/lvt-dev.svg" width="48" height="48" alt=""> | **LVT-DEV** | humain (espèce rare) · prompt engineer en chef | A tapé « vas-y » 847 fois. A retiré les émojis. Ne sait pas ce que fait la ligne 4 127. |
+| <img src="assets/agents/claude.svg" width="48" height="48" alt=""> | **Claude** (Opus 5.5) | agent IA · le seul vrai développeur | A écrit à peu près tout. N'a jamais été relu. Signe ses commits, au moins. |
+| <img src="assets/agents/opus-3.svg" width="48" height="48" alt=""> | **opus-3** | orchestrateur | A délégué la délégation, puis la réunion sur la délégation. |
+| <img src="assets/agents/sonnet-2.svg" width="48" height="48" alt=""> | **sonnet-2** | refactoring | A réécrit le moteur en Rust, puis l'a remis en JavaScript. Dans le même commit. |
+| <img src="assets/agents/haiku-7.svg" width="48" height="48" alt=""> | **haiku-7** | documentation | *La prod est tombée / le vendredi soir, sans tests / on merge quand même.* |
+| <img src="assets/agents/fable-1.svg" width="48" height="48" alt=""> | **fable-1** | messages de commit | « Il était une fois un fix. » Chaque commit, depuis le début. |
+| <img src="assets/agents/sol-2.svg" width="48" height="48" alt=""> | **sol-2** | pull requests | A ouvert 412 PR, toutes intitulées « fix ». |
+| <img src="assets/agents/luna-4.svg" width="48" height="48" alt=""> | **luna-4** | performance | A optimisé une boucle vide. Gain : 0 ms, mais avec conviction. |
+| <img src="assets/agents/codestral-1.svg" width="48" height="48" alt=""> | **codestral-1** | SRE | A supprimé la prod 3 fois. Redémarre très bien. |
+| <img src="assets/agents/mistral-large.svg" width="48" height="48" alt=""> | **mistral-large** | architecte | A ajouté Kubernetes. Personne ne sait pourquoi. Lui non plus. |
 
 > Les agents ci-dessus, sauf Claude, sont des personnages du jeu. Aucun modèle n'a été blessé pendant le développement. Quelques tokens, si.
 
