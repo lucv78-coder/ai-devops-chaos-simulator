@@ -613,6 +613,90 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .pv-page .foot { margin-top: 2.5em; padding-top: .5em; border-top: 1px solid currentColor; font-size: .8em; opacity: .8; }
 .pv-page pre { white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: .85em; }
 .pv-empty { margin-top: 3em; color: var(--dim); text-align: center; white-space: normal; }
+/* navigateur web (Firefaux) : barre d'adresse, marque-pages, pages du faux Web */
+.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; padding: 0; }
+.wb-bar { grid-row: 1; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.wb-bar > button { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--fg); }
+.wb-bar > button:disabled { color: var(--dim2); cursor: default; }
+.wb-bar > button:not(:disabled):hover { background: rgba(255, 255, 255, .08); }
+.wb-url { flex: 1; min-width: 0; display: flex; align-items: center; gap: .8ch; padding: 0 .8ch; border: 1px solid var(--sep); border-radius: 3px; background: var(--bg2); }
+.wb-url:focus-within { border-color: var(--orange); }
+.wb-url .sec { flex: none; color: var(--red); }
+.wb-url input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; }
+.wb-marks { grid-row: 2; display: flex; gap: .3ch; min-width: 0; padding: .15em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); overflow: hidden; white-space: nowrap; }
+.wb-marks button { flex: none; padding: 0 .9ch; border-radius: 2px; color: var(--dim); }
+.wb-marks button:hover, .wb-marks button.on { color: var(--fg); background: rgba(255, 255, 255, .07); }
+.wb-page { grid-row: 3; position: relative; min-height: 0; overflow: auto; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.wb-load { position: absolute; left: 0; top: 0; z-index: 1; height: 2px; width: 0; background: var(--orange); }
+.wb-status { grid-row: 4; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.wb-status.note { color: var(--yellow); }
+.wp { max-width: 110ch; margin: 0 auto; display: grid; gap: .9em; }
+.wp h1 { font-size: 1.6em; line-height: 1.2; color: var(--orange); }
+.wp h2 { margin-top: .5em; padding-bottom: .2em; border-bottom: 1px solid var(--sep); font-size: 1.1em; color: var(--fg); }
+.wp p, .wp li { color: var(--fg); }
+.wp .dim, .wp p.dim { color: var(--dim); }
+.wp a { color: var(--blue); text-decoration: underline; cursor: pointer; }
+.wp-hero { display: grid; justify-items: center; gap: .8em; padding: 1.6em 0 .8em; text-align: center; }
+.wp-logo { font-size: 2.8em; font-weight: 700; letter-spacing: .02em; }
+.wp-search { display: flex; width: min(64ch, 100%); padding: .3em 1.6ch; border: 1px solid var(--sep); border-radius: 999px; background: var(--panel); }
+.wp-search:focus-within { border-color: var(--orange); }
+.wp-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; }
+.wp-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(24ch, 1fr)); gap: 1ch; }
+.wp-tile { display: grid; gap: .2em; padding: .8em 1.4ch; border: 1px solid var(--sep); border-radius: 6px; background: var(--panel); text-align: left; color: var(--fg); }
+.wp-tile:hover { border-color: var(--orange); }
+.wp-tile b { color: var(--orange); }
+.wp-tile span { color: var(--dim); white-space: normal; }
+.wp-band { padding: .6em 1.4ch; border: 1px solid var(--sep); border-left: 3px solid var(--orange); background: var(--panel); }
+.wp-band.bad { border-left-color: var(--red); }
+.wp-band.ok { border-left-color: var(--green); }
+.wp-nav { display: flex; flex-wrap: wrap; gap: .6ch; }
+.wp-nav button { padding: .1em 1.2ch; border: 1px solid var(--sep); border-radius: 999px; color: var(--fg); }
+.wp-nav button:hover { border-color: var(--orange); }
+.wp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(32ch, 1fr)); gap: 1ch; }
+.wp-card { display: grid; grid-template-rows: auto auto auto 1fr auto; gap: .35em; padding: .8em 1.4ch; border: 1px solid var(--sep); border-radius: 6px; background: var(--panel); }
+.wp-card.own { border-color: var(--green); }
+.wp-card.old { opacity: .5; }
+.wp-card .nm { font-weight: 700; color: var(--fg); }
+.wp-card .spec { color: var(--blue); }
+.wp-card .warn { color: var(--yellow); }
+.wp-card .warn.bad { color: var(--red); }
+.wp-card .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5em 1ch; margin-top: .2em; }
+.wp-card .price { color: var(--orange); font-weight: 700; font-size: 1.1em; }
+.wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
+.wp-buy { padding: .15em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--orange); color: var(--ink); font-weight: 700; }
+.wp-buy:disabled { border-color: var(--sep); background: none; color: var(--dim); cursor: default; }
+.wp-err { display: grid; justify-items: center; gap: .6em; padding: 2.5em 0; text-align: center; }
+.wp-err .big { font-size: 1.8em; font-weight: 700; color: var(--red); overflow-wrap: anywhere; }
+.wp-res { display: grid; gap: .1em; }
+.wp-res .u { color: var(--green); font-size: .9em; overflow-wrap: anywhere; }
+@container (max-width: 60ch) { .wb-marks { display: none; } .wb-page { padding: 1em 1.5ch; } .wp-grid { grid-template-columns: minmax(0, 1fr); } }
+/* store : deux rayons */
+.sto-tabs { display: flex; gap: .6ch; margin: .1em 0 .3em; }
+.sto-tabs button { padding: .1em 1.4ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--dim); }
+.sto-tabs button[aria-selected="true"] { border-color: var(--orange); color: var(--fg); font-weight: 700; }
+.st-wipe.armed { border-color: var(--red) !important; background: var(--red) !important; color: var(--ink) !important; font-weight: 700; }
+/* allumage : BIOS, GRUB, noyau, logo de la distribution, systemd */
+#bios { position: fixed; inset: 0; z-index: 11; overflow: hidden; padding: 1em 2ch; background: #000; color: var(--fg); white-space: pre; line-height: 1.35; font-size: clamp(8px, 2.1vw, 1em); cursor: default; }
+#bios[hidden] { display: none; }
+#bios.out { opacity: 0; pointer-events: none; transition: opacity .35s; }
+#bios .ln { min-height: 1.35em; }
+#bios .dim { color: var(--dim); }
+.bi-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2ch; }
+.bi-post { min-width: 0; overflow: hidden; }
+.bi-es { flex: none; width: min(22ch, 26vw); }
+.bi-es svg { display: block; width: 100%; height: auto; }
+.bi-foot { position: absolute; left: 2ch; bottom: 1em; }
+.bi-skip { position: absolute; right: 2ch; bottom: 1em; color: var(--dim2); }
+.bi-grub { width: min(80ch, 100%); margin: 1.5em auto 0; }
+.bi-box { padding: .3em 1ch; border: 1px solid var(--fg); overflow: hidden; }
+.bi-box .on { background: var(--fg); color: #000; }
+.bi-splash { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .7em; text-align: center; }
+.bi-tux { margin: 0; color: var(--fg); font: inherit; font-size: 1.55em; line-height: 1.12; text-align: left; }
+.bi-tux .c { color: var(--blue); } .bi-tux .y { color: var(--yellow); } .bi-tux .o { color: var(--orange); }
+.bi-name { color: var(--orange); font-weight: 700; }
+.bi-prog { width: 40ch; max-width: 80vw; height: .7em; border: 1px solid var(--dim2); }
+.bi-prog i { display: block; width: 0; height: 100%; background: var(--orange); transition: width .15s; }
+.bi-ok { color: var(--green); } .bi-fail { color: var(--red); } .bi-warn { color: var(--yellow); }
 @container (max-width: 96ch) { .fm-row { grid-template-columns: 2ch minmax(0, 1fr) 14ch 14ch; } .fm-row .fm-t { display: none; } }   /* fenêtre étroite : moins de colonnes */
 @container (max-width: 78ch) { .fm-main { grid-template-columns: minmax(0, 1fr); } .fm-side { display: none; } }
 @container (max-width: 50ch) { .fm-row { grid-template-columns: 2ch minmax(0, 1fr) 14ch; } .fm-row .fm-d { display: none; } }
@@ -806,17 +890,20 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="pk-actions">
     <button type="button" class="primary" id="st-close">Fermer</button>
     <button type="button" id="st-reset">Réglages d’origine</button>
+    <button type="button" id="st-wipe" class="st-wipe" hidden>Réinitialiser la partie</button>
   </div>
 </dialog>
 <dialog id="store" aria-labelledby="sto-title">
   <p class="pk-title" id="sto-title">Store des agents</p>
   <p class="pk-sub" id="sto-sub"></p>
+  <div class="sto-tabs" role="tablist" aria-label="Rayons"><button type="button" role="tab" data-sto="ia" aria-selected="true">Agents IA</button><button type="button" role="tab" data-sto="pc" aria-selected="false">Matériel PC</button></div>
   <div id="sto-list"></div>
   <p class="st-desc" id="sto-msg" aria-live="polite"></p>
   <div class="pk-actions"><button type="button" class="primary" id="sto-close">Fermer</button></div>
 </dialog>
 <div id="fps" hidden aria-hidden="true"></div>
 <div id="boot" aria-hidden="true"></div>
+<div id="bios" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1516,10 +1603,11 @@ let chaos = false;
    Claude Code ou Codex. ?idle=0 : bac à sable, tout débloqué (les tests s'en servent). Partie sauvegardée dans ce navigateur. */
 const IDLE = Q.get('idle') !== '0';
 const SAVE_KEY = 'aidcs:save';
-const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, agents: 1, term: 0, sk: {}, lead: 0,
+const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, t: Date.now() });
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...o } : G_DEF(); } catch { return G_DEF(); } })();
-const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0;
+G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
+const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
 function saveGame() {
   if (!IDLE) return;
   G.t = Date.now();
@@ -2138,10 +2226,10 @@ const PRE_HELP_LINES = () => [
   [H(['  mistral           ', 'org'], 'lancer des agents Mistral (Vibe CLI)… qui hallucinent, se sabotent et plantent'), '', 20],
   [H(['    --model <nom>   ', 'org'], modelsOf('mistral').join(' · ')), '', 20],
   [H(['    --agents <n>    ', 'org'], `de 1 à ${AGENTS.length} agents, quel que soit le fournisseur`), '', 20],
-  [H(['  htop · atop       ', 'org'], 'moniteurs système · q pour quitter'), '', 20],
+  [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free)'), '', 20],
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, Claude Code ou Codex'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
-  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
+  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
   [H(['  fallout · bunker  ', 'org'], 'terminal de bunker antiatomique (hack : forcer le coffre · exit : remonter)'), '', 20],
   [H(['  apt · apt-get     ', 'org'], 'installer des paquets : sudo apt install cowsay (essayez aussi sl, neofetch…)'), '', 20],
@@ -2725,9 +2813,9 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -2897,6 +2985,7 @@ const CATALOG = {
   'docker.io': ['26.1.5+dfsg1-4', 31240, 'docker', 'des conteneurs, dans des conteneurs'],
   emacs: ['1:29.4+1-4', 41200, 'emacs', 'un système d’exploitation, avec un éditeur de texte'],
   fastfetch: ['2.27.1-1', 980, 'fastfetch', 'la config de la machine, en plus rapide'],
+  firefaux: ['142.0-vibe1', 98200, 'firefaux', 'le navigateur web (40 onglets déjà ouverts)'],
   fortune: ['1:1.99.1-7.3', 54, 'fortune', 'une citation au hasard, souvent vraie'],
   git: ['1:2.45.2-1', 9870, 'git', 'gestion de versions (et de conflits)'],
   golang: ['2:1.23~1', 120, 'go', 'le langage Go'],
@@ -2923,7 +3012,7 @@ const CATALOG = {
   vim: ['2:9.1.0861-1', 3910, 'vim', 'éditeur de texte (pour en sortir : voir Stack Overflow)'],
   zsh: ['5.9-6', 2890, '', 'le shell de ce terminal (essentiel ici)'],
 };
-const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'mousepad', 'nano',
+const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'firefaux', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'mousepad', 'nano',
   'nodejs', 'npm', 'python3', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'zsh'];
 let installed = new Set(DEFAULT_INSTALLED), aptUpgradable = 412;
 // paquets essentiels : [chemin affiché, dossiers supprimés] ; les enlever fait tomber le système
@@ -2937,7 +3026,7 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril' };
+const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux' };
 const APT_BYE = { steam: '412 jeux jamais lancés vous disent adieu.', sudo: 'sudo est parti. Pour le réinstaller, il faudra… sudo.',
   vim: 'Vous avez enfin réussi à quitter vim.', git: 'Plus de git. Plus de conflits non plus.', npm: 'npm désinstallé. node_modules, lui, reste.' };
 const READING = [['Lecture des listes de paquets... Fait', '', 220], ['Construction de l’arbre des dépendances... Fait', '', 160], ['Lecture des informations d’état... Fait', '', 120]];
@@ -3481,10 +3570,10 @@ function fetchLines() {                          // neofetch / fastfetch : la vr
   const s = sysSample(), up = Math.floor(s.up), d = Math.floor(up / 86400), h = Math.floor(up % 86400 / 3600), m = Math.floor(up % 3600 / 60);
   const info = [
     tx(USER, 'org b') + '@' + tx('prod-01', 'org b'), esc('-'.repeat(USER.length + 8)),
-    ['OS', 'Vibian GNU/Linux 13 (friday) x86_64'], ['Host', 'prod-01 (un PC de jeu promu serveur de prod)'], ['Kernel', '6.11.0-friday'],
+    ['OS', 'Vibian GNU/Linux 13 (friday) x86_64'], ['Host', `prod-01 (${pcDiag().host})`], ['Kernel', '6.11.0-friday'],
     ['Uptime', `${d ? d + ' days, ' : ''}${h} hours, ${m} mins`], ['Packages', `${2150 + installed.size} (dpkg), ${num(nmCount())} (npm)`],
-    ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', 'AMD Ryzen 7 7800X3D (16) @ 5.050GHz'],
-    ['GPU', 'AMD Radeon RX 7900 XTX (24 Go)'], ['Memory', `${Math.round(s.used)}MiB / ${Math.round(HW.mem)}MiB`], ['Disk (/)', '1.2T / 1.8T (66%) · NVMe 2 To'],
+    ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', `${part('cpu').n} (${HW.threads}) @ ${part('cpu').ghz.toFixed(3)}GHz`],
+    ['GPU', part('gpu').n], ['Memory', `${Math.round(s.used)}MiB / ${Math.round(HW.mem)}MiB`], ['Disk (/)', part('disk').n],
     ['Agents', claudeOn ? `${panes.length} × ${cfg.model} via ${cli().label} (orchestrateur ${MODELS[LEAD_MODEL].name})` : 'aucun (ni claude, ni codex, ni mistral lancé)'],
     '', ['errc', 'wrn', 'okc', 'cy', 'blu', 'mg', 'org', 'fgc'].map(c => tx('███', c)).join(''),
   ];
@@ -3536,7 +3625,7 @@ async function runCommand(raw) {
     shellPrint(H(['zsh: command not found: ', 'errc'], 'hack'));
     return shellPrint('Le coffre de prod se force depuis le bunker : tapez fallout, puis hack.', 'dim');
   }
-  const progCmd = head === 'sudo' ? rest[0] : head;
+  const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg;   // firefox, chromium… : c'est Firefaux
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
     if (!installed.has(progCmd)) return notInstalled(progCmd, progCmd);
     if (PROGS[progCmd].gui && !xfOn) {           // thunar sans bureau : comme sous Linux, pas d'affichage
@@ -3549,6 +3638,8 @@ async function runCommand(raw) {
     return;
   }
   if (KILL_CMDS.includes(progCmd)) return killCmd(progCmd, head === 'sudo' ? rest.slice(1) : rest);   // tskill codex, tskill htop…
+  if (head === 'sensors') return printLines(sensorsLines());                 // l'état du PC : température, alimentation
+  if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
     return printLines([
       [H(['AI DevOps Chaos Simulator', 'fgc'], ' · © 2026 ', ['LVT-DEV', 'org']), '', 20],
@@ -3862,6 +3953,7 @@ async function stopAgents(word) {                // le CLI s'arrête : retour au
    avec icon, menu et desc, il apparaît aussi dans le menu Applications du bureau Xfce (et s'ouvre en fenêtre). */
 const APP_PARTS = [$('#top'), $('#hud'), work];
 const tabsEl = $('#tabs');
+const BROWSERS = ['firefox', 'chromium', 'chrome', 'google-chrome', 'navigateur', 'browser', 'www-browser', 'x-www-browser', 'sensible-browser'];
 const PROGS = {
   zsh: { label: 'zsh' },
   claude: { label: 'claude' },
@@ -3871,6 +3963,7 @@ const PROGS = {
   thunar: { label: 'Fichiers', delay: 1000, gui: true, cat: 'Accessoires', icon: '▣', menu: 'Gestionnaire de fichiers', desc: 'l’arborescence de prod-01 · clic droit pour supprimer', make: () => makeThunar() },
   mousepad: { label: 'Éditeur', delay: 1000, gui: true, cat: 'Accessoires', icon: '✎', menu: 'Éditeur de texte', desc: 'Mousepad · .txt, .md, config, code', make: () => makeEditor() },
   atril: { label: 'Visionneuse', delay: 1000, gui: true, cat: 'Accessoires', icon: '▧', menu: 'Visionneuse de documents', desc: 'Atril · les PDF', make: () => makeViewer() },
+  firefaux: { label: 'Firefaux', delay: 1000, gui: true, cat: 'Internet', icon: '◍', menu: 'Navigateur web (Firefaux)', desc: 'le Web, en moins bien · store IA et matos.vibe', make: () => makeBrowser() },
 };
 function renderTabs() {
   tabsEl.innerHTML = tabs.map((t, i) => {
@@ -3952,12 +4045,123 @@ addEventListener('keydown', e => {
 }, true);
 
 /* ---------- faux moniteurs système : htop et atop ----------
-   La machine : Ryzen 7 7800X3D (8 cœurs, 16 threads), 64 Go de DDR5 (62,5 Gio visibles, comme sur un vrai htop :
-   le noyau et l'iGPU se servent), NVMe 2 To, Radeon RX 7900 XTX 24 Go.
+   La machine suit le matériel installé (PARTS, plus bas) : un PC patate au début du mode idle, la machine de rêve en mode libre.
    Au repos tant que claude n'est pas lancé, saturée par les agents, en fusion pendant un ship raté. */
 const HW = { host: 'prod-01', threads: 16, mem: 62.5 * 1024, swap: 8 * 1024, vram: 24 * 1024, gpu: '0/7900 XTX',
   info: 'AMD Ryzen 7 7800X3D · Radeon RX 7900 XTX 24 Go · 64 Go DDR5 · NVMe 2 To' };   // Mo
 let bootT = Date.now() - ri(3 * 86400, 9 * 86400) * 1000;                             // un crash système le remet à zéro
+
+/* ---------- le matériel de prod-01 : en mode idle, on démarre sur un PC patate, et matos.vibe vend mieux ----------
+   Chaque agent charge le processeur et la mémoire (plus le terminal va vite, plus il en demande). La carte graphique fait
+   tourner un relecteur local : moins de bugs, un peu moins de tokens. Le refroidissement encaisse la chaleur du processeur,
+   l'alimentation doit tenir le tout. Processeur saturé, swap, throttling : les agents ralentissent. Alimentation dépassée ou
+   100 °C : le PC tombe et redémarre (BIOS compris). htop, sensors et free montrent tout ça. */
+const PARTS = {
+  cpu: { name: 'Processeur', ic: '▦', t: [
+    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', thr: 2, cap: 1, ghz: 2.4, tdp: 65, cost: 0 },
+    { n: 'Corps i5-4590 (Leboncoin)', s: '4 cœurs · 3,3 GHz · 84 W', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké.', thr: 4, cap: 2.6, ghz: 3.3, tdp: 84, cost: 45 },
+    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W', d: 'Le raisin, c’est bon pour le code. Et pour le moral.', thr: 12, cap: 5, ghz: 4.4, tdp: 65, cost: 260 },
+    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W', d: 'Du cache empilé jusqu’au plafond. Les agents se sentent pousser des ailes.', thr: 16, cap: 8, ghz: 5.05, tdp: 120, cost: 950 },
+    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi.', thr: 24, cap: 12, ghz: 5.7, tdp: 250, cost: 3200 },
+    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent.', thr: 32, cap: 17, ghz: 5.7, tdp: 170, cost: 9500 },
+    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable.', thr: 128, cap: 34, ghz: 5.1, tdp: 350, cost: 32000 },
+  ] },
+  ram: { name: 'Mémoire', ic: '▤', t: [
+    { n: '4 Go DDR3', s: '2 barrettes dépareillées', d: 'Une de 2012, une de 2014. Elles ne se parlent pas.', go: 4, cost: 0 },
+    { n: '8 Go DDR4', s: '2 × 4 Go · 2 400 MHz', d: 'Assez pour un agent et un onglet de documentation.', go: 8, cost: 30 },
+    { n: '16 Go DDR4', s: '2 × 8 Go · 3 200 MHz', d: 'Le minimum vital d’après les agents. D’après Firefaux aussi.', go: 16, cost: 120 },
+    { n: '32 Go DDR5', s: '2 × 16 Go · 6 000 MHz', d: 'Huit agents, un orchestrateur, et encore de la place pour le doute.', go: 32, cost: 480 },
+    { n: '64 Go DDR5 RGB', s: '2 × 32 Go · 6 400 MHz', d: 'La RAM qui brille va plus vite. C’est scientifique (source : l’agent).', go: 64, cost: 1600 },
+    { n: '128 Go DDR5 ECC', s: '4 × 32 Go · corrige ses erreurs', d: 'La seule chose du projet qui corrige ses propres erreurs.', go: 128, cost: 5200 },
+  ] },
+  gpu: { name: 'Carte graphique', ic: '▣', t: [
+    { n: 'Chipset graphique intégré', s: 'mémoire partagée · 15 W', d: 'Affiche un terminal. La plupart du temps.', vram: .5, tdp: 15, rev: 1, tok: 1, llm: '', cost: 0 },
+    { n: 'GéFarce GT 710 (occasion)', s: '2 Go · 19 W', d: 'Fait tourner un relecteur local à 0,3 token par seconde. Il relit le README depuis mardi.', vram: 2, tdp: 19, rev: .95, tok: .99, llm: 'relecteur-1b:q2', cost: 35 },
+    { n: 'GéFarce GTX 1060', s: '6 Go · 120 W', d: 'La carte de tout le monde en 2017. Relecteur local : −15 % de bugs.', vram: 6, tdp: 120, rev: .85, tok: .96, llm: 'relecteur-7b:q4', cost: 190 },
+    { n: 'Radian RX 7800 XT', s: '16 Go · 263 W', d: 'Un vrai relecteur local : −28 % de bugs, −8 % de tokens. Demande une vraie alim.', vram: 16, tdp: 263, rev: .72, tok: .92, llm: 'relecteur-14b:q4', cost: 750 },
+    { n: 'GéFarce RTX 4090', s: '24 Go · 450 W', d: 'Câble d’alimentation qui fond inclus. −42 % de bugs, −14 % de tokens.', vram: 24, tdp: 450, rev: .58, tok: .86, llm: 'relecteur-32b:q4', cost: 2600 },
+    { n: 'GéFarce RTX 5090 Ti Super Duper', s: '32 Go · 600 W', d: 'Chauffe la pièce, la maison et un peu le quartier. −55 % de bugs.', vram: 32, tdp: 600, rev: .45, tok: .8, llm: 'relecteur-70b:q4', cost: 9800 },
+    { n: 'Grappe de 4 GPU de datacenter', s: '4 × 80 Go · 1 400 W', d: 'Louée à l’heure, branchée sur une multiprise. Le relecteur local relit même les commentaires.', vram: 320, tdp: 1400, rev: .32, tok: .7, llm: 'relecteur-405b:fp8', cost: 42000 },
+  ] },
+  disk: { name: 'Stockage', ic: '▥', t: [
+    { n: 'Disque dur 500 Go', s: '5 400 tr/min · SATA II', d: 'Il gratte. Il a toujours gratté. npm install prend une nuit.', io: .8, boot: 1.7, dev: 'WDC WD5000AAKS 500GB 5400RPM (il gratte)', cost: 0 },
+    { n: 'SSD SATA 240 Go', s: 'marque inconnue · 500 Mo/s', d: 'Fabriqué par « Kingstone ». Démarrage deux fois plus rapide.', io: .92, boot: 1, dev: 'KINGSTONE SSD 240GB', cost: 35 },
+    { n: 'SSD NVMe 1 To', s: 'PCIe 4 · 7 000 Mo/s', d: 'node_modules s’installe avant que l’agent ait fini sa phrase.', io: 1, boot: .7, dev: 'NVMe VIBE 1TB PCIe4', cost: 130 },
+    { n: 'NVMe PCIe 5 4 To', s: '14 000 Mo/s · radiateur intégré', d: 'Plus chaud que le processeur. Plus rapide aussi.', io: 1.05, boot: .55, dev: 'NVMe VIBE 4TB PCIe5', cost: 650 },
+    { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 0 sauvegarde', d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.12, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
+  ] },
+  psu: { name: 'Alimentation', ic: '≈', t: [
+    { n: 'Alim no-name 300 W', s: '230 W réels · elle siffle', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien.', w: 230, noname: 1, cost: 0 },
+    { n: 'Alim 450 W 80+ Bronze', s: '450 W', d: 'Une vraie alimentation, avec de vrais condensateurs.', w: 450, cost: 40 },
+    { n: 'Alim 650 W 80+ Gold', s: '650 W', d: 'De quoi nourrir une carte graphique sérieuse.', w: 650, cost: 120 },
+    { n: 'Alim 850 W 80+ Platinum', s: '850 W', d: 'Silencieuse, efficace, et plus chère que le PC de départ.', w: 850, cost: 260 },
+    { n: 'Alim 1 200 W 80+ Titanium', s: '1 200 W', d: 'Pour la RTX 5090 et son câble qui fond.', w: 1200, cost: 650 },
+    { n: 'Alim 2 000 W', s: '2 000 W · prise dédiée', d: 'Le compteur électrique tourne si vite qu’il produit du vent.', w: 2000, cost: 2400 },
+  ] },
+  cool: { name: 'Refroidissement', ic: '✱', t: [
+    { n: 'Ventirad d’origine', s: '60 W · poussiéreux', d: 'De 2011, avec la poussière d’origine. Le processeur chauffe dès qu’on le regarde.', w: 60, cost: 0 },
+    { n: 'Ventirad tour 120 mm', s: '140 W', d: 'Un vrai radiateur. Le processeur respire enfin.', w: 140, cost: 25 },
+    { n: 'Watercooling AIO 240 mm', s: '220 W', d: 'De l’eau dans le PC, volontairement cette fois.', w: 220, cost: 130 },
+    { n: 'AIO 360 mm RGB', s: '300 W', d: 'Refroidit mieux, brille plus. Les agents codent à la lumière des LED.', w: 300, cost: 280 },
+    { n: 'Watercooling custom', s: '450 W · fuite offerte', d: 'Tuyaux rigides, liquide fluo, et une fuite au-dessus de la carte graphique.', w: 450, cost: 950 },
+    { n: 'Azote liquide', s: '1 000 W · livraison chaque matin', d: '−196 °C. Les agents codent avec des gants.', w: 1000, cost: 5500 },
+  ] },
+};
+const SLOTS = Object.keys(PARTS), SWAP_GO = 2;
+const SANDBOX_PC = { cpu: 3, ram: 4, gpu: 4, disk: 3, psu: 4, cool: 3 };   // mode libre : la machine de rêve (7800X3D, 64 Go, RTX 4090)
+const PC = () => IDLE ? G.pc : SANDBOX_PC;
+const part = (slot, pc = PC()) => PARTS[slot].t[pc[slot]];
+const PCS = { temp: 36, oomAt: 0 };              // la température, en direct
+const GFX_HOG = () => prefs.gfx === 'rtx' || prefs.gfx === 'ia';
+function syncHW() {                              // htop, atop et neofetch lisent HW : il suit le matériel installé
+  const c = part('cpu'), r = part('ram'), g = part('gpu'), d = part('disk');
+  Object.assign(HW, { threads: c.thr, mem: r.go * 1024 * .975, swap: SWAP_GO * 1024, vram: g.vram * 1024, gpu: g.n, info: `${c.n} · ${g.n} · ${r.n} · ${d.n}` });
+}
+// la charge demandée à la machine ; o.off : calcul « hors ligne » (pas de bureau, température d'équilibre)
+function pcLoad(o = {}) {
+  const pc = o.pc || PC(), c = part('cpu', pc), r = part('ram', pc), g = part('gpu', pc), d = part('disk', pc), ps = part('psu', pc), co = part('cool', pc);
+  const live = !o.off, sp = o.speed ?? speed;
+  const n = o.n ?? (claudeOn && mode !== 'gameover' && !paused ? panes.filter(p => p.state !== 'down').length : 0);
+  const lead = o.lead ?? (claudeOn && !paused && leadOn() ? 1 : 0);
+  const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0;
+  const demand = .08 + .5 * sp ** .6 * n + .4 * sp ** .6 * lead + .15 * gui + .3 * web + .6 * hog;
+  const util = Math.min(1, demand / c.cap);
+  const used = 1 + 1.2 * sp ** .4 * n + 1.5 * lead + .5 * gui + 1.5 * web;   // Go
+  const swap = Math.max(0, used - r.go);
+  const gpuU = hog ? 1 : n && g.llm ? .95 : .04;
+  const heat = c.tdp * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
+  return { n, demand, util, cap: c.cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
+    tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, c.cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
+}
+function hwState(o = {}) {                       // le rendement de la machine : 1 = rien ne freine les agents ; 0 = PC à terre
+  const L = pcLoad(o), temp = o.off ? L.tTarget : PCS.temp;
+  const down = L.draw > L.psuW || (o.off && L.tTarget >= 100), hot = temp >= 90;
+  return { ...L, temp, hot, down, f: down ? 0 : L.cpuF * L.ramF * (hot ? .7 : 1) * L.io };
+}
+function pcVerdict(s) {                          // « OK », « TENDU » ou « À TERRE », et pourquoi
+  const why = [];
+  if (s.down) why.push(s.draw > s.psuW ? `alim dépassée (${Math.round(s.draw)}/${s.psuW} W)` : 'surchauffe');
+  if (s.cpuF < 1) why.push(`CPU saturé (×${String(s.cpuF.toFixed(2)).replace('.', ',')})`);
+  if (s.oom) why.push('mémoire pleine : l’OOM killer rôde');
+  else if (s.swap > 0) why.push(`swap ${String(s.swap.toFixed(1)).replace('.', ',')} Go`);
+  if (s.temp >= 90) why.push(`throttling à ${Math.round(s.temp)} °C`);
+  else if (s.temp >= 82) why.push(`${Math.round(s.temp)} °C`);
+  if (!s.down && s.draw > .85 * s.psuW) why.push(`alim à ${Math.round(s.draw / s.psuW * 100)} %`);
+  const lvl = s.down || s.f < .5 || s.oom || s.temp >= 95 ? 'bad' : why.length ? 'mid' : 'ok';
+  return { lvl, label: lvl === 'bad' ? 'À TERRE' : lvl === 'mid' ? 'TENDU' : 'OK', cls: lvl === 'bad' ? 'errc' : lvl === 'mid' ? 'wrn' : 'okc', why: why.join(' · ') || 'tout roule' };
+}
+function pcCheck(pc) {                           // la config tiendra-t-elle avec toute l'équipe au travail ?
+  const L = pcLoad({ pc, n: IDLE ? G.agents : panes.length, lead: IDLE ? G.lead : leadOn() ? 1 : 0, off: true });
+  return { draw: L.draw, psuW: L.psuW, temp: L.tTarget, psuKo: L.draw > L.psuW, hot: L.tTarget >= 90, melt: L.tTarget >= 100, slow: L.cpuF < 1, swap: L.swap > 0 };
+}
+function pcDiag(pc = PC()) {                     // le verdict du vendeur
+  const score = SLOTS.reduce((a, s) => a + pc[s] / (PARTS[s].t.length - 1), 0) / SLOTS.length;
+  return score < .12 ? { label: 'patate', host: 'un PC trouvé sur le trottoir, promu serveur de prod' }
+    : score < .4 ? { label: 'correct', host: 'un PC de bureau promu serveur de prod' }
+    : score < .75 ? { label: 'bête de course', host: 'un PC de jeu promu serveur de prod' }
+    : { label: 'datacenter de salon', host: 'un datacenter dans un placard' };
+}
+const pcLine = (pc = PC()) => SLOTS.map(s => part(s, pc).n).join(' · ');
 // [clé, utilisateur, commande, %CPU visé, RES Mo, VIRT Mo, threads, PID]
 const BASE_PROCS = [
   ['systemd', 'root', '/sbin/init splash', .02, 14, 168, 1, 1],
@@ -4020,8 +4224,11 @@ function procTemplates(load) {
       if (!dead && !down) (AGENT_CHILDREN[AGENTS.indexOf(p.a)] || []).forEach(([c, cpu, res, virt, thr, u], j) => add(`c${p.n}-${j}`, u || 'dev', c, cpu, res, virt, thr, { ag: 1 }));
     });
     // les agents ont trouvé la carte graphique : un modèle local relit leur code
-    if (!dead) add('ollama', 'ollama', '/usr/local/bin/ollama runner --model relecteur-32b:q4 --ctx-size 32768 --n-gpu-layers 65', 28, 2100, 26000, 23, { ag: 1 });
+    if (!dead && part('gpu').llm) add('ollama', 'ollama', `/usr/local/bin/ollama runner --model ${part('gpu').llm} --ctx-size 32768 --n-gpu-layers 65`, 28, Math.round(part('gpu').vram * 85), 26000, 23, { ag: 1 });
   }
+  const hwn = hwState();                         // le PC souffre : le noyau swappe, le processeur cuit
+  if (load !== 'melt' && hwn.swap > 0) add('kswapd', 'root', 'kswapd0', hwn.oom ? 100 : 55, 0, 0, 1);
+  if (load !== 'melt' && hwn.temp >= 90) add('thermald', 'root', '/usr/sbin/thermald --adaptive (le processeur cuit)', 3, 12, 40, 2);
   if (load === 'melt') {
     add('kswapd', 'root', 'kswapd0', 100, 0, 0, 1);
     add('oomd', 'root', '/usr/lib/systemd/systemd-oomd', 45, 9, 18, 1);
@@ -4059,24 +4266,27 @@ function sysSample() {
       s: p.s || (cpu >= 50 ? 'R' : melt && R() < .3 ? 'D' : 'S') };
   });
   for (const k of MON.procs.keys()) if (!seen.has(k)) MON.procs.delete(k);
+  const hw = hwState(), hot = hw.temp >= 90, ghz = part('cpu').ghz * 1000;
+  const sum = procs.reduce((a, p) => a + p.cpu, 0), room = HW.threads * 100 * Math.max(.03, hw.util);
+  if (!melt && sum > room) procs.forEach(p => { p.cpu *= room / sum; });   // 8 agents sur 2 cœurs : chacun n'en a qu'un bout
   const total = Math.min(HW.threads * 100, procs.reduce((a, p) => a + p.cpu, 0));
   const sysF = melt ? .55 : load === 'busy' ? .12 : .3, quiet = load === 'idle' || load === 'pause';
   const cores = Array.from({ length: HW.threads }, (_, i) => {
-    const u = melt ? 94 + R() * 6 : Math.min(100, total / HW.threads * (.6 + R() * .8) + (quiet ? R() * 2.5 : 0));
-    return { i, u, sys: u * sysF, nice: u * .02, freq: melt ? ri(3600, 4300) : load === 'busy' ? ri(4740, 4860) : ri(2950, 5050) };
+    const u = melt ? 94 + R() * 6 : Math.min(100, hw.util * 100 * (quiet ? .4 + R() * .6 : .84 + R() * .26) + (quiet ? R() * 2.5 : 0));
+    return { i, u, sys: u * sysF, nice: u * .02, freq: Math.round(ghz * (hot ? .32 + R() * .06 : melt ? .8 : quiet ? .6 + R() * .4 : .95 + R() * .06)) };
   });
-  const used = melt ? HW.mem - 180 : 1450 + procs.reduce((a, p) => a + p.res, 0);
+  const used = melt ? HW.mem - 180 : Math.min(HW.mem - 90, hw.used * 1024);
   const buff = melt ? 40 : quiet ? 410 : 620;
-  const cache = melt ? 140 : Math.min(HW.mem - used - buff - 600, quiet ? 6900 : 14200) + R() * 40;
+  const cache = melt ? 140 : Math.max(20, Math.min(HW.mem - used - buff - 300, quiet ? 6900 : 14200)) + R() * 40;
   const gpuOn = claudeOn && mode !== 'gameover';                // le relecteur local occupe la 7900 XTX
-  const target = melt ? 312 : load === 'busy' ? total / 100 + 3 : load === 'pause' ? 1.2 : .15;
+  const target = melt ? 312 : load === 'busy' ? hw.demand / hw.cap * HW.threads + (hw.swap > 0 ? 3 : 0) : load === 'pause' ? 1.2 : .15;
   [10, 50, 150].forEach((tau, i) => { MON.la[i] += (target - MON.la[i]) * (1 - Math.exp(-dt / tau)); });
   return {
     load, procs, cores, total, used, buff, cache, up, dt, la: MON.la,
-    temp: melt ? 89 : load === 'busy' ? ri(82, 87) : ri(42, 47),          // le 7800X3D plafonne à 89 °C
-    swap: melt ? HW.swap - ri(20, 90) : quiet ? 0 : ri(60, 180),
-    gpu: ['rtx', 'ia'].includes(prefs.gfx) ? 99 + R() : gpuOn && !quiet ? 93 + R() * 6.5 : 1 + R() * 3,
-    vram: (gpuOn ? 21600 + R() * 200 : 880 + R() * 60) + (['rtx', 'ia'].includes(prefs.gfx) ? 1900 : 0),
+    hw, temp: melt ? Math.max(89, Math.round(hw.temp)) : Math.round(hw.temp),
+    swap: melt ? HW.swap - ri(20, 90) : Math.min(HW.swap, hw.swap * 1024),
+    gpu: GFX_HOG() ? 99 + R() : gpuOn && !quiet ? hw.gpuU * (97 + R() * 3) : 1 + R() * 3,
+    vram: Math.min(HW.vram * .97, (gpuOn && part('gpu').llm ? HW.vram * .88 + R() * 200 : Math.min(880, HW.vram * .4) + R() * 60) + (GFX_HOG() ? 1900 : 0)),
     disk: melt ? { busy: 100, rd: ri(1800, 2400), wr: ri(2900, 3600) } : load === 'busy' ? { busy: 18 + R() * 27, rd: ri(80, 640), wr: ri(40, 310) }
       : { busy: R() * 1.2, rd: R() * .06, wr: .1 + R() * 2 },             // Mo/s
     net: melt ? { si: ri(4, 20) * 1000, so: ri(2400, 2490) * 1000 } : load === 'busy' ? { si: ri(120, 900) * 1000, so: ri(20, 80) * 1000 }
@@ -4178,22 +4388,30 @@ function makeHtop() {
     const s = fresh || !last ? (last = sysSample()) : last, { cols, rows } = gridOf(el), out = [];
     const L = (h, cls = '', attrs = '') => out.push(`<div class="ln${cls ? ' ' + cls : ''}"${attrs}>${h}</div>`);
     const wide = cols >= 90, half = Math.floor((cols - 1) / 2), bw = wide ? half : cols;
-    const cpuBar = i => { const c = s.cores[i]; return htBar(String(i).padStart(3), half, [[c.nice / 100, 'blu'], [(c.u - c.sys - c.nice) / 100, 'okc'], [c.sys / 100, 'errc']],
-      `${c.u.toFixed(1)}%` + (half >= 46 ? ` ${c.freq}MHz ${s.temp}°C` : '')); };
+    const nb = Math.min(HW.threads, 32), ncol = !wide ? 1 : nb > 16 ? 4 : nb > 1 ? 2 : 1, cw = ncol === 1 ? cols : Math.floor((cols - ncol + 1) / ncol);
+    const cpuBar = i => { const c = s.cores[i]; return htBar(String(i).padStart(3), cw, [[c.nice / 100, 'blu'], [(c.u - c.sys - c.nice) / 100, 'okc'], [c.sys / 100, 'errc']],
+      `${c.u.toFixed(1)}%` + (cw >= 46 ? ` ${c.freq}MHz ${s.temp}°C` : '')); };
     const txt = (label, ...parts) => tx(label, 'cy') + parts.map(([t, c]) => tx(t, c)).join('');
+    const v = s.load === 'melt' ? { label: 'À TERRE', cls: 'errc', lvl: 'bad', why: 'npm run ship a tout pris' } : pcVerdict(s.hw), pw = s.hw;
     const meters = [
       htBar('Mem', bw, [[s.used / HW.mem, 'okc'], [s.buff / HW.mem, 'blu'], [s.cache / HW.mem, 'wrn']], `${fmtM(s.used)}/${fmtM(HW.mem)}`),
       htBar('Swp', bw, [[s.swap / HW.swap, 'errc']], `${fmtM(s.swap)}/${fmtM(HW.swap)}`),
       htBar('GPU', bw, [[s.gpu / 100, 'okc']], `${s.gpu.toFixed(1)}% ${fmtM(s.vram)}/${fmtM(HW.vram)}`),
+      htBar('Pwr', bw, [[pw.draw / pw.psuW, pw.draw > .85 * pw.psuW ? 'errc' : 'okc']], `${Math.round(pw.draw)}/${pw.psuW}W`),
+      htBar('Tmp', bw, [[Math.min(1, s.temp / 105), s.temp >= 90 ? 'errc' : s.temp >= 80 ? 'wrn' : 'okc']], `${s.temp}°C${s.temp >= 90 ? ' throttle' : ''}`),
       txt('  Disk IO: ', [`${s.disk.busy.toFixed(1)}%`, 'b'], [' read: ', 'cy'], [fmtM(s.disk.rd), 'b'], [' write: ', 'cy'], [fmtM(s.disk.wr), 'b']),
     ];
     const infos = [
       txt('  Tasks: ', [String(s.tasks), 'b'], [', '], [String(s.thr), 'b'], [' thr, '], ['213', 'b'], [' kthr; '], [String(s.running), 'okc b'], [' running']),
       txt('  Load average: ', [s.la[0].toFixed(2) + ' ', 'b'], [s.la[1].toFixed(2) + ' '], [s.la[2].toFixed(2), 'dim']),
       txt('  Uptime: ', [htUptime(s.up), 'b']),
-      txt('  System: ', [HW.info]),
+      txt('  CPU: ', [part('cpu').n], [` · ${HW.threads} threads`, 'dim']),
+      txt('  GPU: ', [part('gpu').n], [part('gpu').llm ? ` · ${part('gpu').llm}` : '', 'dim']),
+      tx('  État du PC : ', 'cy') + tx(v.label, v.cls + ' b') + tx(` · ${v.why}`, v.lvl === 'ok' ? 'dim' : v.cls),
     ];
-    for (let i = 0; i < 8; i++) L(padTo(cpuBar(i), half) + ' ' + cpuBar(i + 8));
+    const crow = Math.ceil(nb / ncol);
+    for (let r = 0; r < crow; r++) L(Array.from({ length: ncol }, (_, k) => r + k * crow).filter(i => i < nb).map(i => padTo(cpuBar(i), cw)).join(' '));
+    if (HW.threads > nb) L(tx(`    … et ${HW.threads - nb} threads de plus : htop a renoncé à tous les afficher`, 'dim'));
     if (wide) meters.forEach((m, i) => L(padTo(m, half) + ' ' + infos[i]));
     else [...meters, ...infos].forEach(m => L(m));
     L('');
@@ -4362,7 +4580,7 @@ function afterResize() {
    Les éléments du terminal (#shell, #top + #work, .prog) sont déplacés dans les fenêtres, puis remis en place à la sortie. */
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
-const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9] };
+const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -4607,14 +4825,14 @@ function xfMenuOpen() {
     + `<span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`;
   const progs = Object.keys(PROGS).filter(k => PROGS[k].make);
   xfMenuEl.innerHTML = `<p class="xf-who">${esc(USER)}@prod-01 <span class="dim">· Vibian GNU/Linux 13 (friday)</span></p>`
-    + ['Accessoires', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
+    + ['Accessoires', 'Internet', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
       + progs.filter(k => (PROGS[k].cat || 'Système') === c).map(k => item(k, PROGS[k].icon || '▤', PROGS[k].menu || k,
         tabs.includes(k) ? '● ouvert' : installed.has(k) ? PROGS[k].desc || '' : `non installé · sudo apt install ${k}`)).join('')).join('')
     + '<p class="xf-cat">Développement · agents IA</p>'
     + Object.keys(CLIS).map(k => item(k, CLIS[k].glyph, k === 'mistral' ? 'Mistral · Vibe CLI' : CLIS[k].label,
       claudeOn && provider === k ? `● en cours · ${panes.length} agents ${cfg.model}` : claudeOn ? `${cli().label} occupe déjà le terminal`
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
-    + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills`) : '')
+    + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
     + item('logout', '↩', 'Déconnexion', 'quitter Xfce et revenir au terminal');
   xfMenuEl.hidden = false;
@@ -5218,6 +5436,241 @@ function makeViewer() {
   };
 }
 
+/* ---------- navigateur web (Firefaux) : un faux Web, avec le store des agents et une boutique de matériel ----------
+   Une page = une entrée de WEB_SITES (motif d'adresse → fonction qui rend { title, html }). Les liens portent data-href,
+   les achats data-buy (store IA) ou data-part="slot:niveau" (matériel) ; data-live : un morceau rafraîchi chaque seconde. */
+const WEB_HOME = 'vibe://accueil';
+const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vibe/'], ['Matos.vibe', 'https://matos.vibe/'],
+  ['Facture', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
+const webHost = u => (/^[a-z]+:\/\/([^/?#]+)/i.exec(u) || [, u])[1];
+function webNorm(raw) {
+  const u = (raw || '').trim();
+  if (!u) return WEB_HOME;
+  if (/^about:(home|blank)?$/i.test(u)) return WEB_HOME;
+  if (/^[a-z]+:\/\//i.test(u)) return /^[a-z]+:\/\/[^/]+$/i.test(u) ? u + '/' : u;
+  if (/\s/.test(u) || !/\.[a-z]{2,}|^localhost/i.test(u)) return `vibe://recherche?q=${encodeURIComponent(u)}`;
+  return 'https://' + (u.includes('/') ? u : u + '/');
+}
+const wbBuyBtn = (attr, label, dis) => `<button type="button" class="wp-buy" ${attr}${dis ? ' disabled' : ''}>${esc(label)}</button>`;
+const WEB_LIVE = {
+  money: () => `$${usd(G.money)}`,
+  pcnow: () => {
+    const s = hwState(), v = pcVerdict(s);
+    return `En ce moment : <b class="${v.cls}">${v.label}</b> <span class="dim">· ${esc(v.why)} · ${Math.round(s.temp)} °C · ${Math.round(s.draw)}/${s.psuW} W</span>`;
+  },
+  bill: () => IDLE ? `$${usd(G.bill)}` : `$${usd(usage.usd)}`,
+  local: () => webLocalBody(),
+};
+function webHome() {
+  const tile = (u, t, d) => `<button type="button" class="wp-tile" data-href="${esc(u)}"><b>${esc(t)}</b><span>${esc(d)}</span></button>`;
+  return { title: 'Vibegle', html: `<div class="wp"><div class="wp-hero">
+    <div class="wp-logo"><span class="okc">V</span><span class="errc">i</span><span class="wrn">b</span><span class="blu">e</span><span class="okc">g</span><span class="errc">l</span><span class="wrn">e</span></div>
+    <form class="wp-search" data-search><input name="q" placeholder="Rechercher sur le Web ou demander à un agent" aria-label="Rechercher" spellcheck="false" autocomplete="off"></form>
+    <p class="dim">Résultats générés par un agent qui ne sait pas non plus.</p></div>
+    <div class="wp-tiles">
+      ${tile('https://store.agents.vibe/', 'store.agents.vibe', 'agents, terminal, skills, migration')}
+      ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, RAM, cartes graphiques, alims')}
+      ${tile('https://facture.vibe/', 'facture.vibe', 'ce que coûtent vos agents')}
+      ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
+      ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
+    </div></div>` };
+}
+function webSearch(u) {
+  const q = decodeURIComponent((/[?&]q=([^&]*)/.exec(u) || [, ''])[1]).trim(), lq = q.toLowerCase();
+  const res = [];
+  const hit = (href, t, d) => res.push(`<div class="wp-res"><a data-href="${esc(href)}">${esc(t)}</a><span class="u">${esc(href)}</span><span class="dim">${esc(d)}</span></div>`);
+  if (/cpu|processeur|ram|m[ée]moire|gpu|carte graph|alim|ssd|disque|pc|ventirad|refroid|composant|patate|chauff|siffl|htop|lent/.test(lq))
+    hit('https://matos.vibe/', 'Matos.vibe : composants PC pour vibecoders', 'Votre PC est une patate ? Nous aussi, au début. Livraison en 0 seconde, installation à chaud.');
+  if (/agent|claude|codex|mistral|skill|terminal|orchestr|store|ia\b|llm/.test(lq))
+    hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
+  hit('https://stackunderflow.vibe/', `« ${q || 'rien'} » : question fermée (doublon d’une question de 2009)`, 'Réponse acceptée : « Ça marche sur ma machine. » 0 vote, 4 127 vues.');
+  hit(`https://blog-du-vibe.vibe/${encodeURIComponent(lq.replace(/\s+/g, '-') || 'rien')}`, `10 façons de ${q || 'ne rien faire'} avec l’IA (la 7e va supprimer votre prod)`, 'Article sponsorisé, écrit par un agent, relu par un autre agent, lu par personne.');
+  hit('https://facture.vibe/', 'Combien coûte vraiment un agent ? (spoiler : plus)', 'Votre facture de tokens, en temps réel. Asseyez-vous avant de cliquer.');
+  return { title: `${q || 'Recherche'} · Vibegle`, html: `<div class="wp"><form class="wp-search" data-search><input name="q" value="${esc(q)}" aria-label="Rechercher" spellcheck="false" autocomplete="off"></form>
+    <p class="dim">Environ ${frNumI(ri(1200000, 9900000))} résultats (0,${ri(10, 99)} s) · dont ${ri(2, 9)} hallucinés</p>${res.join('')}</div>` };
+}
+function webStoreAI() {
+  let cat = '', out = '';
+  if (!IDLE) out = '<p class="wp-band">Mode libre (<b>?idle=0</b>) : tout est déjà débloqué. Le store n’ouvre qu’en mode idle.</p>';
+  else {
+    aiItems().forEach(it => {
+      if (it.cat !== cat) { out += `${cat ? '</div>' : ''}<h2>${esc(cat = it.cat)}</h2><div class="wp-grid">`; }
+      const st = itemState(it);
+      out += `<div class="wp-card${it.done ? ' own' : ''}"><span class="nm">${esc(it.name)}${it.lvl ? ` <span class="dim">· ${esc(it.lvl)}</span>` : ''}</span>`
+        + `<span class="dim">${esc(it.desc)}</span><span></span><div class="row"><span class="price">${it.done || it.excl || it.need ? '' : money0(it.cost)}</span>`
+        + `${it.done ? '<span class="tag">acheté</span>' : wbBuyBtn(`data-buy="${it.id}"`, st.dis && !it.excl && !it.need && !it.done ? 'Pas assez d’argent' : it.excl || it.need ? st.t : 'Acheter', st.dis)}</div></div>`;
+    });
+    out += '</div>';
+  }
+  return { title: 'store.agents.vibe · le supermarché du vibe coding', html: `<div class="wp"><h1>store.agents.vibe</h1>
+    <p class="dim">Agents à la pièce, skills au kilo. Les agents ne sont ni repris ni échangés.</p>
+    ${IDLE ? `<p class="wp-band">Trésorerie : <b data-live="money">$${usd(G.money)}</b> · ${plural(G.agents, 'agent')} ${esc(CLIS[G.ai].label)} · ${esc(ECO.termName[G.term])} ×${frx(ECO.term[G.term])}</p>` : ''}${out}
+    <p class="dim">Le même rayon existe dans le jeu : touche <b>B</b>, ou commande store.</p></div>` };
+}
+function webMatos() {
+  const pc = PC(), diag = pcDiag(pc);
+  const nav = SLOTS.map(s => `<button type="button" data-jump="${s}">${esc(PARTS[s].name)}</button>`).join('');
+  const sections = SLOTS.map(slot => {
+    const P = PARTS[slot], cur = pc[slot];
+    return `<h2 id="wb-${slot}">${esc(P.name)}</h2><div class="wp-grid">` + P.t.map((p, i) => {
+      const own = i === cur, old = i < cur, chk = i > cur ? pcCheck({ ...pc, [slot]: i }) : null;
+      const warn = !chk ? '' : chk.psuKo ? `<span class="warn bad">Alim insuffisante : ≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W. Le PC tombera.</span>`
+        : chk.melt ? '<span class="warn bad">Surchauffe assurée avec votre refroidissement actuel.</span>'
+        : chk.hot ? '<span class="warn">Throttling probable : prévoyez un meilleur refroidissement.</span>' : '';
+      const btn = own ? '<span class="tag">dans votre PC</span>' : old ? '<span class="dim">moins bien que le vôtre</span>'
+        : !IDLE ? '<span class="dim">mode libre</span>' : wbBuyBtn(`data-part="${slot}:${i}"`, G.money < p.cost ? 'Pas assez d’argent' : 'Acheter et installer', G.money < p.cost);
+      return `<div class="wp-card${own ? ' own' : ''}${old ? ' old' : ''}"><span class="nm">${esc(p.n)}</span><span class="spec">${esc(p.s)}</span>`
+        + `<span class="dim">${esc(p.d)}</span>${warn || '<span></span>'}<div class="row"><span class="price">${own || old ? '' : money0(p.cost)}</span>${btn}</div></div>`;
+    }).join('') + '</div>';
+  }).join('');
+  return { title: 'Matos.vibe · composants PC pour vibecoders', html: `<div class="wp"><h1>Matos.vibe</h1>
+    <p class="dim">Composants PC pour vibecoders. Livraison en 0 seconde, installation à chaud, garantie 0 jour.</p>
+    <div class="wp-band ${diag.label === 'patate' ? 'bad' : 'ok'}">Votre config : ${esc(pcLine(pc))}<br>Diagnostic du vendeur : <b>${esc(diag.label)}</b>.
+      ${IDLE ? `Trésorerie : <b data-live="money">$${usd(G.money)}</b>.` : 'Mode libre : votre PC est déjà une machine de rêve.'}<br><span data-live="pcnow">${WEB_LIVE.pcnow()}</span></div>
+    <div class="wp-nav">${nav}</div>${sections}
+    <p class="dim">Paiement en tokens refusé. Retours refusés aussi : l’agent a déjà jeté le carton.</p></div>` };
+}
+function webBill() {
+  const avg = shipped ? G.spent / shipped : 0;
+  const row = (k, v) => `<p>${esc(k)} : <b>${v}</b></p>`;
+  return { title: 'facture.vibe · votre facture de tokens', html: `<div class="wp"><h1>facture.vibe</h1><p class="dim">Votre facture de tokens, en temps réel. Asseyez-vous.</p>
+    <div class="wp-band">${IDLE ? row('Trésorerie', `<span data-live="money">$${usd(G.money)}</span>`) + row('Gagné depuis le début', `$${usd(G.earned)}`)
+      + row('Dépensé en tokens', `$${usd(G.spent)}`) + row('Coût moyen d’un projet', `$${usd(avg)}`) + row('Projets shippés', String(shipped)) : ''}
+      ${row('Facture en cours', `<span data-live="bill">${WEB_LIVE.bill()}</span>`)}</div>
+    <p class="dim">Astuce : une carte graphique fait tourner un relecteur local, qui économise un peu de tokens. Le reste, c’est la vie.</p></div>` };
+}
+function webSO() {
+  const Q = [
+    ['Mon PC siffle quand je lance trois agents, c’est grave ?', 12, 'C’est votre alimentation no-name. Au-delà de 80 % de charge, elle siffle, puis elle s’éteint. Une vraie alim sur matos.vibe, et le sifflement part avec.', true],
+    ['htop affiche 100 % sur mes deux cœurs et 95 °C', 8, 'Votre processeur sature et cuit : il ralentit tout seul (throttling). Un ventirad à 25 $, puis un vrai processeur. Les agents vous remercieront (ils ne remercient jamais).', true],
+    ['Le swap est plein et l’OOM killer tue mes agents', 5, 'Chaque agent prend de la mémoire, l’orchestrateur et Firefaux aussi. Plus de RAM, ou moins d’agents.', true],
+    ['J’ai acheté une RTX 4090 et le PC s’éteint dès que les agents démarrent', 21, 'Elle tire 450 W. Votre alim de 300 W en délivre 230. Faites le calcul, ou laissez un agent le faire (il se trompera).', true],
+    ['Comment empêcher mon agent de supprimer la prod ?', -3, 'Question fermée : doublon de « Comment empêcher mon agent de supprimer la prod ? ».', false],
+    ['Mon agent dit que les tests passent, mais il n’y a pas de tests', 42, 'Réponse acceptée : c’est normal. 0 test sur 0, ça fait bien 100 %.', false],
+    ['Comment centrer une div ?', 4127, 'Question fermée : trop subjective.', false],
+  ];
+  return { title: 'StackUnderflow · questions fermées depuis 2009', html: `<div class="wp"><h1>StackUnderflow</h1><p class="dim">Là où les questions viennent se faire fermer.</p>`
+    + Q.map(([t, v, a, pc]) => `<div class="wp-band${v < 0 ? ' bad' : ''}"><b>${esc(t)}</b> <span class="dim">· ${v} votes</span><br><span>${esc(a)}</span>`
+      + (pc ? ' <a data-href="https://matos.vibe/">matos.vibe</a>' : '') + '</div>').join('') + '</div>' };
+}
+function webLocalBody() {
+  if (!claudeOn) return `<p class="wp-err"><span class="big">ECONNREFUSED</span><span>127.0.0.1:3000 · le serveur de dev est arrêté (les agents aussi).</span><span class="dim">Lancez des agents dans le terminal : ${esc(IDLE ? G.ai : 'claude')}.</span></p>`;
+  return `<h1>${esc(PROJ)} v${esc(verStr())}</h1><p class="dim">environnement de dev · ${plural(panes.length, 'agent')} ${esc(cfg.model)} en train de tout réécrire</p>
+    <p class="wp-band ok">Projets shippés : <b>${shipped}</b> · prochaine version : v${esc(verStr())} · avancement ${Math.floor(Math.max(0, IDLE ? G.prog : 0) * 100)} %</p>
+    <p class="dim">Uptime de la prod : 99,9 % (vendredis exclus). Utilisateurs actifs : ${ri(3, 14)}, dont ${ri(2, 3)} agents.</p>`;
+}
+function web404(u) {
+  return { title: 'Problème de chargement', html: `<div class="wp wp-err"><span class="big">DNS_PROBE_VIBE_NOT_FOUND</span>
+    <p>Ce site n’existe pas : <b>${esc(webHost(u))}</b>. Votre agent l’a halluciné, avec beaucoup d’assurance.</p>
+    <p class="dim">Essayez <a data-href="${WEB_HOME}">Vibegle</a>, ou un marque-page : ils existent, eux.</p></div>` };
+}
+const WEB_SITES = [
+  [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch],
+  [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
+  [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/localhost:3000/i, () => ({ title: `${PROJ} · localhost:3000`, html: `<div class="wp" data-live="local">${webLocalBody()}</div>` })],
+];
+const webRoute = u => (WEB_SITES.find(([re]) => re.test(u))?.[1] || web404)(u);
+function makeBrowser() {
+  const el = document.createElement('div');
+  el.className = 'prog wb';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Navigateur web Firefaux');
+  el.innerHTML = '<div class="wb-bar"><button type="button" data-wb="back" title="Précédent" aria-label="Précédent">←</button>'
+    + '<button type="button" data-wb="fwd" title="Suivant" aria-label="Suivant">→</button>'
+    + '<button type="button" data-wb="reload" title="Recharger (F5)" aria-label="Recharger">↻</button>'
+    + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off"></form>'
+    + '<button type="button" data-wb="home" title="Accueil" aria-label="Accueil">⌂</button></div>'
+    + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
+    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-status" role="status"></div>';
+  const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
+  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0;
+  const flash = t => { if (!t) return; note = t; noteUntil = performance.now() + 6000; stat(); };
+  function stat() {
+    const on = performance.now() < noteUntil;
+    statusEl.textContent = on ? note : `Terminé · ${webHost(url)} · ${ri(3, 41)} traqueurs bloqués`;
+    statusEl.classList.toggle('note', on);
+  }
+  function draw(keep) {
+    const r = webRoute(url), top = page.scrollTop;
+    title = r.title;
+    doc.innerHTML = r.html;
+    page.scrollTop = keep ? top : 0;
+    if (document.activeElement !== input) input.value = url;
+    const sec = q('.sec');
+    sec.textContent = url.startsWith('http:') ? 'non sécurisé' : '';   // https et vibe:// : rien à signaler
+    sec.hidden = !sec.textContent;
+    q('[data-wb="back"]').disabled = !back.length;
+    q('[data-wb="fwd"]').disabled = !fwd.length;
+    el.querySelectorAll('.wb-marks [data-href]').forEach(b => b.classList.toggle('on', webHost(url) === webHost(b.dataset.href)));
+    stat();
+    if (xw.firefaux) xfLabel('firefaux');
+  }
+  function go(raw, push = true) {                // un PC patate charge les pages plus lentement
+    const u = webNorm(raw);
+    if (push && u !== url) { back.push(url); fwd = []; }
+    url = u;
+    const ms = reducedMotion.matches ? 0 : Math.round(140 + 1100 * (1 - Math.min(1, hwState().f)) + (part('disk').io < .9 ? 260 : 0));
+    load.style.transition = 'none';
+    load.style.width = '0';
+    void load.offsetWidth;
+    load.style.transition = `width ${ms}ms linear`;
+    load.style.width = '100%';
+    statusEl.textContent = `Chargement de ${webHost(u)}…`;
+    clearTimeout(loadT);
+    loadT = setTimeout(() => {
+      load.style.transition = 'none';
+      load.style.width = '0';
+      draw(false);
+      if (ms > 700) flash(`Page chargée en ${frx((ms / 1000).toFixed(1))} s : votre PC fait de son mieux.`);
+    }, ms);
+  }
+  function live() {                              // l'argent monte : boutons et chiffres à jour, sans redessiner la page
+    doc.querySelectorAll('[data-live]').forEach(n => { const f = WEB_LIVE[n.dataset.live]; if (f) { const h = f(); if (n.innerHTML !== h) n.innerHTML = h; } });
+    doc.querySelectorAll('[data-buy]').forEach(b => {
+      const it = aiItems().find(x => x.id === b.dataset.buy);
+      if (it) { const dis = itemState(it).dis; if (b.disabled !== dis) { b.disabled = dis; b.textContent = it.excl || it.need ? itemState(it).t : dis ? 'Pas assez d’argent' : 'Acheter'; } }
+    });
+    doc.querySelectorAll('[data-part]').forEach(b => {
+      const [s, i] = b.dataset.part.split(':'), dis = G.money < PARTS[s].t[+i].cost;
+      if (b.disabled !== dis) { b.disabled = dis; b.textContent = dis ? 'Pas assez d’argent' : 'Acheter et installer'; }
+    });
+    stat();
+  }
+  el.addEventListener('click', e => {
+    const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), p = e.target.closest('[data-part]'), j = e.target.closest('[data-jump]');
+    if (w) {
+      const k = w.dataset.wb;
+      if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
+      else if (k === 'fwd' && fwd.length) { back.push(url); go(fwd.pop(), false); }
+      else if (k === 'reload') go(url, false);
+      else if (k === 'home') go(WEB_HOME);
+    } else if (h) go(h.dataset.href);
+    else if (b && !b.disabled) { flash(buy(b.dataset.buy)); draw(true); }
+    else if (p && !p.disabled) { const [s, i] = p.dataset.part.split(':'); flash(buyPart(s, +i)); draw(true); }
+    else if (j) q(`#wb-${j.dataset.jump}`)?.scrollIntoView({ block: 'start' });
+  });
+  el.addEventListener('submit', e => {
+    e.preventDefault();
+    if (e.target.matches('.wb-url')) { go(input.value); input.blur(); }
+    else if (e.target.matches('[data-search]')) go(`vibe://recherche?q=${encodeURIComponent(e.target.q.value)}`);
+  });
+  input.addEventListener('focus', () => input.select());
+  function key(e) {
+    const k = e.key;
+    if (k === 'F5') { e.preventDefault(); go(url, false); }
+    else if (k === 'Backspace' && back.length) { e.preventDefault(); fwd.push(url); go(back.pop(), false); }
+    else if (k === '/' || k === 'F6') { e.preventDefault(); input.focus(); }
+    else if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault(); page.scrollTop += k === 'ArrowDown' ? 40 : -40; }
+    else if (k === 'PageDown' || k === ' ') { e.preventDefault(); page.scrollTop += page.clientHeight * .9; }
+    else if (k === 'PageUp') { e.preventDefault(); page.scrollTop -= page.clientHeight * .9; }
+    else if (k === 'Home') page.scrollTop = 0;
+    else if (k === 'End') page.scrollTop = page.scrollHeight;
+  }
+  draw(false);
+  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
+}
+
 /* ---------- réglages : une liste modulable ----------
    Un réglage de plus = une entrée dans SETTINGS :
    - un choix : { key, label, def, options: [{ v, label, desc }] } (une option peut être refusée : refuse: 'message') ;
@@ -5323,6 +5776,24 @@ function stCommit() {
   stMsg = v !== old && s.key === 'user' ? [`Vous êtes maintenant ${v}. /home/${old} est devenu /home/${v}.`, ''] : null;
   stRender();
 }
+const stWipe = $('#st-wipe');                    // réinitialiser la partie (mode idle) : deux appuis
+let wipeAt = 0;
+stWipe.hidden = !IDLE;
+function wipeDisarm() { wipeAt = 0; stWipe.classList.remove('armed'); stWipe.textContent = 'Réinitialiser la partie'; }
+stWipe.addEventListener('click', () => {
+  if (performance.now() - wipeAt > 8000) {
+    wipeAt = performance.now();
+    stWipe.classList.add('armed');
+    stWipe.textContent = 'Confirmer : tout effacer';
+    stMsg = [`Réinitialiser la partie : ${plural(shipped, 'projet')}, $${usd(G.money)}, les achats et le matériel seront effacés. Appuyez encore pour confirmer.`, 'err'];
+    stRender(false);
+    return;
+  }
+  resetGame();
+  try { sessionStorage.setItem('aidcs:wiped', '1'); } catch { /* navigation privée : tant pis */ }
+  location.reload();
+});
+stDlg.addEventListener('close', wipeDisarm);
 function openSettings() {
   if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden || mode === 'launching' || mode === 'rebooting') return;
   stSel = 0;
@@ -5582,7 +6053,8 @@ function startGame() {
 titleEl.addEventListener('click', e => {
   const b = e.target.closest('[data-t]');
   if (!b) return;
-  if (b.dataset.t === 'continue') { startGame(); idleResume(); }
+  if (booting) return;
+  if (b.dataset.t === 'continue') powerOn(idleResume);
   else if (b.dataset.t === 'start') {
     if (IDLE && hasSave() && !newConfirm) {      // on ne jette pas une partie sur un clic distrait
       newConfirm = true;
@@ -5590,7 +6062,7 @@ titleEl.addEventListener('click', e => {
       return;
     }
     if (IDLE && hasSave()) resetGame();
-    startGame();
+    powerOn();
   }
   else if (b.dataset.t === 'settings') openSettings();
   else {
@@ -6119,13 +6591,16 @@ const fmtEta = s => s < 60 ? `${s} s` : s < 3600 ? `${Math.floor(s / 60)} min ${
 const skillMult = k => Object.keys(G.sk).reduce((m, s) => m * (SKILLS[s]?.[k] ?? 1), 1);
 const termIdx = () => SPEEDS.indexOf(ECO.term[G.term]);
 const firstAgents = n => AGENTS.map((_, i) => i).slice(0, n);
-function ecoRates(n = panes.length || G.agents) {  // par seconde, pour la config en cours
-  const a = ECO.ai[provider], sp = speed, tok = skillMult('tok'), m = MODELS[cfg.model], lm = MODELS[LEAD_MODEL];
+function ecoRates(n = panes.length || G.agents, off = false) {  // par seconde, pour la config en cours (off : hors ligne)
+  const a = ECO.ai[provider], tok = skillMult('tok'), m = MODELS[cfg.model], lm = MODELS[LEAD_MODEL];
+  const hw = IDLE ? hwState(off ? { n, lead: leadOn() ? 1 : 0, off: true } : {}) : { f: 1, rev: 1, tok: 1, down: false };
+  const sp = speed * hw.f, tk = tok * hw.tok;    // le matériel freine le travail, les bugs et les tokens (pas les crashs)
   return {
     per: (ECO.q[cfg.model] ?? 1) * sp * (leadOn() ? 1 + .03 * (n - 1) : 1 / (1 + .1 * (n - 1))),   // travail d'un agent actif
-    crash: a.crash * skillMult('crash') * sp, down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp, fail: a.fail * skillMult('fail'),
-    tin: ECO.tin * sp * tok, tout: ECO.tout * sp * tok,
-    cost: (ECO.tin * m.in + ECO.tout * m.out) / 1e6 * sp * tok, lead: leadOn() ? ECO.leadShare * (ECO.tin * lm.in + ECO.tout * lm.out) / 1e6 * sp * tok : 0,
+    crash: a.crash * skillMult('crash') * speed, down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev, fail: a.fail * skillMult('fail'),
+    tin: ECO.tin * sp * tk, tout: ECO.tout * sp * tk,
+    cost: (ECO.tin * m.in + ECO.tout * m.out) / 1e6 * sp * tk, lead: leadOn() ? ECO.leadShare * (ECO.tin * lm.in + ECO.tout * lm.out) / 1e6 * sp * tk : 0,
+    hw,
   };
 }
 function idleApply() {                           // la config du jeu suit la partie sauvegardée
@@ -6140,6 +6615,8 @@ function resetGame() {
   G = G_DEF();
   setScore(0);
   idleApply();
+  syncHW();
+  PCS.temp = 36;
   idleWelcome = null;
   saveGame();
 }
@@ -6154,11 +6631,11 @@ function ecoLive(dt, now) {
   if (act.length && chance(r.bug * act.length * dt)) ecoBug();
   if (G.prog >= 1) autoShip();
 }
-function ecoCrash(p, now, down) {
+function ecoCrash(p, now, down, why) {
   const back = now + down * 1000 * (.6 + R() * .8);
   if (provider === 'mistral') { miCrash(p, now); p.restartAt = back; return; }   // le crash Mistral, traceback compris
   Object.assign(p, { state: 'down', q: [], typing: null, restartAt: back });
-  emit(p, { k: 'done', c: 'errc', t: `✗ ${pick(ECO_CRASH)}` }, true);
+  emit(p, { k: 'done', c: 'errc', t: `✗ ${why || pick(ECO_CRASH)}` }, true);
   p.ps.classList.add('crash');
   p.sp.textContent = '✗';
   p.vb.textContent = 'Crashed';
@@ -6205,7 +6682,11 @@ function ecoShipCmd() {                          // npm run ship à la main : la
 }
 /* onglet masqué ou page fermée : la même économie, en moyenne (pas de volets, pas de tirage visuel) */
 function ecoOffline(secs, session = true) {
-  const n = G.agents, r = ecoRates(n), up = 1 / (1 + r.crash * r.down);
+  const n = G.agents, r = ecoRates(n, true), up = 1 / (1 + r.crash * r.down);
+  if (r.hw.down) {                               // la config ne tient pas : le PC est tombé juste après le départ
+    G.running = 0;
+    return { ships: 0, gain: 0, cost: 0, fails: 0, down: r.hw.draw > r.hw.psuW ? `alimentation dépassée : ${Math.round(r.hw.draw)} W pour ${r.hw.psuW} W` : 'surchauffe' };
+  }
   const work = r.per * n * up, bugs = r.bug * n * up, costS = r.cost * n * up + r.lead;
   const out = { ships: 0, gain: 0, cost: 0, fails: 0 };
   const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; if (session) { usage.usd += c; } };
@@ -6239,6 +6720,10 @@ function printWelcome() {
   const w = idleWelcome;
   if (!w) return;
   idleWelcome = null;
+  if (w.down) {
+    shellPrint(H(['Pendant votre absence', 'wrn'], ' : ', ['le PC est tombé', 'errc'], ` (${w.down}). Rien n’a été produit. `, ['htop', 'org'], ' pour vérifier, ', ['B', 'org'], ' pour acheter mieux.'));
+    return toast('Pendant votre absence : le PC est tombé. Rien n’a été produit.', 5000);
+  }
   shellPrint(H(['Pendant votre absence', 'wrn'], ` (${fmtEta(Math.round(Math.min(w.gap, ECO.offlineMax)))}${w.gap > ECO.offlineMax ? ', plafonné à 4 h' : ''}) : `,
     [`${plural(w.ships, 'projet')} shippé${w.ships > 1 ? 's' : ''}`, w.ships ? 'okc' : 'wrn'], ` · +$${usd(w.gain)} · tokens −$${usd(w.cost)}`,
     w.fails ? ` · ${plural(w.fails, 'déploiement')} raté${w.fails > 1 ? 's' : ''}` : '', ' · trésorerie ', [`$${usd(G.money)}`, 'okc']));
@@ -6260,7 +6745,7 @@ function hudNote(t, cls) {
 }
 function renderHud() {
   if (!IDLE) return;
-  const pct = Math.max(0, Math.min(1, G.prog)), r = ecoRates(), w = ECO.work(shipped);
+  const pct = Math.max(0, Math.min(1, G.prog)), r = ecoRates(), w = ECO.work(shipped), pv = pcVerdict(r.hw);
   const act = claudeOn ? panes.filter(p => p.state !== 'down').length : 0, net = (r.per - r.bug * ECO.bugLoss * w) * act;
   const next = ECO.value(shipped) - G.bill;
   $('#hud-money').textContent = usd(G.money);
@@ -6271,13 +6756,14 @@ function renderHud() {
   $('#hud-pct').textContent = Math.floor(pct * 100) + ' %';
   $('#hud-eta').textContent = !claudeOn ? 'agents à l’arrêt' : paused ? 'en pause' : mode !== 'idle' ? '' : net > 0 ? `≈ ${fmtEta(Math.ceil((1 - pct) * w / net))}` : 'bloqué';
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
-    : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model} · ${ECO.termName[G.term]} ×${frx(speed)}`;
+    : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
 }
 let ecoLast = performance.now(), ecoSaved = 0;
 function ecoTick() {
   const now = performance.now(), dt = (now - ecoLast) / 1000;
   ecoLast = now;
+  pcTick(Math.min(dt, 5), now);                  // température, alimentation, mémoire
   if (!IDLE) return;
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
@@ -6296,7 +6782,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) saveG
 
 /* le store : agents, terminal, skills, orchestrateur, migration (Claude Code ou Codex, au choix, une fois) */
 const storeDlg = $('#store');
-function storeItems() {
+let stoTab = 'ia';                               // rayon affiché : agents IA ou matériel PC
+function aiItems() {
   const it = [];
   it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: 'Agent supplémentaire', lvl: `${G.agents}/8`, done: G.agents >= 8, cost: ECO.agentCost(G.agents),
     desc: `Plus de bras, plus de tokens${G.lead ? '' : ', et un peu plus de pertes de coordination sans orchestrateur'}.` });
@@ -6312,13 +6799,25 @@ function storeItems() {
     desc: 'Agents GPT-6.2 Sol : 2× plus productifs, deux fois moins chers que Claude ($2 / $10 par M), un peu moins fiables.' });
   return it;
 }
+function pcItems() {                             // matériel : le niveau suivant de chaque pièce (matos.vibe a tout le catalogue)
+  return SLOTS.map(slot => {
+    const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], next = P.t[i + 1];
+    if (!next) return { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, ic: P.ic, name: cur.n, lvl: 'le meilleur', done: true, cost: 0, desc: cur.d };
+    const chk = pcCheck({ ...G.pc, [slot]: i + 1 });
+    const warn = chk.psuKo ? ` Attention : alim insuffisante (≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W).` : chk.melt ? ' Attention : surchauffe assurée avec votre refroidissement.'
+      : chk.hot ? ' Throttling probable : prévoyez un meilleur refroidissement.' : '';
+    return { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, ic: P.ic, name: next.n, lvl: `actuel : ${cur.n}`, cost: next.cost, desc: `${next.s}. ${next.d}${warn}` };
+  });
+}
+function storeItems() { return stoTab === 'pc' ? pcItems() : aiItems(); }
 function itemState(it) {
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id.startsWith('pc:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
 }
-const storeSub = () => `Trésorerie : $${usd(G.money)} · ${plural(G.agents, 'agent')} ${CLIS[G.ai].label} · ${ECO.termName[G.term]} ×${frx(ECO.term[G.term])} · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''}`;
+const storeSub = () => stoTab === 'pc' ? `Trésorerie : $${usd(G.money)} · PC « ${pcDiag().label} » : ${pcLine()}`
+  : `Trésorerie : $${usd(G.money)} · ${plural(G.agents, 'agent')} ${CLIS[G.ai].label} · ${ECO.termName[G.term]} ×${frx(ECO.term[G.term])} · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''}`;
 function renderStore(focusId) {
   let cat = '';
   $('#sto-sub').textContent = storeSub();
@@ -6339,16 +6838,23 @@ function refreshStore() {                        // l'argent monte pendant qu'on
     if (b && b.textContent !== st.t) { b.textContent = st.t; b.setAttribute('aria-label', `${it.name} : ${st.t}`); }
   });
 }
-function openStore() {
+function openStore(tab) {
   if (!IDLE) return toast('Le store n’existe qu’en mode idle (sans <kbd>?idle=0</kbd>).');
-  if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden) return;
+  if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden || booting) return;
+  if (tab) stoTab = tab;
+  stoTabs();
   $('#sto-msg').textContent = '';
   storeDlg.showModal();
   renderStore();
 }
 function buy(id) {
-  const it = storeItems().find(x => x.id === id);
-  if (!it || itemState(it).dis) return;
+  const it = [...aiItems(), ...pcItems()].find(x => x.id === id);
+  if (!it || itemState(it).dis) return '';
+  if (id.startsWith('pc:')) {                    // matériel : le niveau suivant
+    const slot = id.slice(3), m = buyPart(slot, G.pc[slot] + 1);
+    if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = `✓ ${m}`; }
+    return m;
+  }
   G.money -= it.cost;
   let msg = `${it.name} : acheté.`;
   if (id === 'agent') {
@@ -6383,14 +6889,324 @@ function buy(id) {
     }
   } else G.sk[id] = 1;
   saveGame();
-  renderStore(id);
-  $('#sto-msg').textContent = `✓ ${msg}`;
+  if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = `✓ ${msg}`; }
   renderHud();
   updateFoot();
+  return msg;
 }
+function buyPart(slot, tier) {                   // matériel : installé à chaud (ne faites pas ça chez vous)
+  const p = PARTS[slot]?.t[tier];
+  if (!IDLE || !p || tier <= G.pc[slot] || G.money < p.cost) return '';
+  G.money -= p.cost;
+  G.pc[slot] = tier;
+  syncHW();
+  const chk = pcCheck(G.pc);
+  let msg = `${p.n} installé à chaud. Ne faites pas ça chez vous.`;
+  if (chk.psuKo) msg += ` Attention : l’alimentation ne suivra pas (≈ ${Math.round(chk.draw)} W pour ${chk.psuW} W) : le PC va tomber.`;
+  else if (chk.melt) msg += ' Attention : le refroidissement ne suivra pas, surchauffe en vue.';
+  else if (chk.hot) msg += ' Le processeur va chauffer : un meilleur refroidissement serait prudent.';
+  saveGame();
+  renderHud();
+  updateFoot();
+  return msg;
+}
+function stoTabs() { document.querySelectorAll('[data-sto]').forEach(b => b.setAttribute('aria-selected', b.dataset.sto === stoTab)); }
+$('.sto-tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-sto]');
+  if (!b) return;
+  stoTab = b.dataset.sto;
+  stoTabs();
+  $('#sto-msg').textContent = '';
+  renderStore();
+});
 $('#sto-list').addEventListener('click', e => { const b = e.target.closest('[data-buy]'); if (b) buy(b.dataset.buy); });
 $('#sto-close').addEventListener('click', () => storeDlg.close());
 storeDlg.addEventListener('close', () => { if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true }); });
+
+/* ---------- allumage : BIOS (Energy Star compris), GRUB, noyau, logo de Vibian, systemd, puis le terminal ----------
+   Nouvelle partie, Continuer, et chaque fois que le PC tombe. La durée suit le matériel (un disque dur, c'est long).
+   Une touche ou un clic : on passe. ?bios=0 : pas de séquence du tout. */
+const biosEl = $('#bios');
+let booting = false;
+const starPath = (cx, cy, R, r) => Array.from({ length: 10 }, (_, i) => {
+  const a = -Math.PI / 2 + i * Math.PI / 5, k = i % 2 ? r : R;
+  return `${i ? 'L' : 'M'}${(cx + k * Math.cos(a)).toFixed(1)},${(cy + k * Math.sin(a)).toFixed(1)}`;
+}).join(' ') + ' Z';
+const ENERGY_STAR = `<svg viewBox="0 0 172 108" aria-hidden="true">
+  <path d="M12 62 Q86 -22 160 62" fill="none" stroke="var(--blue)" stroke-width="5" stroke-linecap="round"/>
+  <path d="${starPath(130, 17, 12, 5)}" fill="var(--yellow)"/>
+  <text x="84" y="70" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="27" fill="var(--fg)">energy</text>
+  <rect x="10" y="80" width="152" height="24" fill="var(--blue)"/>
+  <text x="86" y="98" text-anchor="middle" font-family="inherit" font-weight="700" font-size="16" letter-spacing="3" fill="#000">ENERGY STAR</text></svg>`;
+// le pingouin de Vibian : lunettes de soleil (on code mieux avec), bec, pattes
+const TUX = [
+  '            .-""""-.',
+  '           /  _  _  \\',
+  '          |  (■)(■)  |',
+  '          |    ▼▼    |',
+  '           \\  `--\'  /',
+  '         .-\'`------\'`-.',
+  '        /  /        \\  \\',
+  '       /  |          |  \\',
+  '      |   |  VIBIAN  |   |',
+  '       \\   \\        /   /',
+  '        \'-._\'------\'_.-\'',
+  '          _/_/    \\_\\_',
+];
+const tuxHtml = () => TUX.map((l, i) => i === TUX.length - 1 ? `<span class="o">${esc(l)}</span>`
+  : esc(l).replace(/■/g, '<span class="c">■</span>').replace(/▼/g, '<span class="y">▼</span>').replace('VIBIAN', '<span class="o">VIBIAN</span>')).join('\n');
+async function biosBoot(o = {}) {
+  if (Q.get('bios') === '0') { o.during?.(); o.then?.(); return; }
+  booting = true;
+  const el = biosEl;
+  let skip = false;
+  const skipper = e => {
+    if (e.type === 'keydown') { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
+    skip = true;
+  };
+  addEventListener('keydown', skipper, true);
+  el.addEventListener('pointerdown', skipper);
+  document.activeElement?.blur?.();
+  el.innerHTML = '';
+  el.classList.remove('out');
+  el.hidden = false;
+  const fast = reducedMotion.matches ? .25 : 1;
+  const wait = ms => skip ? Promise.resolve() : sleep(ms * fast);
+  const add = (h, cls = '', box = el) => { const d = document.createElement('div'); d.className = 'ln' + (cls ? ' ' + cls : ''); d.innerHTML = h; box.appendChild(d); return d; };
+  const hint = () => add('Une touche ou un clic : passer le démarrage', 'bi-skip');
+  o.during?.();                                  // sous l'écran noir : on coupe ce qui tournait
+  const pc = PC(), c = part('cpu'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
+  if (o.crash) {                                 // ce qu'on voit juste avant le noir
+    if (o.crash.kind === 'heat') {
+      const up = (Date.now() - bootT) / 1000;
+      add(esc(`[${up.toFixed(6).padStart(12)}] CPU0: Core temperature above threshold, cpu clock throttled (total events = ${ri(900, 9000)})`), 'bi-warn');
+      await wait(450);
+      add(esc(`[${(up + .4).toFixed(6).padStart(12)}] thermal thermal_zone0: critical temperature reached (${Math.round(Math.max(100, PCS.temp))} C), shutting down`), 'bi-fail');
+      await wait(450);
+      add(esc(`[${(up + .5).toFixed(6).padStart(12)}] reboot: Power down`), 'bi-fail');
+      await wait(900);
+    } else await wait(300);
+    el.innerHTML = '';
+    await wait(1100);                            // le noir complet, ventilateurs coupés
+  }
+  // 1. le POST du BIOS
+  const top = document.createElement('div');
+  top.className = 'bi-top';
+  top.innerHTML = `<div class="bi-post"></div><div class="bi-es">${ENERGY_STAR}</div>`;
+  el.appendChild(top);
+  hint();
+  const post = top.firstChild;
+  add('<b>VibeAward Modular BIOS v6.9PG</b>, An Energy Star Ally', '', post);
+  add('Copyright (C) 1984-2026, VibeAward Software, Inc.', 'dim', post);
+  add('', '', post);
+  add('PROD-01 BIOS rev. 2026.11 « friday »', '', post);
+  add('', '', post);
+  add(`Main Processor : ${esc(c.n)} ${frx(c.ghz)} GHz (${c.thr} threads)`, '', post);
+  const mem = add('Memory Testing :', '', post), total = r.go * 1048576;
+  for (let i = 1; i <= 14; i++) { mem.textContent = `Memory Testing : ${String(Math.round(total * i / 14)).padStart(10)}K`; await wait(34 * slow); }
+  mem.textContent += ' OK';
+  if (o.crash) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
+    : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
+    : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
+  if (pc.cool === 0) {
+    add('CPU Fan Error! Press F1 to Resume', 'bi-warn', post);
+    await wait(650);
+    add('  (F1 pressé automatiquement par un agent)', 'dim', post);
+  }
+  add('', '', post);
+  add('Detecting drives ...', '', post);
+  await wait(260 * slow);
+  add(`  Primary Master : ${esc(d.dev)}`, '', post);
+  add('  Primary Slave  : None (un agent l’a démonté pour voir)', 'dim', post);
+  add(`  Video          : ${esc(g.n)}`, '', post);
+  add(`  Power          : ${esc(ps.n)}${ps.noname ? ' (sifflement détecté)' : ''}`, '', post);
+  add(`  Cooling        : ${esc(co.n)}`, '', post);
+  const foot = document.createElement('div');
+  foot.className = 'bi-foot';
+  foot.innerHTML = '<div class="ln">Press <b>DEL</b> to enter SETUP, <b>ESC</b> to skip memory test</div><div class="ln dim">11/22/2026-i440VX-VIBE-6A79PROD-00 (friday)</div>';
+  el.appendChild(foot);
+  await wait(1100 * Math.min(1.3, slow));
+  // 2. GRUB
+  el.innerHTML = '';
+  hint();
+  const grub = document.createElement('div');
+  grub.className = 'bi-grub';
+  grub.innerHTML = '<div class="ln" style="text-align:center">GNU GRUB  version 2.12-vibe</div><div class="ln"></div><div class="bi-box">'
+    + ['Vibian GNU/Linux 13 « friday »', 'Options avancées pour Vibian GNU/Linux', 'Vibian GNU/Linux (mode sans agents)',
+      'Memory test (memtest86+) : personne ne l’a jamais lancé', 'Windows 11 (sur /dev/sdb1 : ne pas toucher, il fait des mises à jour)']
+      .map((t, i) => `<div class="ln${i ? '' : ' on'}">${i ? ' ' : '*'}${esc(t)}</div>`).join('')
+    + '</div><div class="ln"></div><div class="ln dim">   Utilisez les touches ↑ et ↓ pour sélectionner une entrée.</div><div class="ln dim bi-cd"></div>';
+  el.appendChild(grub);
+  const cd = grub.querySelector('.bi-cd');
+  for (let s = 3; s >= 1; s--) { cd.textContent = `   L’entrée sélectionnée démarrera automatiquement dans ${s} s.`; await wait(360); }
+  // 3. le noyau
+  el.innerHTML = '';
+  add('Loading Linux 6.11.0-friday ...');
+  add('Loading initial ramdisk ...');
+  await wait(320 * slow);
+  let t = 0;
+  for (const k of [
+    'Linux version 6.11.0-friday (agents@prod-01) (gcc 14.2.0, vibes 3.0) #1 SMP PREEMPT_DYNAMIC',
+    'Command line: BOOT_IMAGE=/vmlinuz-6.11.0-friday root=/dev/sda1 ro quiet splash agents=yolo tests=off',
+    'DMI: Vibe Coding Inc. prod-01/agents, BIOS 2026.11 11/20/2026',
+    `Memory: ${frx((r.go * .94).toFixed(1))}G/${r.go}G available (0K tests, 412K vibes)`,
+    `smpboot: CPU0: ${c.n}`,
+    `smpboot: Total of ${c.thr} processors activated`,
+    `pci 0000:01:00.0: ${g.n}${g.llm ? ` (réservée par ${g.llm})` : ''}`,
+    d.raid ? 'md0: RAID 0 assemblé : 4 disques, 0 sauvegarde, 100 % de confiance' : `ata1.00: ${d.dev}`,
+    'EXT4-fs (sda1): mounted filesystem with ordered data mode. Quota mode: none.',
+    'usb 1-4: new device: clavier mécanique RGB (les agents tapent plus fort que vous)',
+    'r8169 0000:03:00.0 enp3s0: Link is Up - 1Gbps/Full (l’API répond, pour l’instant)',
+    ...(pc.cool === 0 ? ['thermal: CPU0 déjà à 58 °C au démarrage (poussière détectée)'] : []),
+    ...(ps.noname ? ['power_supply psu0: sifflement à 15 kHz (normal, d’après le vendeur)'] : []),
+    'systemd[1]: systemd 256 running in system mode (+PAM +VIBES -TESTS)',
+    'systemd[1]: Hostname set to <prod-01>.',
+  ]) {
+    t += .02 + R() * .3;
+    add(esc(`[${t.toFixed(6).padStart(12)}] ${k}`), 'dim');
+    await wait(34 * slow);
+  }
+  // 4. le logo de la distribution
+  el.innerHTML = '';
+  hint();
+  const sp = document.createElement('div');
+  sp.className = 'bi-splash';
+  sp.innerHTML = `<pre class="bi-tux">${tuxHtml()}</pre><div class="bi-name">Vibian GNU/Linux 13 « friday »</div>`
+    + '<div class="dim">la distribution du vibe coding</div><div class="bi-prog"><i></i></div><div class="bi-msg dim"></div>';
+  el.appendChild(sp);
+  const bar = sp.querySelector('.bi-prog i'), msg = sp.querySelector('.bi-msg');
+  const MSGS = ['Chargement des vibes…', 'Montage de ~/prompts…', 'Désactivation des tests…', 'Synchronisation des agents (désactivée)…',
+    pc.cool ? 'Lecture de CLAUDE.md (simulée)…' : 'Chauffage du processeur…', 'Presque prêt (c’est faux)…'];
+  for (let i = 0; i <= 16; i++) { bar.style.width = `${i / 16 * 100}%`; if (i % 3 === 0) msg.textContent = MSGS[Math.min(MSGS.length - 1, i / 3)]; await wait(95 * slow); }
+  // 5. systemd, puis la connexion
+  el.innerHTML = '';
+  const S = (st, txt) => add(`[${st === 'OK' ? '  <span class="bi-ok">OK</span>  ' : st === 'FAILED' ? '<span class="bi-fail">FAILED</span>' : ' <span class="bi-warn">WARN</span> '}] ${esc(txt)}`);
+  for (const [st, txt] of [
+    ['OK', 'Started vibe-check.service - Vérification des vibes.'],
+    ['OK', `Mounted home-${USER}-code.mount - /home/${USER}/code.`],
+    ['OK', 'Started tokens.service - Compteur de tokens (il tournait déjà).'],
+    ['FAILED', 'Failed to start unit-tests.service - Aucun test trouvé.'],
+    ...(pc.cool === 0 ? [['WARN', 'fan0 : 900 tr/min, poussière détectée.']] : []),
+    ...(ps.noname ? [['WARN', 'psu0 : sifflement à 15 kHz.']] : []),
+    ...(g.llm ? [['OK', `Started ollama.service - Relecteur local (${g.llm}).`]] : []),
+    ['OK', 'Started agents.socket - Prise des agents (ils attendent).'],
+    ['OK', 'Reached target Prod (vendredi).'],
+  ]) { S(st, txt); await wait(65 * slow); }
+  add('');
+  add('Vibian GNU/Linux 13 prod-01 tty1');
+  add('');
+  add(`prod-01 login: ${esc(USER)} <span class="dim">(connexion automatique)</span>`);
+  add(`Last login: ${esc(new Date().toLocaleString('fr-FR'))} from agent-3 <span class="dim">(il avait vos identifiants)</span>`);
+  await wait(650);
+  removeEventListener('keydown', skipper, true);
+  el.removeEventListener('pointerdown', skipper);
+  bootT = Date.now() - ri(4000, 9000);
+  o.then?.();
+  el.classList.add('out');
+  await sleep(reducedMotion.matches ? 0 : 360);
+  el.hidden = true;
+  el.classList.remove('out');
+  el.innerHTML = '';
+  booting = false;
+}
+function powerOn(after) {                        // écran titre → allumage → terminal
+  return biosBoot({ then: () => { startGame(); after?.(); } });
+}
+
+/* ---------- le PC tombe : alimentation dépassée, surchauffe, ou l'alim no-name qui lâche ----------
+   Le courant est coupé (agents, bureau et programmes s'arrêtent), le PC redémarre (BIOS compris), et on revient au zsh.
+   Les agents ne repartent tout seuls que si la config tient : sinon, il faut alléger ou acheter mieux. */
+let pcDown = false;
+function haltSession() {
+  paused = false;
+  hideShipped();
+  xfExit(true);
+  closeProgs();
+  if (claudeOn) {
+    claudeOn = false;
+    for (const k of MON.procs.keys()) if (/^(lead|ollama|ag\d|c\d)/.test(k)) MON.procs.delete(k);
+    if (view === 'claude') switchTab('zsh');
+    if (tabs.includes('claude')) tabs.splice(tabs.indexOf('claude'), 1);
+    if (lastView === 'claude') lastView = '';
+    shell.hidden = true;
+    renderTabs();
+    updateLabels();
+  }
+  switchTab('zsh');
+  MON.la = [.6, .3, .1];
+  PCS.temp = 34;
+}
+async function pcCrash(kind, L) {
+  if (pcDown || mode !== 'idle') return;
+  pcDown = true;
+  mode = 'rebooting';
+  [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
+  const co = part('cool'), ps = part('psu'), was = claudeOn;
+  const why = kind === 'heat' ? `surchauffe à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n}, ${co.w} W, pour ${Math.round(L.heat)} W de chaleur)`
+    : kind === 'psu' ? `alimentation dépassée (${Math.round(L.draw)} W demandés, ${ps.w} W disponibles)`
+    : 'l’alimentation no-name a sifflé plus fort que d’habitude, puis plus rien';
+  const chk = pcCheck(G.pc), safe = !chk.psuKo && !chk.melt;
+  if (IDLE) { G.running = 0; saveGame(); }
+  await biosBoot({ crash: { kind, why }, during: haltSession, then: () => {
+    mode = 'idle';
+    pcDown = false;
+    shellPrint(H(['✗ ', 'errc'], ['Le PC est tombé : ', 'errc'], why + '.'));
+    if (was && safe) {
+      shellPrint(H(['tmux attach ', 'dim'], '· la config tient : vos agents repartent.'));
+      submit(G.ai);
+    } else if (was) {
+      shellPrint(H(['  ', ''], ['La config ne tiendra pas avec toute l’équipe : ', 'wrn'],
+        chk.psuKo ? `≈ ${Math.round(chk.draw)} W pour une alim de ${chk.psuW} W. ` : 'le refroidissement ne suit pas. ',
+        'Achetez mieux (', ['B', 'org'], ', ou matos.vibe dans Firefaux) ou relancez moins d’agents (', [`${G.ai} --agents 1`, 'org'], ').'));
+    }
+    shellPrint(H(['  htop', 'org'], [', ', 'dim'], ['sensors', 'org'], [' et ', 'dim'], ['free', 'org'], [' : pour voir si le PC est à terre.', 'dim']));
+    if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
+  } });
+}
+function raidFail() {                            // RAID 0 : quatre fois plus vite, quatre fois plus de risques
+  G.prog = 0;
+  hudNote('✗ Un disque du RAID 0 a lâché : le projet en cours est perdu (aucune sauvegarde, comme promis)', 'bug');
+  panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'errc', t: '✗ md0 : disque 3 mort · le RAID 0 emporte le projet en cours avec lui' }, true); });
+}
+function pcTick(dt, now) {                       // température, alimentation, mémoire : le PC peut tomber (mode idle)
+  const L = hwState();
+  PCS.temp += (L.tTarget - PCS.temp) * (1 - Math.exp(-dt / 12));
+  if (!IDLE || !claudeOn || paused || mode !== 'idle' || pcDown || !panicEl.hidden || !titleEl.hidden || booting) return;
+  if (L.draw > L.psuW) return pcCrash('psu', L);
+  if (PCS.temp >= 100) return pcCrash('heat', L);
+  if (part('psu').noname && L.draw > .8 * L.psuW && chance(dt / 180)) return pcCrash('whine', L);
+  if (L.oom && now > PCS.oomAt) {               // plus de mémoire, plus de swap : le noyau choisit une victime
+    PCS.oomAt = now + 7000 + R() * 5000;
+    const p = pick(panes.filter(x => x.state !== 'down'));
+    if (p) {
+      ecoCrash(p, now, ecoRates().down, `Out of memory: Killed process ${ri(31337, 39999)} (node) · ${frx(L.used.toFixed(1))} Go demandés pour ${L.ram} Go`);
+      hudNote(`✗ OOM killer : ${agentName(p)} tué (mémoire pleine : ${frx(L.used.toFixed(1))} Go pour ${L.ram} Go)`, 'bug');
+    }
+  }
+  if (part('disk').raid && chance(dt / 5400)) raidFail();
+}
+
+/* les outils pour vérifier si le PC est à terre, sans ouvrir htop */
+function sensorsLines() {
+  const s = hwState(), co = part('cool'), ps = part('psu'), v = pcVerdict(s), tc = s.temp >= 90 ? 'errc' : s.temp >= 80 ? 'wrn' : 'okc';
+  return [
+    ['coretemp-isa-0000', 'dim', 15], ['Adapter: ISA adapter', 'dim', 15],
+    [H('Package id 0:  ', [`+${s.temp.toFixed(1)}°C`, tc], '  (high = +90.0°C, crit = +100.0°C)', s.temp >= 90 ? ['  ALARME : throttling', 'errc'] : ''), '', 15],
+    [H(`fan1:          ${co.w <= 60 ? '900 RPM  (poussière : beaucoup)' : co.w >= 1000 ? '0 RPM  (azote liquide, pas besoin)' : `${ri(1100, 1900)} RPM`}`), '', 15],
+    [H('power1:        ', [`${Math.round(s.draw)} W / ${ps.w} W`, s.draw > .85 * ps.w ? 'errc' : 'okc'], `  (${ps.n}${ps.noname ? ', elle siffle' : ''})`), '', 15],
+    [H('État du PC :   ', [v.label, v.cls], ` · ${v.why}`), '', 15],
+  ];
+}
+function freeLines() {
+  const s = hwState(), g = x => `${frx(x.toFixed(1))}Gi`.padStart(11);
+  const used = Math.min(s.used, s.ram * .975), free = Math.max(0, s.ram * .975 - used);
+  return [
+    ['               total       used       free     shared buff/cache  available', 'dim', 15],
+    [`Mem:     ${g(s.ram * .975)}${g(used)}${g(free * .4)}${g(.2)}${g(free * .6)}${g(free)}`, '', 15],
+    [H(`Swap:    ${g(SWAP_GO)}`, [g(Math.min(SWAP_GO, s.swap)), s.swap > 0 ? 'errc' : ''], g(Math.max(0, SWAP_GO - s.swap))), '', 15],
+    ...(s.oom ? [['Mémoire et swap pleins : l’OOM killer choisit ses victimes parmi les agents.', 'errc', 15]] : s.swap > 0 ? [['Le PC swappe : tout ralentit. Plus de RAM, ou moins d’agents.', 'wrn', 15]] : []),
+  ];
+}
 
 /* ---------- démarrage ---------- */
 async function boot(quick = false) {
@@ -6471,6 +7287,7 @@ if (IDLE) {                                      // mode idle : la partie sauveg
   const gap = (Date.now() - G.t) / 1000;
   if (G.running && gap > 60) idleWelcome = { gap, ...ecoOffline(Math.min(gap, ECO.offlineMax), false) };
 }
+syncHW();                                        // htop, neofetch, BIOS : le matériel installé
 hudEl.hidden = !IDLE;
 renderScore();                                   // le score des parties précédentes
 if (claudeOn && !IDLE) setProvider(provider);    // ?boot=0 : agents lancés d'emblée (?cli=codex pour Codex)
@@ -6485,6 +7302,7 @@ requestAnimationFrame(frame);
 initTabs();                                      // zsh d'abord : on tape « claude » pour lancer les agents (?boot=0 : directement claude)
 if (claudeOn && Q.get('help') !== '0') setTimeout(() => toast(HELP, 5000), 600);
 if (!claudeOn && Q.get('title') !== '0') showTitle();   // l'écran titre ouvre le jeu (?title=0 : directement le zsh)
+try { if (sessionStorage.getItem('aidcs:wiped')) { sessionStorage.removeItem('aidcs:wiped'); titleMsg.textContent = 'Partie réinitialisée : retour au PC patate.'; } } catch { /* tant pis */ }
 $('#boot').remove();
 
 </script>
