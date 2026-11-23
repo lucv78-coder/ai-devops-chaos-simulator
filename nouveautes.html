@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>18</b><span>mises à jour</span></div>
-    <div role="listitem"><b>27 h 20</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 9 747</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>19</b><span>mises à jour</span></div>
+    <div role="listitem"><b>32 h 37</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 10 006</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#19</span><time datetime="2026-11-23T20:04">20 h 04</time><a href="#succes">Les succès, dans Steam</a></li>
       <li><span class="n">#18</span><time datetime="2026-11-23T14:47">14 h 47</time><a href="#electricite">La facture d’électricité</a></li>
       <li><span class="n">#17</span><time datetime="2026-11-23T12:02">12 h 02</time><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></li>
       <li><span class="n">#16</span><time datetime="2026-11-23T11:20">11 h 20</time><a href="#post-ami">Le POST passe en AMIBIOS</a></li>
@@ -167,8 +168,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="electricite" aria-labelledby="t18">
-    <p class="meta"><span class="n">#18</span><span class="new">dernière</span><time datetime="2026-11-23T14:47">23 nov. 2026 · 14 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6049cc4">6049cc4</a><span>9 696 → 9 747 lignes</span></p>
+  <article class="maj latest" id="succes" aria-labelledby="t19">
+    <p class="meta"><span class="n">#19</span><span class="new">dernière</span><time datetime="2026-11-23T20:04">23 nov. 2026 · 20 h 04</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8618684">8618684</a><span>9 747 → 10 006 lignes</span></p>
+    <h2 id="t19"><a href="#succes">Les succès, dans Steam</a></h2>
+    <ul>
+      <li>39 succès, dont 9 cachés. Ships, trésorerie, matériel, BIOS, memtest86+, GRUB, facture d’électricité, et quelques bêtises (rm -rf /, désinstaller sudo, shipper un vendredi, ou à 3 h du matin).</li>
+      <li>Steam s’ouvre enfin, dans Xfce (icône du bureau, ou Applications › Jeux) : la bibliothèque (412 jeux, un seul installé), la fiche du jeu, le temps de jeu, les succès débloqués avec leur date, ceux qui restent avec leur progression. La part des joueurs qui ont chaque succès est inventée, comme sur un vrai Steam.</li>
+      <li>Une notification en bas à droite à chaque succès ; trois ou plus d’un coup n’en font qu’une, qui les liste. Elle attend la fin du BIOS, de l’écran titre ou du kernel panic.</li>
+      <li>Les succès restent d’une partie à l’autre. Une ancienne sauvegarde reçoit d’un coup ceux qu’elle mérite déjà. Rien ne se débloque dans le bac à sable : tout y est acheté d’avance, comme avec un code de triche.</li>
+    </ul>
+    <blockquote>« 100 % des succès en une journée ? Normal, je les ai codés, testés et débloqués moi-même. »<cite>l’agent, 20 h 04</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-steam.png" title="Voir en grand"><img src="assets/screen-steam.png" width="900" height="540" loading="lazy" alt="Steam en plein écran dans Xfce : la bibliothèque à gauche, la fiche du jeu (4,3 heures de jeu, 13 succès sur 39), les succès débloqués avec leur date, et la notification « Succès débloqué : FAIL » en bas à droite."></a><figcaption>Steam : 13 succès sur 39, et memtest86+ qui vient d’échouer.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="electricite" aria-labelledby="t18">
+    <p class="meta"><span class="n">#18</span><time datetime="2026-11-23T14:47">23 nov. 2026 · 14 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6049cc4">6049cc4</a><span>9 696 → 9 747 lignes</span></p>
     <h2 id="t18"><a href="#electricite">La facture d’électricité</a></h2>
     <ul>
       <li>Le compteur tourne tant que les agents travaillent. Sans agents, ou en pause, le PC est en veille et ne coûte rien.</li>
