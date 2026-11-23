@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>17</b><span>mises à jour</span></div>
-    <div role="listitem"><b>24 h 35</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 9 696</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>18</b><span>mises à jour</span></div>
+    <div role="listitem"><b>27 h 20</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 9 747</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#18</span><time datetime="2026-11-23T14:47">14 h 47</time><a href="#electricite">La facture d’électricité</a></li>
       <li><span class="n">#17</span><time datetime="2026-11-23T12:02">12 h 02</time><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></li>
       <li><span class="n">#16</span><time datetime="2026-11-23T11:20">11 h 20</time><a href="#post-ami">Le POST passe en AMIBIOS</a></li>
       <li><span class="n">#15</span><time datetime="2026-11-23T11:08">11 h 08</time><a href="#bios">Le setup du BIOS : overclocker jusqu’au glitch</a></li>
@@ -166,8 +167,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="grub" aria-labelledby="t17">
-    <p class="meta"><span class="n">#17</span><span class="new">dernière</span><time datetime="2026-11-23T12:02">23 nov. 2026 · 12 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/931ab15">931ab15</a><span>9 497 → 9 696 lignes</span></p>
+  <article class="maj latest" id="electricite" aria-labelledby="t18">
+    <p class="meta"><span class="n">#18</span><span class="new">dernière</span><time datetime="2026-11-23T14:47">23 nov. 2026 · 14 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6049cc4">6049cc4</a><span>9 696 → 9 747 lignes</span></p>
+    <h2 id="t18"><a href="#electricite">La facture d’électricité</a></h2>
+    <ul>
+      <li>Le compteur tourne tant que les agents travaillent. Sans agents, ou en pause, le PC est en veille et ne coûte rien.</li>
+      <li>Il voit ce que tire le PC, overclocking compris, divisé par le rendement de l’alim : 65 % pour la no-name (un tiers part en chaleur et en sifflement), de 85 à 94 % pour les vraies. Le temps est compressé : une seconde de jeu vaut vingt minutes de travail des agents, et le PC patate coûte environ un centime par seconde.</li>
+      <li>La facture est payée à chaque ship, avec les tokens, hors ligne compris. Au début, elle pèse environ un dixième de ce que rapporte un ship. L’IA locale ne paie pas de tokens, mais elle paie l’électricité.</li>
+      <li>Pour payer moins : une meilleure alim, sous-cadencer le processeur dans le BIOS, ou un contrat Vibe Énergie (store, Matériel PC), de l’option Heures creuses (−25 %) au petit réacteur modulaire (−95 %, le voisinage n’a pas été consulté).</li>
+      <li><code>cost</code> et <code>sensors</code> montrent le compteur, le tableau de bord la facture en cours, facture.vibe le total.</li>
+    </ul>
+    <blockquote>« L’électricité coûte plus cher que les tokens ? Normal, les tokens, c’est moi qui les compte. »<cite>l’agent, 14 h 47</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-elec.png" title="Voir en grand"><img src="assets/screen-elec.png" width="900" height="540" loading="lazy" alt="Le terminal après cost et sensors : le coût des tokens, puis « Électricité : $0.19 depuis le dernier ship », « 111 W au compteur (72 W tirés, alim à 65 % de rendement) · Tarif de base Vibe Énergie : $0,25 le kWh », et dans sensors la ligne « compteur : 111 W au mur »."></a><figcaption>Le PC patate : 72 W tirés, 111 W au compteur. L’alim no-name siffle le reste.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="grub" aria-labelledby="t17">
+    <p class="meta"><span class="n">#17</span><time datetime="2026-11-23T12:02">23 nov. 2026 · 12 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/931ab15">931ab15</a><span>9 497 → 9 696 lignes</span></p>
     <h2 id="t17"><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></h2>
     <ul>
       <li>GRUB a enfin un vrai menu : <code>↑</code> <code>↓</code> (ou un clic) choisit une entrée et arrête le compte à rebours, <code>Entrée</code> (ou un second clic) la démarre. Le compte à rebours dure maintenant 3 vraies secondes. Une touche avant de choisir passe toujours le démarrage.</li>
