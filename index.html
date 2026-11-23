@@ -1688,7 +1688,7 @@ const IDLE = Q.get('idle') !== '0';
 const SANDBOX = IDLE && Q.get('sandbox') === '1';   // bac à sable (menu titre) : la partie idle, tout débloqué, sauvegardée à part
 const SAVE_KEY = SANDBOX ? 'aidcs:sandbox' : 'aidcs:save';
 // machine neuve : ces paquets et les CLI d'agents s'installent à la main (G.pk, G.cli) ; ?setup=0 installe tout
-const STARTER_PKGS = ['xfce4', 'htop', 'atop', 'lm-sensors', 'firefaux', 'thunar', 'mousepad', 'atril', 'steam'];
+const STARTER_PKGS = ['xfce4', 'htop', 'atop', 'lm-sensors', 'smartmontools', 'firefaux', 'thunar', 'mousepad', 'atril', 'steam'];
 const SETUP_SKIP = Q.get('setup') === '0' || SANDBOX;   // le bac à sable est livré installé
 const CLI_INST = {                                // la vraie commande d'installation de chaque CLI (et une autre façon)
   mistral: { cmd: 'curl -LsSf https://mistral.ai/vibe/install.sh | bash', alt: 'uv tool install mistral-vibe' },
@@ -2339,7 +2339,7 @@ const SETUP_HELP = () => [
   [H(['  ' + CLI_INST.mistral.cmd, 'org'], ['  Vibe CLI, la commande mistral (ou : uv tool install mistral-vibe)', 'dim']), '', 20],
   [H(['  ' + CLI_INST.codex.cmd, 'org'], ['  Codex (la licence s’achète au store)', 'dim']), '', 20],
   [H(['  ' + CLI_INST.claude.cmd, 'org'], ['  Claude Code (licence au store)', 'dim']), '', 20],
-  [H(['  sudo apt install htop atop lm-sensors', 'org'], ['  surveiller le PC (htop, atop, sensors)', 'dim']), '', 20],
+  [H(['  sudo apt install htop atop lm-sensors smartmontools', 'org'], ['  surveiller le PC (htop, atop, sensors, smartctl)', 'dim']), '', 20],
   [H(['  sudo apt install xfce4 firefaux thunar mousepad atril', 'org'], ['  le bureau, le navigateur, les fichiers, l’éditeur, les PDF', 'dim']), '', 20],
 ];
 const WIKI_LINE = () => [H(['Tout le reste', 'fgc'], ['  le wiki du jeu : commandes, store, matériel, pannes · ', 'dim'], ['wiki', 'org'], [' pour l’ouvrir', 'dim']), '', 20];
@@ -2353,7 +2353,7 @@ const PRE_HELP_LINES = () => [
   [H(['  mistral           ', 'org'], 'lancer des agents Mistral (Vibe CLI)… qui hallucinent, se sabotent et plantent'), '', 20],
   [H(['    --model <nom>   ', 'org'], modelsOf('mistral').join(' · ')), '', 20],
   [H(['    --agents <n>    ', 'org'], `de 1 à ${AGENTS.length} agents, quel que soit le fournisseur`), '', 20],
-  [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free)'), '', 20],
+  [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free, sudo smartctl -a)'), '', 20],
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
     [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
@@ -2952,7 +2952,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3139,6 +3139,7 @@ const CATALOG = {
   ripgrep: ['14.1.1-1', 4120, 'rg', 'grep, mais rapide'],
   rustc: ['1.82.0+dfsg1-2', 18400, 'rustc', 'le compilateur Rust (pour tout réécrire en Rust)'],
   sl: ['5.02-1', 23, 'sl', 'corrige les fautes de frappe sur ls, à sa façon'],
+  smartmontools: ['7.4-2', 1932, 'smartctl', 'la santé des disques (SMART) : sudo smartctl -a /dev/sda'],
   steam: ['1:1.0.0.81-2', 3200, 'steam', '412 jeux achetés, 3 lancés'],
   sudo: ['1.9.16p2-1', 3550, 'sudo', 'faire semblant d’être root'],
   thunar: ['4.20.1-1', 2140, 'thunar', 'gestionnaire de fichiers de Xfce (il lui faut le bureau : xfce)'],
@@ -3152,7 +3153,7 @@ const CATALOG = {
   zsh: ['5.9-6', 2890, '', 'le shell de ce terminal (essentiel ici)'],
 };
 const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'firefaux', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'lm-sensors', 'mousepad', 'nano',
-  'nodejs', 'npm', 'python3', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'xfce4', 'zsh'];
+  'nodejs', 'npm', 'python3', 'smartmontools', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'xfce4', 'zsh'];
 const startPkgs = () => DEFAULT_INSTALLED.filter(pkHas);   // machine neuve : sans les paquets de départ pas encore installés
 let installed = new Set(startPkgs()), aptUpgradable = 412;
 // paquets essentiels : [chemin affiché, dossiers supprimés] ; les enlever fait tomber le système
@@ -3167,8 +3168,8 @@ const ESSENTIAL = {
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
 const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux',
-  xfce4: 'xfce', 'lm-sensors': 'sensors' };
-const APT_ALIAS = { xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux' };   // ce qu'on tape, ce que Vibian comprend
+  xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
+const APT_ALIAS = { xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
 const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
 const APT_BYE = { steam: '412 jeux jamais lancés vous disent adieu.', sudo: 'sudo est parti. Pour le réinstaller, il faudra… sudo.',
   vim: 'Vous avez enfin réussi à quitter vim.', git: 'Plus de git. Plus de conflits non plus.', npm: 'npm désinstallé. node_modules, lui, reste.' };
@@ -3821,6 +3822,11 @@ async function runCommand(raw) {
     return;
   }
   if (KILL_CMDS.includes(progCmd)) return killCmd(progCmd, head === 'sudo' ? rest.slice(1) : rest);   // tskill codex, tskill htop…
+  if (cliWord === 'smartctl') {                  // la santé du disque : SMART (il faut smartmontools, et sudo)
+    if (!installed.has('smartmontools')) return notInstalled('smartctl', 'smartmontools');
+    if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+    return smartCmd(cmd.trim().split(/\s+/).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // options sensibles à la casse : -H n'est pas -h
+  }
   if (head === 'sensors') return installed.has('lm-sensors') ? printLines(sensorsLines()) : notInstalled('sensors', 'lm-sensors');   // l'état du PC : température, alimentation
   if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
@@ -7754,6 +7760,7 @@ function ecoTick() {
   const now = performance.now(), dt = (now - ecoLast) / 1000;
   ecoLast = now;
   pcTick(Math.min(dt, 5), now);                  // température, alimentation, mémoire
+  diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
@@ -8310,6 +8317,7 @@ async function biosBoot(o = {}) {
   booting = false;
 }
 function powerOn(after) {                        // écran titre → allumage → terminal
+  diskSt().cyc++;                                // SMART : un cycle d'allumage de plus
   return biosBoot({ then: () => { startGame(); after?.(); } });
 }
 
@@ -8340,6 +8348,7 @@ async function pcCrash(kind, L) {
   if (pcDown || mode !== 'idle') return;
   pcDown = true;
   mode = 'rebooting';
+  const dk = diskSt(); dk.pan++; dk.cyc++;       // SMART : un arrêt brutal (Unsafe Shutdowns), puis un rallumage
   [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
   const co = part('cool'), ps = part('psu'), g = part('gpu'), was = claudeOn;
   const vr = kind === 'vram' ? `${MODELS[L.model].name}${L.n > 1 ? ` × ${L.n} agents` : ''} : ${go1(L.need)} Go demandés, ${g.n} : ${go1(g.vram)} Go` : '';
@@ -8429,6 +8438,197 @@ function freeLines() {
     [H(`Swap:    ${g(SWAP_GO)}`, [g(Math.min(SWAP_GO, s.swap)), s.swap > 0 ? 'errc' : ''], g(Math.max(0, SWAP_GO - s.swap))), '', 15],
     ...(s.oom ? [['Mémoire et swap pleins : l’OOM killer choisit ses victimes parmi les agents.', 'errc', 15]] : s.swap > 0 ? [['Le PC swappe : tout ralentit. Plus de RAM, ou moins d’agents.', 'wrn', 15]] : []),
   ];
+}
+
+/* ---------- smartctl : l'état SMART du disque installé ----------
+   Les compteurs partent de l'installation du disque (le disque dur et le SSD de départ sont d'occasion : ils ont déjà vécu) et
+   avancent au rythme réel, extrêmement lentement : un secteur réalloué tous les 5 jours pour le disque dur, l'usure des SSD
+   selon ce que les agents écrivent (2 Mo/s chacun). Le disque dur tombe en FAILED au bout d'environ 8 mois. Aucun effet sur le jeu. */
+const SMART_RATE = 2e-6;                         // To écrits par seconde et par agent
+const SMART_DISKS = [
+  { ata: 1, hdd: 1, fam: 'Western Digitale Caviar Bleu (d’occasion)', model: 'WDC WD5000AAKS-00V1A0', sn: 'WD-WCAV9X412042', fw: '05.01D05', cap: 500107862016,
+    rot: '5400 rpm', sata: 'SATA 2.6, 3.0 Gb/s (current: 3.0 Gb/s)', h0: 38412, cyc0: 2117, pan0: 37, real0: 8, w0: 31 },
+  { ata: 1, fam: 'Kingstone SSDNow (marque inconnue)', model: 'KINGSTONE SA400S37240G', sn: '50026B7782C0FFEE', fw: 'SBFKB1D2', cap: 240057409536,
+    rot: 'Solid State Device', sata: 'SATA 3.2, 6.0 Gb/s (current: 6.0 Gb/s)', h0: 21904, cyc0: 1412, pan0: 12, real0: 0, w0: 41, tbw: 80 },
+  { model: 'NVMe VIBE 1TB PCIe4', sn: 'VIBE4N0412', fw: 'VB4R0412', cap: 1000204886016, h0: 0, cyc0: 0, pan0: 0, w0: 0, tbw: 600 },
+  { model: 'NVMe VIBE 4TB PCIe5', sn: 'VIBE5N1337', fw: 'VB5R1337', cap: 4000787030016, h0: 0, cyc0: 0, pan0: 0, w0: 0, tbw: 2400, gen5: 1 },
+  { model: 'NVMe VIBE 4TB PCIe5', sn: 'VIBE5R0', fw: 'VB5R1337', cap: 4000787030016, h0: 0, cyc0: 0, pan0: 0, w0: 0, tbw: 2400, gen5: 1, raid: 4 },
+];
+let SB_DISK = null;                              // mode libre : l'état SMART vit le temps de la page
+function diskSt() {                              // l'état SMART du disque installé (remis à zéro quand on change de disque)
+  const tier = PC().disk, fresh = () => ({ tier, t0: Date.now(), w: 0, cyc: 0, pan: 0, tests: [] });
+  if (!IDLE) return SB_DISK?.tier === tier ? SB_DISK : (SB_DISK = fresh());
+  if (G.disk?.tier !== tier) G.disk = fresh();
+  return G.disk;
+}
+function diskTick(dt) {                          // les agents écrivent : node_modules, logs, worktrees, node_modules encore
+  const d = diskSt();
+  if (!claudeOn || paused || mode !== 'idle') return;
+  d.w += Math.min(dt, ECO.offlineMax) * (panes.length + bgTeams().reduce((a, t) => a + t.n, 0)) * SMART_RATE;
+}
+const smartDevs = () => { const M = SMART_DISKS[diskSt().tier]; return M.ata ? ['/dev/sda'] : Array.from({ length: M.raid || 1 }, (_, i) => `/dev/nvme${i}`); };
+const nf = n => Math.round(n).toLocaleString('en-US');
+function smartData(i = 0) {                      // les valeurs, calculées à la demande depuis l'installation du disque
+  const d = diskSt(), M = SMART_DISKS[d.tier], h = Math.max(0, (Date.now() - d.t0) / 3.6e6);
+  const w = M.w0 + d.w / (M.raid || 1), used = M.tbw ? w / M.tbw * 100 : 0;
+  const temp = Math.round(M.gen5 ? PCS.temp + 4 : (M.ata ? 31 : 38) + Math.max(0, PCS.temp - 36) * .35);
+  const S = { d, M, h, w, used, temp, hrs: Math.floor(M.h0 + h), cyc: M.cyc0 + d.cyc, pan: M.pan0 + d.pan };
+  if (M.hdd) {
+    S.realloc = M.real0 + Math.floor(h / 120); S.pending = Math.floor(h / 700); S.unc = Math.floor(h / 1400);
+    S.val = Math.max(1, 200 - S.realloc); S.fail = S.val <= 140;
+  } else if (M.ata) {
+    S.realloc = Math.floor(h / 400); S.pending = 0; S.unc = 0;
+    S.val = Math.max(1, 100 - Math.round(used)); S.fail = S.val <= 10;
+  } else {
+    S.spare = Math.max(0, 100 - Math.floor(h / 500)); S.pct = Math.floor(used); S.media = Math.floor(h / 3000);
+    S.crit = (S.spare < 10 ? 1 : 0) | (S.pct >= 100 ? 4 : 0); S.fail = !!S.crit;
+  }
+  return S;
+}
+const SMART_HEAD = () => [['smartctl 7.4 2023-08-01 r5530 [x86_64-linux-6.11.0-friday] (local build)', '', 15],
+  ['Copyright (C) 2002-23, les mainteneurs de smartmontools, www.smartmontools.org', '', 15], ['', '', 15]];
+const smartDate = t => new Date(t).toString().replace(/ GMT.*$/, '');
+function smartInfo(S, i) {
+  const M = S.M, cap = `${nf(M.cap)} bytes [${M.cap >= 1e12 ? frx((M.cap / 1e12).toFixed(2)) + ' TB' : Math.round(M.cap / 1e9) + ' GB'}]`;
+  const L = [['=== START OF INFORMATION SECTION ===', 'b', 15]];
+  if (M.ata) {
+    L.push([`Model Family:     ${M.fam}`, '', 15], [`Device Model:     ${M.model}`, '', 15], [`Serial Number:    ${M.sn}`, '', 15],
+      [`Firmware Version: ${M.fw}`, '', 15], [`User Capacity:    ${cap}`, '', 15], ['Sector Size:      512 bytes logical/physical', '', 15],
+      [`Rotation Rate:    ${M.rot}`, '', 15], ['Device is:        In smartctl database 7.3/5528', '', 15], [`SATA Version is:  ${M.sata}`, '', 15],
+      [`Local Time is:    ${smartDate(Date.now())}`, '', 15], ['SMART support is: Available - device has SMART capability.', '', 15], ['SMART support is: Enabled', '', 15]);
+  } else {
+    L.push([`Model Number:                       ${M.model}`, '', 15], [`Serial Number:                      ${M.sn}${M.raid ? i : ''}`, '', 15],
+      [`Firmware Version:                   ${M.fw}`, '', 15], ['PCI Vendor/Subsystem ID:            0x1e4b', '', 15],
+      [`Total NVM Capacity:                 ${cap}`, '', 15], ['Number of Namespaces:               1', '', 15],
+      [`Local Time is:                      ${smartDate(Date.now())}`, '', 15]);
+  }
+  return L;
+}
+function smartHealth(S) {
+  const M = S.M, L = [['', '', 15], [`=== START OF ${M.ata ? 'READ ' : ''}SMART DATA SECTION ===`, 'b', 15]];
+  L.push([H('SMART overall-health self-assessment test result: ', S.fail ? ['FAILED!', 'errc'] : ['PASSED', 'okc']), '', 15]);
+  if (S.fail && M.ata) L.push(['Drive failure expected in less than 24 hours. SAVE ALL DATA.', 'errc', 15], ['(Personne n’a de sauvegarde. Les agents non plus.)', 'dim', 15]);
+  if (S.fail && !M.ata) L.push([`Critical Warning: 0x${S.crit.toString(16).padStart(2, '0')}${S.crit & 4 ? ' (endurance dépassée)' : ''}${S.crit & 1 ? ' (réserve épuisée)' : ''}`, 'errc', 15]);
+  if (!S.fail) {                                 // le commentaire, en français : à quel rythme il vieillit
+    const months = hh => hh / 730 >= 24 ? `${frx((hh / 8760).toFixed(1))} ans` : `${Math.max(1, Math.round(hh / 730))} mois`;
+    const writeRate = S.h > .05 ? S.d.w / (M.raid || 1) / S.h : 0, wear = M.tbw && writeRate > 0 ? ` À ce rythme d’écriture, 100 % d’usure dans ≈ ${months((M.tbw - S.w) / writeRate)}.` : '';
+    L.push([M.hdd ? `(Il gratte. Il a toujours gratté. ${S.realloc - M.real0 ? `${plural(S.realloc - M.real0, 'secteur')} réalloué${S.realloc - M.real0 > 1 ? 's' : ''} depuis que vous jouez. ` : ''}Défaillance prévue dans ≈ ${months((60 - S.realloc) * 120)}, s’il ne change rien.)`
+      : M.ata ? `(Usure : ${Math.round(S.used)} %, dont ${Math.round(M.w0 / M.tbw * 100)} % avant vous : il était d’occasion.${wear})`
+      : `(Usure : ${S.pct} %, réserve : ${S.spare} %.${wear || ' Les agents n’ont encore presque rien écrit.'}${M.gen5 ? ` ${S.temp} °C : plus chaud que le processeur, comme promis.` : ''})`, 'dim', 15]);
+  }
+  return L;
+}
+function smartAttrs(S) {
+  const M = S.M, row = (id, nm, fl, v, w, th, ty, raw) => [`${String(id).padStart(3)} ${nm.padEnd(24)}${fl}   ${String(v).padStart(3, '0')}   ${String(w).padStart(3, '0')}   ${String(th).padStart(3, '0')}    ${ty.padEnd(9)} Always       ${v <= th && th ? 'FAILING_NOW' : '    -      '} ${raw}`,
+    v <= th && th ? 'errc' : (id === 5 || id === 197) && raw !== '0' ? 'wrn' : '', 15];
+  const L = [['', '', 15], ['SMART Attributes Data Structure revision number: 16', '', 15], ['Vendor Specific SMART Attributes with Thresholds:', '', 15],
+    ['ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE', 'dim', 15]];
+  if (M.hdd) {
+    L.push(row(1, 'Raw_Read_Error_Rate', '0x002f', 200, 200, 51, 'Pre-fail', nf(12 + S.h / 40)), row(3, 'Spin_Up_Time', '0x0027', 142, 139, 21, 'Pre-fail', nf(3858)),
+      row(4, 'Start_Stop_Count', '0x0032', 91, 91, 0, 'Old_age', nf(9412 + S.d.cyc)), row(5, 'Reallocated_Sector_Ct', '0x0033', S.val, Math.min(S.val, 200 - M.real0), 140, 'Pre-fail', String(S.realloc)),
+      row(7, 'Seek_Error_Rate', '0x002e', 200, 200, 0, 'Old_age', nf(S.h / 900)), row(9, 'Power_On_Hours', '0x0032', Math.max(1, 100 - Math.floor(S.hrs / 876)), 47, 0, 'Old_age', nf(S.hrs)),
+      row(10, 'Spin_Retry_Count', '0x0032', 100, 100, 0, 'Old_age', '0'), row(12, 'Power_Cycle_Count', '0x0032', 98, 98, 0, 'Old_age', nf(S.cyc)),
+      row(192, 'Power-Off_Retract_Count', '0x0032', 200, 200, 0, 'Old_age', nf(S.pan)), row(193, 'Load_Cycle_Count', '0x0032', 63, 63, 0, 'Old_age', nf(412337 + S.h * 12)),
+      row(194, 'Temperature_Celsius', '0x0022', 150 - S.temp, 98, 0, 'Old_age', String(S.temp)), row(196, 'Reallocated_Event_Count', '0x0032', 200, 200, 0, 'Old_age', String(S.realloc)),
+      row(197, 'Current_Pending_Sector', '0x0032', 200, 200, 0, 'Old_age', String(S.pending)), row(198, 'Offline_Uncorrectable', '0x0030', 200, 200, 0, 'Old_age', String(S.unc)),
+      row(199, 'UDMA_CRC_Error_Count', '0x0032', 200, 200, 0, 'Old_age', '3'), ['(UDMA_CRC_Error_Count : le câble SATA tient avec du scotch.)', 'dim', 15]);
+  } else {
+    L.push(row(1, 'Raw_Read_Error_Rate', '0x0032', 100, 100, 0, 'Old_age', '0'), row(5, 'Reallocated_Sector_Ct', '0x0033', 100, 100, 10, 'Pre-fail', String(S.realloc)),
+      row(9, 'Power_On_Hours', '0x0032', 100, 100, 0, 'Old_age', nf(S.hrs)), row(12, 'Power_Cycle_Count', '0x0032', 100, 100, 0, 'Old_age', nf(S.cyc)),
+      row(169, 'Remaining_Lifetime_Perc', '0x0000', S.val, S.val, 0, 'Old_age', String(S.val)), row(174, 'Unexpect_Power_Loss_Ct', '0x0030', 100, 100, 0, 'Old_age', nf(S.pan)),
+      row(194, 'Temperature_Celsius', '0x0022', 100 - S.temp, 70, 0, 'Old_age', `${S.temp} (Min/Max 19/71)`), row(231, 'SSD_Life_Left', '0x0013', S.val, S.val, 10, 'Pre-fail', String(S.val)),
+      row(241, 'Lifetime_Writes_GiB', '0x0032', 100, 100, 0, 'Old_age', nf(S.w * 931.3)), row(242, 'Lifetime_Reads_GiB', '0x0032', 100, 100, 0, 'Old_age', nf(S.w * 2514)));
+  }
+  return L;
+}
+function smartNvme(S) {
+  const du = tb => `${nf(tb * 1e12 / 512000)} [${tb >= 1 ? frx(tb.toFixed(1)) + ' TB' : Math.round(tb * 1000) + ' GB'}]`;
+  return [['', '', 15], ['SMART/Health Information (NVMe Log 0x02)', '', 15],
+    [`Critical Warning:                   0x${S.crit.toString(16).padStart(2, '0')}`, S.crit ? 'errc' : '', 15],
+    [`Temperature:                        ${S.temp} Celsius`, S.temp >= 80 ? 'wrn' : '', 15],
+    [`Available Spare:                    ${S.spare}%`, S.spare < 10 ? 'errc' : '', 15], ['Available Spare Threshold:          10%', '', 15],
+    [`Percentage Used:                    ${S.pct}%`, S.pct >= 100 ? 'errc' : '', 15],
+    [`Data Units Read:                    ${du(S.w * 2.7)}`, '', 15], [`Data Units Written:                 ${du(S.w)}`, '', 15],
+    [`Host Read Commands:                 ${nf(S.w * 2.7 * 4.1e7 + 18000)}`, '', 15], [`Host Write Commands:                ${nf(S.w * 3.3e7 + 9000)}`, '', 15],
+    [`Controller Busy Time:               ${nf(S.h * 9)}`, '', 15], [`Power Cycles:                       ${nf(S.cyc)}`, '', 15],
+    [`Power On Hours:                     ${nf(S.hrs)}`, '', 15], [`Unsafe Shutdowns:                   ${nf(S.pan)}`, S.pan ? 'wrn' : '', 15],
+    [`Media and Data Integrity Errors:    ${S.media}`, S.media ? 'wrn' : '', 15], [`Error Information Log Entries:      ${nf(S.h / 250 + S.pan)}`, '', 15],
+    [`Warning  Comp. Temperature Time:    ${S.M.gen5 ? nf(S.h * 2) : 0}`, '', 15], ['Critical Comp. Temperature Time:    0', '', 15]];
+}
+const smartDur = (M, k) => k === 'short' ? 2 : M.hdd ? 85 : M.ata ? 45 : 30;   // minutes
+function smartTests(S, i) {                      // le journal des autotests (smartctl -t short|long)
+  const M = S.M, now = Date.now(), T = S.d.tests.filter(t => (t.dev || 0) === i);
+  const st = t => t.ab ? 'Aborted by host' : now < t.t + t.dur * 60000 ? 'Self-test routine in progress'
+    : t.k === 'long' && M.hdd && S.pending ? 'Completed: read failure' : 'Completed without error';
+  const rem = t => now < t.t + t.dur * 60000 && !t.ab ? Math.ceil((1 - (now - t.t) / (t.dur * 60000)) * 10) * 10 : 0;
+  if (M.ata) {
+    const L = [['', '', 15], ['SMART Self-test log structure revision number 1', '', 15]];
+    if (!T.length) return [...L, ['No self-tests have been logged.  [To run self-tests, use: smartctl -t]', '', 15]];
+    L.push(['Num  Test_Description    Status                  Remaining  LifeTime(hours)  LBA_of_first_error', 'dim', 15]);
+    T.forEach((t, n) => L.push([`# ${String(n + 1).padEnd(2)} ${(t.k === 'short' ? 'Short' : 'Extended') + ' offline'}`.padEnd(25) + st(t).padEnd(30) + `${String(rem(t)).padStart(2, '0')}%`.padStart(4)
+      + String(t.hrs).padStart(14) + '         ' + (st(t) === 'Completed: read failure' ? String(412042 + S.pending * 7) : '-'), st(t).includes('failure') ? 'errc' : '', 15]));
+    return L;
+  }
+  const run = T.find(t => rem(t)), L = [['', '', 15], ['Self-test Log (NVMe Log 0x06)', '', 15],
+    [`Self-test status: ${run ? `${run.k === 'short' ? 'Short' : 'Extended'} self-test in progress (${100 - rem(run)}% completed)` : 'No self-test in progress'}`, '', 15]];
+  if (!T.length) return [...L, ['No Self-tests Logged', '', 15]];
+  L.push(['Num  Test_Description  Result                       Power_on_Hours  Failing_LBA  NSID Seg SCT Code', 'dim', 15]);
+  T.forEach((t, n) => L.push([` ${String(n).padEnd(3)} ${(t.k === 'short' ? 'Short' : 'Extended').padEnd(17)} ${st(t).padEnd(28)} ${String(t.hrs).padStart(14)}            -     -   -   -    -`, '', 15]));
+  return L;
+}
+const SMART_USAGE = () => [
+  ['Usage : smartctl [options] <disque>', 'fgc', 15],
+  [H(['  --scan              ', 'org'], 'les disques du PC'), '', 15], [H(['  -i, --info          ', 'org'], 'modèle, numéro de série, capacité'), '', 15],
+  [H(['  -H, --health        ', 'org'], 'l’état de santé : PASSED, ou pas'), '', 15], [H(['  -A, --attributes    ', 'org'], 'les attributs SMART (secteurs réalloués, heures, température…)'), '', 15],
+  [H(['  -a, --all · -x      ', 'org'], 'tout'), '', 15], [H(['  -l selftest         ', 'org'], 'le journal des autotests'), '', 15],
+  [H(['  -t short|long       ', 'org'], 'lancer un autotest (2 min, ou bien plus)'), '', 15], [H(['  -X, --abort         ', 'org'], 'interrompre l’autotest'), '', 15],
+  [H(['  -h · -V             ', 'org'], 'cette aide · la version'), '', 15],
+  [H(['Exemple : ', 'dim'], [`sudo smartctl -a ${smartDevs()[0]}`, 'org'], ['  (il faut sudo, comme dans la vraie vie)', 'dim']), '', 15],
+];
+function smartCmd(args, sudo) {
+  const has = (...o) => o.some(x => args.includes(x)), dev = args.find(a => /^\/dev\/|^(sd[a-z]\d*|nvme\d+(n\d+)?|md\d+)$/.test(a));
+  if (has('-h', '--help', '--usage') || !args.length) return printLines(SMART_USAGE());
+  if (has('-V', '--version')) return printLines(SMART_HEAD().slice(0, 2));
+  if (has('--scan', '--scan-open')) return printLines(smartDevs().map(d => [d.startsWith('/dev/sd') ? `${d} -d sat # ${d} [SAT], ATA device` : `${d} -d nvme # ${d}, NVMe device`, '', 15]));
+  if (!dev) return printLines([...SMART_HEAD(), ['ERROR: smartctl requires a device name as the final command-line argument.', 'errc', 15],
+    [H(['astuce : ', 'dim'], ['sudo smartctl --scan', 'org'], [' pour la liste des disques', 'dim']), '', 15]]);
+  const path = '/dev/' + dev.replace(/^\/dev\//, '').replace(/^(sd[a-z])\d+$/, '$1').replace(/^(nvme\d+)n\d+$/, '$1');
+  if (!sudo) return printLines([...SMART_HEAD(), [`Smartctl open device: ${path} failed: Permission denied`, 'errc', 15],
+    [H(['astuce : ', 'dim'], [`sudo smartctl ${args.join(' ')}`, 'org']), '', 15]]);
+  if (/^\/dev\/md\d+$/.test(path) && SMART_DISKS[diskSt().tier].raid) return printLines([...SMART_HEAD(), [`${path}: Unable to detect device type`, 'errc', 15],
+    ['Please specify device type with the -d option.', '', 15], [H(['(Le RAID 0 se lit disque par disque : ', 'dim'], ['sudo smartctl -a /dev/nvme0', 'org'], [' … nvme3.)', 'dim']), '', 15]]);
+  const i = smartDevs().indexOf(path);
+  if (i < 0) return printLines([...SMART_HEAD(), [`Smartctl open device: ${path} failed: No such device`, 'errc', 15],
+    [H(['astuce : ', 'dim'], ['sudo smartctl --scan', 'org'], [` (ce PC a : ${smartDevs().join(', ')})`, 'dim']), '', 15]]);
+  const S = smartData(i), M = S.M, L = SMART_HEAD();
+  const ti = args.findIndex(a => a === '-t' || a === '--test'), t = ti >= 0 ? args[ti + 1] : '';
+  if (has('-t', '--test')) {                     // lancer un autotest
+    if (!['short', 'long'].includes(t)) return printLines([...L, ['=======> INVALID ARGUMENT TO -t: ' + (t || ''), 'errc', 15], ['=======> VALID ARGUMENTS ARE: short, long', '', 15]]);
+    const run = S.d.tests.find(x => (x.dev || 0) === i && !x.ab && Date.now() < x.t + x.dur * 60000);
+    if (run) return printLines([...L, [`Can't start self-test without aborting current test (${Math.ceil((1 - (Date.now() - run.t) / (run.dur * 60000)) * 10) * 10}% remaining),`, 'errc', 15], ['add \'-t force\' option to override, or run \'smartctl -X\' to abort test.', '', 15]]);
+    const dur = smartDur(M, t), end = Date.now() + dur * 60000;
+    S.d.tests.unshift({ k: t, t: Date.now(), dur, hrs: S.hrs, dev: i });
+    S.d.tests = S.d.tests.slice(0, 8);
+    saveGame();
+    const nm = t === 'short' ? 'Short' : 'Extended';
+    return printLines([...L, ['=== START OF OFFLINE IMMEDIATE AND SELF-TEST SECTION ===', 'b', 15],
+      ...(M.ata ? [[`Sending command: "Execute SMART ${nm} self-test routine immediately in off-line mode".`, '', 15],
+        [`Drive command "Execute SMART ${nm} self-test routine immediately in off-line mode" successful.`, '', 15], ['Testing has begun.', '', 15]] : [['Self-test has begun', '', 15]]),
+      [`Please wait ${dur} minutes for test to complete.`, '', 15], [`Test will complete after ${smartDate(end)}`, '', 15], ['Use smartctl -X to abort test.', '', 15],
+      ['(Le résultat arrive dans le journal : sudo smartctl -l selftest ' + path + '.)', 'dim', 15]]);
+  }
+  if (has('-X', '--abort')) {
+    const run = S.d.tests.find(x => (x.dev || 0) === i && !x.ab && Date.now() < x.t + x.dur * 60000);
+    if (run) { run.ab = 1; saveGame(); }
+    return printLines([...L, ['=== START OF OFFLINE IMMEDIATE AND SELF-TEST SECTION ===', 'b', 15], [run ? 'Self-testing aborted!' : 'No self-test in progress.', run ? 'wrn' : '', 15]]);
+  }
+  const all = has('-a', '--all', '-x', '--xall'), log = has('-l') && args[args.indexOf('-l') + 1] === 'selftest';
+  if (all || has('-i', '--info')) L.push(...smartInfo(S, i));
+  if (all || has('-H', '--health')) L.push(...smartHealth(S));
+  if (all || has('-A', '--attributes')) L.push(...(M.ata ? smartAttrs(S) : smartNvme(S)));
+  if (all || log) L.push(...smartTests(S, i));
+  if (L.length === 3) L.push(...smartHealth(S));  // sans option reconnue : l'essentiel, la santé
+  return printLines(L);
 }
 
 /* ---------- démarrage ---------- */
