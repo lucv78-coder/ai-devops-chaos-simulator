@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>19</b><span>mises à jour</span></div>
-    <div role="listitem"><b>32 h 37</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 10 006</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>20</b><span>mises à jour</span></div>
+    <div role="listitem"><b>33 h 27</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 10 149</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#20</span><time datetime="2026-11-23T20:54">20 h 54</time><a href="#sauvegarde">Exporter et importer la partie</a></li>
       <li><span class="n">#19</span><time datetime="2026-11-23T20:04">20 h 04</time><a href="#succes">Les succès, dans Steam</a></li>
       <li><span class="n">#18</span><time datetime="2026-11-23T14:47">14 h 47</time><a href="#electricite">La facture d’électricité</a></li>
       <li><span class="n">#17</span><time datetime="2026-11-23T12:02">12 h 02</time><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></li>
@@ -168,8 +169,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="succes" aria-labelledby="t19">
-    <p class="meta"><span class="n">#19</span><span class="new">dernière</span><time datetime="2026-11-23T20:04">23 nov. 2026 · 20 h 04</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8618684">8618684</a><span>9 747 → 10 006 lignes</span></p>
+  <article class="maj latest" id="sauvegarde" aria-labelledby="t20">
+    <p class="meta"><span class="n">#20</span><span class="new">dernière</span><time datetime="2026-11-23T20:54">23 nov. 2026 · 20 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/26f872a">26f872a</a><span>10 006 → 10 149 lignes</span></p>
+    <h2 id="t20"><a href="#sauvegarde">Exporter et importer la partie</a></h2>
+    <ul>
+      <li>Paramètres (M, ou depuis l’écran titre) › Exporter la partie : un fichier aidcs-sauvegarde-final-v2-OK-….vibe se télécharge, et le même code part dans le presse-papiers. Dedans : la partie, le disque (fichiers, paquets, dépendances npm), les succès et le temps de jeu.</li>
+      <li>Importer une partie, dans un autre navigateur : collez le code ou choisissez le fichier. Le jeu dit ce qu’il contient et ce qu’il remplace, puis demande deux clics s’il y a déjà une partie. Un code abîmé, ou celui d’un autre jeu, est refusé.</li>
+      <li>Les succès et le temps de jeu des deux navigateurs sont gardés : le plus ancien déblocage gagne. Les réglages restent ceux du navigateur. Le bac à sable et le mode libre ne s’exportent pas.</li>
+      <li>Corrigé : dans les 8 secondes qui suivaient l’ouverture de la page, « Réinitialiser la partie » effaçait tout dès le premier clic.</li>
+    </ul>
+    <blockquote>« Enfin une sauvegarde plus récente que celle de jeudi. »<cite>l’agent, 20 h 54</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-sauvegarde.png" title="Voir en grand"><img src="assets/screen-sauvegarde.png" width="900" height="540" loading="lazy" alt="Les Paramètres ouverts sur l’écran titre : sous les réglages, le bloc Partie avec « Exporter la partie » et « Importer une partie », un code de sauvegarde collé, et le résumé : 412 projets, $1,234,567.89, 21 succès sur 39, qui remplaceront la partie en cours (3 projets, $41.20)."></a><figcaption>Importer une partie : 412 projets à la place de 3. Deux clics.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="succes" aria-labelledby="t19">
+    <p class="meta"><span class="n">#19</span><time datetime="2026-11-23T20:04">23 nov. 2026 · 20 h 04</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8618684">8618684</a><span>9 747 → 10 006 lignes</span></p>
     <h2 id="t19"><a href="#succes">Les succès, dans Steam</a></h2>
     <ul>
       <li>39 succès, dont 9 cachés. Ships, trésorerie, matériel, BIOS, memtest86+, GRUB, facture d’électricité, et quelques bêtises (rm -rf /, désinstaller sudo, shipper un vendredi, ou à 3 h du matin).</li>
