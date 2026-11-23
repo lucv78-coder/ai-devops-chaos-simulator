@@ -327,6 +327,21 @@ body[data-view="zsh"] #shell.out { opacity: 0; pointer-events: none; }
 }
 #toast.on { opacity: 1; transform: none; }
 #toast kbd { font: inherit; color: var(--orange); }
+/* succès débloqué : la notification de Steam, en bas à droite (au-dessus des fenêtres, sous le BIOS) */
+#ach-pop {
+  position: fixed; right: 1.5ch; bottom: calc(var(--lh) + 4.4em); z-index: 8;
+  display: flex; align-items: center; gap: 1.2ch; width: min(44ch, calc(100vw - 3ch)); padding: .6em 1.2ch;
+  background: var(--panel); border: 1px solid var(--orange); border-radius: 4px; box-shadow: 0 .4em 1.4em rgba(0, 0, 0, .55);
+  color: var(--fg); white-space: normal; pointer-events: none;
+  opacity: 0; transform: translateX(1.5em); transition: opacity .3s, transform .3s;
+}
+#ach-pop.on { opacity: 1; transform: none; }
+#ach-pop:empty { display: none; }
+#ach-pop .ic, .stm-a .ic { flex: none; display: grid; place-items: center; width: 2.6em; height: 2.6em; border: 1px solid var(--orange); border-radius: 3px; background: var(--bg2); color: var(--orange); font-size: 1.15em; font-weight: 700; }
+#ach-pop .tx { display: grid; min-width: 0; }
+#ach-pop .k, #ach-pop .s { color: var(--dim); font-size: .85em; }
+#ach-pop .n { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { #ach-pop { transform: none; transition: opacity .2s; } }
 
 /* écran titre */
 #title {
@@ -668,6 +683,54 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .pv-page .foot { margin-top: 2.5em; padding-top: .5em; border-top: 1px solid currentColor; font-size: .8em; opacity: .8; }
 .pv-page pre { white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: .85em; }
 .pv-empty { margin-top: 3em; color: var(--dim); text-align: center; white-space: normal; }
+/* Steam : la bibliothèque à gauche, la fiche du jeu et ses succès à droite (une seule colonne dans une fenêtre étroite) */
+.stm { container-type: inline-size; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; }
+.stm-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .3em 2.4ch; padding: .45em 1.6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.stm-nav .logo { margin-right: 1ch; color: var(--fg); font-weight: 700; letter-spacing: .06em; }
+.stm-nav button { padding: 0 .2ch; border-bottom: 2px solid transparent; color: var(--dim); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.stm-nav button:hover, .stm-nav button.on { color: var(--fg); }
+.stm-nav button.on { border-bottom-color: var(--orange); }
+.stm-main { display: grid; grid-template-columns: minmax(22ch, 30ch) minmax(0, 1fr); min-height: 0; }
+.stm-lib { min-height: 0; overflow: auto; padding: .4em 0; border-right: 1px solid var(--sep); background: var(--panel); scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.stm-lib p { padding: .4em 1.4ch .1em; color: var(--dim2); font-size: .85em; letter-spacing: .06em; text-transform: uppercase; white-space: normal; }
+.stm-lib button { display: block; width: 100%; padding: .05em 1.4ch; overflow: hidden; color: var(--dim2); text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.stm-lib button:hover { background: rgba(255, 255, 255, .06); color: var(--dim); }
+.stm-lib button.on { background: color-mix(in srgb, var(--orange) 22%, transparent); color: var(--fg); font-weight: 700; white-space: normal; }
+.stm-lib .run { color: var(--green); font-weight: 400; }
+.stm-game { min-width: 0; min-height: 0; overflow: auto; padding: 1em 2.4ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.stm-ban { margin-bottom: 1em; padding: .5em 1.4ch; border: 1px solid var(--yellow); border-radius: 3px; color: var(--yellow); }
+.stm-hero { display: grid; gap: .3em; padding: 1.2em 2ch; border: 1px solid var(--sep); border-radius: 4px; background: linear-gradient(135deg, color-mix(in srgb, var(--orange) 16%, var(--panel)), var(--panel) 70%); }
+.stm-hero h2 { color: var(--fg); font-size: 1.5em; line-height: 1.2; }
+.stm-hero p { color: var(--dim); }
+.stm-play { display: flex; flex-wrap: wrap; align-items: center; gap: .7em 3.2ch; margin: .9em 0 .4em; }
+.stm-play .go { padding: .35em 2.4ch; border-radius: 3px; background: var(--blue); color: var(--ink); font-weight: 700; letter-spacing: .06em; }
+.stm-play .go:hover { filter: brightness(1.12); }
+.stm-st { display: grid; }
+.stm-st .k { color: var(--dim2); font-size: .8em; letter-spacing: .08em; text-transform: uppercase; }
+.stm-bar { display: block; width: 18ch; max-width: 100%; height: .45em; margin-top: .25em; overflow: hidden; border-radius: 2px; background: var(--sep); }
+.stm-bar i { display: block; height: 100%; background: var(--orange); }
+.stm-game h3 { margin: 1.2em 0 .45em; padding-bottom: .2em; border-bottom: 1px solid var(--sep); color: var(--fg); font-size: 1em; }
+.stm-game h3 span { color: var(--dim); font-weight: 400; }
+.stm-none { color: var(--dim); }
+.stm-a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .3em 1.6ch; margin-bottom: .35em; padding: .45em 1.2ch; border-radius: 3px; background: var(--panel); }
+.stm-a.off .ic { border-color: var(--sep); color: var(--dim2); }
+.stm-a .tx { display: grid; min-width: 0; }
+.stm-a b { color: var(--fg); }
+.stm-a.off b { color: var(--dim); }
+.stm-a .d { color: var(--dim); }
+.stm-a .m { color: var(--dim2); font-size: .85em; text-align: right; }
+.stm-a .pg { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1ch; margin-top: .2em; color: var(--dim2); font-size: .85em; }
+.stm-a .pg .stm-bar { width: 22ch; margin: 0; }
+.stm-hid { padding: .5em 1.2ch; border: 1px dashed var(--sep); border-radius: 3px; color: var(--dim); }
+.stm-status { padding: .1em 1ch; overflow: hidden; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); text-overflow: ellipsis; white-space: pre; }
+.stm-status.note { color: var(--yellow); }
+@container (max-width: 72ch) {
+  .stm-main { grid-template-columns: minmax(0, 1fr); }
+  .stm-lib { display: none; }
+  .stm-game { padding: .8em 1.4ch 1.6em; }
+  .stm-a { grid-template-columns: auto minmax(0, 1fr); }
+  .stm-a .m { grid-column: 2; text-align: left; }
+}
 /* navigateur web (Firefaux) : barre d'adresse, marque-pages, pages du faux Web */
 .wb { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; padding: 0; }
 .wb-bar { grid-row: 1; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
@@ -1099,6 +1162,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 <div id="ocg" aria-hidden="true"></div>
 <div id="bios" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="ach-pop" role="status" aria-live="polite"></div>
 
 <script>
 const SRC_LINES = [...document.childNodes].map(n => n.outerHTML ?? (n.nodeType === 8 ? `<!--${n.data}-->` : '<!doctype html>')).join('\n').split('\n').length + 3;   // la taille du fichier, avant que le jeu ne remplisse la page (+3 : la fin, pas encore lue)
@@ -1843,6 +1907,102 @@ function platInit() {                            // plateformes : une équipe ch
   G.model = G.pm[G.ai];
 }
 platInit();
+
+/* ---------- les succès : ils se débloquent dans la partie, Steam les affiche (sa bibliothèque, et la notification en bas à droite) ----------
+   ach(id) pour un événement ; t (un état) ou v (une progression [actuel, but]) : vérifié chaque seconde par achTick, donc rétroactif
+   pour les sauvegardes d'avant les succès. G.ach : { id: date }, gardé d'une partie à l'autre (comme sur Steam). Ni dans le bac à sable
+   (tout y est débloqué d'avance), ni en mode libre (rien n'est sauvegardé). p : la part des joueurs qui l'ont, selon Steam (inventée) ;
+   h : caché tant qu'il n'est pas débloqué ; u : l'unité de la progression. */
+const ACH = [
+  { id: 'ship1', g: '▲', n: 'Hello, prod', d: 'Shipper un premier projet.', p: 94.1, v: () => [shipped, 1] },
+  { id: 'ship10', g: '▲', n: 'Release manager', d: 'Shipper 10 projets.', p: 63.7, v: () => [shipped, 10] },
+  { id: 'ship100', g: '▲', n: 'Usine à features', d: 'Shipper 100 projets.', p: 21.4, v: () => [shipped, 100] },
+  { id: 'ship1000', g: '▲', n: 'Mille et un déploiements', d: 'Shipper 1 000 projets. Relus : aucun.', p: 3.2, v: () => [shipped, 1000] },
+  { id: 'earn1m', g: '$', n: 'Licorne de garage', d: 'Gagner 1 000 000 $ au total.', p: 8.9, u: '$', v: () => [G.earned || 0, 1e6] },
+  { id: 'lead', g: '◆', n: 'Chef d’orchestre', d: 'Embaucher un orchestrateur.', p: 48.2, t: () => G.lead >= 1 },
+  { id: 'teamfull', g: '☰', n: 'Open space', d: 'Faire travailler 8 agents dans la même équipe.', p: 30.5, v: () => [Math.max(0, ...Object.values(G.team || {})), AGENTS.length] },
+  { id: 'claude', g: '✻', n: 'Changement de crèmerie', d: 'Acheter la licence Claude Code.', p: 36, t: () => !!G.own.claude },
+  { id: 'allplat', g: '≡', n: 'Polyamour des LLM', d: 'Avoir Mistral, Claude Code et Codex.', p: 14.8, t: () => !!(G.own.claude && G.own.codex) },
+  { id: 'local', g: '◉', n: 'Ma VRAM, mes règles', d: 'Faire tourner une IA locale : aucune API, aucune facture de tokens.', p: 11.3, t: () => !!G.own.local },
+  { id: 'boost', g: '»', n: 'Mode turbo', d: 'Lancer un mode boost (ultracode, xhigh…).', p: 27.9 },
+  { id: 'claudemd', g: '✎', n: 'Quelqu’un l’a lu', d: 'Acheter « lire CLAUDE.md (pour de vrai) ».', p: 4.6, t: () => !!G.sk.claudemd },
+  { id: 'offline', g: '☾', n: 'Les agents ne dorment jamais', d: 'Revenir et trouver des projets shippés pendant votre absence.', p: 71 },
+  { id: 'xfce', g: '▭', n: 'Interface graphique', d: 'Lancer le bureau Xfce.', p: 58.3 },
+  { id: 'steam', g: '◎', n: '412 jeux, 4 lancés', d: 'Ouvrir Steam. Ça compte comme un lancement.', p: 41 },
+  { id: 'potato', g: '▣', n: 'Adieu, patate', d: 'Remplacer une pièce du PC patate.', p: 66.4, t: () => SLOTS.some(k => G.pc[k] > 0) },
+  { id: 'gpu', g: '▦', n: 'Ray tracing dans le terminal', d: 'Installer la meilleure carte graphique.', p: 6.1, t: () => G.pc.gpu >= PARTS.gpu.t.length - 1 },
+  { id: 'bios', g: 'F2', n: 'Assez rapide', d: 'Entrer dans le setup du BIOS pendant le POST.', p: 22.7 },
+  { id: 'oc', g: '↑', n: 'Overclocker du dimanche', d: 'Overclocker le processeur ou la RAM dans le BIOS.', p: 17.5, t: () => { const k = ocK(); return k.cr > 1.004 || k.rr > 1.004; } },
+  { id: 'glitch', g: '▒', n: 'Ça glitche, donc ça va vite', d: 'Pousser l’overclocking jusqu’aux glitchs.', p: 9.8, t: () => { const u = ocU(); return Math.max(u.cpu, u.ram) >= .5; } },
+  { id: 'under', g: '↓', n: 'Écolo malgré lui', d: 'Sous-cadencer le processeur dans le BIOS.', p: 5.2, t: () => ocK().cr < .996 },
+  { id: 'mtpass', g: '✓', n: 'PASS', d: 'Passer memtest86+ sans une erreur.', p: 7.4 },
+  { id: 'mtfail', g: '✗', n: 'FAIL', d: 'Faire échouer memtest86+ (ou le figer).', p: 4.9 },
+  { id: 'elec', g: '↯', n: 'Heures creuses', d: 'Souscrire un contrat Vibe Énergie.', p: 19.6, t: () => (G.elecT || 0) >= 1 },
+  { id: 'bill', g: '¤', n: 'Vibe Énergie vous remercie', d: 'Payer 1 000 $ d’électricité au total.', p: 12.2, u: '$', v: () => [G.elecTot || 0, 1000] },
+  { id: 'reactor', g: '✺', n: 'Le voisinage n’a pas été consulté', d: 'Installer le petit réacteur modulaire.', p: .9, t: () => (G.elecT || 0) >= ELEC.tiers.length - 1 },
+  { id: 'pccrash', g: '!', n: 'Ça sent le chaud', d: 'Faire planter le PC : surchauffe, alimentation, mémoire ou VRAM.', p: 33.1 },
+  { id: 'kill', g: '†', n: 'kill -9', d: 'Tuer un agent. Il ne vous en voudra pas : il a déjà tout oublié.', p: 24 },
+  { id: 'friday', g: 'V', n: 'Déployer un vendredi', d: 'Shipper un projet un vendredi (un vrai).', p: 38.4 },
+  { id: 'night', g: '◐', n: 'Astreinte', d: 'Shipper un projet entre 3 h et 4 h du matin.', p: 2.7, h: 1 },
+  { id: 'rmrf', g: '∅', n: '--no-preserve-root', d: 'Effacer le système. La sauvegarde de jeudi aussi.', p: 15.3, h: 1 },
+  { id: 'win', g: '⊞', n: '99 %', d: 'Lancer Windows 11 depuis GRUB.', p: 6.6, h: 1 },
+  { id: 'thursday', g: '⟲', n: 'C’était mieux jeudi', d: 'Démarrer sur le noyau 6.10.0-thursday.', p: 3.9, h: 1 },
+  { id: 'noagents', g: '○', n: 'Première journée calme', d: 'Démarrer en mode sans agents.', p: 5.5, h: 1 },
+  { id: 'sudo', g: '#', n: 'Il faudra… sudo', d: 'Désinstaller sudo.', p: 1.8, h: 1 },
+  { id: 'unsteam', g: '◌', n: '412 jeux vous disent adieu', d: 'Désinstaller Steam. Le succès vous attendra.', p: 1.1, h: 1 },
+  { id: 'hack', g: '>', n: 'Accès autorisé', d: 'Ouvrir le coffre de prod, dans le bunker.', p: 4.2, h: 1 },
+  { id: 'sl', g: '≈', n: 'Locomotive', d: 'Taper sl au lieu de ls (avec sl installé).', p: 9.4, h: 1 },
+  { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
+];
+const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
+G.ach = G.ach || {};                              // { id: date du déblocage }
+G.play = G.play || 0;                             // temps de jeu, en secondes (Steam l'affiche)
+const achN = () => ACH.filter(a => G.ach[a.id]).length;
+const achP = a => { try { return a.v ? a.v() : null; } catch { return null; } };
+let achQ = [], achBusy = false, achWait = 0, achLast = 0;
+function ach(id) {
+  const a = ACH_BY[id];
+  if (!ACH_ON || !a || G.ach[id]) return false;
+  G.ach[id] = Date.now();
+  achQ.push(a);
+  if (id !== 'all' && ACH.every(x => x.id === 'all' || G.ach[x.id])) ach('all');
+  saveGame();
+  setTimeout(achPump);                           // après le tic : ceux qui tombent ensemble partent ensemble
+  return true;
+}
+function achTick() {                              // les succès d'état : ships, trésorerie, matériel, réglages du BIOS…
+  if (!ACH_ON) return;
+  ACH.forEach(a => {
+    if (G.ach[a.id] || (!a.t && !a.v)) return;
+    let ok = false;
+    try { const pv = a.v && a.v(); ok = pv ? pv[0] >= pv[1] : !!a.t(); } catch {}
+    if (ok) ach(a.id);
+  });
+}
+function achPump() {                              // une notification à la fois ; trois d'un coup ou plus : une seule, qui les liste
+  if (achBusy || !achQ.length || achWait) return;
+  if (booting || !titleEl.hidden || !panicEl.hidden || mode === 'rebooting') {   // BIOS, écran titre, kernel panic : elle attend
+    achWait = setTimeout(() => { achWait = 0; achPump(); }, 1000);
+    return;
+  }
+  const el = $('#ach-pop'), list = achQ.splice(0, achQ.length > 2 ? achQ.length : 1), many = list.length > 1;
+  const sub = installed.has('steam') ? `Steam · ${achN()}/${ACH.length} succès` : 'Steam n’est pas installé : sudo apt install steam, pour les voir';
+  const names = many ? list.slice(0, 3).map(a => a.n).join(' · ') + (list.length > 3 ? ` · et ${list.length - 3} autres` : '') : list[0].n;
+  el.innerHTML = `<span class="ic" aria-hidden="true">${esc(many ? String(list.length) : list[0].g)}</span><span class="tx">`
+    + `<span class="k">${many ? `${list.length} succès débloqués` : 'Succès débloqué'}</span><span class="n">${esc(names)}</span><span class="s">${esc(sub)}</span></span>`;
+  void el.offsetWidth;
+  el.classList.add('on');
+  achBusy = true;
+  setTimeout(() => {
+    el.classList.remove('on');
+    setTimeout(() => { el.innerHTML = ''; achBusy = false; achPump(); }, 350);
+  }, many ? 6500 : 4500);
+}
+const achDate = t => {
+  const d = new Date(t), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()} à ${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`;
+};
+const playStr = sec => sec < 3600 ? `${Math.floor(sec / 60)} minute${sec >= 120 ? 's' : ''}` : `${(sec / 3600).toFixed(1).replace('.', ',')} heures`;
 const cliHas = p => p === 'local' || !IDLE || SETUP_SKIP || !!G.cli?.[p];          // le CLI de la plateforme est-il installé ?
 const pkHas = n => !STARTER_PKGS.includes(n) || !IDLE || SETUP_SKIP || G.pk.includes(n);   // paquet présent au démarrage ?
 const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
@@ -2462,6 +2622,7 @@ const SETUP_HELP = () => [
   [H(['  ' + CLI_INST.claude.cmd, 'org'], ['  Claude Code (licence au store)', 'dim']), '', 20],
   [H(['  sudo apt install htop atop lm-sensors smartmontools', 'org'], ['  surveiller le PC (htop, atop, sensors, smartctl)', 'dim']), '', 20],
   [H(['  sudo apt install xfce4 firefaux thunar mousepad atril', 'org'], ['  le bureau, le navigateur, les fichiers, l’éditeur, les PDF', 'dim']), '', 20],
+  [H(['  sudo apt install steam', 'org'], ['  les succès (Steam, dans Xfce)', 'dim']), '', 20],
 ];
 const WIKI_LINE = () => [H(['Tout le reste', 'fgc'], ['  le wiki du jeu : commandes, store, matériel, pannes · ', 'dim'], ['wiki', 'org'], [' pour l’ouvrir', 'dim']), '', 20];
 const PRE_HELP_LINES = () => [
@@ -2481,7 +2642,7 @@ const PRE_HELP_LINES = () => [
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
     [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · à installer dans Firefaux (lolama.vibe, githype.vibe)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
-  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux)'), '', 20],
+  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
   [H(['  fallout · bunker  ', 'org'], 'terminal de bunker antiatomique (hack : forcer le coffre · exit : remonter)'), '', 20],
   [H(['  apt · apt-get     ', 'org'], 'installer des paquets : sudo apt install cowsay (essayez aussi sl, neofetch…)'), '', 20],
@@ -3234,6 +3395,7 @@ async function systemCrash(label, targets, opts = {}) {
   if (mode !== 'idle') return;
   mode = 'shipping';                             // verrouille le terminal comme pendant un ship
   crashKind = 'sys';
+  ach('rmrf');
   fsDrop();
   crashPath = label;
   crashCmd = opts.cmd || `rm -rf ${label}`;
@@ -3396,7 +3558,7 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux',
+const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
   xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
 const APT_ALIAS = { xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
 const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
@@ -3591,6 +3753,7 @@ async function aptRemove(job, names, yes, purge) {
     binsOf(n).forEach(b => { if (nodeAt(['usr', 'bin', b])) removeAt(['usr', 'bin', b]); });
     if (tabs.includes(n)) closeTab(n);           // htop ou atop ouvert dans un onglet : il disparaît avec son paquet
     if (APT_BYE[n]) shellPrint(APT_BYE[n], 'dim');
+    if (n === 'sudo' || n === 'steam') ach(n === 'sudo' ? 'sudo' : 'unsteam');
   });
 }
 async function aptUpdate(job) {
@@ -3960,6 +4123,7 @@ const LOCO = ['      (@@) (  )     ', '     (    )         ', '    _||__________
 const SMOKE = ['     (  ) (@@)      ', '      (    )        '];
 const WAGON = k => ['                   ', '                   ', '  ________________ ', ' |  node_modules  |', `=|  ${k} / 1337420   |`, '=|________________|', '    (O)      (O)   '];
 async function slTrain() {
+  ach('sl');
   const rows = i => LOCO.map((r, j) => (j < 2 && i % 8 >= 4 ? SMOKE[j] : r) + WAGON(1)[j] + WAGON(2)[j]);
   const w = rows(0)[0].length;
   if (reducedMotion.matches) { rows(0).forEach(r => shellPrint(r, 'sl')); return; }
@@ -4446,6 +4610,7 @@ async function killOne(t, word) {
     : H(['✓ ', 'okc'], `${n} tué${s}… `, [`systemd ${many ? 'les' : 'l’'}a relancé${s} aussitôt.`, 'dim']));
 }
 function killAgent(p, word) {
+  ach('kill');
   const pid = MON.procs.get(agentKey(p))?.pid || ri(31400, 31999), now = performance.now();
   if (provider === 'mistral') {                  // chez Mistral, mourir fait partie du métier
     if (p.state === 'down') return shellPrint(H(['✗ ', 'wrn'], `${agentName(p)} est déjà planté. Il redémarre tout seul, laissez-le faire.`));
@@ -4504,6 +4669,7 @@ const PROGS = {
   mousepad: { label: 'Éditeur', delay: 1000, gui: true, cat: 'Accessoires', icon: '✎', menu: 'Éditeur de texte', desc: 'Mousepad · .txt, .md, config, code', make: () => makeEditor() },
   atril: { label: 'Visionneuse', delay: 1000, gui: true, cat: 'Accessoires', icon: '▧', menu: 'Visionneuse de documents', desc: 'Atril · les PDF', make: () => makeViewer() },
   firefaux: { label: 'Firefaux', delay: 1000, gui: true, cat: 'Internet', icon: '◍', menu: 'Navigateur web (Firefaux)', desc: 'le Web, en moins bien · store IA et matos.vibe', make: () => makeBrowser() },
+  steam: { label: 'Steam', delay: 1000, gui: true, cat: 'Jeux', icon: '◎', menu: 'Steam', desc: '412 jeux, 3 lancés · les succès de celui-ci', make: () => makeSteam() },
 };
 function renderTabs() {
   tabsEl.innerHTML = tabs.map((t, i) => {
@@ -5348,7 +5514,7 @@ function afterResize() {
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
-const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86] };
+const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -5369,6 +5535,7 @@ function crtFlash() {                            // le tube se rallume quand Xor
   setTimeout(() => document.body.classList.remove('crt-on'), 800);
 }
 async function xfEnter() {
+  ach('xfce');
   const gfx = SETTINGS.find(s => s.key === 'gfx').options.find(o => o.v === prefs.gfx)?.label || prefs.gfx;
   await printLines([
     [H(['startx', 'org'], ' → Xorg :0 sur vt7 · amdgpu · Radeon RX 7900 XTX · 3840×2160 à 144 Hz'), 'dim', 160],
@@ -5597,7 +5764,7 @@ function xfMenuOpen() {
     + `<span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`;
   const progs = Object.keys(PROGS).filter(k => PROGS[k].make);
   xfMenuEl.innerHTML = `<p class="xf-who">${esc(USER)}@prod-01 <span class="dim">· Vibian GNU/Linux 13 (friday)</span></p>`
-    + ['Accessoires', 'Internet', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
+    + ['Accessoires', 'Internet', 'Jeux', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
       + progs.filter(k => (PROGS[k].cat || 'Système') === c).map(k => item(k, PROGS[k].icon || '▤', PROGS[k].menu || k,
         tabs.includes(k) ? '● ouvert' : installed.has(k) ? PROGS[k].desc || '' : `non installé · sudo apt install ${k}`)).join('')).join('')
     + '<p class="xf-cat">Développement · agents IA</p>'
@@ -5703,7 +5870,7 @@ function xfIconList() {
     { id: 'zsh', ic: '❯', t: 'Terminal', tip: `zsh · ${tildePath(cwd)}` },
     ...['firefaux', 'mousepad', 'atril', 'htop'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
       t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système' }[k], tip: PROGS[k].desc })),
-    has('steam') && { id: 'steam', ic: '◎', t: 'Steam', tip: '412 jeux achetés, 3 lancés' },
+    has('steam') && { id: 'steam', ic: PROGS.steam.icon, on: open('steam'), t: 'Steam', tip: `412 jeux achetés, 3 lancés${ACH_ON ? ` · ${achN()}/${ACH.length} succès` : ''}` },
     ...['mistral', 'codex', 'claude'].filter(k => !IDLE || (G.own[k] && cliHas(k))).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
       t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
       tip: plat(k) ? (provider === k ? '● au premier plan' : '● en arrière-plan') : MODELS[(IDLE && G.pm?.[k]) || CLIS[k].def]?.name || CLIS[k].label })),
@@ -5730,7 +5897,6 @@ function xfIconSelect(id) {
 }
 function xfIconOpen(id) {
   if (id === 'trash') return toast('La corbeille est vide. Ici, on supprime avec <kbd>rm -rf</kbd>, sans filet.', 2600);
-  if (id === 'steam') return toast('Steam : 412 jeux achetés, 3 lancés. Pas ce soir : les agents ont réservé la carte graphique.', 2600);
   if (id.startsWith('rt:')) {                    // Lolama, StudioLM : le terminal lance l'équipe locale (ou liste les modèles)
     const k = id.slice(3);
     return typeIntoShell(G.own.local ? `${k} ${k === 'studiolm' ? 'load' : 'run'} ${MODELS[G.pm.local].b}b` : `${k} list`);
@@ -6513,6 +6679,87 @@ function makeViewer() {
   };
 }
 
+/* ---------- Steam : 412 jeux achetés, 3 lancés, et celui-ci. La bibliothèque, la fiche du jeu, ses succès ---------- */
+const STEAM_LIB = [['Kubernetes Kart', 87], ['Merge Conflict Tactics', 41], ['Stand-up Simulator 2026', 12], ['Legacy Code Odyssey', 120],
+  ['Jira Quest IV', 64], ['Refacto Rush', 23], ['Sprint Planning Survivor', 9], ['On-Call Nightmares', 33]];
+function makeSteam() {
+  const el = document.createElement('div');
+  el.className = 'prog stm';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Steam');
+  el.innerHTML = '<nav class="stm-nav" aria-label="Steam"><span class="logo">◎ STEAM</span>'
+    + ['Magasin', 'Bibliothèque', 'Communauté', USER].map((t, i) => `<button type="button" data-stm="nav${i}"${i === 1 ? ' class="on" aria-current="page"' : ''}>${esc(t)}</button>`).join('')
+    + '</nav><div class="stm-main"><div class="stm-lib"></div><div class="stm-game" tabindex="-1"></div></div><div class="stm-status" role="status"></div>';
+  const q = sel => el.querySelector(sel), lib = q('.stm-lib'), game = q('.stm-game'), statusEl = q('.stm-status');
+  let note = '', noteUntil = 0, sig = '';
+  const flash = t => { note = t; noteUntil = performance.now() + 6000; status(); };
+  function status() {
+    const noting = performance.now() < noteUntil;
+    statusEl.textContent = noting ? note : `Téléchargements : 0 sur 412 · Amis : 3 agents, tous « Occupé »${ACH_ON ? ` · ${achN()}/${ACH.length} succès` : ''}`;
+    statusEl.classList.toggle('note', noting);
+  }
+  lib.innerHTML = '<p>Jeux · 412</p><button type="button" class="on" data-stm="me" aria-current="true">AI DevOps Chaos Simulator <span class="run">· en cours</span></button>'
+    + STEAM_LIB.map(([n, go], i) => `<button type="button" data-stm="g${i}" title="non installé · ${go} Go">${esc(n)}</button>`).join('')
+    + '<p>… et 404 autres, jamais lancés</p>';
+  const num = x => Math.floor(x).toLocaleString('fr-FR');
+  function row(a) {
+    const t = G.ach[a.id], pv = !t && achP(a), pc = pv ? Math.min(100, pv[0] / pv[1] * 100) : 0;
+    const pg = pv && pv[1] > 1 ? `<span class="pg"><span class="stm-bar"><i style="width:${pc.toFixed(1)}%"></i></span>`
+      + `${a.u || ''}${num(Math.min(pv[0], pv[1]))} / ${a.u || ''}${num(pv[1])}</span>` : '';
+    return `<div class="stm-a${t ? '' : ' off'}" data-ach="${a.id}"><span class="ic" aria-hidden="true">${esc(a.g)}</span>`
+      + `<span class="tx"><b>${esc(a.n)}</b><span class="d">${esc(a.d)}</span>${pg}</span>`
+      + `<span class="m">${t ? `Débloqué le ${achDate(t)}<br>` : ''}${String(a.p).replace('.', ',')} % des joueurs</span></div>`;
+  }
+  function draw(force) {
+    const got = ACH.filter(a => G.ach[a.id]).sort((a, b) => G.ach[b.id] - G.ach[a.id]);
+    const left = ACH.filter(a => !G.ach[a.id] && !a.h).sort((a, b) => b.p - a.p), hid = ACH.filter(a => !G.ach[a.id] && a.h).length;
+    const key_ = [got.map(a => a.id).join(), left.map(a => (achP(a) || []).map(Math.floor).join('/')).join(), Math.floor(G.play / 60)].join('|');
+    if (key_ === sig && !force) return status();
+    sig = key_;
+    const n = got.length, top = game.scrollTop;
+    const ban = !IDLE ? 'Mode libre : rien n’est sauvegardé, les succès non plus. Ils vous attendent dans la vraie partie.'
+      : SANDBOX ? 'Bac à sable : succès désactivés. Tout y est débloqué d’avance, comme avec un code de triche.' : '';
+    game.innerHTML = (ban ? `<p class="stm-ban">${esc(ban)}</p>` : '')
+      + '<div class="stm-hero"><h2>AI DevOps Chaos Simulator</h2><p>LVT-DEV · parodie · évaluations « Très positives » (412, toutes écrites par des agents)</p></div>'
+      + '<div class="stm-play"><button type="button" class="go" data-stm="stop">■ ARRÊTER</button>'
+      + `<span class="stm-st"><span class="k">Temps de jeu</span><span>${esc(playStr(G.play))}</span></span>`
+      + `<span class="stm-st"><span class="k">Succès</span><span>${n} sur ${ACH.length}</span><span class="stm-bar"><i style="width:${(n / ACH.length * 100).toFixed(1)}%"></i></span></span></div>`
+      + `<h3>Succès débloqués <span>· ${n}</span></h3>`
+      + (n ? got.map(row).join('') : '<p class="stm-none">Aucun pour l’instant. Shipper un projet serait un bon début.</p>')
+      + (left.length ? `<h3>Succès verrouillés <span>· ${left.length}</span></h3>` + left.map(row).join('') : '')
+      + (hid ? `<p class="stm-hid">+ ${hid} succès caché${hid > 1 ? 's' : ''} restant${hid > 1 ? 's' : ''} · les détails seront dévoilés une fois débloqués.</p>` : '');
+    game.scrollTop = top;
+    status();
+    if (xw.steam) xfLabel('steam');
+  }
+  el.addEventListener('click', e => {
+    const k = e.target.closest('[data-stm]')?.dataset.stm;
+    if (!k) return;
+    if (k === 'nav0') flash('Magasin : soldes à −90 % sur 412 jeux que vous avez déjà. Le panier attendra le prochain ship.');
+    else if (k === 'nav1' || k === 'me') game.scrollTop = 0;
+    else if (k === 'nav2') flash('Communauté : 3 amis, tous des agents IA, tous « Occupé ». L’un d’eux a écrit un guide des succès, faux.');
+    else if (k === 'nav3') flash(`Profil de ${USER} : niveau 1, 412 jeux, 4 lancés${ACH_ON ? `, ${achN()} succès, tous dans le même jeu` : ''}.`);
+    else if (k === 'stop') flash('Impossible d’arrêter le jeu : vous êtes dedans. Et les agents, eux, ne s’arrêtent jamais.');
+    else if (k[0] === 'g') { const [n, go] = STEAM_LIB[+k.slice(1)]; flash(`${n} : non installé (${go} Go). Pas ce soir : les agents ont réservé la carte graphique.`); }
+  });
+  function key(e) {
+    const k = e.key, step = game.clientHeight * .9;
+    if (e.target.closest?.('button') && (k === 'Enter' || k === ' ')) return;
+    if (k === 'ArrowDown' || k === 'ArrowUp') game.scrollTop += k === 'ArrowDown' ? 40 : -40;
+    else if (k === 'PageDown' || k === ' ') game.scrollTop += step;
+    else if (k === 'PageUp') game.scrollTop -= step;
+    else if (k === 'Home') game.scrollTop = 0;
+    else if (k === 'End') game.scrollTop = game.scrollHeight;
+    else return;
+    e.preventDefault();
+  }
+  const before = achN();
+  ach('steam');
+  draw(true);
+  if (ACH_ON && before) flash(`Steam Cloud : ${before} succès synchronisé${before > 1 ? 's' : ''}. Ils vous attendaient.`);
+  return { el, key, render: () => draw(), redraw: () => draw(true), title: () => 'Bibliothèque · Steam', tname: () => 'Steam' };
+}
+
 /* ---------- navigateur web (Firefaux) : un faux Web, avec le store des agents et une boutique de matériel ----------
    Une page = une entrée de WEB_SITES (motif d'adresse → fonction qui rend { title, html }). Les liens portent data-href,
    les achats data-buy (store IA) ; le matériel passe par le panier (data-cart-add="slot:niveau", data-cart-del, data-cart) ;
@@ -7160,6 +7407,7 @@ function hackHint() {                            // un agent élimine un mauvais
 }
 function hackWin() {
   const g = hackGame, s = Math.round((performance.now() - g.t0) / 1000), used = HACK_TRIES - g.tries + 1;
+  ach('hack');
   g.out.set(g.secret, 'ok');
   hackRender();
   hackEnd();
@@ -7976,6 +8224,7 @@ function boostStart(p) {
   const B = BOOST[p], st = G.boost[p], C = CLIS[p];
   st.day = today();
   st.left = boostDur(p);
+  ach('boost');
   if (p === provider) panes.forEach(x => { if (x.state !== 'down') { emit(x, { k: 'done', c: 'wrn', t: `${C.glyph} ${B.on}` }, true); ping(x); } });
   if (leadOn()) leadLog(H([`${C.glyph} `, 'wrn'], `${B.cmd} on for ${mmss(st.left)}. `
     + (p === 'claude' ? `Fanning out ${ri(8, 24)} subagents per task.` : p === 'codex' ? 'Thinking very, very hard.' : 'Speed over correctness.')));
@@ -8100,7 +8349,8 @@ function sandboxFill() {                         // bac à sable : tout est ache
   G.model = G.pm[G.ai];
 }
 function resetGame() {
-  G = G_DEF();
+  const keep = { ach: G.ach, play: G.play };   // les succès et le temps de jeu restent : ils sont à Steam, pas à la partie
+  G = { ...G_DEF(), ...keep };
   platInit();
   if (SANDBOX) sandboxFill();
   resetFS();                                      // machine neuve : paquets de départ, fichiers et dépendances d'origine
@@ -8168,6 +8418,9 @@ function autoShip() {                            // barre pleine : en production
   const val = ECO.value(shipped), cost = G.bill, elec = G.elec || 0, net = val - cost - elec;
   Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
   setScore(shipped + 1);                         // score, version suivante, sauvegarde
+  const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
+  if (day.getDay() === 5) ach('friday');
+  if (day.getHours() === 3) ach('night');
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
   hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité = ${signed(net)}`, 'ok');
@@ -8229,6 +8482,7 @@ function printWelcome() {
   shellPrint(H(['Pendant votre absence', 'wrn'], ` (${fmtEta(Math.round(Math.min(w.gap, ECO.offlineMax)))}${w.gap > ECO.offlineMax ? ', plafonné à 4 h' : ''}) : `,
     [`${plural(w.ships, 'projet')} shippé${w.ships > 1 ? 's' : ''}`, w.ships ? 'okc' : 'wrn'], ` · +$${usd(w.gain)} · tokens −$${usd(w.cost)}${w.elec ? ` · électricité −$${usd(w.elec)}` : ''}`,
     w.fails ? ` · ${plural(w.fails, 'déploiement')} raté${w.fails > 1 ? 's' : ''}` : '', ' · trésorerie ', [`$${usd(G.money)}`, 'okc']));
+  if (w.ships) ach('offline');
   toast(`Pendant votre absence : <kbd>${plural(w.ships, 'projet')}</kbd> shippé${w.ships > 1 ? 's' : ''}, +$${usd(w.gain)}`, 5000);
 }
 
@@ -8280,6 +8534,8 @@ function ecoTick() {
   ocTick(Math.min(dt, 5), now);                  // overclocking instable : glitchs et erreurs matérielles
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
+  if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
+  if (now - achLast > 1000) { achLast = now; achTick(); }
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
@@ -8815,11 +9071,11 @@ async function biosBoot(o = {}) {
       tp += TICK / TEST;
       if (chance(bad * .35)) addErr();
       if (ecc && u.ram > 0 && chance(u.ram * .4)) fixed++;
-      if (ti === freezeAt && tp > .45) { frozen = true; setTimeout(draw, 2500); return; }
+      if (ti === freezeAt && tp > .45) { frozen = true; ach('mtfail'); setTimeout(draw, 2500); return; }
       if (tp >= 1) {
         if (ti === 5 && bad > 0 && !errs) addErr();   // au-delà de la marge, au moins une erreur par passage
         tp = 0;
-        if (++ti >= MT_TESTS.length) { ti = MT_TESTS.length - 1; tp = 1; end = true; }
+        if (++ti >= MT_TESTS.length) { ti = MT_TESTS.length - 1; tp = 1; end = true; ach(errs ? 'mtfail' : 'mtpass'); }
       }
       draw();
     }, TICK);
@@ -8959,6 +9215,7 @@ async function biosBoot(o = {}) {
     add('', '', post);
     add('Entering SETUP...', '', post);
     await sleep(reducedMotion.matches ? 150 : 450);
+    ach('bios');
     const res = await amiSetup(el, k => { modalKey = k; });
     wantSetup = false;
     el.classList.remove('setup');
@@ -8968,6 +9225,7 @@ async function biosBoot(o = {}) {
   }
   // 2. GRUB : le menu de démarrage
   choice = await grubMenu();
+  ach({ windows: 'win', thursday: 'thursday', noagents: 'noagents' }[choice]);
   if (choice === 'memtest') await memtest();
   else if (choice === 'windows') await winUpdate();
   else break;
@@ -9251,6 +9509,7 @@ async function pcCrash(kind, L) {
   if (pcDown || mode !== 'idle') return;
   pcDown = true;
   mode = 'rebooting';
+  ach('pccrash');
   const dk = diskSt(); dk.pan++; dk.cyc++;       // SMART : un arrêt brutal (Unsafe Shutdowns), puis un rallumage
   [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
   const co = part('cool'), ps = part('psu'), g = part('gpu'), was = claudeOn;
