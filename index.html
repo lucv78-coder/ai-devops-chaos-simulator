@@ -1821,7 +1821,7 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
   return o;
 }
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
-  prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, t: Date.now() });
+  prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now() });
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2603,6 +2603,15 @@ async function hackerDump(cmd) {
     ` facturés (${MODELS[cfg.model].name}). Tapez `, ['help', 'org'], ' pour les vraies commandes.'));
 }
 
+function elecLines() {                          // cost : la facture d'électricité
+  const L = hwState(), W = wallW(L), ps = part('psu'), T = ELEC.tiers[G.elecT || 0], on = claudeOn && !paused && mode === 'idle';
+  return [
+    [H('Électricité :    ', [`$${usd(G.elec || 0)}`, 'wrn'], ` depuis le dernier ship · ${frx((G.kwh || 0).toFixed(1))} kWh en tout · $${usd(G.elecTot || 0)} depuis le début`), '', 20],
+    [H(`                 ${on ? `${Math.round(W)} W au compteur (${Math.round(L.draw)} W tirés, alim à ${Math.round((ps.eff || .85) * 100)} % de rendement)` : 'PC en veille : sans agents, le compteur ne tourne pas'}`
+      + ` · ${T.n} : $${frx(kwhPrice().toFixed(4).replace(/0+$/, ''))} le kWh`), '', 20],
+    [H(['                 Une seconde de jeu = vingt minutes de travail des agents : le compteur, lui, compte en heures.', 'dim']), '', 20],
+  ];
+}
 function costLines() {
   const rows = Object.keys(MODELS).filter(k => usage.by[k]).map(k => {
     const m = MODELS[k], b = usage.by[k];
@@ -2610,10 +2619,11 @@ function costLines() {
       ['   ' + `${price(m.in)} / ${price(m.out)} par M` + (k === LEAD_MODEL && leadOn() ? ' · orchestrateur' : ''), 'dim']), '', 20];
   });
   return [
-    [H('Coût total :     ', [`$${usd(usage.usd)}`, 'wrn']), '', 20],
+    [H('Coût des tokens : ', [`$${usd(usage.usd)}`, 'wrn'], IDLE ? ['  (l’électricité est en dessous)', 'dim'] : ''), '', 20],
     [`Tokens :         ${kfmt(usage.in + usage.out)} (entrée ${kfmt(usage.in)} · sortie ${kfmt(usage.out)})`, '', 20],
     ['Par modèle :', '', 20],
     ...rows,
+    ...(IDLE ? elecLines() : []),
     [H([`Tarifs réels de l’API ${cli().api}, entrée / sortie par million de tokens${provider === 'codex' ? ' (standard, contexte ≤ 272k)' : ''}. `
       + 'Volumes de tokens simulés, sans cache.', 'dim']), '', 20],
   ];
@@ -4630,12 +4640,12 @@ const PARTS = {
     { n: 'RAID 0 de 4 NVMe', s: '4 × 4 To · 4 M.2 PCIe 5 · 0 sauvegarde', m2: 4, gen5: 1, d: 'Quatre fois plus vite, quatre fois plus de chances de tout perdre. Les agents adorent.', io: 1.15, boot: .45, dev: 'RAID0 VIBE 16TB (4 x NVMe, 0 sauvegarde)', raid: 1, cost: 2700 },
   ] },
   psu: { name: 'Alimentation', ic: '≈', t: [
-    { n: 'Alim no-name 300 W', s: '300 W (sur l’étiquette) · elle siffle', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien.', w: 230, lbl: 300, noname: 1, cost: 0 },
-    { n: 'Alim 450 W 80+ Bronze', s: '450 W', d: 'Une vraie alimentation, avec de vrais condensateurs.', w: 450, lbl: 450, cost: 40 },
-    { n: 'Alim 650 W 80+ Gold', s: '650 W', d: 'De quoi nourrir une carte graphique sérieuse.', w: 650, lbl: 650, cost: 120 },
-    { n: 'Alim 850 W 80+ Platinum', s: '850 W', d: 'Silencieuse, efficace, et plus chère que le PC de départ.', w: 850, lbl: 850, cost: 260 },
-    { n: 'Alim 1 200 W 80+ Titanium', s: '1 200 W', d: 'Pour la RTX 5090 et son câble qui fond.', w: 1200, lbl: 1200, cost: 650 },
-    { n: 'Alim 2 000 W', s: '2 000 W · prise dédiée', d: 'Le compteur électrique tourne si vite qu’il produit du vent.', w: 2000, lbl: 2000, cost: 2400 },
+    { n: 'Alim no-name 300 W', s: '300 W (sur l’étiquette) · elle siffle · rendement 65 %', d: 'Certifiée 80 Plus Rien. Au-delà de 80 % de charge, elle siffle, puis parfois plus rien. Un tiers du courant part en chaleur (et en sifflement).', w: 230, lbl: 300, noname: 1, eff: .65, cost: 0 },
+    { n: 'Alim 450 W 80+ Bronze', s: '450 W · rendement 85 %', d: 'Une vraie alimentation, avec de vrais condensateurs. La facture d’électricité baisse d’un quart.', w: 450, lbl: 450, eff: .85, cost: 40 },
+    { n: 'Alim 650 W 80+ Gold', s: '650 W · rendement 90 %', d: 'De quoi nourrir une carte graphique sérieuse.', w: 650, lbl: 650, eff: .9, cost: 120 },
+    { n: 'Alim 850 W 80+ Platinum', s: '850 W · rendement 92 %', d: 'Silencieuse, efficace, et plus chère que le PC de départ.', w: 850, lbl: 850, eff: .92, cost: 260 },
+    { n: 'Alim 1 200 W 80+ Titanium', s: '1 200 W · rendement 94 %', d: 'Pour la RTX 5090 et son câble qui fond.', w: 1200, lbl: 1200, eff: .94, cost: 650 },
+    { n: 'Alim 2 000 W', s: '2 000 W · prise dédiée · rendement 90 %', d: 'Le compteur électrique tourne si vite qu’il produit du vent.', w: 2000, lbl: 2000, eff: .9, cost: 2400 },
   ] },
   cool: { name: 'Refroidissement', ic: '✱', t: [
     { n: 'Ventirad d’origine', s: '60 W · poussiéreux', d: 'De 2011, avec la poussière d’origine. Le processeur chauffe dès qu’on le regarde.', w: 60, cost: 0 },
@@ -6528,6 +6538,7 @@ const WEB_LIVE = {
     return `En ce moment : <b class="${v.cls}">${v.label}</b> <span class="dim">· ${esc(v.why)} · ${Math.round(s.temp)} °C · ${Math.round(s.draw)}/${s.psuW} W</span>`;
   },
   bill: () => IDLE ? `$${usd(G.bill)}` : `$${usd(usage.usd)}`,
+  elec: () => `$${usd(G.elec || 0)}`,
   local: () => webLocalBody(),
 };
 function webHome() {
@@ -6637,8 +6648,10 @@ function webBill() {
   return { title: 'facture.vibe · votre facture de tokens', html: `<div class="wp"><h1>facture.vibe</h1><p class="dim">Votre facture de tokens, en temps réel. Asseyez-vous.</p>
     <div class="wp-band">${IDLE ? row('Trésorerie', `<span data-live="money">$${usd(G.money)}</span>`) + row('Gagné depuis le début', `$${usd(G.earned)}`)
       + row('Dépensé en tokens', `$${usd(G.spent)}`) + row('Coût moyen d’un projet', `$${usd(avg)}`) + row('Projets shippés', String(shipped)) : ''}
-      ${row('Facture en cours', `<span data-live="bill">${WEB_LIVE.bill()}</span>`)}</div>
-    <p class="dim">Astuce : une carte graphique fait tourner un relecteur local, qui économise un peu de tokens. Le reste, c’est la vie.</p></div>` };
+      ${row('Facture en cours', `<span data-live="bill">${WEB_LIVE.bill()}</span>`)}
+      ${IDLE ? row('Électricité en cours', `<span data-live="elec">${WEB_LIVE.elec()}</span>`) + row('Électricité depuis le début', `$${usd(G.elecTot || 0)} · ${frx((G.kwh || 0).toFixed(1))} kWh`)
+        + row('Contrat', esc(ELEC.tiers[G.elecT || 0].n)) : ''}</div>
+    <p class="dim">Astuce : une carte graphique fait tourner un relecteur local, qui économise un peu de tokens. Une alim avec un meilleur rendement fait tourner le compteur moins vite. Le reste, c’est la vie.</p></div>` };
 }
 function webSO() {
   const Q = [
@@ -7768,6 +7781,28 @@ const ECO = {
   work: n => 12 * 1.1 ** n,                      // taille du projet n (unités de travail)
   value: n => 8 * 1.1 ** n,                      // ce qu'il rapporte une fois en production
 };
+/* ---------- la facture d'électricité : le compteur tourne tant que les agents travaillent (sans agents, ou en pause : le PC est en veille) ----------
+   Le compteur voit ce que tire le PC (pcLoad : processeur, overclocking compris, carte graphique, le reste), divisé par le rendement de l'alim.
+   Le temps du jeu est compressé (une seconde = vingt minutes de travail des agents) : à 0,25 $ le kWh, une seconde de PC patate coûte
+   environ un centime, un dixième de ce que rapporte un ship au début. Payée à chaque ship, avec les tokens. Les contrats Vibe Énergie (store, Matériel PC)
+   baissent le prix du kWh. */
+const ELEC = { kwh: .25, k: 1200, tiers: [
+  { n: 'Tarif de base Vibe Énergie', m: 1, cost: 0, d: 'Le contrat d’origine, signé par l’agent sans lire.' },
+  { n: 'Option Heures creuses', m: .75, cost: 120, d: 'Les agents travaillent la nuit. Ils travaillent aussi le jour, mais le contrat ne le sait pas. −25 % sur le kWh.' },
+  { n: 'Panneaux solaires sur le balcon', m: .5, cost: 2500, d: 'Ils produisent surtout l’été, quand il fait beau, et l’agent a branché l’onduleur à l’envers. −50 % quand même.' },
+  { n: 'Contrat datacenter (tarif pro)', m: .3, cost: 40000, d: 'Le fournisseur vous prend pour un hyperscaler. Ne le détrompez pas. −70 %.' },
+  { n: 'Petit réacteur modulaire', m: .05, cost: 900000, d: 'Livré avec un agent qui affirme avoir lu la doc de sûreté. −95 %. Le voisinage n’a pas été consulté.' },
+] };
+const wallW = (L = hwState()) => L.draw / (part('psu').eff || .85);          // W au compteur (ce que tire le PC, plus ce que l'alim perd)
+const kwhPrice = () => ELEC.kwh * ELEC.tiers[Math.min(ELEC.tiers.length - 1, G.elecT || 0)].m;
+const elecRate = W => W / 1000 * kwhPrice() * ELEC.k / 3600;                 // $ par seconde de jeu
+function elecTick(hw, dt) {                      // le compteur tourne : la facture est payée au prochain ship, avec les tokens
+  const W = wallW(hw), c = elecRate(W) * dt;
+  G.elec = (G.elec || 0) + c;
+  G.elecTot = (G.elecTot || 0) + c;
+  G.kwh = (G.kwh || 0) + W / 1000 * dt * ELEC.k / 3600;
+  return c;
+}
 /* les plateformes : une au premier plan (l'onglet des agents), les autres en arrière-plan si le PC suit ; chacune garde son équipe */
 const PLAT_ORDER = ['mistral', 'codex', 'claude', 'local'];
 const PLATS = {
@@ -8059,7 +8094,7 @@ function sandboxFill() {                         // bac à sable : tout est ache
     team: { mistral: AGENTS.length, codex: AGENTS.length, claude: AGENTS.length, local: nLoc },
     pm: { mistral: 'large', codex: 'astra', claude: 'fable', local: 'kwen72b' },
     pc: { ...Object.fromEntries(SLOTS.map(k => [k, PARTS[k].t.length - 1])), disk: PARTS.disk.t.length - 2 },   // pas le RAID 0 : il est au store, pour les joueurs
-    boost: Object.fromEntries(Object.keys(BOOST).map(p => [p, { own: 1, lvl: BOOST_EXT.length }])),
+    boost: Object.fromEntries(Object.keys(BOOST).map(p => [p, { own: 1, lvl: BOOST_EXT.length }])), elecT: ELEC.tiers.length - 1,
   });
   G.agents = G.team[G.ai];
   G.model = G.pm[G.ai];
@@ -8082,6 +8117,7 @@ function resetGame() {
 /* en direct : les volets plantés ne produisent rien, chaque bug et chaque crash se voit chez les agents */
 function ecoLive(dt, now) {
   const r = ecoRates(), act = panes.filter(p => p.state !== 'down');
+  elecTick(r.hw, dt);                            // le compteur électrique tourne avec les agents
   G.prog += r.per * act.length * dt / ECO.work(shipped);
   if (act.length) bill(cfg.model, r.tin * act.length * dt, r.tout * act.length * dt);   // bill() ajoute à la facture du prochain ship
   if (r.leadK) bill(LEAD_MODEL, r.tin * r.leadK * dt, r.tout * r.leadK * dt);
@@ -8129,12 +8165,12 @@ function autoShip() {                            // barre pleine : en production
     panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'errc', t: `✗ Déploiement de ${PROJ}@${v} raté : ${why}` }, true); });
     return hudNote(`✗ déploiement raté : ${why} · retour à ${back * 100} %${G.sk.flags ? ' (feature flag coupé)' : ''}`, 'bug');
   }
-  const val = ECO.value(shipped), cost = G.bill, net = val - cost;
-  Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, prog: 0 });
+  const val = ECO.value(shipped), cost = G.bill, elec = G.elec || 0, net = val - cost - elec;
+  Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
   setScore(shipped + 1);                         // score, version suivante, sauvegarde
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
-  hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens = ${signed(net)}`, 'ok');
+  hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité = ${signed(net)}`, 'ok');
   if (shipped === 1 || shipped % 10 === 0) {     // les jalons : le grand écran et une ligne dans le terminal
     showShipped(v, ri(3000, 4800));
     shellPrint(H(['✓ ', 'okc'], `${PROJ}@${v} en production · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''} · trésorerie `, [`$${usd(G.money)}`, 'okc']));
@@ -8154,8 +8190,8 @@ function ecoOffline(secs, session = true) {
   const main = ecoRates(n, true, { hw }), teams = [{ k: n, r: main }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))];
   let work = 0, bugs = 0, costS = main.lead;
   teams.forEach(({ k, r }) => { const up = 1 / (1 + r.crash * r.down); work += r.per * k * up; bugs += r.bug * k * up; costS += r.cost * k * up; });
-  const out = { ships: 0, gain: 0, cost: 0, fails: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5;
-  const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; if (session) { usage.usd += c; } };
+  const out = { ships: 0, gain: 0, cost: 0, fails: 0, elec: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5;
+  const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; out.elec += elecTick(hw, s); if (session) { usage.usd += c; } };
   let t = secs;
   while (t > 0 && out.ships < 10000) {
     const w = ECO.work(shipped), net = work - bugs * loss * w;
@@ -8166,7 +8202,7 @@ function ecoOffline(secs, session = true) {
     t -= need;
     if (chance(main.fail)) { G.prog = back; out.fails++; continue; }
     const val = ECO.value(shipped);
-    Object.assign(G, { money: G.money + val - G.bill, earned: G.earned + val, bill: 0, prog: 0 });
+    Object.assign(G, { money: G.money + val - G.bill - G.elec, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
     out.gain += val;
     out.ships++;
     shipped++;
@@ -8191,7 +8227,7 @@ function printWelcome() {
     return toast('Pendant votre absence : le PC est tombé. Rien n’a été produit.', 5000);
   }
   shellPrint(H(['Pendant votre absence', 'wrn'], ` (${fmtEta(Math.round(Math.min(w.gap, ECO.offlineMax)))}${w.gap > ECO.offlineMax ? ', plafonné à 4 h' : ''}) : `,
-    [`${plural(w.ships, 'projet')} shippé${w.ships > 1 ? 's' : ''}`, w.ships ? 'okc' : 'wrn'], ` · +$${usd(w.gain)} · tokens −$${usd(w.cost)}`,
+    [`${plural(w.ships, 'projet')} shippé${w.ships > 1 ? 's' : ''}`, w.ships ? 'okc' : 'wrn'], ` · +$${usd(w.gain)} · tokens −$${usd(w.cost)}${w.elec ? ` · électricité −$${usd(w.elec)}` : ''}`,
     w.fails ? ` · ${plural(w.fails, 'déploiement')} raté${w.fails > 1 ? 's' : ''}` : '', ' · trésorerie ', [`$${usd(G.money)}`, 'okc']));
   toast(`Pendant votre absence : <kbd>${plural(w.ships, 'projet')}</kbd> shippé${w.ships > 1 ? 's' : ''}, +$${usd(w.gain)}`, 5000);
 }
@@ -8213,7 +8249,7 @@ function renderHud() {
   if (!IDLE) return;
   const pct = Math.max(0, Math.min(1, G.prog)), r = ecoRates(), w = ECO.work(shipped), pv = pcVerdict(r.hw);
   const net = ecoFlow(), bgT = bgTeams(), bgS = bgT.length ? ` + ${bgT.map(t => `${t.n} ${t.ai}`).join(' + ')} en arrière-plan` : '';
-  const next = ECO.value(shipped) - G.bill;
+  const next = ECO.value(shipped) - G.bill - (G.elec || 0), meter = claudeOn && !paused && mode === 'idle';
   $('#hud-money').textContent = usd(G.money);
   hudEl.querySelector('.hud-money').classList.toggle('neg', G.money < 0);
   $('#hud-ver').textContent = `${SANDBOX ? 'bac à sable · ' : ''}${PROJ} v${verStr()}`;
@@ -8222,7 +8258,7 @@ function renderHud() {
   $('#hud-pct').textContent = Math.floor(pct * 100) + ' %';
   $('#hud-eta').textContent = !claudeOn ? 'agents à l’arrêt' : paused ? 'en pause' : mode !== 'idle' ? '' : net > 0 ? `≈ ${fmtEta(Math.ceil((1 - pct) * w / net))}` : 'bloqué';
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
-    : `facture en cours −$${usd(G.bill)} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
+    : `tokens −$${usd(G.bill)} · électricité −$${usd(G.elec || 0)}${meter ? ` (${Math.round(wallW(r.hw))} W)` : ' (PC en veille)'} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
   const on = PLAT_ORDER.filter(boostOn), hb = $('#hud-boost'), ub = $('.tbtn.boost'), own = !!G.boost?.[provider]?.own;
   hb.hidden = !on.length;
@@ -8293,21 +8329,27 @@ function aiItems() {
 }
 const webItems = () => [...aiItems(), ...PLAT_ORDER.filter(p => PLATS[p].cost).map(p => ({ cat: 'Plateformes', id: p, ic: CLIS[p].glyph, name: `Licence ${CLIS[p].label}`,
   done: !!G.own[p], cost: PLATS[p].cost, desc: PLATS[p].desc + ' Premier plan, arrière-plan : dans le store du jeu (B), onglet Plateformes.' }))];
+function elecItem() {                            // le contrat d'électricité suivant (sinon, le meilleur)
+  const t = Math.min(ELEC.tiers.length - 1, G.elecT || 0), cur = ELEC.tiers[t], nx = ELEC.tiers[t + 1], base = { cat: 'Électricité · Vibe Énergie', id: 'elec', ic: '↯' };
+  if (!nx) return { ...base, name: cur.n, lvl: 'le meilleur contrat', done: true, cost: 0, desc: cur.d };
+  const px = m => `$${frx((ELEC.kwh * m).toFixed(4).replace(/0+$/, ''))}`;
+  return { ...base, name: nx.n, lvl: `actuel : ${cur.n}`, cost: nx.cost, desc: `${nx.d} Le kWh passe de ${px(cur.m)} à ${px(nx.m)}.` };
+}
 function pcItems() {                             // matériel : par emplacement, la pièce du panier, sinon la prochaine qui rentre (matos.vibe a tout le catalogue)
-  return SLOTS.map(slot => {
+  return [...SLOTS.map(slot => {
     const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], base = { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, pc: 1, ic: P.ic };
     const inCart = CART[slot] != null;
     if (i >= P.t.length - 1 && !inCart) return { ...base, name: cur.n, lvl: 'le meilleur', done: true, cost: 0, desc: cur.d };
     const t = inCart ? CART[slot] : P.t.map((_, k) => k).find(k => k > i && !partBlock(slot, k)) ?? i + 1, p = P.t[t], blk = inCart ? null : partBlock(slot, t);
     return { ...base, name: p.n, lvl: `actuel : ${cur.n}`, cost: p.cost, inCart, tier: t, block: blk?.need || '', desc: `${p.s}. ${p.d}`,
       bad: blk ? `${blk.msg} ${blk.hint}` : '', warn: blk || inCart ? '' : partWarn(slot, t) };
-  });
+  }), elecItem()];
 }
 function storeItems() { return stoTab === 'pc' ? pcItems() : stoTab === 'plat' ? [] : aiItems(); }
 let platSeen = '';
 function itemState(it) {
   if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') || it.id === 'elec' ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
@@ -8364,6 +8406,13 @@ function buy(id) {
   let msg = '';
   if (id === 'agent' || id.startsWith('agent:')) msg = buyAgent(id === 'agent' ? G.ai : id.slice(6));
   else if (PLATS[id]) msg = buyLicence(id);
+  else if (id === 'elec') {                      // un contrat Vibe Énergie : le kWh baisse tout de suite
+    const it = elecItem();
+    if (it.done || G.money < it.cost) return '';
+    G.money -= it.cost;
+    G.elecT = (G.elecT || 0) + 1;
+    msg = `${it.name} : signé. Le kWh est à $${frx(kwhPrice().toFixed(4).replace(/0+$/, ''))}. L’agent a lu les conditions générales (il dit).`;
+  }
   else {
     const it = aiItems().find(x => x.id === id);
     if (!it || itemState(it).dis) return '';
@@ -8471,7 +8520,7 @@ function buyAgent(p) {
     G.agents = G.team[p];
     if (claudeOn) { cfg.agents = firstAgents(G.agents); saveCfg(); rebuild(); }
   }
-  if (p === 'local') return `${plural(G.team[p], 'agent')} en local : ${go1(vramFor(G.pm.local, G.team[p]))} Go de VRAM demandés (carte graphique : ${go1(gpuVram())} Go). Gratuit, en apparence.`;
+  if (p === 'local') return `${plural(G.team[p], 'agent')} en local : ${go1(vramFor(G.pm.local, G.team[p]))} Go de VRAM demandés (carte graphique : ${go1(gpuVram())} Go). Gratuit, en apparence : l’électricité, elle, se paie.`;
   return `${plural(G.team[p], 'agent')} ${CLIS[p].label} désormais. Le nouveau lit déjà le README (en diagonale).`;
 }
 function buyLicence(p) {                         // changer de plateforme : l'équipe migre au premier plan, l'ancienne reste disponible
@@ -9375,6 +9424,8 @@ function sensorsLines() {
     [H('Package id 0:  ', [`+${s.temp.toFixed(1)}°C`, tc], '  (high = +90.0°C, crit = +100.0°C)', s.temp >= 90 ? ['  ALARME : throttling', 'errc'] : ''), '', 15],
     [H(`fan1:          ${co.w <= 60 ? '900 RPM  (poussière : beaucoup)' : co.w >= 1000 ? '0 RPM  (azote liquide, pas besoin)' : `${ri(1100, 1900)} RPM`}`), '', 15],
     [H('power1:        ', [`${Math.round(s.draw)} W / ${ps.w} W`, s.draw > .85 * ps.w ? 'errc' : 'okc'], `  (${ps.n}${ps.noname ? ', elle siffle' : ''})`), '', 15],
+    ...(IDLE ? [[H('compteur:      ', [`${Math.round(wallW(s))} W au mur`, 'wrn'], `  (rendement ${Math.round((ps.eff || .85) * 100)} % · `,
+      claudeOn && !paused ? `$${usd(G.elec || 0)} d’électricité depuis le dernier ship)` : 'PC en veille : le compteur ne tourne pas sans agents)'), '', 15]] : []),
     ...(() => {                                  // les réglages du BIOS, s'ils ne sont pas sur Auto
       const o = ocSt(), r = part('ram'), u = ocU();
       return o.ratio || o.mhz || o.err ? [[H('vibe-tweaker:  ', [`CPU ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})`, u.cpu > 0 ? 'errc' : 'okc'], ' · ',
