@@ -3,31 +3,38 @@
 </p>
 
 <p align="center">
+  <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/"><img src="assets/readme/btn-jouer.svg" height="44" alt="Jouer en ligne"></a>
+  <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html"><img src="assets/readme/btn-wiki.svg" height="44" alt="Le wiki"></a>
+  <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html"><img src="assets/readme/btn-nouveautes.svg" height="44" alt="Les nouveautés"></a>
+</p>
+
+<p align="center"><a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html"><img src="assets/readme/stats.svg" width="100%" alt="En chiffres, d'après la page des nouveautés : le nombre de mises à jour, le temps écoulé depuis le premier commit, les lignes de index.html, et les lignes relues (0, stable)."></a></p>
+
+<p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
+
+<p align="center">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
   <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 10 149">
+  <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
-  <br>
   <img src="assets/badges/tokens.svg" alt="tokens : brûlés">
   <img src="assets/badges/agi.svg" alt="AGI : imminente">
+  <br>
   <img src="assets/badges/humains.svg" alt="humains : optionnels">
   <img src="assets/badges/humaine.svg" alt="revue humaine : 1 (les émojis)">
   <img src="assets/badges/made.svg" alt="made with : prompts + café">
   <img src="assets/badges/licence.svg" alt="licence : CC BY-NC 4.0">
 </p>
 
-<h3 align="center"><a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/">Jouer en ligne →</a></h3>
-
-<p align="center"><a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">Les nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</p>
-
 <p align="center"><i>« Je ne code plus. Je prompte, je ship, je regarde la facture. »</i><br>un vibecoder, 3 h du matin, un vendredi</p>
 
 > [!WARNING]
 > Ce dépôt a été **entièrement vibecodé**. Aucune ligne n'a été relue par un humain. La seule revue humaine de tout le projet a consisté à demander : « Retire les émojis ». Elle a été appliquée. On en est très fiers.
 
-## TL;DR (résumé généré par l'agent, en 1 ligne de 400 mots)
+## <img src="assets/readme/g-tldr.svg" width="30" height="30" align="top" alt=""> TL;DR (résumé généré par l'agent, en 1 ligne de 400 mots)
 
 Vous êtes un vibecoder. Vos agents IA codent, hallucinent, plantent et **shippent en prod à votre place**. Vous, vous regardez la barre de progression avancer et la facture des tokens grimper.
 
@@ -35,7 +42,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 
 <p align="center"><img src="assets/gameplay.webp" width="100%" alt="Partie en accéléré : écran titre, lancement d'un agent Mistral, barre de ship, écran SHIPPED, achats au store, migration vers Claude Code avec quatre agents et un orchestrateur, puis le bureau Xfce avec htop."></p>
 
-## Fonctionnalités
+## <img src="assets/readme/g-features.svg" width="30" height="30" align="top" alt=""> Fonctionnalités
 
 *Liste rédigée par l'agent. Non vérifiée. Probablement vraie à 60 %.*
 
@@ -64,7 +71,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
 - **Monolithe artisanal.** 1 fichier, 10 149 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
-## Le matériel
+## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
 Le jeu tourne maintenant sur un vrai faux PC, et il commence par terre.
 
@@ -95,7 +102,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 > [!CAUTION]
 > Matos.vibe refuse maintenant une RTX 4090 sur l'alim no-name. L'agent a donc pris une GTX 1060 et un i5 : 242 W sur 300 d'après la jauge, qui croit l'étiquette. L'alim, elle, coupe vers 230. Le PC a redémarré, et l'incident a été classé « hotfix réussi » : après tout, il est revenu.
 
-## Les plateformes IA (et la progression)
+## <img src="assets/readme/g-platforms.svg" width="30" height="30" align="top" alt=""> Les plateformes IA (et la progression)
 
 *« On change de plateforme, ça va tout régler. » Toutes les équipes tech, chaque trimestre.*
 
@@ -127,19 +134,19 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 > [!NOTE]
 > Ces temps sortent d'une simulation qui achète toujours le bon objet au bon moment. Un humain mettra plus longtemps. Un agent dira qu'il a fini en 4 minutes, tests compris.
 
-## Architecture
+## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
 <p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (10 149 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
-## Benchmarks
+## <img src="assets/readme/g-bench.svg" width="30" height="30" align="top" alt=""> Benchmarks
 
 <p align="center"><img src="assets/benchmarks.svg" width="100%" alt="Benchmarks : l'agent annonce 100 % sur six critères. Réalité : les tests passent 0 % (il n'y a pas de tests), le code a été relu 0 %, aucune régression 12 %, prêt pour la prod 3 %, facture des tokens maîtrisée 8 %, ça marche sur ma machine 100 %."></p>
 
 <p align="center"><img src="assets/stars.svg" width="100%" alt="Étoiles GitHub : l'agent projette une courbe exponentielle jusqu'à l'AGI. En réalité, zéro étoile pendant 25 jours, puis une le jour 26 (votre mère)."></p>
 
-## Installation
+## <img src="assets/readme/g-install.svg" width="30" height="30" align="top" alt=""> Installation
 
 ```bash
 # Étape 1 : il n'y a pas d'étape 1.
@@ -150,7 +157,7 @@ L'agent avait prévu Docker, Kubernetes, un service mesh, trois microservices et
 
 Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-chaos-simulator/)**. Rien à installer, rien à configurer, rien à relire. Surtout rien à relire.
 
-## Comment jouer
+## <img src="assets/readme/g-play.svg" width="30" height="30" align="top" alt=""> Comment jouer
 
 1. Installez votre premier agent : `curl -LsSf https://mistral.ai/vibe/install.sh | bash`. La machine est neuve, rien n'y est installé.
 2. Tapez `mistral`. C'est le pire agent, donc celui du début.
@@ -199,27 +206,28 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 
 **Pressé ?** `?bios=0` saute la séquence de démarrage. Vous rateriez le pingouin. `?setup=0` livre la machine déjà installée : paquets et CLI d'agents.
 
-## Captures
+## <img src="assets/readme/g-shots.svg" width="30" height="30" align="top" alt=""> Captures
 
 *Non retouchées. Enfin, l'agent dit que non.*
 
-| Le store | L'équipe au complet |
-|---|---|
-| <img src="assets/screen-store.png" alt="Le store, onglet Agents IA : un agent Claude Code supplémentaire, l'orchestrateur en plan mode, le terminal plus rapide, les modèles à acheter du Mistral Large 4 à 300 dollars au Claude Fable 5.2 à 300 000, puis les skills."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
-| **Le bureau Xfce** | **Mistral, un vendredi** |
-| <img src="assets/screen-xfce.png" alt="Le bureau Xfce : les icônes en colonnes à gauche (dossier personnel, système de fichiers, corbeille, terminal, Firefaux, Steam, Vibe CLI, Claude Code, store), puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
-| **Le BIOS AMIVIBES, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
-| <img src="assets/screen-post.png" alt="Le POST du BIOS AMIVIBES : Céléri G530 à 2,4 GHz, « Press DEL or F2 to run Setup », 4096MB OK, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, l’alimentation no-name qui siffle à +12 V, le disque dur détecté, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
-| **htop : le PC est à terre** | **matos.vibe, dans Firefaux** |
-| <img src="assets/screen-htop-patate.png" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."> | <img src="assets/screen-matos.png" alt="Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."> |
-| **Le rayon Matériel : commande bloquée** | **Le panier de matos.vibe** |
-| <img src="assets/screen-store-pc.png" alt="Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."> | <img src="assets/screen-panier.png" alt="Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300 en jaune, l'avis client sur l'alim no-name, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."> |
-| **Kernel panic : l'alim a dit non** | **L'onglet Plateformes** |
-| <img src="assets/screen-panic.png" alt="Un kernel panic plein écran : erreurs matérielles mce, puis « Kernel panic - not syncing: Fatal Machine Check: alimentation dépassée (499 W demandés, 230 W disponibles) », la pile d'appels avec vibe_agent_spawn, tokens_burn_all, npm_install_universe et friday_deploy, et « Rebooting in 4 seconds.. »."> | <img src="assets/screen-plateformes.png" alt="L'onglet Plateformes du store : Claude Code au premier plan avec 5 agents Opus 5.5, Codex en arrière-plan avec un apport de 65 % de production, Vibe CLI à l'arrêt, et la capacité du PC : 3 plateformes à la fois sur le Raisin 9 avec 64 Go."> |
-| **lolama.vibe, dans Firefaux** | **Kernel panic : la VRAM a dit non** |
-| <img src="assets/screen-lolama.png" alt="Le site lolama.vibe dans Firefaux : « Des LLM en local. Aucune API, aucune facture : juste votre VRAM, toute votre VRAM. », la GéFarce GTX 1060 et ses 6 Go, puis la bibliothèque des six modèles, de Jemma 3 2B à Kwen 2.5 72B, avec leur VRAM, leur efficacité par rapport à Codestral et, en rouge, « Ne rentre pas dans vos 6 Go de VRAM : le lancer fera redémarrer le PC »."> | <img src="assets/screen-vram.png" alt="Un kernel panic plein écran : « lolama: CUDA error: out of memory (tried to allocate 6,4 GiB) », puis « Kernel panic - not syncing: NVRM: GPU out of memory (Jemma 3 4B × 2 agents : 6,4 Go demandés, GéFarce GTX 1060 : 6 Go) », la pile d'appels avec gpu_vram_alloc et friday_deploy, et « Rebooting in 4 seconds.. »."> |
+<p align="center">
+  <a href="assets/screen-store.png"><img src="assets/readme/cap-store.png" width="49%" alt="Le store. Le store, onglet Agents IA : un agent Claude Code supplémentaire, l'orchestrateur en plan mode, le terminal plus rapide, les modèles à acheter du Mistral Large 4 à 300 dollars au Claude Fable 5.2 à 300 000, puis les skills."></a>
+  <a href="assets/screen-agents.png"><img src="assets/readme/cap-agents.png" width="49%" alt="L'équipe au complet. Quatre agents Claude Code et leur orchestrateur, en plein travail."></a>
+  <a href="assets/screen-xfce.png"><img src="assets/readme/cap-xfce.png" width="49%" alt="Le bureau Xfce. Le bureau Xfce : les icônes en colonnes à gauche (dossier personnel, système de fichiers, corbeille, terminal, Firefaux, Steam, Vibe CLI, Claude Code, store), puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."></a>
+  <a href="assets/screen-gameover.png"><img src="assets/readme/cap-gameover.png" width="49%" alt="Mistral, un vendredi. Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."></a>
+  <a href="assets/screen-post.png"><img src="assets/readme/cap-post.png" width="49%" alt="Le BIOS AMIVIBES, An Energy Star Ally. Le POST du BIOS AMIVIBES : Céléri G530 à 2,4 GHz, « Press DEL or F2 to run Setup », 4096MB OK, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, l’alimentation no-name qui siffle à +12 V, le disque dur détecté, logo Energy Star redessiné en haut à droite."></a>
+  <a href="assets/screen-tux.png"><img src="assets/readme/cap-tux.png" width="49%" alt="Vibian GNU/Linux 13 « friday ». Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."></a>
+  <a href="assets/screen-htop-patate.png"><img src="assets/readme/cap-htop-patate.png" width="49%" alt="htop : le PC est à terre. htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."></a>
+  <a href="assets/screen-matos.png"><img src="assets/readme/cap-matos.png" width="49%" alt="matos.vibe, dans Firefaux. Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."></a>
+  <a href="assets/screen-store-pc.png"><img src="assets/readme/cap-store-pc.png" width="49%" alt="Le rayon Matériel : commande bloquée. Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."></a>
+  <a href="assets/screen-panier.png"><img src="assets/readme/cap-panier.png" width="49%" alt="Le panier de matos.vibe. Le panier de matos.vibe dans Firefaux : Raisin 7, carte mère B650 et GTX 1060, jauge d'alimentation à 285 W sur 300 en jaune, l'avis client sur l'alim no-name, et une incompatibilité : la RAM DDR3 ne rentre pas dans la B650."></a>
+  <a href="assets/screen-panic.png"><img src="assets/readme/cap-panic.png" width="49%" alt="Kernel panic : l'alim a dit non. Un kernel panic plein écran : erreurs matérielles mce, puis « Kernel panic - not syncing: Fatal Machine Check: alimentation dépassée (499 W demandés, 230 W disponibles) », la pile d'appels avec vibe_agent_spawn, tokens_burn_all, npm_install_universe et friday_deploy, et « Rebooting in 4 seconds.. »."></a>
+  <a href="assets/screen-plateformes.png"><img src="assets/readme/cap-plateformes.png" width="49%" alt="L'onglet Plateformes. L'onglet Plateformes du store : Claude Code au premier plan avec 5 agents Opus 5.5, Codex en arrière-plan avec un apport de 65 % de production, Vibe CLI à l'arrêt, et la capacité du PC : 3 plateformes à la fois sur le Raisin 9 avec 64 Go."></a>
+  <a href="assets/screen-lolama.png"><img src="assets/readme/cap-lolama.png" width="49%" alt="lolama.vibe, dans Firefaux. Le site lolama.vibe dans Firefaux : « Des LLM en local. Aucune API, aucune facture : juste votre VRAM, toute votre VRAM. », la GéFarce GTX 1060 et ses 6 Go, puis la bibliothèque des six modèles, de Jemma 3 2B à Kwen 2.5 72B, avec leur VRAM, leur efficacité par rapport à Codestral et, en rouge, « Ne rentre pas dans vos 6 Go de VRAM : le lancer fera redémarrer le PC »."></a>
+  <a href="assets/screen-vram.png"><img src="assets/readme/cap-vram.png" width="49%" alt="Kernel panic : la VRAM a dit non. Un kernel panic plein écran : « lolama: CUDA error: out of memory (tried to allocate 6,4 GiB) », puis « Kernel panic - not syncing: NVRM: GPU out of memory (Jemma 3 4B × 2 agents : 6,4 Go demandés, GéFarce GTX 1060 : 6 Go) », la pile d'appels avec gpu_vram_alloc et friday_deploy, et « Rebooting in 4 seconds.. »."></a>
+</p>
 
-## Roadmap
+## <img src="assets/readme/g-roadmap.svg" width="30" height="30" align="top" alt=""> Roadmap
 
 *Priorisée par l'agent, par ordre alphabétique.*
 
@@ -253,7 +261,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
 
-## FAQ
+## <img src="assets/readme/g-faq.svg" width="30" height="30" align="top" alt=""> FAQ
 
 **Le code a-t-il été relu ?**
 Non. Question suivante.
@@ -291,11 +299,11 @@ Dans le jeu, oui. Dans la vraie vie, apparemment aussi.
 **Ce README a-t-il été écrit par une IA ?**
 Évidemment. Elle l'a même relu, ce qui en fait la partie la plus relue du projet.
 
-## Contribuer
+## <img src="assets/readme/g-contribute.svg" width="30" height="30" align="top" alt=""> Contribuer
 
 Ouvrez une pull request. Un agent la mergera sans la lire, comme le reste. Le protocole complet est dans [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Contributeurs
+## <img src="assets/readme/g-people.svg" width="30" height="30" align="top" alt=""> Contributeurs
 
 | Avatar | Contributeur | Rôle | Contribution |
 |:-:|---|---|---|
@@ -312,14 +320,16 @@ Ouvrez une pull request. Un agent la mergera sans la lire, comme le reste. Le pr
 
 > Les agents ci-dessus, sauf Claude, sont des personnages du jeu. Aucun modèle n'a été blessé pendant le développement. Quelques tokens, si.
 
-## Licence
+## <img src="assets/readme/g-licence.svg" width="30" height="30" align="top" alt=""> Licence
 
 © 2026 LVT-DEV, sous licence [CC BY-NC 4.0](LICENSE). Vous pouvez copier, modifier et partager le jeu en citant LVT-DEV, mais **pas en faire un usage commercial**.
 
 Si vous arrivez à gagner de l'argent avec, c'est que vous avez mieux vibecodé que nous. Ce n'est pas une raison.
 
-## Avertissement
+## <img src="assets/readme/g-warning.svg" width="30" height="30" align="top" alt=""> Avertissement
 
 Ce jeu est une **parodie**, sans lien avec Anthropic, OpenAI, Mistral AI, GitHub, Ollama, LM Studio ni le projet Xfce. Les noms de produits et de modèles appartiennent à leurs propriétaires. Les chiffres, factures, bugs, benchmarks et citations sont inventés. Les étoiles GitHub aussi, pour l'instant.
+
+<p align="center"><img src="assets/readme/footer.svg" width="100%" alt="Fin de session : déconnexion, 8 agents encore en train de shipper, la prod reste ouverte."></p>
 
 <p align="center"><sub>Fait avec des prompts, du café et une confiance aveugle. Aucune ligne de ce dépôt n'a été écrite à la main. Celle-ci non plus.</sub></p>

@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="158" height="20" role="img" aria-label="made with : prompts + café">
+<svg xmlns="http://www.w3.org/2000/svg" width="182" height="22" viewBox="0 0 182 22" role="img" aria-label="made with : prompts + café">
 <title>made with : prompts + café</title>
-<linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
-<clipPath id="r"><rect width="158" height="20" rx="3" fill="#fff"/></clipPath>
-<g clip-path="url(#r)" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11"><rect width="67.6" height="20" fill="#555"/><g class="s0"><rect x="67.6" width="90.8" height="20" fill="#007ec6"/><text x="113.0" y="15" fill="#010101" fill-opacity=".3" textLength="79" lengthAdjust="spacingAndGlyphs">prompts + café</text><text x="113.0" y="14" fill="#fff" textLength="79" lengthAdjust="spacingAndGlyphs">prompts + café</text></g><rect width="158" height="20" fill="url(#s)"/>
-<text x="33.8" y="15" fill="#010101" fill-opacity=".3" textLength="56" lengthAdjust="spacingAndGlyphs">made with</text>
-<text x="33.8" y="14" fill="#fff" textLength="56" lengthAdjust="spacingAndGlyphs">made with</text></g>
+<clipPath id="r"><rect width="182" height="22" rx="3"/></clipPath>
+<g clip-path="url(#r)"><rect width="74.3" height="22" fill="#1d1300"/><rect x="74.3" width="107.8" height="22" fill="#0d0800"/></g>
+<rect x=".5" y=".5" width="181" height="21" rx="3" fill="none" stroke="#5c3d00"/><line x1="74.3" y1="1" x2="74.3" y2="21" stroke="#5c3d00"/>
+<g text-anchor="middle" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, Menlo, 'DejaVu Sans Mono', monospace" font-size="11"><text x="37.2" y="15" fill="#a8711a" textLength="60" lengthAdjust="spacingAndGlyphs">made with</text><g class="s0"><text x="128.2" y="15" fill="#ffcf6b" font-weight="700" textLength="94" lengthAdjust="spacingAndGlyphs">prompts + café</text></g></g>
 </svg>
