@@ -695,6 +695,43 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .pv-page .foot { margin-top: 2.5em; padding-top: .5em; border-top: 1px solid currentColor; font-size: .8em; opacity: .8; }
 .pv-page pre { white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: .85em; }
 .pv-empty { margin-top: 3em; color: var(--dim); text-align: center; white-space: normal; }
+/* VLC : le menu, la scène (le cône, puis le spectre en caractères), la barre de lecture, les boutons, le volume */
+.vlc { container-type: inline-size; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto auto auto; padding: 0; }
+.vlc-menu { display: flex; flex-wrap: wrap; gap: 0 1.8ch; padding: .15em 1.2ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.vlc-menu button { color: var(--dim); }
+.vlc-menu button:hover { color: var(--fg); }
+.vlc-stage { display: grid; place-items: center; align-content: center; gap: .7em; min-height: 0; overflow: hidden; padding: 1em 2ch; background: var(--bg2); text-align: center; white-space: normal; }
+.vlc-cone { font-size: clamp(1em, 2.2cqw, 1.7em); line-height: 1.05; white-space: pre; }
+.vlc-cone .a { color: var(--orange); }
+.vlc-cone .b { color: var(--yellow); }
+.vlc-viz { max-width: 100%; overflow: hidden; color: var(--fg); font-size: clamp(1em, 2.6cqw, 2.1em); line-height: 1; white-space: pre; text-shadow: 0 0 6px color-mix(in srgb, var(--fg) 45%, transparent); }
+.vlc-now { display: grid; gap: .15em; max-width: 64ch; }
+.vlc-now b { color: var(--orange); font-size: 1.15em; }
+.vlc-now .by { color: var(--fg); }
+.vlc-now .dim { color: var(--dim); }
+.vlc-now .err { color: var(--yellow); }
+.vlc-info { max-height: 16em; overflow: auto; padding: .5em 2ch; border-top: 1px solid var(--sep); background: var(--panel); white-space: normal; }
+.vlc-info dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .1em 2ch; }
+.vlc-info dt { color: var(--dim); }
+.vlc-info dd { margin: 0; color: var(--fg); overflow-wrap: anywhere; }
+.vlc-info p { margin-top: .5em; color: var(--fg); }
+.vlc-info a { color: var(--orange); }
+.vlc-seek { display: flex; align-items: center; gap: 1ch; padding: .4em 1.4ch .1em; border-top: 1px solid var(--sep); background: var(--bar); }
+.vlc-seek .t { min-width: 5ch; color: var(--dim); font-variant-numeric: tabular-nums; }
+.vlc input[type="range"] { flex: 1; min-width: 0; margin: 0; accent-color: var(--orange); cursor: pointer; }
+.vlc input[type="range"]:disabled { cursor: default; opacity: .45; }
+.vlc-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1ch; padding: .3em 1.4ch .45em; background: var(--bar); }
+.vlc-ctl button { min-width: 3.4ch; padding: .05em .8ch; border: 1px solid var(--rule); border-radius: 3px; color: var(--fg); }
+.vlc-ctl button:hover { border-color: var(--orange); }
+.vlc-ctl button[aria-pressed="true"] { border-color: var(--orange); color: var(--orange); }
+.vlc-ctl .play { min-width: 5ch; border-color: var(--orange); background: var(--orange); color: var(--ink); font-weight: 700; }
+.vlc-ctl button:disabled { opacity: .45; cursor: default; }
+.vlc-vol { display: flex; align-items: center; gap: .8ch; margin-left: auto; color: var(--dim); }
+.vlc-vol input[type="range"] { flex: none; width: 13ch; }
+.vlc-vol .pct { min-width: 5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.vlc-status { padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.vlc-status.note { color: var(--yellow); }
+@container (max-width: 56ch) { .vlc-vol { margin-left: 0; } }
 /* Steam : la bibliothèque à gauche, la fiche du jeu et ses succès à droite (une seule colonne dans une fenêtre étroite) */
 .stm { container-type: inline-size; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; }
 .stm-nav { display: flex; flex-wrap: wrap; align-items: center; gap: .3em 2.4ch; padding: .45em 1.6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
@@ -779,6 +816,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-band { padding: .6em 1.4ch; border: 1px solid var(--sep); border-left: 3px solid var(--orange); background: var(--panel); }
 .wp-band.bad { border-left-color: var(--red); }
 .wp-band.ok { border-left-color: var(--green); }
+.wp-band .tag { margin-right: .6ch; padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
 .wp-nav { display: flex; flex-wrap: wrap; gap: .6ch; }
 .wp-nav button { padding: .1em 1.2ch; border: 1px solid var(--sep); border-radius: 999px; color: var(--fg); }
 .wp-nav button:hover { border-color: var(--orange); }
@@ -795,6 +833,23 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
 .wp-buy { padding: .15em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--orange); color: var(--ink); font-weight: 700; }
 .wp-buy:disabled { border-color: var(--sep); background: none; color: var(--dim); cursor: default; }
+/* telecharge.vibe : les publicités, le fichier, le vrai lien (tout petit), la barre de téléchargement */
+.dl-ads { display: grid; grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr)); gap: 1ch; }
+.dl-ad { display: grid; gap: .3em; padding: .7em 1.4ch; border: 2px dashed var(--yellow); border-radius: 4px; background: var(--panel); color: var(--yellow); text-align: center; white-space: normal; }
+.dl-ad:hover { border-style: solid; }
+.dl-ad b { font-size: 1.15em; }
+.dl-ad .big { padding: .25em 1ch; border-radius: 4px; background: var(--green); color: var(--ink); font-weight: 700; letter-spacing: .06em; }
+.dl-ad small { color: var(--dim); }
+.dl-file { display: grid; gap: .4em; padding: .9em 1.6ch; border: 1px solid var(--orange); border-radius: 6px; background: var(--panel); white-space: normal; }
+.dl-file .nm { color: var(--fg); font-weight: 700; font-size: 1.1em; }
+.dl-file .meta { color: var(--dim); }
+.dl-file .human { color: var(--orange); }
+.dl-real { justify-self: start; padding: 0 .3ch; color: var(--blue); font-size: .85em; text-decoration: underline; }
+.dl-state { display: grid; gap: .35em; }
+.dl-bar { height: .7em; border: 1px solid var(--rule); border-radius: 2px; background: var(--bg2); overflow: hidden; }
+.dl-bar span { display: block; width: 0; height: 100%; background: var(--orange); animation: dlfill linear forwards; }
+@keyframes dlfill { from { width: 0; } to { width: 100%; } }
+.dl-act { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; }
 .wp-err { display: grid; justify-items: center; gap: .6em; padding: 2.5em 0; text-align: center; }
 .wp-err .big { font-size: 1.8em; font-weight: 700; color: var(--red); overflow-wrap: anywhere; }
 .wp-res { display: grid; gap: .1em; }
@@ -2653,6 +2708,7 @@ const SETUP_HELP = () => [
   [H(['  sudo apt install htop atop lm-sensors smartmontools', 'org'], ['  surveiller le PC (htop, atop, sensors, smartctl)', 'dim']), '', 20],
   [H(['  sudo apt install xfce4 firefaux thunar mousepad atril', 'org'], ['  le bureau, le navigateur, les fichiers, l’éditeur, les PDF', 'dim']), '', 20],
   [H(['  sudo apt install steam', 'org'], ['  les succès (Steam, dans Xfce)', 'dim']), '', 20],
+  [H(['  sudo apt install vlc', 'org'], ['  la musique (VLC ; les morceaux se téléchargent sur telecharge.vibe, dans Firefaux)', 'dim']), '', 20],
 ];
 const WIKI_LINE = () => [H(['Tout le reste', 'fgc'], ['  le wiki du jeu : commandes, store, matériel, pannes · ', 'dim'], ['wiki', 'org'], [' pour l’ouvrir', 'dim']), '', 20];
 const PRE_HELP_LINES = () => [
@@ -2672,7 +2728,7 @@ const PRE_HELP_LINES = () => [
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
     [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · à installer dans Firefaux (lolama.vibe, githype.vibe)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
-  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam)'), '', 20],
+  [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam), musique (vlc)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
   [H(['  fallout · bunker  ', 'org'], 'terminal de bunker antiatomique (hack : forcer le coffre · exit : remonter)'), '', 20],
   [H(['  apt · apt-get     ', 'org'], 'installer des paquets : sudo apt install cowsay (essayez aussi sl, neofetch…)'), '', 20],
@@ -3370,7 +3426,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3463,6 +3519,7 @@ async function systemCrash(label, targets, opts = {}) {
   gameOver('sys');
 }
 async function kernelPanic() {
+  vlcHalt();                                     // la musique s'arrête avec le PC
   kpLog.innerHTML = '';
   kpEnd.hidden = true;
   panicEl.hidden = false;
@@ -3569,6 +3626,7 @@ const CATALOG = {
   tmux: ['3.5a-1', 1130, 'tmux', 'un terminal dans le terminal'],
   tree: ['2.1.3-1', 112, 'tree', 'l’arborescence des dossiers'],
   vim: ['2:9.1.0861-1', 3910, 'vim', 'éditeur de texte (pour en sortir : voir Stack Overflow)'],
+  vlc: ['3.0.21-0+deb13u1', 52800, 'vlc cvlc', 'lecteur multimédia : lit tout, même ce que les agents ont encodé (il lui faut le bureau)'],
   xfce4: ['4.20', 186400, 'startxfce4 xfce4-session', 'le bureau Xfce : fenêtres, menu, tableau de bord (commande xfce)'],
   zsh: ['5.9-6', 2890, '', 'le shell de ce terminal (essentiel ici)'],
 };
@@ -3588,7 +3646,7 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
+const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
   xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
 const APT_ALIAS = { xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
 const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
@@ -4700,6 +4758,7 @@ const PROGS = {
   atril: { label: 'Visionneuse', delay: 1000, gui: true, cat: 'Accessoires', icon: '▧', menu: 'Visionneuse de documents', desc: 'Atril · les PDF', make: () => makeViewer() },
   firefaux: { label: 'Firefaux', delay: 1000, gui: true, cat: 'Internet', icon: '◍', menu: 'Navigateur web (Firefaux)', desc: 'le Web, en moins bien · store IA et matos.vibe', make: () => makeBrowser() },
   steam: { label: 'Steam', delay: 1000, gui: true, cat: 'Jeux', icon: '◎', menu: 'Steam', desc: '412 jeux, 3 lancés · les succès de celui-ci', make: () => makeSteam() },
+  vlc: { label: 'VLC', delay: 250, gui: true, cat: 'Multimédia', icon: '▲', menu: 'Lecteur multimédia VLC', desc: 'la musique · les morceaux se téléchargent sur telecharge.vibe', make: () => makeVlc() },
 };
 function renderTabs() {
   tabsEl.innerHTML = tabs.map((t, i) => {
@@ -4751,6 +4810,7 @@ function closeTab(name) {
   if (view === name && xfOn) { xfNext(name); if (view === name) view = 'zsh'; }   // bureau : la fenêtre du dessous prend la main
   else if (view === name) switchTab(tabs.includes(lastView) && lastView !== name ? lastView : 'zsh');
   tabs.splice(tabs.indexOf(name), 1);
+  p.close?.();                                   // le programme range ses affaires (VLC coupe le son)
   p.el.remove();
   (p.made || ['el', 'render', 'redraw', 'key']).forEach(k => { p[k] = null; });
   if (lastView === name) lastView = '';
@@ -5544,7 +5604,7 @@ function afterResize() {
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
-const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86] };
+const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -5794,7 +5854,7 @@ function xfMenuOpen() {
     + `<span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`;
   const progs = Object.keys(PROGS).filter(k => PROGS[k].make);
   xfMenuEl.innerHTML = `<p class="xf-who">${esc(USER)}@prod-01 <span class="dim">· Vibian GNU/Linux 13 (friday)</span></p>`
-    + ['Accessoires', 'Internet', 'Jeux', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
+    + ['Accessoires', 'Internet', 'Jeux', 'Multimédia', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
       + progs.filter(k => (PROGS[k].cat || 'Système') === c).map(k => item(k, PROGS[k].icon || '▤', PROGS[k].menu || k,
         tabs.includes(k) ? '● ouvert' : installed.has(k) ? PROGS[k].desc || '' : `non installé · sudo apt install ${k}`)).join('')).join('')
     + '<p class="xf-cat">Développement · agents IA</p>'
@@ -5898,8 +5958,8 @@ function xfIconList() {
     has('thunar') && { id: 'root', ic: '/', t: 'Système de fichiers', tip: '/ · ne rien supprimer (vraiment)' },
     { id: 'trash', ic: '▥', t: 'Corbeille', tip: 'vide : ici, on supprime avec rm -rf' },
     { id: 'zsh', ic: '❯', t: 'Terminal', tip: `zsh · ${tildePath(cwd)}` },
-    ...['firefaux', 'mousepad', 'atril', 'htop'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
-      t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système' }[k], tip: PROGS[k].desc })),
+    ...['firefaux', 'mousepad', 'atril', 'htop', 'vlc'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
+      t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système', vlc: 'VLC' }[k], tip: PROGS[k].desc })),
     has('steam') && { id: 'steam', ic: PROGS.steam.icon, on: open('steam'), t: 'Steam', tip: `412 jeux achetés, 3 lancés${ACH_ON ? ` · ${achN()}/${ACH.length} succès` : ''}` },
     ...['mistral', 'codex', 'claude'].filter(k => !IDLE || (G.own[k] && cliHas(k))).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
       t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
@@ -5980,8 +6040,8 @@ deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) xfIconSel
    supprimer, propriétés. Déplacer ou renommer un élément vital fait tomber le système, comme le supprimer. La suppression suit les règles de rm : un élément
    système vital fait tomber la machine, les agents réagissent quand on touche au projet. Il faut le bureau (xfce). */
 const frNumI = n => Math.round(n).toLocaleString('fr-FR');   // l'interface graphique parle français : 1 337 420
-const fmGlyph = (k, c) => c.d ? '■' : /\.pdf$/i.test(k) ? '▧' : c.x ? '▶' : /\.(png|jpe?g|psd|gif)$/i.test(k) ? '▨' : /\.(mp4|mkv|mov)$/i.test(k) ? '▶' : /\.(mp3|wav|flac)$/i.test(k) ? '♪' : c.b ? '▦' : c.code ? '◆' : '□';
-const FM_BIN_TYPES = [[/\.(png|jpe?g|gif)$/i, 'image'], [/\.psd$/i, 'image Photoshop'], [/\.(mp4|mkv|mov)$/i, 'vidéo'], [/\.(mp3|wav|flac)$/i, 'audio'],
+const fmGlyph = (k, c) => c.d ? '■' : /\.pdf$/i.test(k) ? '▧' : c.x ? '▶' : /\.(png|jpe?g|psd|gif)$/i.test(k) ? '▨' : /\.(mp4|mkv|mov|webm|avi)$/i.test(k) ? '▶' : /\.(m4a|mp3|aac|ogg|opus|wav|flac)$/i.test(k) ? '♪' : c.b ? '▦' : c.code ? '◆' : '□';
+const FM_BIN_TYPES = [[/\.(png|jpe?g|gif)$/i, 'image'], [/\.psd$/i, 'image Photoshop'], [/\.(mp4|mkv|mov|webm|avi)$/i, 'vidéo'], [/\.(m4a|aac)$/i, 'audio AAC'], [/\.(mp3|ogg|opus|wav|flac)$/i, 'audio'],
   [/\.iso$/i, 'image disque'], [/\.(safetensors|ckpt)$/i, 'poids de modèle IA'], [/\.jsonl$/i, 'jeu de données'], [/\.(xlsx|ods)$/i, 'tableur'], [/\.(docx|odt)$/i, 'document'], [/\.exe$/i, 'programme Windows (ceci est un Linux)']];
 const fmType = (k, c) => c.d ? (c.many ? 'dossier géant' : 'dossier') : c.x ? 'exécutable' : c.b ? (/\.pdf$/i.test(k) ? 'document PDF' : /\.(xz|gz|tar|zip)$/i.test(k) ? 'archive' : FM_BIN_TYPES.find(([re]) => re.test(k))?.[1] || 'binaire')
   : c.code || /\.(ts|tsx|js|jsx|go|rs|py|sql|tf|ya?ml|sh|c|h|css)$/i.test(k) ? 'code source' : /\.md$/i.test(k) ? 'Markdown' : /\.json$/i.test(k) ? 'JSON' : /\.log$/i.test(k) ? 'journal' : /\.html?$/i.test(k) ? 'page HTML' : 'texte brut';
@@ -6256,6 +6316,7 @@ function makeThunar() {
     const kd = fileKind(k, c);
     if (kd === 'dir') return go(segs);
     if (kd === 'pdf') return openWith('atril', segs);        // un PDF : la visionneuse
+    if (kd === 'audio' || kd === 'video') return openWith('vlc', segs);   // une musique, une vidéo : VLC
     if (kd === 'text') return openWith('mousepad', segs);    // du texte (txt, md, json, config, code) : l'éditeur
     if (kd === 'exe') {                          // un exécutable se lance : htop, atop, thunar en fenêtre, claude… par le terminal
       if (PROGS[k]?.make && installed.has(k)) return openTab(k);
@@ -6307,7 +6368,7 @@ function makeThunar() {
       const segs = [...path, k], c = nodeAt(segs);
       if (!c) return;
       const kd = fileKind(k, c), cat = { ic: '❯', t: 'Afficher dans le terminal (cat)', run: () => typeIntoShell(`cat ${shq(tildePath(segs))}`) };
-      const main = { dir: 'Ouvrir', pdf: 'Ouvrir avec la visionneuse', text: 'Ouvrir avec l’éditeur de texte', exe: 'Exécuter', bin: cat.t }[kd];
+      const main = { dir: 'Ouvrir', pdf: 'Ouvrir avec la visionneuse', text: 'Ouvrir avec l’éditeur de texte', exe: 'Exécuter', bin: cat.t, audio: 'Lire avec VLC', video: 'Lire avec VLC' }[kd];
       return xfCtxOpen(x, y, [
         { ic: fmGlyph(k, c), t: main, k: 'Entrée', run: () => open(k) },
         ...(kd === 'dir' ? [{ ic: '❯', t: 'Ouvrir un terminal ici', run: () => typeIntoShell(`cd ${shq(tildePath(segs))}`) }] : []),
@@ -6417,7 +6478,8 @@ function makeThunar() {
    Les .txt, .md, .json, la config, le code… ; un binaire (PDF compris) s'affiche en lecture seule, illisible comme il se doit.
    Enregistrer (Ctrl+S) écrit dans le faux système de fichiers : cat, ls -l et le gestionnaire de fichiers le voient. */
 const isPdf = k => /\.pdf$/i.test(k);
-const fileKind = (k, c) => c.d ? 'dir' : isPdf(k) ? 'pdf' : c.x ? 'exe' : c.b ? 'bin' : 'text';
+const isAudio = k => /\.(m4a|mp3|aac|ogg|opus|wav|flac)$/i.test(k), isVideo = k => /\.(mp4|mkv|mov|webm|avi)$/i.test(k);
+const fileKind = (k, c) => c.d ? 'dir' : isPdf(k) ? 'pdf' : c.x ? 'exe' : isAudio(k) ? 'audio' : isVideo(k) ? 'video' : c.b ? 'bin' : 'text';
 const garble = () => Array.from({ length: ri(30, 60) }, () => pick(GARB)).join('');
 function binaryText(k) {                         // ce qu'un éditeur de texte montre d'un binaire
   const head = isPdf(k) ? ['%PDF-1.7', '%âãÏÓ', '1 0 obj', '<< /Type /Catalog /Pages 2 0 R /Producer (un agent, à 3 h du matin) >>', 'endobj', '2 0 obj', 'stream']
@@ -6790,13 +6852,345 @@ function makeSteam() {
   return { el, key, render: () => draw(), redraw: () => draw(true), title: () => 'Bibliothèque · Steam', tname: () => 'Steam' };
 }
 
+/* ---------- la musique : de vrais morceaux (assets/musique), faits par des humains ----------
+   Un morceau = une entrée de TRACKS. telecharge.vibe le propose ; le fichier téléchargé (~/Downloads) porte au: <clé>,
+   et VLC le lit. Le .m4a d'origine si le navigateur lit l'AAC, sinon le .mp3 de secours (Chromium libre, certains Linux). */
+const TRACKS = {
+  chris1: { file: 'musique chris 1.m4a', title: 'Mon morceau 35', artist: 'Christopher Gasq', credit: 'Christopher GASQ', gh: 'https://github.com/ChrisGasq',
+    dur: 99.2, sz: 3321513, kbps: 268, tool: 'GarageBand for iOS 2.3.20', src: 'assets/musique/musique-chris-1' },
+};
+const AAC_OK = (() => { try { return !!document.createElement('audio').canPlayType('audio/mp4; codecs="mp4a.40.2"'); } catch { return false; } })();
+const trackUrl = t => `${t.src}.${AAC_OK ? 'm4a' : 'mp3'}`;
+const moStr = n => `${frx((n / 1e6).toFixed(1))} Mo`;
+
+/* ---------- telecharge.vibe : des publicités, un compte à rebours, et le vrai lien, en tout petit ----------
+   Le fichier arrive dans ~/Downloads (« musique chris 1 (1).m4a » s'il y est déjà, comme Firefox), sur le disque sauvegardé. */
+let DL = null;                                    // le téléchargement : { k, phase: 'wait' | 'get' | 'done', t0, dur, name }
+const DL_WAIT = 3000, DL_SPEED = 1.6e6;           // 3 s de publicités, puis 1,6 Mo/s : la 4G de l'agent
+const dlDir = () => [...HOME, 'Downloads'];
+const dlRedraw = () => { if (tabs.includes('firefaux')) PROGS.firefaux.redraw?.(); };
+function dlName(k) {
+  const D = nodeAt(dlDir()), f = TRACKS[k].file;
+  if (!D?.d || !Object.hasOwn(D.k, f)) return f;
+  const m = /^(.+?)(\.[^.]+)?$/.exec(f);
+  for (let i = 1; ; i++) { const c = `${m[1]} (${i})${m[2] || ''}`; if (!Object.hasOwn(D.k, c)) return c; }
+}
+function dlStart(k) {
+  const t = TRACKS[k];
+  if (!t) return '';
+  if (DL && DL.phase !== 'done') return 'Un téléchargement est déjà en cours. Télécharge.vibe n’en autorise qu’un à la fois (sauf en Premium).';
+  if (diskUsed() + t.sz > diskCap()) return `Plus d’espace disque : ${moStr(t.sz)} à télécharger, ${fmtSize(Math.max(0, diskCap() - diskUsed()))} libres. Supprimez quelque chose (node_modules ?).`;
+  DL = { k, phase: 'wait', t0: performance.now(), dur: DL_WAIT };
+  setTimeout(dlGet, DL_WAIT);
+  dlRedraw();
+  return 'Votre téléchargement commence dans 3 secondes : le temps de vous montrer les publicités.';
+}
+function dlGet() {
+  if (DL?.phase !== 'wait') return;
+  const dur = Math.round(TRACKS[DL.k].sz / DL_SPEED * 1000);
+  Object.assign(DL, { phase: 'get', t0: performance.now(), dur });
+  setTimeout(dlDone, dur);
+  dlRedraw();
+}
+function dlDone() {
+  if (DL?.phase !== 'get') return;
+  const t = TRACKS[DL.k], home = nodeAt(HOME);
+  if (!home?.d) { DL = null; dlRedraw(); return; }   // plus de dossier personnel : un crash est passé par là
+  if (!nodeAt(dlDir())?.d) home.k.Downloads = mkD({}, { mt: Date.now() });   // Téléchargements supprimé : Firefaux le recrée
+  const name = dlName(DL.k);
+  nodeAt(dlDir()).k[name] = big(t.sz, { au: DL.k, mt: Date.now() });
+  DL = { k: DL.k, phase: 'done', name };
+  saveGame();
+  toast(`Téléchargement terminé : <b>~/Downloads/${esc(name)}</b>`, 3200);
+  if (tabs.includes('firefaux')) PROGS.firefaux.flash?.(`Téléchargement terminé : ~/Downloads/${name}`);
+  dlRedraw();
+  PROGS.thunar.redraw?.();
+}
+function dlPanel(k) {                             // l'état du téléchargement, rafraîchi chaque seconde (data-live="dl:clé")
+  const t = TRACKS[k], d = DL?.k === k ? DL : null, now = performance.now();
+  if (d?.phase === 'wait') return `<div class="dl-state"><span>Votre téléchargement commence dans <b>${Math.max(1, Math.ceil((d.t0 + d.dur - now) / 1000))} s</b>… <span class="dim">(le temps d’afficher les publicités)</span></span></div>`;
+  if (d?.phase === 'get') {
+    return `<div class="dl-state"><div class="dl-bar"><span style="animation-duration:${d.dur}ms;animation-delay:-${Math.round(Math.min(d.dur, now - d.t0))}ms"></span></div>`
+      + `<span class="dim">Téléchargement de ${esc(t.file)} · ${moStr(t.sz)} à ${moStr(DL_SPEED)}/s · la 4G de l’agent</span></div>`;
+  }
+  const how = installed.has('vlc') ? 'Double-cliquez la musique dans Thunar : VLC s’ouvre.' : 'Pour l’écouter : <b>sudo apt install vlc</b> dans le terminal, puis double-cliquez la musique dans Thunar.';
+  if (d?.phase === 'done') {
+    return `<div class="dl-state"><span>✓ Téléchargé : <b>~/Downloads/${esc(d.name)}</b></span><div class="dl-act">`
+      + `${installed.has('thunar') ? '<button type="button" class="wp-buy" data-dlopen>Ouvrir le dossier</button>' : ''}<button type="button" class="dl-real" data-dl="${k}">le retélécharger</button></div>`
+      + `<span class="dim">${how}</span></div>`;
+  }
+  return `<div class="dl-state"><button type="button" class="dl-real" data-dl="${k}">télécharger le fichier (${moStr(t.sz)})</button><span class="dim">Le vrai lien. Oui, celui-là, en petit.</span></div>`;
+}
+function webDl() {
+  const ads = '<div class="dl-ads">'
+    + '<button type="button" class="dl-ad" data-ad="dl"><b>VOTRE FICHIER EST PRÊT</b><span class="big">▼ TÉLÉCHARGER ▼</span><small>publicité</small></button>'
+    + '<button type="button" class="dl-ad" data-ad="pc"><b>VOTRE PC EST LENT !</b><span>Accélérez-le en 1 clic (vraiment : matos.vibe)</span><small>publicité</small></button>'
+    + '<button type="button" class="dl-ad" data-ad="exe"><b>VLC_Setup_2026_FREE.exe</b><span>Le lecteur qui lit tout. Même les virus.</span><small>publicité · 0 virus détecté sur 1 analysé</small></button></div>';
+  const files = Object.entries(TRACKS).map(([k, t]) => `<div class="dl-file"><span class="nm">♪ ${esc(t.file)}</span>`
+    + `<span class="meta">« ${esc(t.title)} » · ${esc(t.artist)} · ${mmss(t.dur)} · AAC ${t.kbps} kbit/s · ${moStr(t.sz)}</span>`
+    + `<span class="human">Fait par ${esc(t.credit)}, le seul humain à avoir produit quelque chose de concret sur ce jeu.</span>`
+    + '<span class="dim">Aucun agent n’a touché ce fichier. Il marche du premier coup.</span>'
+    + `<div data-live="dl:${k}">${dlPanel(k)}</div></div>`).join('');
+  const vlc = installed.has('vlc');
+  return { title: 'Télécharge.vibe · des fichiers 100 % sûrs', html: `<div class="wp"><h1>Télécharge.vibe</h1>
+    <p>Des fichiers 100 % sûrs, vérifiés par un agent (il a dit oui à tout). Gratuit, sans inscription, sans limite (sauf une).</p>${ads}
+    <h2>Musique · faite par des humains (1 sur 1)</h2>${files}
+    <h2>Pour l’écouter</h2>
+    <p class="wp-band${vlc ? ' ok' : ''}">${vlc ? '<span class="tag">installé</span> VLC est là : double-cliquez la musique dans Thunar (~/Downloads).'
+      : 'Il vous faut <b>VLC</b>. Sur Vibian, pas d’installeur à télécharger : <b>sudo apt install vlc</b>, dans le terminal. Puis double-cliquez la musique dans Thunar.'}</p>
+    <p class="dim">Télécharge.vibe décline toute responsabilité si vos agents trouvent la musique : ils en feraient un remix, puis un NFT.</p></div>` };
+}
+
+/* ---------- VLC : le lecteur multimédia ----------
+   Il lit pour de vrai les fichiers qui portent au (téléchargés sur telecharge.vibe) ; les faux MP3 et les vidéos des agents ont
+   droit à un message. Un seul lecteur audio pour tout le jeu : fermer VLC, se déconnecter, planter ou redémarrer coupe le son.
+   Le spectre est dessiné en caractères : il écoute vraiment la musique en http(s) et fait semblant en file:// (là, brancher
+   Web Audio sur un fichier local rendrait la musique muette). */
+let vlcAudio = null, vlcAn = null, vlcBins = null;
+const VLC_LISTEN = /^https?:$/.test(location.protocol) && typeof AudioContext === 'function';
+const VLC_CONE = ['     ▄█▄', '    ░░░░░', '   ███████', '  ░░░░░░░░░', ' ███████████', '▀▀▀▀▀▀▀▀▀▀▀▀▀']
+  .map(l => l.replace(/[█▄▀]+/g, m => `<span class="a">${m}</span>`).replace(/░+/g, m => `<span class="b">${m}</span>`)).join('\n');
+function vlcHalt() { if (vlcAudio && !vlcAudio.paused) vlcAudio.pause(); }
+function vlcEar() {                               // au premier son : le spectre se branche sur la musique, une fois pour toutes
+  if (vlcAn || !VLC_LISTEN) return;
+  try {
+    const ctx = new AudioContext(), src = ctx.createMediaElementSource(vlcAudio);
+    vlcAn = ctx.createAnalyser();
+    vlcAn.fftSize = 128;
+    vlcAn.smoothingTimeConstant = .72;
+    src.connect(vlcAn);
+    vlcAn.connect(ctx.destination);
+    vlcBins = new Uint8Array(vlcAn.frequencyBinCount);
+  } catch { vlcAn = null; }
+}
+function vlcFakeMsg(name, c) {                    // ce que VLC dit des fichiers des agents
+  const kd = fileKind(name, c);
+  if (!c.sz && !c.b) return `« ${name} » est vide : 0 octet de musique. Même pour un agent, c’est peu.`;
+  if (kd === 'audio') return `VLC ne peut pas lire « ${name} » : ce MP3 a été généré par un agent. ${fmSize(c)} de silence, encodé en 320 kbit/s, avec des métadonnées très sûres d’elles.`;
+  if (kd === 'video') return `« ${name} » : ${fmSize(c)} d’écran noir. L’agent dit que c’est un choix artistique.`;
+  if (kd === 'pdf') return `VLC ne lit pas « ${name} » : c’est un PDF. VLC lit presque tout, mais il a ses principes.`;
+  return `VLC ne sait pas lire « ${name} » : ${kd === 'text' ? 'c’est du texte. Même VLC a des limites.' : 'ni son ni image, juste des octets, et beaucoup de confiance.'}`;
+}
+function makeVlc() {
+  const el = document.createElement('div');
+  el.className = 'prog vlc';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Lecteur multimédia VLC');
+  el.innerHTML = '<nav class="vlc-menu" aria-label="Menus de VLC">'
+    + [['open', 'Média'], ['toggle', 'Lecture'], ['mute', 'Audio'], ['video', 'Vidéo'], ['info', 'Outils'], ['about', 'Aide']].map(([k, t]) => `<button type="button" data-v="${k}">${t}</button>`).join('')
+    + '</nav><div class="vlc-stage"><pre class="vlc-cone" aria-hidden="true"></pre><pre class="vlc-viz" aria-hidden="true" hidden></pre><div class="vlc-now"></div></div>'
+    + '<div class="vlc-info" hidden></div>'
+    + '<div class="vlc-seek"><span class="t cur">0:00</span><input type="range" class="pos" min="0" max="1000" step="1" value="0" aria-label="Position dans le morceau"><span class="t tot">0:00</span></div>'
+    + '<div class="vlc-ctl"><button type="button" class="play" data-v="toggle" aria-label="Lecture">▶</button><button type="button" data-v="stop" aria-label="Arrêt">■</button>'
+    + '<button type="button" data-v="back" aria-label="Reculer de 10 secondes">«10</button><button type="button" data-v="fwd" aria-label="Avancer de 10 secondes">10»</button>'
+    + '<button type="button" data-v="loop" aria-pressed="false" aria-label="Lecture en boucle" title="Boucle (L)">↻</button>'
+    + '<button type="button" data-v="info" aria-pressed="false" aria-label="Informations sur le média" title="Informations (I)">i</button>'
+    + '<label class="vlc-vol"><span>vol</span><input type="range" class="vol" min="0" max="100" step="1" aria-label="Volume"><span class="pct"></span></label></div>'
+    + '<div class="vlc-status" role="status"></div>';
+  const q = s => el.querySelector(s), coneEl = q('.vlc-cone'), vizEl = q('.vlc-viz'), nowEl = q('.vlc-now'), infoEl = q('.vlc-info');
+  const pos = q('.pos'), vol = q('.vol'), statusEl = q('.vlc-status'), playBtn = q('.play');
+  if (!vlcAudio) { vlcAudio = new Audio(); vlcAudio.preload = 'auto'; }
+  const A = vlcAudio;
+  let file = null, k = null, fake = '', note = '', noteUntil = 0, seeking = false, raf = 0, lastViz = 0, info = false, vizN = 24;
+  const T = () => (k && TRACKS[k]) || null;
+  const flash = t => { note = t; noteUntil = t ? performance.now() + 5000 : 0; render(); };
+  function infoHtml() {
+    const t = T(), row = (a, b) => `<dt>${a}</dt><dd>${b}</dd>`;
+    if (!t) return `<dl>${row('Lecteur', 'VLC media player 3.0.21 Vetinari · édition vibe')}${row('Lit', 'tout, même ce que les agents ont encodé')}`
+      + `${row('Média', file ? esc(tildePath(file)) : 'aucun')}</dl><p class="dim">Parodie : VideoLAN n’y est pour rien.</p>`;
+    return `<dl>${row('Titre', esc(t.title))}${row('Artiste', esc(t.artist))}${row('Encodé avec', esc(t.tool))}${row('Durée', mmss(t.dur))}`
+      + row('Codec', `AAC (M4A) · ${t.kbps} kbit/s · stéréo${AAC_OK ? '' : ' <span class="dim">(lu en MP3 : ce navigateur ne lit pas l’AAC)</span>'}`)
+      + `${row('Fichier', esc(tildePath(file)))}${row('Relu par', 'un humain')}</dl>`
+      + `<p>Musique de <b>${esc(t.credit)}</b>, le seul humain à avoir produit quelque chose de concret sur ce jeu. `
+      + `<a href="${esc(t.gh)}" target="_blank" rel="noopener">${esc(t.gh.replace(/^https:\/\//, ''))} ↗</a></p>`;
+  }
+  function show() {                              // la scène : le cône au repos, le spectre avec un morceau ; le titre, l'artiste
+    const t = T();
+    coneEl.innerHTML = VLC_CONE;
+    coneEl.hidden = !!t;
+    vizEl.hidden = !t;
+    nowEl.innerHTML = t ? `<b>${esc(t.title)}</b><span class="by">${esc(t.artist)}</span><span class="dim">fait par un humain · une première sur prod-01</span>`
+      : fake ? `<span class="err">${esc(fake)}</span>`
+      : '<b>VLC media player</b><span class="dim">Aucun média. Double-cliquez une musique dans Thunar, ou Média pour en choisir une.</span>'
+        + '<span class="dim">Les morceaux se téléchargent sur telecharge.vibe, dans Firefaux.</span>';
+    infoEl.innerHTML = infoHtml();
+    drawViz();
+  }
+  function bars(n) {                             // n hauteurs de 0 à 8 : la vraie musique (Web Audio), ou une imitation crédible
+    const out = [];
+    if (vlcAn && !A.paused) {
+      vlcAn.getByteFrequencyData(vlcBins);
+      const step = Math.max(1, Math.floor(vlcBins.length * .75 / n));
+      for (let i = 0; i < n; i++) { let m = 0; for (let j = 0; j < step; j++) m = Math.max(m, vlcBins[i * step + j] || 0); out.push(m / 255 * 8); }
+      return out;
+    }
+    const t = A.currentTime, on = !!T() && !A.paused;
+    for (let i = 0; i < n; i++) {
+      const v = on ? (.55 + .45 * Math.sin(t * 7.3 + i * .9) * Math.sin(t * 2.1 + i * .37)) * (1 - i / n * .55) * (.75 + .25 * Math.sin(t * 13 + i * 2.3)) : 0;
+      out.push(Math.max(0, v) * 8);
+    }
+    return out;
+  }
+  function drawViz() {
+    if (vizEl.hidden) return;
+    const h = bars(vizN), rows = [];
+    for (let r = 8; r >= 1; r--) rows.push(h.map(v => v >= r ? '█' : v >= r - .5 ? '▄' : r === 1 ? '▁' : ' ').join(' '));
+    vizEl.textContent = rows.join('\n');
+  }
+  function loop() {                              // le spectre bouge pendant la lecture (une vingtaine d'images par seconde)
+    if (raf) return;
+    const step = now => {
+      raf = 0;
+      if (!el.isConnected) return;
+      if (A.paused) { drawViz(); return; }
+      if (now - lastViz > 45 && !document.hidden) { lastViz = now; drawViz(); }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+  function play() {
+    if (!T()) return flash(fake ? 'Rien à lire : ce fichier n’est pas de la musique.' : 'Aucun média. Double-cliquez une musique dans Thunar.');
+    vlcEar();
+    vlcAn?.context.resume?.();
+    A.play()?.catch?.(err => { if (err?.name !== 'AbortError') flash('Lecture bloquée par le navigateur : appuyez sur ▶.'); });
+    loop();
+    render();
+  }
+  function stop() {
+    A.pause();
+    if (A.src) try { A.currentTime = 0; } catch { /* pas encore chargé */ }
+    render();
+  }
+  function toggle() { if (T() && !A.paused) { A.pause(); render(); } else play(); }
+  function seek(d) {
+    if (!T() || !Number.isFinite(A.duration)) return;
+    A.currentTime = Math.max(0, Math.min(A.duration - .1, A.currentTime + d));
+    render();
+  }
+  function setVol(v) {
+    v = Math.max(0, Math.min(100, Math.round(v)));
+    A.volume = v / 100;
+    A.muted = false;
+    vol.value = v;
+    try { localStorage.setItem('aidcs:vlc', String(v)); } catch { /* navigation privée : tant pis */ }
+    render();
+  }
+  function load(segs) {
+    const c = nodeAt(segs), name = segs.at(-1);
+    if (!c) return flash(`Impossible d’ouvrir ${absPath(segs)} : fichier introuvable`);
+    if (c.d) return flash(`« ${name} » est un dossier. VLC lit les fichiers.`);
+    file = [...segs];
+    if (c.au && TRACKS[c.au]) {
+      const url = trackUrl(TRACKS[c.au]);
+      k = c.au;
+      fake = '';
+      if (A.src.endsWith(url.split('/').pop())) { try { A.currentTime = 0; } catch { /* pas encore chargé */ } }
+      else A.src = url;
+      play();
+    } else {
+      A.pause();
+      k = null;
+      fake = vlcFakeMsg(name, c);
+    }
+    show();
+    render();
+  }
+  function openMedia() {                         // Média › Ouvrir un fichier : Thunar, dans les téléchargements
+    if (!installed.has('thunar')) return flash('Pour choisir un fichier, il faut Thunar : sudo apt install thunar.');
+    openTab('thunar');
+    PROGS.thunar.go?.(tildePath(nodeAt(dlDir())?.d ? dlDir() : HOME));
+    toast('Double-cliquez une musique : elle s’ouvre dans VLC.', 2400);
+  }
+  function render() {
+    const t = T(), dur = t ? (Number.isFinite(A.duration) && A.duration > 0 ? A.duration : t.dur) : 0, cur = t ? A.currentTime || 0 : 0;
+    const playing = !!t && !A.paused, noting = performance.now() < noteUntil;
+    if (!seeking) pos.value = dur ? Math.round(cur / dur * 1000) : 0;
+    pos.disabled = !t;
+    q('.cur').textContent = mmss(cur);
+    q('.tot').textContent = mmss(dur);
+    playBtn.textContent = playing ? '❚❚' : '▶';
+    playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    q('[data-v="loop"]').setAttribute('aria-pressed', String(A.loop));
+    q('[data-v="info"]').setAttribute('aria-pressed', String(info));
+    infoEl.hidden = !info;
+    q('.pct').textContent = A.muted ? 'muet' : `${Math.round(A.volume * 100)} %`;
+    statusEl.textContent = noting ? note : !file ? 'Aucun média'
+      : !t ? `Erreur · ${tildePath(file)}`
+      : `${playing ? '▶ Lecture' : cur > 0 ? '❚❚ Pause' : '■ Arrêt'} · ${mmss(cur)} / ${mmss(dur)} · AAC ${t.kbps} kbit/s · ${tildePath(file)}`;
+    statusEl.classList.toggle('note', noting);
+    const cw = parseFloat(getComputedStyle(vizEl).fontSize) * .6 || 9;   // autant de barres que la fenêtre en tient
+    vizN = Math.max(8, Math.min(40, Math.floor((q('.vlc-stage').clientWidth / cw - 4) / 2)));
+    if (!raf) drawViz();
+    if (xw.vlc) xfLabel('vlc');
+  }
+  A.onplay = () => { loop(); render(); };
+  A.onpause = () => render();
+  A.onloadedmetadata = () => render();
+  A.onended = () => flash('Fin du morceau. Les agents demandent déjà un remix.');
+  A.onerror = () => { if (A.getAttribute('src')) flash('Impossible de lire la musique : le fichier ne répond pas (hors ligne ?).'); };
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-v]');
+    if (!b || b.disabled) return;
+    const v = b.dataset.v;
+    if (v === 'toggle') toggle();
+    else if (v === 'stop') stop();
+    else if (v === 'back') seek(-10);
+    else if (v === 'fwd') seek(10);
+    else if (v === 'loop') { A.loop = !A.loop; flash(A.loop ? 'Lecture en boucle : le morceau recommencera, comme les bugs.' : 'Boucle désactivée.'); }
+    else if (v === 'info') { info = !info; render(); }
+    else if (v === 'mute') { A.muted = !A.muted; flash(A.muted ? 'Son coupé. Les agents, eux, font toujours du bruit.' : 'Son rétabli.'); }
+    else if (v === 'video') flash('Aucune piste vidéo : juste de la musique, faite par un humain.');
+    else if (v === 'about') { info = true; flash('VLC media player 3.0.21 Vetinari, édition vibe. Parodie : VideoLAN n’y est pour rien.'); }
+    else if (v === 'open') openMedia();
+  });
+  pos.addEventListener('input', () => {          // glisser : l'heure suit ; lâcher : la musique saute
+    seeking = true;
+    const t = T();
+    if (t) q('.cur').textContent = mmss(pos.value / 1000 * (Number.isFinite(A.duration) ? A.duration : t.dur));
+  });
+  pos.addEventListener('change', () => {
+    seeking = false;
+    if (T() && Number.isFinite(A.duration)) A.currentTime = pos.value / 1000 * A.duration;
+    render();
+  });
+  vol.addEventListener('input', () => setVol(+vol.value));
+  function key(e) {
+    const kk = e.key, ctl = e.target.closest?.('button, input');
+    if (ctl && (kk === ' ' || kk === 'Enter' || (ctl.matches('input') && kk.startsWith('Arrow')))) return;   // le bouton ou le curseur s'en charge
+    if (kk === ' ' || kk === 'k' || kk === 'K') { e.preventDefault(); toggle(); }
+    else if (kk === 's' || kk === 'S') stop();
+    else if (kk === 'ArrowLeft' || kk === 'ArrowRight') { e.preventDefault(); seek(kk === 'ArrowLeft' ? -5 : 5); }
+    else if (kk === 'ArrowUp' || kk === 'ArrowDown') { e.preventDefault(); setVol(A.volume * 100 + (kk === 'ArrowUp' ? 5 : -5)); }
+    else if (kk === 'm' || kk === 'M') q('[data-v="mute"]').click();
+    else if (kk === 'l' || kk === 'L') q('[data-v="loop"]').click();
+    else if (kk === 'i' || kk === 'I') { info = !info; render(); }
+  }
+  function close() {                             // VLC fermé (ou la session, ou le PC) : plus de son
+    cancelAnimationFrame(raf);
+    raf = 0;
+    A.pause();
+    A.onplay = A.onpause = A.onloadedmetadata = A.onended = A.onerror = null;
+    A.removeAttribute('src');
+    A.load();
+  }
+  let v0 = 80;
+  try { const s = parseInt(localStorage.getItem('aidcs:vlc'), 10); if (Number.isFinite(s)) v0 = Math.max(0, Math.min(100, s)); } catch { /* tant pis */ }
+  vol.value = v0;
+  A.volume = v0 / 100;
+  A.loop = false;
+  show();
+  render();
+  return { el, key, render, redraw: render, close, go: p => load(Array.isArray(p) ? p : resolvePath(p)),
+    title: () => T() ? `${T().title} - Lecteur multimédia VLC` : 'Lecteur multimédia VLC', tname: () => 'VLC' };
+}
+
 /* ---------- navigateur web (Firefaux) : un faux Web, avec le store des agents et une boutique de matériel ----------
    Une page = une entrée de WEB_SITES (motif d'adresse → fonction qui rend { title, html }). Les liens portent data-href,
    les achats data-buy (store IA) ; le matériel passe par le panier (data-cart-add="slot:niveau", data-cart-del, data-cart) ;
    data-live : un morceau rafraîchi chaque seconde. */
 const WEB_HOME = 'vibe://accueil';
 const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vibe/'], ['Matos.vibe', 'https://matos.vibe/'],
-  ['GitHype', 'https://githype.vibe/'], ['Lolama', 'https://lolama.vibe/'],
+  ['GitHype', 'https://githype.vibe/'], ['Lolama', 'https://lolama.vibe/'], ['Télécharge.vibe', 'https://telecharge.vibe/'],
   ['Facture', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
 const webHost = u => (/^[a-z]+:\/\/([^/?#]+)/i.exec(u) || [, u])[1];
 function webNorm(raw) {
@@ -6817,6 +7211,7 @@ const WEB_LIVE = {
   bill: () => IDLE ? `$${usd(G.bill)}` : `$${usd(usage.usd)}`,
   elec: () => `$${usd(G.elec || 0)}`,
   local: () => webLocalBody(),
+  dl: k => dlPanel(k),                            // telecharge.vibe : le compte à rebours, la barre
 };
 function webHome() {
   const tile = (u, t, d) => `<button type="button" class="wp-tile" data-href="${esc(u)}"><b>${esc(t)}</b><span>${esc(d)}</span></button>`;
@@ -6829,6 +7224,7 @@ function webHome() {
       ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, cartes mères, RAM, cartes graphiques, alims')}
       ${tile('https://githype.vibe/', 'GitHype', 'là où le code vient se faire forker · StudioLM')}
       ${tile('https://lolama.vibe/', 'lolama.vibe', 'des LLM en local : 0 API, toute votre VRAM')}
+      ${tile('https://telecharge.vibe/', 'telecharge.vibe', 'des fichiers 100 % sûrs · de la musique, faite par un humain')}
       ${tile('https://facture.vibe/', 'facture.vibe', 'ce que coûtent vos agents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
@@ -6844,6 +7240,8 @@ function webSearch(u) {
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
   if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
     hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/musique|music|mp3|m4a|audio|chanson|morceau|vlc|lecteur|t[ée]l[ée]charg|download|chris|gasq/.test(lq))
+    hit('https://telecharge.vibe/', 'Télécharge.vibe : de la musique gratuite, 100 % sûre (vérifiée par un agent)', 'Un morceau fait par un humain, Christopher GASQ. Le seul. Téléchargement en 3 secondes, publicités comprises.');
   if (/git|repo|d[ée]p[ôo]t|open.?source|studio|lm studio|star/.test(lq))
     hit('https://githype.vibe/', 'GitHype : là où le code vient se faire forker', 'Tendances du jour : studiolm, lolama, awesome-vibecoding. 90 % des dépôts sont des « awesome-quelque-chose ».');
   hit('https://stackunderflow.vibe/', `« ${q || 'rien'} » : question fermée (doublon d’une question de 2009)`, 'Réponse acceptée : « Ça marche sur ma machine. » 0 vote, 4 127 vues.');
@@ -7018,7 +7416,7 @@ const WEB_SITES = [
   [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
-  [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
+  [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
   [/^https?:\/\/localhost:3000/i, () => ({ title: `${PROJ} · localhost:3000`, html: `<div class="wp" data-live="local">${webLocalBody()}</div>` })],
 ];
 const webRoute = u => (WEB_SITES.find(([re]) => re.test(u))?.[1] || web404)(u);
@@ -7079,7 +7477,10 @@ function makeBrowser() {
   }
   function live() {                              // l'argent monte : boutons et chiffres à jour, sans redessiner la page
     if (seen !== cartVer && /^https?:\/\/(www\.)?matos\.vibe/i.test(url)) return draw(true);   // le panier a changé ailleurs (le store du jeu)
-    doc.querySelectorAll('[data-live]').forEach(n => { const f = WEB_LIVE[n.dataset.live]; if (f) { const h = f(); if (n.innerHTML !== h) n.innerHTML = h; } });
+    doc.querySelectorAll('[data-live]').forEach(n => {   // data-live="nom" ou "nom:argument"
+      const [nm, arg] = n.dataset.live.split(':'), f = WEB_LIVE[nm];
+      if (f) { const h = f(arg); if (n.innerHTML !== h) n.innerHTML = h; }
+    });
     doc.querySelectorAll('[data-buy]').forEach(b => {
       const it = webItems().find(x => x.id === b.dataset.buy);
       if (it) { const dis = itemState(it).dis; if (b.disabled !== dis) { b.disabled = dis; b.textContent = it.excl || it.need ? itemState(it).t : dis ? 'Pas assez d’argent' : 'Acheter'; } }
@@ -7090,6 +7491,7 @@ function makeBrowser() {
   el.addEventListener('click', e => {
     const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), j = e.target.closest('[data-jump]');
     const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]'), lc = e.target.closest('[data-local]');
+    const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]');
     if (w) {
       const k = w.dataset.wb;
       if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
@@ -7105,6 +7507,13 @@ function makeBrowser() {
       if (cc.dataset.cart === 'clear') { flash(cartClear()); draw(true); }
       else { const r = cartCheckout(); flash(r.msg); if (r.ok) go('https://matos.vibe/commande'); else draw(true); }
     }
+    else if (dl) flash(dlStart(dl.dataset.dl));    // telecharge.vibe : le vrai lien
+    else if (ad) {                                 // les publicités : une seule mène quelque part
+      if (ad.dataset.ad === 'pc') go('https://matos.vibe/');
+      else flash(ad.dataset.ad === 'exe' ? 'Ceci est un Linux : un .exe ne s’ouvre pas ici. VLC s’installe avec sudo apt install vlc, dans le terminal.'
+        : 'C’était une publicité. Le vrai lien est plus bas, en tout petit. Comme toujours.');
+    }
+    else if (dlo && DL?.name && installed.has('thunar')) { openTab('thunar'); PROGS.thunar.go?.(tildePath([...dlDir(), DL.name])); }
     else if (j) q(`#wb-${j.dataset.jump}`)?.scrollIntoView({ block: 'start' });
   });
   el.addEventListener('submit', e => {
@@ -7125,7 +7534,7 @@ function makeBrowser() {
     else if (k === 'End') page.scrollTop = page.scrollHeight;
   }
   draw(false);
-  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
+  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
 }
 
 /* ---------- réglages : une liste modulable ----------
