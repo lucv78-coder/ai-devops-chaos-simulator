@@ -783,6 +783,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .bi-prog { width: 40ch; max-width: 80vw; height: .7em; border: 1px solid var(--dim2); }
 .bi-prog i { display: block; width: 0; height: 100%; background: var(--orange); transition: width .15s; }
 .bi-ok { color: var(--green); } .bi-fail { color: var(--red); } .bi-warn { color: var(--yellow); }
+.bi-amih { display: flex; align-items: center; gap: 2ch; margin-bottom: .7em; }
+.bi-amil { flex: none; width: min(15ch, 20vw); height: auto; }
 .bi-del { padding: .5em .8ch; margin: -.5em -.8ch; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline dotted; text-underline-offset: .2em; cursor: pointer; }
 /* le setup du BIOS (DEL ou F2 pendant le POST), façon AMIBIOS : gris, bleu, une seule police */
 #bios.setup:not([hidden]) { display: grid; place-items: center; padding: .6em 1ch; white-space: normal; font-size: clamp(8px, min(1.75vw, 2.75vh), 24px); }   /* plein écran, comme en mode texte */
@@ -8569,6 +8571,10 @@ const ENERGY_STAR = `<svg viewBox="0 0 172 108" aria-hidden="true">
   <text x="84" y="70" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="27" fill="var(--fg)">energy</text>
   <rect x="10" y="80" width="152" height="24" fill="var(--blue)"/>
   <text x="86" y="98" text-anchor="middle" font-family="inherit" font-weight="700" font-size="16" letter-spacing="3" fill="#000">ENERGY STAR</text></svg>`;
+const AMI_LOGO = `<svg class="bi-amil" viewBox="0 0 120 66" aria-hidden="true">
+  <ellipse cx="60" cy="33" rx="55" ry="16" fill="none" stroke="var(--blue)" stroke-width="3" transform="rotate(-10 60 33)"/>
+  <text x="60" y="44" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-weight="700" font-size="34" letter-spacing="1" fill="var(--red)">AMI</text>
+  <text x="60" y="62" text-anchor="middle" font-family="inherit" font-weight="700" font-size="9.5" letter-spacing="3.5" fill="var(--fg)">VIBES</text></svg>`;
 // le pingouin de Vibian : lunettes de soleil (on code mieux avec), bec, pattes
 const TUX = [
   '            .-""""-.',
@@ -8630,7 +8636,7 @@ async function biosBoot(o = {}) {
     add(`${ts(dt += .01)} <b>Kernel panic - not syncing: ${cause}</b>`, 'bi-fail');
     await wait(250);
     const trace = [`CPU: ${ri(0, Math.max(0, c.thr - 1))} PID: ${ri(31337, 39999)} Comm: ${comm} Tainted: G      D  O       6.11.0-friday #1`,
-      `Hardware name: VibeAward ${mb.n}/PROD-01, BIOS 2026.11 « friday »`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
+      `Hardware name: Vibe Coding Inc. ${mb.n}/PROD-01, BIOS AMIVIBES 2611 11/20/2026`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
       k === 'oom' ? ' out_of_memory.cold+0x5c/0x70' : k === 'heat' ? ' thermal_zone_device_critical+0x41/0x50' : k === 'vram' ? ' gpu_vram_alloc.cold+0x13/0x37' : ' mce_panic+0x1b6/0x200',
       ` vibe_agent_spawn+0x2a/0x40 [${comm}_cli]`, ' tokens_burn_all+0x1337/0x2000', ' npm_install_universe+0x404/0x404', ' friday_deploy+0x17/0x420',
       ' do_syscall_64+0x82/0x170', ' entry_SYSCALL_64_after_hwframe+0x76/0x7e', ' </TASK>', 'Kernel Offset: disabled'];
@@ -8654,20 +8660,26 @@ async function biosBoot(o = {}) {
     hint();
     const foot = document.createElement('div');
     foot.className = 'bi-foot';
-    foot.innerHTML = '<div class="ln">Press <button type="button" class="bi-del" tabindex="-1">DEL</button> or <b>F2</b> to enter SETUP, <b>ESC</b> to skip memory test</div><div class="ln dim">11/22/2026-i440VX-VIBE-6A79PROD-00 (friday)</div>';
+    foot.innerHTML = `<div class="ln">(C) American Megavibes, Inc.</div><div class="ln dim">64-2611-000001-00101111-112226-${esc(mb.so.replace(/\W/g, ''))}-VIBE-PROD01</div>`;
     el.appendChild(foot);
     const post = top.firstChild, oc = ocSt(), mhz = cpuMhz(), rm = ramMhz(), b0 = cpuBase(c);
-    add('<b>VibeAward Modular BIOS v6.9PG</b>, An Energy Star Ally', '', post);
-    add('Copyright (C) 1984-2026, VibeAward Software, Inc.', 'dim', post);
+    const head = document.createElement('div');
+    head.className = 'bi-amih';
+    head.innerHTML = `${AMI_LOGO}<div><div class="ln"><b>AMIVIBES(C)2026 American Megavibes, Inc.</b></div><div class="ln">${esc(mb.n)} PROD-01 BIOS Revision 2611 « friday »</div></div>`;
+    post.appendChild(head);
+    add(`CPU : ${esc(c.n)} (${c.thr} threads, socket ${esc(mb.so)})`, '', post);
+    add(` Speed : ${frx(+(mhz / 1000).toFixed(3))} GHz`
+      + (oc.ratio ? ` (${oc.ratio} x 100 MHz, ${mhz > b0 ? 'overclocké' : mhz < b0 ? 'sous-cadencé' : 'réglé à la main'})` : ''), '', post);
     add('', '', post);
-    add('PROD-01 BIOS rev. 2026.11 « friday »', '', post);
-    add('', '', post);
-    add(`Motherboard    : ${esc(mb.n)} · socket ${esc(mb.so)} · DDR${mb.ddr}`, '', post);
-    add(`Main Processor : ${esc(c.n)} ${frx(+(mhz / 1000).toFixed(3))} GHz (${c.thr} threads)`
-      + (oc.ratio ? ` · ${oc.ratio} x 100 MHz, ${mhz > b0 ? 'overclocké' : mhz < b0 ? 'sous-cadencé' : 'réglé à la main'}` : ''), '', post);
-    const mem = add('Memory Testing :', '', post), total = r.go * 1048576, full = oc.quick === 0, steps = full ? 40 : 14;   // Quick Boot coupé : le test complet
-    for (let i = 1; i <= steps; i++) { mem.textContent = `Memory Testing : ${String(Math.round(total * i / steps)).padStart(10)}K`; await wait((full ? 48 : 34) * slow); }
-    mem.textContent += ` OK (DDR${r.ddr}${oc.mhz ? `-${rm}, ${rm > r.mhz ? 'overclockée' : rm < r.mhz ? 'sous-cadencée' : 'réglée à la main'}` : ''})`;
+    add('Press <button type="button" class="bi-del" tabindex="-1">DEL</button> or <b>F2</b> to run Setup', '', post);
+    add('Press F8 for BBS POPUP <span class="dim">(un agent a déjà choisi le disque)</span>', '', post);
+    add(`DDR${r.ddr}-${rm} in ${r.go <= 4 ? 'Single-Channel Mode (les barrettes ne se parlent pas)' : 'Dual-Channel Interleaved Mode'}`
+      + (oc.mhz ? `, ${rm > r.mhz ? 'overclockée' : rm < r.mhz ? 'sous-cadencée' : 'réglée à la main'}` : ''), '', post);
+    add('Initializing USB Controllers .. Done.', '', post);
+    const mem = add('', '', post), total = r.go * 1024, full = oc.quick === 0, steps = full ? 40 : 14;   // Quick Boot coupé : le test complet
+    for (let i = 1; i <= steps; i++) { mem.textContent = `${Math.round(total * i / steps)}MB`; await wait((full ? 48 : 34) * slow); }
+    mem.textContent += ' OK';
+    add('USB Device(s): 1 Keyboard, 1 Mouse, 1 Agent', '', post);
     if (o.crash && !pass) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
       : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
       : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
@@ -8679,7 +8691,7 @@ async function biosBoot(o = {}) {
       oc.chg = '';
     }
     if (oc.err && !pass) {                       // la session d'avant a fait des erreurs matérielles : l'overclocking ne tient pas
-      add(`Warning! Overclocking unstable : ${oc.err} erreur${oc.err > 1 ? 's' : ''} matérielle${oc.err > 1 ? 's' : ''} depuis le dernier démarrage. Press DEL to enter SETUP.`, 'bi-fail', post);
+      add(`Warning! Overclocking unstable : ${oc.err} erreur${oc.err > 1 ? 's' : ''} matérielle${oc.err > 1 ? 's' : ''} depuis le dernier démarrage. Press DEL to run Setup.`, 'bi-fail', post);
       oc.err = 0;
     }
     if (pc.cool === 0) {
@@ -8687,14 +8699,14 @@ async function biosBoot(o = {}) {
       await wait(650);
       add('  (F1 pressé automatiquement par un agent)', 'dim', post);
     }
+    if (ps.noname) add('Warning! +12V : 11.1V (l’alimentation siffle, comme d’habitude)', 'bi-warn', post);
     add('', '', post);
-    add('Detecting drives ...', '', post);
+    add(`Auto-Detecting Pri Master..${d.raid ? 'RAID 0 Volume' : d.m2 ? 'NVMe Device' : d.io < .9 ? 'IDE Hard Disk' : 'SATA SSD'}`, '', post);
     await wait(260 * slow);
-    add(`  Primary Master : ${esc(d.dev)}`, '', post);
-    add('  Primary Slave  : None (un agent l’a démonté pour voir)', 'dim', post);
-    add(`  Video          : ${esc(g.n)}`, '', post);
-    add(`  Power          : ${esc(ps.n)}${ps.noname ? ' (sifflement détecté)' : ''}`, '', post);
-    add(`  Cooling        : ${esc(co.n)}`, '', post);
+    add(`Pri Master: ${esc(d.dev)}`, '', post);
+    add(`            ${d.io < .9 ? 'Ultra DMA Mode-5, S.M.A.R.T. Capable and Status OK' : 'S.M.A.R.T. Capable and Status OK'}`, 'dim', post);
+    add('Auto-detecting USB Mass Storage Devices ..', '', post);
+    add('01 USB mass storage device found and configured. <span class="dim">(la clé « backup-jeudi »)</span>', '', post);
     await wait(1100 * Math.min(1.3, slow), 1);   // la fenêtre pour DEL : jamais raccourcie (mouvement réduit compris)
     postOn = false;
     if (!wantSetup) break;
@@ -8800,7 +8812,7 @@ const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Exit'
 const AMI_HELP = 'Vibe Tweaker : CPU Ratio (le multiplicateur du processeur) et DRAM Frequency (la RAM). Plus haut : les agents vont plus vite, '
   + 'le processeur chauffe et consomme davantage. Trop haut : glitchs à l’écran, erreurs matérielles, agents qui plantent. Chaque puce a sa marge '
   + '(la loterie du silicium) : montez par paliers, redescendez au premier glitch. F10 : enregistrer et redémarrer · Échap : quitter sans enregistrer '
-  + '· F9 : tout sur Auto. Le POST est de VibeAward, le setup d’American Megavibes : un agent a fusionné les deux branches. Il a gardé les deux.';
+  + '· F9 : tout sur Auto. L’agent a remplacé le BIOS VibeAward par un AMIVIBES : il appelle ça une mise à jour. Personne n’a gardé l’ancien.';
 const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', def: 'Load Optimal Defaults?' };
 function amiSetup(el, bindKey) {
   return new Promise(done => {
