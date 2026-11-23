@@ -399,6 +399,18 @@ body[data-view="zsh"] #shell.out { opacity: 0; pointer-events: none; }
 .st-desc { min-height: calc(var(--lh) * 2); margin-top: .7em; color: var(--dim); white-space: normal; }
 .st-desc.err { color: var(--red); }
 .st-desc.wrn { color: var(--yellow); }
+.st-desc.ok { color: var(--green); }
+/* exporter / importer la partie */
+.st-save { margin-top: .8em; padding-top: .6em; border-top: 1px solid var(--sep); }
+.st-save[hidden], .st-imp[hidden] { display: none; }
+.st-save-btns { display: flex; flex-wrap: wrap; gap: .5em 2ch; margin-top: .4em; }
+.st-save button { padding: .1em 1.2ch; border: 1px solid var(--rule); border-radius: 3px; }
+.st-save button:disabled { opacity: .45; cursor: not-allowed; }
+.st-imp { margin-top: .6em; }
+.st-imp label { display: block; color: var(--dim); }
+.st-imp textarea { display: block; width: 100%; height: calc(var(--lh) * 3 + .4em); margin-top: .2em; padding: .2em .5ch; border: 1px solid var(--rule); border-radius: 2px;
+  background: var(--bg2); color: var(--fg); font: inherit; resize: vertical; word-break: break-all; }
+.st-imp textarea:focus { border-color: var(--orange); outline: none; }
 
 /* réglage « Graphismes » (dont quelques options très discutables) */
 #fps {
@@ -1143,6 +1155,23 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div id="st-rows"></div>
   <p class="st-desc" id="st-desc" aria-live="polite"></p>
   <p class="pk-hint">↑↓ choisir · ←→ changer · Entrée modifier · Échap fermer</p>
+  <div class="st-save" id="st-save" hidden>
+    <p>Partie <span class="dim">· à emporter dans un autre navigateur, ou à garder au chaud</span></p>
+    <div class="st-save-btns">
+      <button type="button" id="st-export">Exporter la partie</button>
+      <button type="button" id="st-import" aria-expanded="false" aria-controls="st-imp">Importer une partie</button>
+    </div>
+    <div class="st-imp" id="st-imp" hidden>
+      <label for="st-code">Code de sauvegarde, ou le fichier .vibe exporté</label>
+      <textarea id="st-code" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="aidcs:1:…"></textarea>
+      <div class="st-save-btns">
+        <button type="button" id="st-file">Choisir un fichier…</button>
+        <button type="button" id="st-imp-go" class="st-wipe" disabled>Remplacer la partie</button>
+      </div>
+      <input type="file" id="st-file-in" accept=".vibe,.txt,text/plain" hidden>
+    </div>
+    <p class="st-desc" id="st-save-msg" aria-live="polite"></p>
+  </div>
   <div class="pk-actions">
     <button type="button" class="primary" id="st-close">Fermer</button>
     <button type="button" id="st-reset">Réglages d’origine</button>
@@ -2006,8 +2035,9 @@ const playStr = sec => sec < 3600 ? `${Math.floor(sec / 60)} minute${sec >= 120 
 const cliHas = p => p === 'local' || !IDLE || SETUP_SKIP || !!G.cli?.[p];          // le CLI de la plateforme est-il installé ?
 const pkHas = n => !STARTER_PKGS.includes(n) || !IDLE || SETUP_SKIP || G.pk.includes(n);   // paquet présent au démarrage ?
 const hasSave = () => G.shipped > 0 || G.money !== 0 || !!G.running || G.agents > 1 || G.term > 0 || Object.values(G.pc).some(Boolean);
+let saveLock = false;                             // une partie importée vient d'être écrite : celle en cours ne doit plus rien sauvegarder
 function saveGame() {
-  if (!IDLE) return;
+  if (!IDLE || saveLock) return;
   G.t = Date.now();
   G.shipped = shipped;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); fsSave(); } catch {}   // fsSave : ignoré tant que le disque n'est pas monté (plus bas)
@@ -7208,7 +7238,7 @@ let wipeAt = 0;
 stWipe.hidden = !IDLE;
 function wipeDisarm() { wipeAt = 0; stWipe.classList.remove('armed'); stWipe.textContent = SANDBOX ? 'Réinitialiser le bac à sable' : 'Réinitialiser la partie'; }
 stWipe.addEventListener('click', () => {
-  if (performance.now() - wipeAt > 8000) {
+  if (!wipeAt || performance.now() - wipeAt > 8000) {   // !wipeAt : sans lui, dans les 8 premières secondes de la page, un seul appui effaçait tout
     wipeAt = performance.now();
     stWipe.classList.add('armed');
     stWipe.textContent = 'Confirmer : tout effacer';
@@ -7223,6 +7253,115 @@ stWipe.addEventListener('click', () => {
 });
 stDlg.addEventListener('close', wipeDisarm);
 wipeDisarm();                                    // le libellé : partie ou bac à sable
+
+/* exporter / importer la partie (partie normale seulement) : un code texte, aidcs:1:z:<JSON gzippé en base64>, dans un fichier
+   .vibe et dans le presse-papiers. L'import remplace la partie et son disque ; les succès et le temps de jeu de ce navigateur
+   restent (ils sont à Steam, pas à la partie) ; les réglages aussi (ils sont au navigateur). */
+const SAVE_TAG = 'aidcs:1:';
+const stSave = $('#st-save'), stImp = $('#st-imp'), stImpBtn = $('#st-import'), stCode = $('#st-code'), stImpGo = $('#st-imp-go'),
+  stSaveMsg = $('#st-save-msg'), stFileIn = $('#st-file-in');
+stSave.hidden = !IDLE || SANDBOX;
+let impData = null, impAt = 0, impTok = 0;
+const saveSum = g => `${plural(g.shipped, 'projet')}, $${usd(g.money)}, ${ACH.filter(a => g.ach?.[a.id]).length} succès sur ${ACH.length}`;
+function saveMsg(t, cls = '') { stSaveMsg.textContent = t; stSaveMsg.className = 'st-desc' + (cls ? ' ' + cls : ''); }
+const b64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };
+const zpipe = (u8, T) => new Response(new Blob([u8]).stream().pipeThrough(new T('gzip'))).arrayBuffer().then(b => new Uint8Array(b));
+async function saveEncode(o) {                   // gzip si le navigateur sait faire (tous les récents), sinon le JSON tel quel
+  let u8 = new TextEncoder().encode(JSON.stringify(o)), z = 'j';
+  if (typeof CompressionStream === 'function') { u8 = await zpipe(u8, CompressionStream); z = 'z'; }
+  return `${SAVE_TAG}${z}:${b64(u8)}`;
+}
+async function saveDecode(txt) {                 // le code seul ou tout le fichier ; espaces et retours à la ligne tolérés
+  const m = /aidcs:1:([zj]):([A-Za-z0-9+/=\s]+)/.exec(txt);
+  if (!m) throw new Error('code');
+  let u8 = Uint8Array.from(atob(m[2].replace(/\s+/g, '')), c => c.charCodeAt(0));
+  if (m[1] === 'z') u8 = await zpipe(u8, DecompressionStream);
+  return JSON.parse(new TextDecoder().decode(u8));
+}
+function saveBad(o) {                            // '' : la partie tient debout (les migrations du chargement font le reste)
+  const obj = x => !!x && typeof x === 'object' && !Array.isArray(x), g = o?.g;
+  if (!obj(o) || o.app !== 'aidcs' || !obj(g) || g.v !== 1) return 'Ce code n’est pas une partie d’AI DevOps Chaos Simulator.';
+  if (typeof g.money !== 'number' || !Number.isFinite(g.money) || !Number.isInteger(g.shipped) || g.shipped < 0 || !obj(g.own)
+    || (g.pc != null && !obj(g.pc)) || (g.pk != null && !Array.isArray(g.pk)) || (g.ach != null && !obj(g.ach)))
+    return 'Sauvegarde abîmée : la trésorerie, le score ou les achats sont illisibles. Un agent l’a « optimisée ».';
+  return '';
+}
+$('#st-export').addEventListener('click', async () => {
+  saveGame();                                    // la partie telle qu'elle est, disque compris (rien sur le disque : disque neuf à l'import)
+  let fs = null;
+  try { fs = JSON.parse(localStorage.getItem(FS_KEY)); } catch { /* pas de disque sauvegardé */ }
+  const code = await saveEncode({ app: 'aidcs', v: 1, at: Date.now(), g: G, fs });
+  const d = new Date(), p2 = n => String(n).padStart(2, '0');
+  const name = `aidcs-sauvegarde-final-v2-OK-${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}.vibe`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([code + '\n'], { type: 'text/plain' }));
+  a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  let copied = false;
+  try { await navigator.clipboard.writeText(code); copied = true; } catch { /* presse-papiers refusé : le fichier suffit */ }
+  saveMsg(`Partie exportée (${saveSum(G)}) : ${name}, ${Math.max(1, Math.round(code.length / 1024))} Ko${copied ? ', et le code est aussi dans le presse-papiers' : ''}. `
+    + 'Ailleurs : Menu › Importer une partie. Les agents, eux, n’ont jamais fait de sauvegarde.', 'ok');
+});
+function impDisarm() { impAt = 0; stImpGo.classList.remove('armed'); stImpGo.textContent = 'Remplacer la partie'; }
+function impReset() {
+  impTok++; impData = null; stCode.value = ''; stImp.hidden = true; stImpBtn.setAttribute('aria-expanded', 'false');
+  stImpGo.disabled = true; impDisarm();
+}
+async function impCheck(txt) {                   // à chaque saisie : le dernier texte collé gagne
+  const tok = ++impTok;
+  impData = null; stImpGo.disabled = true; impDisarm();
+  if (!txt.trim()) { saveMsg('Collez le code exporté, ou choisissez le fichier .vibe.'); return; }
+  let o = null, err;
+  try { o = await saveDecode(txt); err = saveBad(o); } catch { err = 'Ce n’est pas un code de sauvegarde. L’agent affirme que si. Ce n’en est pas un.'; }
+  if (tok !== impTok) return;
+  if (err) { saveMsg(err, 'err'); return; }
+  impData = o; stImpGo.disabled = false;
+  const when = typeof o.at === 'number' && Number.isFinite(o.at) ? ` exportée le ${achDate(o.at)}` : '';
+  saveMsg(`Partie${when} : ${saveSum(o.g)}. `
+    + (hasSave() ? `Elle remplacera la partie en cours (${plural(shipped, 'projet')}, $${usd(G.money)}), disque compris. ` : 'Pas de partie en cours ici : rien à perdre. ')
+    + 'Les succès et le temps de jeu de ce navigateur sont gardés.', 'wrn');
+}
+stImpBtn.addEventListener('click', () => {
+  if (!stImp.hidden) { impReset(); saveMsg(''); return; }
+  stImp.hidden = false; stImpBtn.setAttribute('aria-expanded', 'true');
+  saveMsg('Collez le code exporté, ou choisissez le fichier .vibe.');
+  stCode.focus();
+});
+stCode.addEventListener('input', () => impCheck(stCode.value));
+$('#st-file').addEventListener('click', () => stFileIn.click());
+stFileIn.addEventListener('change', async () => {
+  const f = stFileIn.files[0];
+  stFileIn.value = '';
+  if (!f) return;
+  if (f.size > 5e6) { saveMsg(`${f.name} : ${Math.round(f.size / 1e6)} Mo. Une sauvegarde en fait moins d’un. Ce fichier est autre chose.`, 'err'); return; }
+  stCode.value = await f.text();
+  impCheck(stCode.value);
+});
+stImpGo.addEventListener('click', () => {
+  if (!impData) return;
+  if (hasSave() && (!impAt || performance.now() - impAt > 8000)) {   // une vraie partie en cours : deux appuis, comme pour tout effacer
+    impAt = performance.now();
+    stImpGo.classList.add('armed');
+    stImpGo.textContent = 'Confirmer : remplacer';
+    return;
+  }
+  const g = { ...impData.g, ach: { ...(impData.g.ach || {}) } };
+  for (const [id, t] of Object.entries(G.ach || {})) if (!g.ach[id] || t < g.ach[id]) g.ach[id] = t;   // le plus ancien déblocage gagne
+  g.play = Math.max(Number(g.play) || 0, G.play || 0);
+  saveLock = true;                               // la partie en cours ne doit plus rien écrire, même en quittant la page
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(g));
+    if (impData.fs) localStorage.setItem(FS_KEY, JSON.stringify(impData.fs)); else localStorage.removeItem(FS_KEY);
+  } catch {
+    saveLock = false; saveGame();                // rien n'a pu s'écrire jusqu'au bout : la partie en cours reprend sa place
+    saveMsg('Le navigateur refuse d’écrire la sauvegarde : stockage plein, ou navigation privée.', 'err');
+    return;
+  }
+  try { sessionStorage.setItem('aidcs:imported', saveSum(g)); } catch { /* tant pis pour le message */ }
+  location.reload();
+});
+stDlg.addEventListener('close', () => { impReset(); saveMsg(''); });
 function openSettings() {
   if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden || mode === 'launching' || mode === 'rebooting') return;
   stSel = 0;
@@ -7233,7 +7372,7 @@ function openSettings() {
 }
 stDlg.addEventListener('keydown', e => {
   if (stEdit) { if (e.key === 'Enter') { e.preventDefault(); stCommit(); } return; }   // Échap : voir « cancel »
-  if (e.target.closest('.pk-actions')) return;
+  if (e.target.closest('.pk-actions, .st-save')) return;   // boutons, et le code de sauvegarde qu'on colle : les touches leur reviennent
   const s = SETTINGS[stSel], k = e.key;
   if (k === 'ArrowDown' || k === 'ArrowUp') {
     e.preventDefault();
@@ -9999,6 +10138,10 @@ initTabs();                                      // zsh d'abord : on tape « cla
 if (claudeOn && Q.get('help') !== '0') setTimeout(() => toast(HELP, 5000), 600);
 if (!claudeOn && Q.get('title') !== '0') showTitle();   // l'écran titre ouvre le jeu (?title=0 : directement le zsh)
 try { if (sessionStorage.getItem('aidcs:wiped')) { sessionStorage.removeItem('aidcs:wiped'); titleMsg.textContent = 'Partie réinitialisée : retour au PC patate.'; } } catch { /* tant pis */ }
+try {                                            // retour d'un import : ce qui vient d'arriver
+  const imp = sessionStorage.getItem('aidcs:imported');
+  if (imp) { sessionStorage.removeItem('aidcs:imported'); titleMsg.textContent = `Partie importée : ${imp}.${hasSave() ? ' Continuer pour la reprendre.' : ''}`; }
+} catch { /* tant pis */ }
 $('#boot').remove();
 
 </script>
