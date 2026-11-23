@@ -136,8 +136,8 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>11</b><span>mises à jour</span></div>
-    <div role="listitem"><b>14 h 25</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>12</b><span>mises à jour</span></div>
+    <div role="listitem"><b>14 h 38</b><span>du premier au dernier commit</span></div>
     <div role="listitem"><b>6 492 → 8 741</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#12</span><time datetime="2026-11-23T02:05">02 h 05</time><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></li>
       <li><span class="n">#11</span><time datetime="2026-11-23T01:52">01 h 52</time><a href="#smart">smartctl : la santé des disques</a></li>
       <li><span class="n">#10</span><time datetime="2026-11-23T01:19">01 h 19</time><a href="#bac-a-sable">Le bac à sable</a></li>
       <li><span class="n">#9</span><time datetime="2026-11-23T00:36">00 h 36</time><a href="#machine-neuve">La machine neuve, et un wiki</a></li>
@@ -160,8 +161,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="smart" aria-labelledby="t11">
-    <p class="meta"><span class="n">#11</span><span class="new">dernière</span><time datetime="2026-11-23T01:52">23 nov. 2026 · 01 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d0bcf40">d0bcf40</a><span>8 541 → 8 741 lignes</span></p>
+  <article class="maj latest" id="wiki-illustre" aria-labelledby="t12">
+    <p class="meta"><span class="n">#12</span><span class="new">dernière</span><time datetime="2026-11-23T02:05">23 nov. 2026 · 02 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/17fd236">17fd236</a><span>8 741 lignes (le jeu n’a pas bougé)</span></p>
+    <h2 id="t12"><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></h2>
+    <ul>
+      <li>Le <a href="wiki.html">wiki</a> s’ouvre sur la partie en accéléré, dans une fenêtre de terminal, puis sur un portail : une vignette et une phrase par section.</li>
+      <li>18 captures du jeu, rangées dans leurs sections. Un clic les agrandit, Échap les referme.</li>
+      <li>Des schémas et des graphiques : le parcours d’une partie, la boucle du jeu, le travail de chaque modèle, le prix des agents, la vitesse du terminal, combien d’agents tiennent dans chaque carte graphique, le PC patate face à la machine de rêve ($91 300), les pannes en fiches, les touches en relief.</li>
+      <li>212 commandes se copient d’un clic (ou avec Entrée, ou C) : « ✓ Copié », prête à coller dans le terminal du jeu.</li>
+      <li>Les couleurs suivent le thème choisi dans le jeu. Sur mobile, tout passe en colonne, sans rien faire déborder.</li>
+    </ul>
+    <blockquote>« J’ai ajouté des images au wiki. Toujours personne ne le lit, mais maintenant c’est joli. »<cite>l’agent, 02 h 05</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-wiki-visuel.png" title="Voir en grand"><img src="assets/screen-wiki-visuel.png" width="900" height="540" loading="lazy" alt="Le haut du wiki : le sommaire, le titre, la partie en accéléré dans une fenêtre de terminal, la recherche, puis les premières vignettes du portail."></a><figcaption>L’en-tête du wiki : la partie en accéléré, puis le portail.</figcaption></figure>
+      <figure><a href="assets/screen-wiki-copie.png" title="Voir en grand"><img src="assets/screen-wiki-copie.png" width="900" height="540" loading="lazy" alt="Le tableau des CLI d’agents : chaque commande est un bouton, celle de Vibe CLI vient d’être copiée, et « ✓ Copié : curl -LsSf https://mistral.ai/vibe/install.sh | bash » s’affiche en bas."></a><figcaption>Un clic, et la commande est copiée.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="smart" aria-labelledby="t11">
+    <p class="meta"><span class="n">#11</span><time datetime="2026-11-23T01:52">23 nov. 2026 · 01 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d0bcf40">d0bcf40</a><span>8 541 → 8 741 lignes</span></p>
     <h2 id="t11"><a href="#smart">smartctl : la santé des disques</a></h2>
     <ul>
       <li><code>smartctl</code>, du paquet smartmontools (<code>sudo apt install smartmontools</code>). Il faut sudo, comme dans la vraie vie : sans, « Permission denied ».</li>
