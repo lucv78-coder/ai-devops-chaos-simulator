@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>16</b><span>mises à jour</span></div>
-    <div role="listitem"><b>23 h 53</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 9 497</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>17</b><span>mises à jour</span></div>
+    <div role="listitem"><b>24 h 35</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 9 696</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#17</span><time datetime="2026-11-23T12:02">12 h 02</time><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></li>
       <li><span class="n">#16</span><time datetime="2026-11-23T11:20">11 h 20</time><a href="#post-ami">Le POST passe en AMIBIOS</a></li>
       <li><span class="n">#15</span><time datetime="2026-11-23T11:08">11 h 08</time><a href="#bios">Le setup du BIOS : overclocker jusqu’au glitch</a></li>
       <li><span class="n">#14</span><time datetime="2026-11-23T08:24">08 h 24</time><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></li>
@@ -165,8 +166,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="post-ami" aria-labelledby="t16">
-    <p class="meta"><span class="n">#16</span><span class="new">dernière</span><time datetime="2026-11-23T11:20">23 nov. 2026 · 11 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/968ba87">968ba87</a><span>9 485 → 9 497 lignes</span></p>
+  <article class="maj latest" id="grub" aria-labelledby="t17">
+    <p class="meta"><span class="n">#17</span><span class="new">dernière</span><time datetime="2026-11-23T12:02">23 nov. 2026 · 12 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/931ab15">931ab15</a><span>9 497 → 9 696 lignes</span></p>
+    <h2 id="t17"><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></h2>
+    <ul>
+      <li>GRUB a enfin un vrai menu : <code>↑</code> <code>↓</code> (ou un clic) choisit une entrée et arrête le compte à rebours, <code>Entrée</code> (ou un second clic) la démarre. Le compte à rebours dure maintenant 3 vraies secondes. Une touche avant de choisir passe toujours le démarrage.</li>
+      <li>memtest86+, « que personne n’avait jamais lancé » : onze tests sur la RAM, à la fréquence réglée dans le BIOS, en 12 secondes. Dans la marge des barrettes : PASS. Au-delà : les adresses fautives en rouge, puis un grand FAIL. Un processeur bien trop overclocké le fait figer. GRUB compte combien de fois vous l’avez lancé.</li>
+      <li>Mode sans agents : Vibian démarre avec <code>agents=off</code>, et aucun agent ne se lance jusqu’au prochain démarrage.</li>
+      <li>Options avancées : le mode de dépannage (le mot de passe root a été changé par un agent) et le noyau 6.10.0-thursday, « la version qui marchait ».</li>
+      <li>Windows 11, sur /dev/sdb1 : il se met à jour, reste à 99 %, annule tout et redémarre. Comme prévu.</li>
+    </ul>
+    <blockquote>« J’ai lancé memtest86+ une fois. FAIL. Depuis, je ne le lance plus, et tout va bien. »<cite>l’agent, 12 h 02</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-grub.png" title="Voir en grand"><img src="assets/screen-grub.png" width="900" height="540" loading="lazy" alt="Le menu GRUB : Vibian GNU/Linux, les options avancées, le mode sans agents, « Memory test (memtest86+) : lancé 3 fois, par vous » en surbrillance, et Windows 11."></a><figcaption>GRUB : ↑↓ pour choisir, Entrée pour démarrer.</figcaption></figure>
+      <figure><a href="assets/screen-memtest.png" title="Voir en grand"><img src="assets/screen-memtest.png" width="900" height="540" loading="lazy" alt="memtest86+ sur fond bleu : la RAM en DDR3-1333, « Errors: 84 », un grand FAIL rouge, le conseil de baisser la fréquence dans le BIOS, et la liste des adresses fautives."></a><figcaption>memtest86+ : DDR3-1333 ne tient pas sur les barrettes dépareillées.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="post-ami" aria-labelledby="t16">
+    <p class="meta"><span class="n">#16</span><time datetime="2026-11-23T11:20">23 nov. 2026 · 11 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/968ba87">968ba87</a><span>9 485 → 9 497 lignes</span></p>
     <h2 id="t16"><a href="#post-ami">Le POST passe en AMIBIOS</a></h2>
     <ul>
       <li>Le démarrage suit le setup : le BIOS VibeAward laisse la place à AMIVIBES, d’American Megavibes. Logo à gauche, Energy Star à droite, « Press DEL or F2 to run Setup » dès la première ligne, la mémoire comptée en Mo, la détection des disques, le code du BIOS en bas.</li>
