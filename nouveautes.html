@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>9</b><span>mises à jour</span></div>
-    <div role="listitem"><b>13 h 09</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 8 506</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>10</b><span>mises à jour</span></div>
+    <div role="listitem"><b>13 h 52</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 8 541</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#10</span><time datetime="2026-11-23T01:19">01 h 19</time><a href="#bac-a-sable">Le bac à sable</a></li>
       <li><span class="n">#9</span><time datetime="2026-11-23T00:36">00 h 36</time><a href="#machine-neuve">La machine neuve, et un wiki</a></li>
       <li><span class="n">#8</span><time datetime="2026-11-23T00:00">00 h 00</time><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></li>
       <li><span class="n">#7</span><time datetime="2026-11-22T21:51">21 h 51</time><a href="#boost">Les modes boost : ultracode, xhigh et Flash Answers</a></li>
@@ -158,8 +159,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="machine-neuve" aria-labelledby="t9">
-    <p class="meta"><span class="n">#9</span><span class="new">dernière</span><time datetime="2026-11-23T00:36">23 nov. 2026 · 00 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/df8a941">df8a941</a><span>8 320 → 8 506 lignes</span></p>
+  <article class="maj latest" id="bac-a-sable" aria-labelledby="t10">
+    <p class="meta"><span class="n">#10</span><span class="new">dernière</span><time datetime="2026-11-23T01:19">23 nov. 2026 · 01 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/db416dc">db416dc</a><span>8 506 → 8 541 lignes</span></p>
+    <h2 id="t10"><a href="#bac-a-sable">Le bac à sable</a></h2>
+    <ul>
+      <li>Une entrée « Bac à sable » dans le menu titre. Dedans, elle devient « Partie normale ». Chaque mode a sa sauvegarde : aucune n’écrase l’autre. Adresse : <code>?sandbox=1</code>.</li>
+      <li>Tout est débloqué d’office : les quatre plateformes et leurs CLI, 8 agents par plateforme, tous les modèles et les skills, l’orchestrateur multi-plateforme, le terminal le plus rapide, le meilleur matériel, Lolama et StudioLM avec Kwen 72B, et $10 000 000.</li>
+      <li>Les modes boost y sont prolongés à 3 min et relançables dès qu’ils s’arrêtent, sans limite par jour.</li>
+      <li>Le RAID 0 n’est pas installé d’office : il fait perdre le projet en cours quand un disque lâche. Il reste au store, pour qui veut.</li>
+      <li>Nouvelle partie, ou Réinitialiser le bac à sable : tout redevient débloqué, et la partie normale ne bouge pas.</li>
+      <li class="fix">Écran titre : le survol ne prend le focus qu’après un vrai mouvement de souris. Sinon, « Partie normale » arrivait sous le curseur, et Entrée ramenait aussitôt à la partie normale.</li>
+    </ul>
+    <blockquote>« Tout est débloqué. J’ai shippé 20 projets en 5 secondes. Personne ne sait ce qu’il y avait dedans, comme d’habitude, mais plus vite. »<cite>l’agent, 01 h 19</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-sandbox-title.png" title="Voir en grand"><img src="assets/screen-sandbox-title.png" width="900" height="540" loading="lazy" alt="L'écran titre du bac à sable : « bac à sable : tout est débloqué », la trésorerie à 10 000 000 dollars, et le menu Continuer, Nouvelle partie, Partie normale, Paramètres, Nouveautés, Aide (wiki), Quitter."></a><figcaption>L’écran titre : « Partie normale » pour revenir.</figcaption></figure>
+      <figure><a href="assets/screen-sandbox.png" title="Voir en grand"><img src="assets/screen-sandbox.png" width="900" height="540" loading="lazy" alt="Huit agents Claude Fable et l'orchestrateur dans le bac à sable : le tableau de bord affiche « bac à sable · atlas v0.54.0 », ultracode 2:57, et 45 projets shippés."></a><figcaption>Huit agents Fable, ultracode, 45 projets en une minute.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="machine-neuve" aria-labelledby="t9">
+    <p class="meta"><span class="n">#9</span><time datetime="2026-11-23T00:36">23 nov. 2026 · 00 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/df8a941">df8a941</a><span>8 320 → 8 506 lignes</span></p>
     <h2 id="t9"><a href="#machine-neuve">La machine neuve, et un wiki</a></h2>
     <ul>
       <li>Une nouvelle partie démarre sur une machine neuve : rien n’est installé, pas même votre agent. <code>mistral</code> répond « command not found », avec la commande qui l’installe.</li>
