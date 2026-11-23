@@ -776,6 +776,41 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .bi-grub { width: min(80ch, 100%); margin: 1.5em auto 0; }
 .bi-box { padding: .3em 1ch; border: 1px solid var(--fg); overflow: hidden; }
 .bi-box .on { background: var(--fg); color: #000; }
+.bi-ge { display: block; width: 100%; min-height: 1.35em; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; white-space: pre; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+/* memtest86+ : bleu, gris clair, une barre par passage et par test, les erreurs en rouge */
+#bios.mt:not([hidden]) { display: grid; place-items: center; padding: .6em 1ch; background: #000; font-size: clamp(8px, min(1.65vw, 2.75vh), 24px); }
+.mt86 {
+  --m-bg: #0000a8; --m-fg: #c8c8c8; --m-hi: #fff; --m-err: #ff5555; --m-ok: #55ff55; --m-ln: #5555ff;
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; width: min(100%, 96ch); height: min(100%, 34em);
+  background: var(--m-bg); color: var(--m-fg); line-height: 1.4; white-space: pre; text-shadow: none; overflow: hidden;
+}
+:root[data-theme="abri"] .mt86 { --m-bg: #04140a; --m-fg: #3dff7e; --m-hi: #d2ffe2; --m-err: #d2ffe2; --m-ok: #8cffb2; --m-ln: #166b33; }
+.mt-top { display: grid; grid-template-columns: minmax(0, 30ch) minmax(0, 1fr); border-bottom: 1px solid var(--m-ln); }
+.mt-top > div { min-width: 0; padding: .3em 1ch; overflow: hidden; }
+.mt-top > div + div { border-left: 1px solid var(--m-ln); }
+.mt-name { display: inline-block; padding: 0 .6ch; background: #a80000; color: var(--m-hi); font-weight: 700; }
+:root[data-theme="abri"] .mt-name { background: var(--m-fg); color: var(--m-bg); }
+.mt-bar { display: inline-block; width: 22ch; max-width: 50%; height: .8em; margin-left: 1ch; vertical-align: -.05em; border: 1px solid var(--m-fg); }
+.mt-bar i { display: block; height: 100%; background: var(--m-fg); }
+.mt-mid { padding: .3em 1ch; border-bottom: 1px solid var(--m-ln); overflow: hidden; }
+.mt-mid b, .mt-err .x { color: var(--m-err); }
+.mt-err { min-height: 0; padding: .3em 1ch; overflow: hidden; }
+.mt-err .h { color: var(--m-hi); }
+.mt-big { margin: .2em 0 0; font: inherit; line-height: 1.05; }
+.mt-res { white-space: normal; }
+.mt-big.ok, .mt-res.ok { color: var(--m-ok); } .mt-big.ko, .mt-res.ko { color: var(--m-err); }
+.mt-foot { display: flex; flex-wrap: wrap; gap: 0 3ch; padding: .1em 1ch; background: var(--m-fg); color: var(--m-bg); }
+.mt-foot button { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+@media (max-width: 640px) { #bios.mt:not([hidden]) { font-size: clamp(8px, 2.6vw, 12px); } .mt-top { grid-template-columns: minmax(0, 1fr); } .mt-top > div + div { border-left: 0; border-top: 1px solid var(--m-ln); } }
+/* Windows 11, sur /dev/sdb1 : il se met à jour, et il ne faut pas éteindre */
+.winup { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .6em; padding: 1em; background: #082050; color: #fff; text-align: center; white-space: normal; font-family: "Segoe UI", system-ui, sans-serif; font-size: 1.25em; }
+:root[data-theme="abri"] .winup { background: #04140a; color: #3dff7e; font-family: inherit; }
+.win-sp { position: relative; width: 2.6em; height: 2.6em; margin-bottom: 1em; }
+.win-sp i { position: absolute; left: 50%; top: 0; width: .3em; height: .3em; margin-left: -.15em; border-radius: 50%; background: currentColor; transform-origin: .15em 1.3em; animation: winsp 2.4s cubic-bezier(.5, .1, .5, .9) infinite; }
+.win-sp i:nth-child(2) { animation-delay: .14s; } .win-sp i:nth-child(3) { animation-delay: .28s; } .win-sp i:nth-child(4) { animation-delay: .42s; } .win-sp i:nth-child(5) { animation-delay: .56s; }
+@keyframes winsp { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.win-s { opacity: .85; font-size: .8em; }
+@media (prefers-reduced-motion: reduce) { .win-sp i { animation: none; } }
 .bi-splash { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .7em; text-align: center; }
 .bi-tux { margin: 0; color: var(--fg); font: inherit; font-size: 1.55em; line-height: 1.12; text-align: left; }
 .bi-tux .c { color: var(--blue); } .bi-tux .y { color: var(--yellow); } .bi-tux .o { color: var(--orange); }
@@ -4247,6 +4282,7 @@ function agentCmd(p, a) {
   if (IDLE && !cliHas(p)) return cliMissing(p);  // machine neuve : il faut d'abord l'installer
   if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(p === 'local' ? LOCAL_USAGE(rtOn('studiolm') && !rtOn('lolama') ? 'studiolm' : 'lolama') : AGENT_USAGE(p));
   if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${VERSION} (${GAME}) · aucun vrai token n’est facturé`);
+  if (noAgents) return shellPrint(H(['✗ ', 'errc'], 'Mode sans agents (choisi dans GRUB) : aucun agent jusqu’au prochain démarrage. ', ['reboot', 'org'], ' pour les retrouver.'));
   if (IDLE && !G.own[p] && p === 'local') return shellPrint(H(['✗ ', 'errc'], `IA locale : ${localHint()}`));
   if (IDLE && !G.own[p]) {                       // mode idle : il faut la licence (achetée au store)
     return shellPrint(H(['✗ ', 'errc'], `${CLIS[p].label} : licence non achetée. Vous démarrez avec Mistral (la moins bien) : `, ['store', 'org'], ', onglet Plateformes.'));
@@ -7144,6 +7180,7 @@ const SHADOW = {
   C: [' ██████╗', '██╔════╝', '██║     ', '██║     ', '╚██████╗', ' ╚═════╝'],
   D: ['██████╗ ', '██╔══██╗', '██║  ██║', '██║  ██║', '██████╔╝', '╚═════╝ '],
   E: ['███████╗', '██╔════╝', '█████╗  ', '██╔══╝  ', '███████╗', '╚══════╝'],
+  F: ['███████╗', '██╔════╝', '█████╗  ', '██╔══╝  ', '██║     ', '╚═╝     '],   // pour FAIL (memtest86+)
   H: ['██╗  ██╗', '██║  ██║', '███████║', '██╔══██║', '██║  ██║', '╚═╝  ╚═╝'],
   I: ['██╗', '██║', '██║', '██║', '██║', '╚═╝'],
   L: ['██╗     ', '██║     ', '██║     ', '██║     ', '███████╗', '╚══════╝'],
@@ -8560,7 +8597,7 @@ storeDlg.addEventListener('close', () => { if (view === 'zsh' && !shellForm.hidd
    Nouvelle partie, Continuer, et chaque fois que le PC tombe. La durée suit le matériel (un disque dur, c'est long).
    Une touche ou un clic : on passe. ?bios=0 : pas de séquence du tout. */
 const biosEl = $('#bios');
-let booting = false;
+let booting = false, noAgents = false;          // noAgents : GRUB › mode sans agents, jusqu'au prochain démarrage
 const starPath = (cx, cy, R, r) => Array.from({ length: 10 }, (_, i) => {
   const a = -Math.PI / 2 + i * Math.PI / 5, k = i % 2 ? r : R;
   return `${i ? 'L' : 'M'}${(cx + k * Math.cos(a)).toFixed(1)},${(cy + k * Math.sin(a)).toFixed(1)}`;
@@ -8596,9 +8633,9 @@ async function biosBoot(o = {}) {
   if (Q.get('bios') === '0') { o.during?.(); o.then?.(); return; }
   booting = true;
   const el = biosEl;
-  let skip = false, wake = null, prePost = true, postOn = false, wantSetup = false, setupKey = null;
+  let skip = false, wake = null, prePost = true, postOn = false, wantSetup = false, modalKey = null;
   const skipper = e => {
-    if (setupKey) { if (e.type === 'keydown') setupKey(e); return; }   // le setup gère ses touches (et ses clics)
+    if (modalKey) { if (e.type === 'keydown') modalKey(e); return; }   // setup, GRUB, memtest86+, Windows : chacun ses touches (et ses clics)
     const del = e.type === 'keydown' ? ['Delete', 'Del', 'F2'].includes(e.key) : !!e.target.closest?.('.bi-del');
     if (e.type === 'keydown') { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
     if (wantSetup || (del && prePost)) return;   // DEL pressé à temps : direction le setup ; martelé dès le kernel panic : on attend le POST
@@ -8617,6 +8654,164 @@ async function biosBoot(o = {}) {
     : new Promise(res => { const t = setTimeout(() => { wake = null; res(); }, ms * k); wake = () => { clearTimeout(t); wake = null; res(); }; });
   const add = (h, cls = '', box = el) => { const d = document.createElement('div'); d.className = 'ln' + (cls ? ' ' + cls : ''); d.innerHTML = h; box.appendChild(d); return d; };
   const hint = () => add('Une touche ou un clic : passer le démarrage', 'bi-skip');
+  // GRUB. ↑↓ (ou un clic) : choisir, le compte à rebours s'arrête ; Entrée (ou un second clic) : démarrer ; « e », « c » : refusés.
+  // Une autre touche, ou un clic à côté, tant qu'on n'a rien choisi : passer le démarrage, comme avant.
+  const grubMenu = () => skip ? Promise.resolve('boot') : new Promise(done => {
+    const st = ocSt(), nMt = st.mt || 0;
+    const MAIN = [
+      { t: 'Vibian GNU/Linux 13 « friday »', go: 'boot' },
+      { t: 'Options avancées pour Vibian GNU/Linux', sub: 1 },
+      { t: 'Vibian GNU/Linux (mode sans agents)', go: 'noagents' },
+      { t: `Memory test (memtest86+) : ${nMt ? `lancé ${nMt} fois, par vous` : 'personne ne l’a jamais lancé'}`, go: 'memtest' },
+      { t: `Windows 11 (sur /dev/sdb1 : ${st.win ? 'il se met toujours à jour' : 'ne pas toucher, il fait des mises à jour'})`, go: 'windows' },
+    ];
+    const ADV = [
+      { t: `Vibian GNU/Linux, avec Linux 6.11.0-friday`, go: 'boot' },
+      { t: 'Vibian GNU/Linux, avec Linux 6.11.0-friday (mode de dépannage)', go: 'recovery' },
+      { t: 'Vibian GNU/Linux, avec Linux 6.10.0-thursday (la version qui marchait)', go: 'thursday' },
+    ];
+    let menu = MAIN, sel = 0, touched = false, note = '', left = 3;
+    el.innerHTML = '';
+    hint();
+    const box = document.createElement('div');
+    box.className = 'bi-grub';
+    el.appendChild(box);
+    const draw = () => {
+      box.innerHTML = '<div class="ln" style="text-align:center">GNU GRUB  version 2.12-vibe</div><div class="ln"></div>'
+        + `<div class="bi-box" role="listbox" aria-label="${menu === MAIN ? 'Menu de démarrage' : 'Options avancées'}">`
+        + menu.map((e, i) => `<button type="button" tabindex="-1" role="option" aria-selected="${i === sel}" class="bi-ge${i === sel ? ' on' : ''}" data-g="${i}">${i === sel ? '*' : ' '}${esc(e.t)}${e.sub ? ' >' : ''}</button>`).join('')
+        + '</div><div class="ln"></div><div class="ln dim">   Utilisez les touches ↑ et ↓ pour sélectionner une entrée.</div>'
+        + `<div class="ln dim">   Entrée : démarrer${menu === MAIN ? '' : ' · Échap : revenir au menu'} · « e » : modifier · « c » : ligne de commande</div>`
+        + (note ? `<div class="ln bi-warn">   ${esc(note)}</div>` : '')
+        + (touched ? '' : `<div class="ln dim bi-cd">   L’entrée sélectionnée démarrera automatiquement dans ${left} s.</div>`);
+    };
+    const iv = setInterval(() => { if (touched) return; if (--left <= 0) finish(menu[sel].go || 'boot'); else draw(); }, 1000);
+    function finish(v) { clearInterval(iv); modalKey = null; el.removeEventListener('click', onClick); done(v); }
+    function choose() { const e = menu[sel]; if (e.sub) { menu = ADV; sel = 0; note = ''; draw(); } else finish(e.go); }
+    function passe() { skip = true; finish('boot'); }
+    modalKey = e => {
+      const k = e.key;
+      if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(k)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (k === 'ArrowUp' || k === 'ArrowDown') sel = (sel + (k === 'ArrowDown' ? 1 : -1) + menu.length) % menu.length;
+      else if (k === 'Home' || k === 'End') sel = k === 'Home' ? 0 : menu.length - 1;
+      else if (k === 'Enter') { touched = true; return choose(); }
+      else if (k === 'e' || k === 'c') note = k === 'e' ? 'Modification refusée : un agent a déjà « optimisé » la ligne de commande (agents=yolo tests=off).'
+        : 'grub> ls (hd0,msdos2)/backup : aucun fichier. La ligne de commande est retournée se coucher.';
+      else if (k === 'Escape' && menu !== MAIN) { menu = MAIN; sel = 1; note = ''; }
+      else if (!touched) return passe();         // une touche avant de choisir : on passe le démarrage
+      else return;
+      touched = true;
+      draw();
+    };
+    function onClick(e) {
+      const b = e.target.closest('.bi-ge');
+      if (!b) { if (!touched) passe(); return; }
+      touched = true;
+      const i = +b.dataset.g;
+      if (i === sel) choose(); else { sel = i; draw(); }
+    }
+    el.addEventListener('click', onClick);
+    draw();
+  });
+  // memtest86+ : un passage de 11 tests sur la RAM, à la fréquence réglée dans le BIOS. Au-delà de la marge des barrettes : des erreurs,
+  // en rouge, et FAIL (l'ECC corrige les petites). Processeur bien trop overclocké : memtest86+ se fige. Échap (ou un clic) : redémarrer.
+  const MT_TESTS = ['Address test, walking ones, no cache', 'Address test, own address in window', 'Address test, own address + window',
+    'Moving inversions, 1s & 0s', 'Moving inversions, 8 bit pattern', 'Moving inversions, random pattern', 'Block move, 64 moves',
+    'Moving inversions, 32 bit pattern', 'Random number sequence', 'Modulo 20, random pattern', 'Bit fade test, 2 patterns (90 min, raccourci par un agent)'];
+  const memtest = () => new Promise(done => {
+    const st = ocSt(), c = part('cpu'), r = part('ram'), u = ocU(), ecc = !!r.ecc, rm = ramMhz(), gb = r.go * .975;
+    const bad = ecc ? Math.max(0, u.ram - 1) : u.ram, freezeAt = u.cpu >= 1 ? ri(2, 6) : -1, cas = { 3: '7-7-7-20', 4: '16-18-18-38', 5: '30-38-38-96' }[r.ddr] || 'auto';
+    st.mt = (st.mt || 0) + 1;
+    if (IDLE) saveGame();
+    let ti = 0, tp = 0, errs = 0, fixed = 0, end = false, frozen = false, spin = 0;
+    const rows = [], t0 = Date.now(), TICK = 100, TEST = 1100;
+    el.innerHTML = '';
+    el.classList.add('mt');
+    const box = document.createElement('div');
+    box.className = 'mt86';
+    el.appendChild(box);
+    const bar = p => `<span class="mt-bar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>`;
+    const addErr = () => {                       // une adresse, le motif attendu, ce qu'on a lu : un bit a basculé
+      const ex = hex(16), pos = ri(0, 15), v = parseInt(ex[pos], 16), f = v ^ (1 << ri(0, 3)), g = (gb * R()).toFixed(1);
+      rows.push(`${String(ri(0, Math.max(0, c.thr - 1))).padStart(4)}  ${String(0).padStart(4)}  ${String(ti).padStart(4)}  ${hex(12)} (${g.padStart(5)}GB)  ${ex}  ${ex.slice(0, pos)}${f.toString(16)}${ex.slice(pos + 1)}`);
+      if (rows.length > 9) rows.shift();
+      errs++;
+    };
+    const draw = () => {
+      const pass = Math.min(1, (ti + tp) / MT_TESTS.length), secs = Math.floor((Date.now() - t0) / 1000), lo = (gb * tp * .9).toFixed(1);
+      const status = frozen ? 'Testing' : end ? (errs ? 'Failed!' : 'Pass complete') : 'Testing';
+      box.innerHTML = '<div class="mt-top"><div>'
+        + `<div><span class="mt-name">Memtest86+</span> v7.20</div><div>CLK/Temp: ${cpuMhz()}MHz  ${Math.round(PCS.temp)}°C</div>`
+        + `<div>L1 Cache:   64KB   ${c.thr * 24} GB/s</div><div>L2 Cache:  ${c.thr * 256}KB   ${c.thr * 11} GB/s</div><div>L3 Cache:  ${Math.max(3, c.thr * 2)}MB   ${c.thr * 6} GB/s</div>`
+        + `<div>Memory  :  ${gb.toFixed(1)}GB   ${Math.round(rm / 120)} GB/s</div>`
+        + `</div><div><div>${esc(c.n)} (${c.thr} threads)</div><div>Pass ${String(Math.floor(pass * 100)).padStart(3)}%${bar(pass)}</div><div>Test ${String(Math.floor(tp * 100)).padStart(3)}%${bar(tp)}</div>`
+        + `<div>Test #${ti} [${esc(MT_TESTS[Math.min(ti, MT_TESTS.length - 1)])}]</div><div>Testing: ${lo}GB - ${gb.toFixed(1)}GB [${gb.toFixed(1)}GB of ${gb.toFixed(1)}GB]</div><div>Pattern: 0x${end ? '0000000000000000' : hex(16)}</div></div></div>`
+        + `<div class="mt-mid"><div>CPU: ${c.thr} Threads  SMP: ${c.thr}T (PAR)  │ Time: ${Math.floor(secs / 3600)}:${String(Math.floor(secs / 60) % 60).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}  Status: ${status} ${end || frozen ? '' : '|/-\\'[spin % 4]}</div>`
+        + `<div>RAM: ${rm}MHz (DDR${r.ddr}-${rm}) CAS ${cas}${ecc ? ' ECC' : ''}  │ Pass: ${end ? 1 : 0}  Errors: ${errs ? `<b>${errs}</b>` : '0'}${ecc ? `  ECC corrected: ${fixed}` : ''}</div></div>`
+        + '<div class="mt-err">'
+        + (end ? `<div class="mt-res ${errs ? 'ko' : 'ok'}">** Pass complete, ${errs ? `${errs} error${errs > 1 ? 's' : ''}` : 'no errors'}, press Esc to exit **</div>`   // le verdict d'abord
+          + `<pre class="mt-big ${errs ? 'ko' : 'ok'}">${esc(artRows(errs ? 'FAIL' : 'PASS').join('\n'))}</pre>`
+          + (errs ? `<div class="mt-res ko">RAM instable à DDR${r.ddr}-${rm} : baissez la fréquence dans le BIOS (Suppr pendant le POST, Vibe Tweaker).</div>` : `<div>DDR${r.ddr}-${rm} tient${ecc && fixed ? `, grâce à l’ECC (${fixed} corrigées)` : ''}.</div>`) : '')
+        + (rows.length ? '<div class="h">pCPU  Pass  Test  Failing Address        Expected          Found</div><div class="h">----  ----  ----  ---------------------  ----------------  ----------------</div>'
+          + rows.map(x => `<div class="x">${esc(x)}</div>`).join('') : '')
+        + (frozen ? '<div class="mt-res ko">(Plus rien ne bouge : le processeur overclocké a planté memtest86+. Échap : redémarrer.)</div>' : '')
+        + '</div>'
+        + `<div class="mt-foot"><button type="button" tabindex="-1" data-mt="esc">&lt;ESC&gt; Exit</button><span>&lt;F1&gt; Configuration</span><span>&lt;Space&gt; Scroll Lock</span><span>&lt;Enter&gt; Single Step</span></div>`;
+    };
+    const iv = setInterval(() => {
+      if (end || frozen) return;
+      spin++;
+      tp += TICK / TEST;
+      if (chance(bad * .35)) addErr();
+      if (ecc && u.ram > 0 && chance(u.ram * .4)) fixed++;
+      if (ti === freezeAt && tp > .45) { frozen = true; setTimeout(draw, 2500); return; }
+      if (tp >= 1) {
+        if (ti === 5 && bad > 0 && !errs) addErr();   // au-delà de la marge, au moins une erreur par passage
+        tp = 0;
+        if (++ti >= MT_TESTS.length) { ti = MT_TESTS.length - 1; tp = 1; end = true; }
+      }
+      draw();
+    }, TICK);
+    const quit = () => { clearInterval(iv); modalKey = null; el.removeEventListener('click', onClick); done(); };
+    modalKey = e => {
+      if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === 'Escape' || (end && (e.key === 'Enter' || e.key === ' '))) quit();
+    };
+    function onClick(e) { if (e.target.closest('[data-mt="esc"]') || end || frozen) quit(); }
+    el.addEventListener('click', onClick);
+    draw();
+  });
+  // Windows 11, sur /dev/sdb1 : il se met à jour, reste à 99 %, annule tout et redémarre. Une touche ou un clic : il annule plus tôt.
+  const winUpdate = () => new Promise(done => {
+    const st = ocSt();
+    st.win = (st.win || 0) + 1;
+    if (IDLE) saveGame();
+    el.innerHTML = '<div class="winup"><div class="win-sp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="win-t"></div>'
+      + '<div class="win-s">Ne pas éteindre votre ordinateur. Cela peut prendre un certain temps.</div></div>';
+    const T = el.querySelector('.win-t'), S = el.querySelector('.win-s');
+    let p = 0, hold = 0, gone = false;
+    const iv = setInterval(() => {
+      p = Math.min(99, p + (p < 30 ? 3 : p < 90 ? 2 : .5));
+      T.textContent = `Travail sur les mises à jour : ${Math.floor(p)} % terminé`;
+      if (p >= 99 && ++hold > 12) cancel();
+    }, 120);
+    function cancel() {
+      if (gone) return;
+      gone = true;
+      clearInterval(iv);
+      modalKey = null;
+      el.removeEventListener('click', cancel);
+      T.textContent = 'Nous n’avons pas pu terminer les mises à jour';
+      S.textContent = 'Annulation des modifications. Ne pas éteindre votre ordinateur.';
+      setTimeout(() => { T.textContent = 'Redémarrage…'; S.textContent = ''; setTimeout(done, 900); }, 2600);
+    }
+    modalKey = e => { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); cancel(); };
+    el.addEventListener('click', cancel);
+  });
   o.during?.();                                  // sous l'écran noir : on coupe ce qui tournait
   const pc = PC(), c = part('cpu'), mb = part('mobo'), r = part('ram'), g = part('gpu'), d = part('disk'), ps = part('psu'), co = part('cool'), slow = d.boot;
   if (o.crash) {                                 // le kernel panic, avec sa cause, puis le noir et le redémarrage
@@ -8648,8 +8843,10 @@ async function biosBoot(o = {}) {
     el.innerHTML = '';
     await wait(900);                             // le noir complet, ventilateurs coupés
   }
+  let nPost = 0, choice = 'boot';
+  for (;;) {                                     // le PC (re)démarre : POST puis GRUB ; memtest86+ et Windows ramènent ici
   // 1. le POST du BIOS. DEL ou F2 (ou un clic sur DEL) avant qu'il ne finisse : le setup. « Save & Exit » : le PC redémarre, le POST repasse.
-  for (let pass = 0; ; pass++) {
+  for (;; nPost++) {
     el.innerHTML = '';
     prePost = false;
     postOn = true;
@@ -8680,17 +8877,17 @@ async function biosBoot(o = {}) {
     for (let i = 1; i <= steps; i++) { mem.textContent = `${Math.round(total * i / steps)}MB`; await wait((full ? 48 : 34) * slow); }
     mem.textContent += ' OK';
     add('USB Device(s): 1 Keyboard, 1 Mouse, 1 Agent', '', post);
-    if (o.crash && !pass) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
+    if (o.crash && !nPost) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
       : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
       : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
       : o.crash.kind === 'vram' ? 'Warning! Previous shutdown: GPU out of memory (le modèle local ne rentrait pas dans la VRAM).'
       : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
-    if (oc.chg && !pass) {                       // la pièce a changé : ses réglages repartent sur Auto
+    if (oc.chg && !nPost) {                       // la pièce a changé : ses réglages repartent sur Auto
       if (oc.chg !== 'ram') add('New CPU installed! Please enter Setup to configure your system. (CPU Ratio : Auto)', 'bi-warn', post);
       if (oc.chg !== 'cpu') add('Memory configuration changed! DRAM Frequency reset to Auto.', 'bi-warn', post);
       oc.chg = '';
     }
-    if (oc.err && !pass) {                       // la session d'avant a fait des erreurs matérielles : l'overclocking ne tient pas
+    if (oc.err && !nPost) {                       // la session d'avant a fait des erreurs matérielles : l'overclocking ne tient pas
       add(`Warning! Overclocking unstable : ${oc.err} erreur${oc.err > 1 ? 's' : ''} matérielle${oc.err > 1 ? 's' : ''} depuis le dernier démarrage. Press DEL to run Setup.`, 'bi-fail', post);
       oc.err = 0;
     }
@@ -8713,35 +8910,34 @@ async function biosBoot(o = {}) {
     add('', '', post);
     add('Entering SETUP...', '', post);
     await sleep(reducedMotion.matches ? 150 : 450);
-    const res = await amiSetup(el, k => { setupKey = k; });
+    const res = await amiSetup(el, k => { modalKey = k; });
     wantSetup = false;
     el.classList.remove('setup');
     el.innerHTML = '';
     if (res !== 'save') break;
     await sleep(reducedMotion.matches ? 100 : 700);   // Save & Exit : le PC redémarre, écran noir
   }
-  // 2. GRUB
+  // 2. GRUB : le menu de démarrage
+  choice = await grubMenu();
+  if (choice === 'memtest') await memtest();
+  else if (choice === 'windows') await winUpdate();
+  else break;
+  el.classList.remove('mt');
   el.innerHTML = '';
-  hint();
-  const grub = document.createElement('div');
-  grub.className = 'bi-grub';
-  grub.innerHTML = '<div class="ln" style="text-align:center">GNU GRUB  version 2.12-vibe</div><div class="ln"></div><div class="bi-box">'
-    + ['Vibian GNU/Linux 13 « friday »', 'Options avancées pour Vibian GNU/Linux', 'Vibian GNU/Linux (mode sans agents)',
-      'Memory test (memtest86+) : personne ne l’a jamais lancé', 'Windows 11 (sur /dev/sdb1 : ne pas toucher, il fait des mises à jour)']
-      .map((t, i) => `<div class="ln${i ? '' : ' on'}">${i ? ' ' : '*'}${esc(t)}</div>`).join('')
-    + '</div><div class="ln"></div><div class="ln dim">   Utilisez les touches ↑ et ↓ pour sélectionner une entrée.</div><div class="ln dim bi-cd"></div>';
-  el.appendChild(grub);
-  const cd = grub.querySelector('.bi-cd');
-  for (let s = 3; s >= 1; s--) { cd.textContent = `   L’entrée sélectionnée démarrera automatiquement dans ${s} s.`; await wait(360); }
-  // 3. le noyau
+  nPost++;
+  await sleep(reducedMotion.matches ? 100 : 700);   // et le PC redémarre
+  }
+  // 3. le noyau (celui de jeudi, si on l'a choisi dans les options avancées)
+  const kv = choice === 'thursday' ? '6.10.0-thursday' : '6.11.0-friday';
   el.innerHTML = '';
-  add('Loading Linux 6.11.0-friday ...');
+  add(`Loading Linux ${kv} ...`);
   add('Loading initial ramdisk ...');
   await wait(320 * slow);
   let t = 0;
   for (const k of [
-    'Linux version 6.11.0-friday (agents@prod-01) (gcc 14.2.0, vibes 3.0) #1 SMP PREEMPT_DYNAMIC',
-    'Command line: BOOT_IMAGE=/vmlinuz-6.11.0-friday root=/dev/sda1 ro quiet splash agents=yolo tests=off',
+    `Linux version ${kv} (agents@prod-01) (gcc 14.2.0, vibes 3.0) #1 SMP PREEMPT_DYNAMIC`,
+    `Command line: BOOT_IMAGE=/vmlinuz-${kv} root=/dev/sda1 ro ${choice === 'recovery' ? 'single' : 'quiet splash'} agents=${choice === 'noagents' ? 'off' : 'yolo'} tests=off`,
+    ...(choice === 'recovery' ? ['recovery: shell root demandé · mot de passe root changé par un agent · on continue en mode normal'] : []),
     'DMI: Vibe Coding Inc. prod-01/agents, BIOS 2026.11 11/20/2026',
     `Memory: ${frx((r.go * .94).toFixed(1))}G/${r.go}G available (0K tests, 412K vibes)`,
     `smpboot: CPU0: ${c.n}`,
@@ -8783,7 +8979,7 @@ async function biosBoot(o = {}) {
     ...(pc.cool === 0 ? [['WARN', 'fan0 : 900 tr/min, poussière détectée.']] : []),
     ...(ps.noname ? [['WARN', 'psu0 : sifflement à 15 kHz.']] : []),
     ...(g.llm ? [['OK', `Started ollama.service - Relecteur local (${g.llm}).`]] : []),
-    ['OK', 'Started agents.socket - Prise des agents (ils attendent).'],
+    choice === 'noagents' ? ['OK', 'Stopped agents.socket - Prise des agents (mode sans agents : le calme).'] : ['OK', 'Started agents.socket - Prise des agents (ils attendent).'],
     ['OK', 'Reached target Prod (vendredi).'],
   ]) { S(st, txt); await wait(65 * slow); }
   add('');
@@ -8795,11 +8991,12 @@ async function biosBoot(o = {}) {
   removeEventListener('keydown', skipper, true);
   el.removeEventListener('pointerdown', skipper);
   bootT = Date.now() - ri(4000, 9000);
+  noAgents = choice === 'noagents';
   o.then?.();
   el.classList.add('out');
   await sleep(reducedMotion.matches ? 0 : 360);
   el.hidden = true;
-  el.classList.remove('out');
+  el.classList.remove('out', 'mt');
   el.innerHTML = '';
   booting = false;
 }
@@ -9032,7 +9229,8 @@ async function pcCrash(kind, L) {
     pcDown = false;
     shellPrint(H(['✗ ', 'errc'], ['Kernel panic : ', 'errc'], why + '. Le PC a redémarré.'));
     if (dropped.length) shellPrint(H(['  ', ''], ['Arrière-plan coupé : ', 'wrn'], `${dropped.join(' et ')} ne repart pas, la config ne tiendrait pas avec. `, ['plateformes', 'org'], ' pour voir.'));
-    if (was && safe) {
+    if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
+    else if (was && safe) {
       shellPrint(H(['tmux attach ', 'dim'], '· la config tient : vos agents repartent.'));
       submit(G.ai);
     } else if (was && kind === 'vram') {
@@ -9065,7 +9263,8 @@ async function pcReboot() {                      // reboot : un redémarrage pro
     pcDown = false;
     const o = ocSt(), set = [o.ratio ? `processeur à ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})` : '', o.mhz ? `RAM à ${frMhz(ramMhz())} (${ocPct(ramMhz(), part('ram').mhz)})` : ''].filter(Boolean);
     shellPrint(H(['✓ ', 'okc'], 'Le PC a redémarré.', set.length ? [` BIOS : ${set.join(', ')}.`, 'dim'] : ''));
-    if (was) { shellPrint(H(['tmux attach ', 'dim'], '· vos agents repartent.')); submit(IDLE ? G.ai : provider); }
+    if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
+    else if (was) { shellPrint(H(['tmux attach ', 'dim'], '· vos agents repartent.')); submit(IDLE ? G.ai : provider); }
     if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
   } });
 }
