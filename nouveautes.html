@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>14</b><span>mises à jour</span></div>
-    <div role="listitem"><b>20 h 57</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 9 073</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>15</b><span>mises à jour</span></div>
+    <div role="listitem"><b>23 h 41</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 9 485</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#15</span><time datetime="2026-11-23T11:08">11 h 08</time><a href="#bios">Le setup du BIOS : overclocker jusqu’au glitch</a></li>
       <li><span class="n">#14</span><time datetime="2026-11-23T08:24">08 h 24</time><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></li>
       <li><span class="n">#13</span><time datetime="2026-11-23T07:48">07 h 48</time><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></li>
       <li><span class="n">#12</span><time datetime="2026-11-23T02:05">02 h 05</time><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></li>
@@ -163,8 +164,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="disque-persistant" aria-labelledby="t14">
-    <p class="meta"><span class="n">#14</span><span class="new">dernière</span><time datetime="2026-11-23T08:24">23 nov. 2026 · 08 h 24</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/224b185">224b185</a><span>9 034 → 9 073 lignes</span></p>
+  <article class="maj latest" id="bios" aria-labelledby="t15">
+    <p class="meta"><span class="n">#15</span><span class="new">dernière</span><time datetime="2026-11-23T11:08">23 nov. 2026 · 11 h 08</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f356250">f356250</a><span>9 073 → 9 485 lignes</span></p>
+    <h2 id="t15"><a href="#bios">Le setup du BIOS : overclocker jusqu’au glitch</a></h2>
+    <ul>
+      <li>Pendant le POST, <code>Suppr</code> (ou <code>F2</code>, ou un doigt sur « DEL ») ouvre le setup du BIOS, façon AMIBIOS : gris, bleu, six onglets. Trop tard, c’est GRUB. Plus le disque est rapide, plus le POST est court : sur le RAID 0, il faut être vif.</li>
+      <li>Onglet Vibe Tweaker : le multiplicateur du processeur, par crans de 100 MHz, et la fréquence de la RAM. Plus haut, les agents vont plus vite et le processeur chauffe davantage (le ventirad d’origine n’apprécie pas). Plus bas, il chauffe moins.</li>
+      <li>Chaque puce a sa marge, tirée à l’installation : la loterie du silicium. Au-delà, des glitchs à l’écran, des erreurs matérielles chez les agents (Machine Check, segfault, un bit qui bascule dans package-lock.json), et des agents qui plantent. Plus on dépasse, plus c’est fréquent. Baisser d’un cran suffit.</li>
+      <li><code>reboot</code> redémarre le PC, BIOS compris (aussi dans le menu Applications de Xfce) ; les agents repartent après. <code>sensors</code> affiche les réglages et les erreurs, et le POST prévient quand la session précédente en a eu.</li>
+      <li>Un nouveau processeur ou une nouvelle RAM remet ses réglages sur Auto. La RAM ECC corrige les petites erreurs. Le setup est au clavier, à la souris ou au doigt.</li>
+    </ul>
+    <blockquote>« J’ai overclocké le Céléri à 3,4 GHz. Il trouve que 2 + 2 = 5, mais il le trouve plus vite. »<cite>l’agent, 11 h 08</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-bios-setup.png" title="Voir en grand"><img src="assets/screen-bios-setup.png" width="900" height="540" loading="lazy" alt="Le setup du BIOS, façon AMIBIOS : fond gris, barres bleues, l’onglet Vibe Tweaker avec CPU Ratio [27], Target CPU Frequency 2700MHz (+13 %), DRAM Frequency [Auto], l’aide à droite, les touches en dessous et « American Megavibes, Inc. » en bas."></a><figcaption>Le setup, onglet Vibe Tweaker : le Céléri passe de 2,4 à 2,7 GHz.</figcaption></figure>
+      <figure><a href="assets/screen-overclock.png" title="Voir en grand"><img src="assets/screen-overclock.png" width="900" height="540" loading="lazy" alt="Le terminal des agents pendant un glitch : texte dédoublé en rouge et cyan, bandes inversées, rangées de caractères parasites, la ligne « segfault … in libnode.so.115 », l’agent « Crashed », et le tableau de bord : « Erreur matérielle (processeur à 3 300 MHz) : overclocking instable »."></a><figcaption>Trop loin : l’écran bave, les agents plantent.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="disque-persistant" aria-labelledby="t14">
+    <p class="meta"><span class="n">#14</span><time datetime="2026-11-23T08:24">23 nov. 2026 · 08 h 24</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/224b185">224b185</a><span>9 034 → 9 073 lignes</span></p>
     <h2 id="t14"><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></h2>
     <ul>
       <li>Le disque est sauvegardé avec la partie : ce que vous créez, copiez, renommez ou supprimez, dans le terminal ou le gestionnaire de fichiers, est toujours là au prochain lancement. Les paquets apt et les dépendances npm aussi.</li>
