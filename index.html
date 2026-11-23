@@ -566,7 +566,31 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .xf-ctx .xf-it:disabled * { color: var(--dim); }
 .xf-it.danger .t, .xf-it.danger .xw-ic { color: var(--red); }
 /* gestionnaire de fichiers (thunar) : la vraie arborescence du jeu, en vue liste détaillée */
-.fm { container-type: inline-size; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; }
+.fm { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; padding: 0; }
+.fm-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .2em .3ch; padding: .2em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); }
+.fm-tools button { padding: 0 .9ch; border: 1px solid var(--sep); border-radius: 2px; color: var(--fg); white-space: nowrap; }
+.fm-tools button:not(:disabled):hover { border-color: var(--orange); background: rgba(255, 255, 255, .06); }
+.fm-tools button:disabled { color: var(--dim2); cursor: default; }
+.fm-tools .fm-del:not(:disabled) { color: var(--red); }
+.fm-tools .sep { width: 1px; height: 1.1em; margin: 0 .4ch; background: var(--sep); }
+.fm-row.cutting > span { opacity: .45; }
+.fm-prog { height: .35em; background: var(--sep); }
+.fm-prog > span { display: block; height: 100%; width: 0; background: var(--orange); }
+.fm-disk { margin: .8em 1.2ch .4em; display: grid; gap: .25em; }
+.fm-disk small { color: var(--dim); white-space: normal; }
+.fm-dbar { display: block; height: .45em; border-radius: 3px; background: var(--sep); overflow: hidden; }
+.fm-dbar.big { height: .6em; margin: .25em 0 .3em; }
+.fm-dbar > span { display: block; height: 100%; background: var(--orange); }
+.fm-dbar > span.full { background: var(--red); }
+.fm-props { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .3em 2ch; margin: 0; }
+.fm-props dt { color: var(--dim); }
+.fm-props dd { margin: 0; color: var(--fg); overflow-wrap: anywhere; }
+.fm-props .warn { color: var(--red); }
+.fm-pic { color: var(--fg); }
+.fm-lbl { display: grid; gap: .3em; color: var(--dim); }
+.fm-in { font: inherit; color: var(--fg); background: var(--bg2); border: 1px solid var(--rule); border-radius: 2px; padding: .25em 1ch; }
+.fm-in:focus { outline: none; border-color: var(--orange); }
+.fm-err { color: var(--red); }
 .fm-bar { display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); white-space: pre; }
 .fm-bar > button { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--fg); }
 .fm-bar > button:disabled { color: var(--dim2); cursor: default; }
@@ -2532,13 +2556,62 @@ const NM_PKGS = ['.bin', '@babel', '@types', 'chalk', 'express', 'is-even', 'is-
   'rimraf', 'the-future', 'typescript', 'vite', 'webpack'];
 const NM_COUNT = 1337420;
 const nodeModules = () => mkD(Object.fromEntries(NM_PKGS.map(n => [n, mkD({ 'index.js': mkF('', { code: 1 }),
-  'package.json': mkF(`{ "name": "${n}", "version": "${ri(0, 9)}.${ri(0, 40)}.${ri(0, 9)}" }`) }, { mt: ago(1, 30) })])), { many: NM_COUNT, mt: ago(1, 5) });
+  'package.json': mkF(`{ "name": "${n}", "version": "${ri(0, 9)}.${ri(0, 40)}.${ri(0, 9)}" }`) }, { mt: ago(1, 30) })])), { many: NM_COUNT, msz: 2.4e9 + ri(0, 3e8), mt: ago(1, 5) });   // msz : ce que pèsent les 1 337 420 fichiers
 const logDate = min => { const d = new Date(T0 - min * 60000); return `${d.toString().slice(4, 10)} ${d.toTimeString().slice(0, 8)}`; };
 
 function put(dir, path, node) {
   const parts = path.split('/').filter(Boolean), name = parts.pop();
   for (const s of parts) dir = Object.hasOwn(dir.k, s) ? dir.k[s] : (dir.k[s] = mkD({}, { mt: ago(1, 72) }));
   if (!Object.hasOwn(dir.k, name)) dir.k[name] = node;
+}
+const big = (sz, o = {}) => mkF('', { b: 1, ...o, sz: Math.round(sz) });   // un fichier lourd : vidéo, modèle, image disque…
+const series = (fmt, n, lo, hi, o = {}) => Object.fromEntries(Array.from({ length: n }, (_, i) => [fmt(i + 1), big(ri(lo, hi), o)]));
+const p3 = i => String(i).padStart(3, '0');
+function fakeProjects() {                         // ~/code : les autres projets, abandonnés à des stades divers
+  const old = (a, b) => ({ mt: ago(24 * a, 24 * b) });
+  return {
+    'saas-de-la-mort': mkD({
+      'README.md': mkF('# SaaS de la mort\n\nLe prochain Notion. Puis le prochain Slack. Puis le prochain Notion, encore.\n\n## Statut\nAbandonné après 3 semaines et 14 abonnés (dont 13 comptes de test).\n\n## Lancer\n```\nnpm install   # 2,4 Go\nnpm run dev   # ne marche plus depuis la v2 de quelque chose\n```', old(500, 700)),
+      'package.json': mkF('{\n  "name": "saas-de-la-mort",\n  "version": "0.0.1-alpha-final",\n  "dependencies": { "next": "^12.0.0", "stripe": "*", "left-pad": "^1.3.0" }\n}', old(500, 700)),
+      '.env': mkF('STRIPE_SECRET_KEY=sk_live_••••••••   # commitée, puis révoquée, puis recommitée\nOPENAI_KEY=demander-au-stagiaire', old(500, 700)),
+      'TODO.md': mkF(Array.from({ length: 41 }, (_, i) => `- [ ] ${['Ajouter les paiements', 'Faire le RGPD', 'Trouver un client', 'Refaire le logo', 'Passer à Kubernetes', 'Écrire des tests'][i % 6]}`).join('\n') + '\n- [x] Acheter le nom de domaine', old(500, 700)),
+      'landing.png': big(2.1e6, old(500, 700)), 'demo-investisseurs.mp4': big(890e6, old(500, 700)),
+      node_modules: nodeModules(),
+      src: mkD({ 'index.ts': mkF('', { code: 1, ...old(500, 700) }), 'billing.ts': mkF('', { code: 1, ...old(500, 700) }), 'ai-wrapper.ts': mkF('', { code: 1, ...old(500, 700) }) }, old(500, 700)),
+    }, old(500, 700)),
+    'todo-app-v14': mkD({
+      'README.md': mkF('# Todo app, version 14\n\nLa quatorzième. Celle-là sera la bonne.\nFonctionnalités : ajouter une tâche. Supprimer une tâche (bientôt).', old(30, 90)),
+      'index.html': mkF('<!doctype html>\n<title>Todo v14</title>\n<h1>Mes tâches</h1>\n<ul id="t"></ul>\n<script src="app.js"><\/script>', old(30, 90)),
+      'app.js': mkF('', { code: 1, ...old(30, 90) }), 'style.css': mkF('', { code: 1, ...old(30, 90) }),
+    }, old(30, 90)),
+    'blockchain-pour-chats': mkD({
+      'whitepaper.pdf': big(12.4e6, old(900, 1100)),
+      'roadmap-2021.md': mkF('# Roadmap\n\n- T1 2021 : lancer le CatCoin\n- T2 2021 : un chat sur la Lune\n- T3 2021 : ???\n- T4 2021 : nous sommes en 2026', old(900, 1100)),
+      contracts: mkD({ 'CatCoin.sol': mkF('', { code: 1, ...old(900, 1100) }), 'Croquettes.sol': mkF('', { code: 1, ...old(900, 1100) }) }, old(900, 1100)),
+      'nft-chats': mkD(series(i => `chat-${p3(i)}.png`, 24, 1.1e6, 3.4e6, old(900, 1100)), old(900, 1100)),
+    }, old(900, 1100)),
+    'ia-qui-code-une-ia': mkD({
+      'README.md': mkF('# Une IA qui code une IA\n\nQui code une IA. Le GPU a demandé une pause au bout de 3 niveaux.\n\nEntraînement : 41 Go de données, 11 jours, 1 GTX 1060.\nRésultat : elle écrit « TODO » très bien.', old(60, 120)),
+      'train.py': mkF('', { code: 1, ...old(60, 120) }),
+      models: mkD({ 'weights-final-v1.safetensors': big(7.81e9, old(60, 120)), 'weights-final-v2-VRAIMENT.safetensors': big(7.83e9, old(50, 60)) }, old(50, 60)),
+      data: mkD({ 'stackoverflow-dump.jsonl': big(41.3e9, old(60, 120)), 'README.md': mkF('Tout Stack Overflow, sans les réponses acceptées : elles étaient fausses.', old(60, 120)) }, old(60, 120)),
+      checkpoints: mkD(series(i => `step-${i * 1000}.ckpt`, 6, 1.8e9, 1.95e9, old(50, 60)), old(50, 60)),
+    }, old(50, 60)),
+    'startup-pivot-n7': mkD({
+      'pitch-deck-v23.pdf': big(48.2e6, old(100, 200)), 'business-plan.xlsx': big(381e3, old(100, 200)), 'logo-final-final.psd': big(412e6, old(100, 200)),
+      'pivots.md': mkF('1. Uber pour les chats\n2. Airbnb pour les chats\n3. Tinder pour les chats\n4. La blockchain (pour les chats)\n5. Le métavers\n6. Une IA\n7. Une IA pour pivoter', old(100, 200)),
+    }, old(100, 200)),
+    'portfolio-2019': mkD({
+      'index.html': mkF('<h1>Portfolio</h1>\n<p>En construction.</p>   <!-- depuis 2019 -->', old(2400, 2500)),
+      'photo-pro.jpg': big(6.2e6, old(2400, 2500)), 'cv.pdf': big(184e3, old(2400, 2500)),
+    }, old(2400, 2500)),
+    'jeu-video-du-siecle': mkD({
+      'README.md': mkF('# Le jeu vidéo du siècle\n\nAvancement : 100 % des idées, 3 % du jeu.\nMoteur : maison (pourquoi pas).', old(300, 400)),
+      'musique-intro.wav': big(341e6, old(300, 400)),
+      'textures-4k': mkD(series(i => `texture-${p3(i)}.png`, 18, 58e6, 71e6, old(300, 400)), old(300, 400)),
+      moteur: mkD({ 'renderer.rs': mkF('', { code: 1, ...old(300, 400) }), 'physique.rs': mkF('', { code: 1, ...old(300, 400) }), 'TODO.txt': mkF('Tout.', old(300, 400)) }, old(300, 400)),
+    }, old(300, 400)),
+  };
 }
 function projectTree() {
   const p = mkD({
@@ -2586,9 +2659,15 @@ function buildFS() {
         'id_ed25519.pub': mkF(USER_TEXT.pubkey(USER)) }),
       '.zsh_history': mkF('npm install\ngit push --force\nnpm run ship\nsudo rm -rf / --no-preserve-root   # juste pour voir\nrestart'),
       '.zshrc': mkF("export PATH=\"$HOME/.local/bin:$PATH\"\nalias ship='npm run ship'      # très mauvaise idée\nalias yolo='rm -rf node_modules && npm i'"),
-      code: mkD({ [PROJ]: projectTree() }, { mt: ago(0, 3) }),
-      Documents: mkD({ 'cv_final_v3_VRAIMENT_FINAL.pdf': bin(), 'todo.txt': mkF('1. Shipper\n2. Ne pas shipper le vendredi\n3. Se rendre compte qu’on est vendredi') }),
-      Downloads: mkD({ 'node-v47.0.0-linux-x64.tar.xz': bin() }),
+      code: mkD({ [PROJ]: projectTree(), ...fakeProjects() }, { mt: ago(0, 3) }),
+      Documents: mkD({ 'cv_final_v3_VRAIMENT_FINAL.pdf': bin(), 'todo.txt': mkF('1. Shipper\n2. Ne pas shipper le vendredi\n3. Se rendre compte qu’on est vendredi'),
+        'video-demo-du-vendredi.mp4': big(2.31e9), 'factures-tokens-2026.pdf': big(3.4e6), 'contrat-agents.docx': big(86e3),
+        'notes-reunion.md': mkF('# Réunion du lundi\n\n- Les agents ont shippé 41 fois ce week-end.\n- Personne ne sait quoi.\n- Action : ne rien changer.'),
+        'photos-seminaire': mkD(series(i => `IMG_${4100 + i}.jpg`, 30, 3.1e6, 7.4e6)) }),
+      Downloads: mkD({ 'node-v47.0.0-linux-x64.tar.xz': bin(), 'vibian-13-friday-amd64.iso': big(4.2e9), 'Setup_Steam.exe': big(3.1e6),
+        'dataset-chats-4k.zip': big(18.6e9), 'cours-rust-en-1h.mp4': big(1.42e9) }),
+      Musique: mkD({ 'lofi-pour-shipper': mkD(series(i => `${p3(i)} - beat pour vendredi soir.mp3`, 40, 5.8e6, 11.2e6)) }),
+      Vidéos: mkD({ 'conf-vibe-coding-2026.mkv': big(6.8e9), 'tuto-git-push-force.mp4': big(214e6) }),
     }, { mt: ago(0, 3) }) }),
     lib: mkD({ modules: mkD({ '6.11.0-friday': mkD() }), systemd: mkD({ systemd: bin({ x: 1 }) }),
       'x86_64-linux-gnu': mkD({ 'libc.so.6': bin(), 'libssl.so.3': bin(), 'libstdc++.so.6': bin(), 'libz.so.1': bin() }) }, { crit: 1, deep: 1 }),
@@ -2651,7 +2730,8 @@ const fmtDate = ts => {
   const d = new Date(ts);
   return `${String(d.getDate()).padStart(2)} ${MOIS[d.getMonth()].padEnd(5)} ${Date.now() - ts < 182 * 864e5 ? d.toTimeString().slice(0, 5) : ' ' + d.getFullYear()}`;
 };
-const fmtSize = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(n / 1e3)) + ' ko';
+const fmtSize = n => n >= 1e12 ? (n / 1e12).toFixed(1).replace('.', ',') + ' To' : n >= 1e9 ? (n / 1e9).toFixed(1).replace('.', ',') + ' Go'
+  : n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(n / 1e3)) + ' ko';
 const owner = segs => isPrefix(HOME, segs) || segs[0] === 'tmp' ? USER : 'root';
 const argv = s => [...s.matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)].map(m => m[1] ?? m[2] ?? m[3]);
 const isOpt = a => /^-[a-z1]+$/i.test(a);
@@ -4266,7 +4346,7 @@ const PROGS = {
   htop: { label: 'htop', delay: 1500, icon: '▤', menu: 'Moniteur système (htop)', desc: 'processus, CPU, mémoire', make: () => makeHtop() },
   atop: { label: 'atop', delay: 2000, icon: '▥', menu: 'Moniteur avancé (atop)', desc: 'disques, réseau, carte graphique', make: () => makeAtop() },
   // gui : il lui faut le bureau Xfce (sinon « cannot open display »), et il se ferme avec la session
-  thunar: { label: 'Fichiers', delay: 1000, gui: true, cat: 'Accessoires', icon: '▣', menu: 'Gestionnaire de fichiers', desc: 'l’arborescence de prod-01 · clic droit pour supprimer', make: () => makeThunar() },
+  thunar: { label: 'Fichiers', delay: 1000, gui: true, cat: 'Accessoires', icon: '▣', menu: 'Gestionnaire de fichiers', desc: 'copier, couper, coller, renommer, propriétés · clic droit', make: () => makeThunar() },
   mousepad: { label: 'Éditeur', delay: 1000, gui: true, cat: 'Accessoires', icon: '✎', menu: 'Éditeur de texte', desc: 'Mousepad · .txt, .md, config, code', make: () => makeEditor() },
   atril: { label: 'Visionneuse', delay: 1000, gui: true, cat: 'Accessoires', icon: '▧', menu: 'Visionneuse de documents', desc: 'Atril · les PDF', make: () => makeViewer() },
   firefaux: { label: 'Firefaux', delay: 1000, gui: true, cat: 'Internet', icon: '◍', menu: 'Navigateur web (Firefaux)', desc: 'le Web, en moins bien · store IA et matos.vibe', make: () => makeBrowser() },
@@ -5501,17 +5581,44 @@ xfIconsEl.addEventListener('contextmenu', e => {
 deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) xfIconSelect(''); });   // un clic sur le fond désélectionne
 
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
-   Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés.
-   Clic droit : ouvrir, ouvrir un terminal ici, supprimer. La suppression suit les règles de rm : un élément
+   Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés, jauge du disque.
+   Barre d'outils et clic droit : créer, couper, copier, coller (à la vitesse du disque, dans l'espace libre), renommer,
+   supprimer, propriétés. Déplacer ou renommer un élément vital fait tomber le système, comme le supprimer. La suppression suit les règles de rm : un élément
    système vital fait tomber la machine, les agents réagissent quand on touche au projet. Il faut le bureau (xfce). */
 const frNumI = n => Math.round(n).toLocaleString('fr-FR');   // l'interface graphique parle français : 1 337 420
-const fmGlyph = (k, c) => c.d ? '■' : /\.pdf$/i.test(k) ? '▧' : c.x ? '▶' : c.b ? '▦' : c.code ? '◆' : '□';
-const fmType = (k, c) => c.d ? (c.many ? 'dossier géant' : 'dossier') : c.x ? 'exécutable' : c.b ? (/\.pdf$/i.test(k) ? 'document PDF' : /\.(xz|gz|tar|zip)$/i.test(k) ? 'archive' : 'binaire')
+const fmGlyph = (k, c) => c.d ? '■' : /\.pdf$/i.test(k) ? '▧' : c.x ? '▶' : /\.(png|jpe?g|psd|gif)$/i.test(k) ? '▨' : /\.(mp4|mkv|mov)$/i.test(k) ? '▶' : /\.(mp3|wav|flac)$/i.test(k) ? '♪' : c.b ? '▦' : c.code ? '◆' : '□';
+const FM_BIN_TYPES = [[/\.(png|jpe?g|gif)$/i, 'image'], [/\.psd$/i, 'image Photoshop'], [/\.(mp4|mkv|mov)$/i, 'vidéo'], [/\.(mp3|wav|flac)$/i, 'audio'],
+  [/\.iso$/i, 'image disque'], [/\.(safetensors|ckpt)$/i, 'poids de modèle IA'], [/\.jsonl$/i, 'jeu de données'], [/\.(xlsx|ods)$/i, 'tableur'], [/\.(docx|odt)$/i, 'document'], [/\.exe$/i, 'programme Windows (ceci est un Linux)']];
+const fmType = (k, c) => c.d ? (c.many ? 'dossier géant' : 'dossier') : c.x ? 'exécutable' : c.b ? (/\.pdf$/i.test(k) ? 'document PDF' : /\.(xz|gz|tar|zip)$/i.test(k) ? 'archive' : FM_BIN_TYPES.find(([re]) => re.test(k))?.[1] || 'binaire')
   : c.code || /\.(ts|tsx|js|jsx|go|rs|py|sql|tf|ya?ml|sh|c|h|css)$/i.test(k) ? 'code source' : /\.md$/i.test(k) ? 'Markdown' : /\.json$/i.test(k) ? 'JSON' : /\.log$/i.test(k) ? 'journal' : /\.html?$/i.test(k) ? 'page HTML' : 'texte brut';
 const fmCount = n => { const c = n.many || Object.keys(n.k).length; return c >= 1e6 ? `${frNum(c / 1e6)} M éléments` : `${frNumI(c)} élément${c > 1 ? 's' : ''}`; };
 const fmDate = ts => fmtDate(ts).replace(/\s+/g, ' ').trim();   // « 21 nov. 14:03 » ou « 13 mai 2026 »
 const fmSize = c => c.d ? fmCount(c) : !c.sz ? '0 octet' : c.sz < 1000 ? `${c.sz} octets` : fmtSize(c.sz);
 const shq = s => /[\s'"$]/.test(s) ? `"${s}"` : s;
+const FM_CLIP = { op: '', items: [] };             // le presse-papiers de Thunar : copier ou couper, puis coller
+const DISK_SPEED = [90, 450, 5000, 10000, 28000];  // Mo/s : disque dur, SSD SATA, NVMe PCIe 4, NVMe PCIe 5, RAID 0
+const DISK_SYS = 11.2e9;                          // ce que pèse le système en dehors de l'arborescence du jeu
+const nodeSize = n => !n ? 0 : n.d ? (n.msz || 0) + Object.values(n.k).reduce((t, c) => t + nodeSize(c), 0) : (n.sz || 0);
+const diskCap = () => { const M = SMART_DISKS[PC().disk]; return M.cap * (M.raid || 1); };
+const diskUsed = () => DISK_SYS + nodeSize(vfs);
+function fmClone(n) {                             // une copie : la date du jour, et plus rien de « vital » (copier /bin ne protège rien)
+  const c = { ...n, mt: Date.now() };
+  delete c.crit; delete c.deep;
+  if (n.d) c.k = Object.fromEntries(Object.entries(n.k).map(([k, v]) => [k, fmClone(v)]));
+  return c;
+}
+function freeName(dir, k, tag = '') {             // « rapport.pdf » → « rapport (copie).pdf », ou « Nouveau dossier 2 »
+  if (!Object.hasOwn(dir.k, k)) return k;
+  const m = /^(.+?)(\.[^.\s]{1,9})?$/.exec(k), base = dir.k[k]?.d ? k : m[1], ext = dir.k[k]?.d ? '' : (m[2] || '');
+  for (let i = 1; ; i++) {
+    const c = tag ? `${base} (${tag}${i > 1 ? ' ' + i : ''})${ext}` : `${base} ${i + 1}${ext}`;
+    if (!Object.hasOwn(dir.k, c)) return c;
+  }
+}
+const fmPerms = (segs, c) => c.d ? (segs[0] === 'root' || segs.at(-1) === '.ssh' ? 'drwx------' : 'drwxr-xr-x') : c.x ? '-rwxr-xr-x'
+  : /^id_|\.env$|secret/.test(segs.at(-1)) ? '-rw-------' : '-rw-r--r--';
+const PERM_TXT = { 'drwx------': 'vous seul (et les agents)', 'drwxr-xr-x': 'tout le monde lit, vous écrivez (les agents aussi)', '-rwxr-xr-x': 'exécutable par tout le monde',
+  '-rw-------': 'vous seul. Un agent l’a quand même collé dans un ticket', '-rw-r--r--': 'tout le monde lit, vous écrivez' };
 function makeThunar() {
   const el = document.createElement('div');
   el.className = 'prog fm';
@@ -5522,13 +5629,21 @@ function makeThunar() {
     + '<button type="button" data-fm="up" title="Dossier parent (Retour arrière)" aria-label="Dossier parent">↑</button>'
     + '<nav class="fm-path" aria-label="Emplacement"></nav>'
     + '<button type="button" class="fm-hid" data-fm="hidden" aria-pressed="false" title="Afficher les fichiers cachés">.* cachés</button></div>'
+    + '<div class="fm-tools" role="toolbar" aria-label="Actions sur les fichiers">'
+    + '<button type="button" data-fm="newdir" title="Créer un dossier (Ctrl+Maj+N)">+ Dossier</button><button type="button" data-fm="newfile" title="Créer un document vide">+ Document</button><span class="sep"></span>'
+    + '<button type="button" data-fm="cut" title="Couper (Ctrl+X)">Couper</button><button type="button" data-fm="copy" title="Copier (Ctrl+C)">Copier</button>'
+    + '<button type="button" data-fm="paste" title="Coller (Ctrl+V)">Coller</button><span class="sep"></span>'
+    + '<button type="button" data-fm="rename" title="Renommer (F2)">Renommer</button><button type="button" data-fm="props" title="Propriétés (Alt+Entrée)">Propriétés</button>'
+    + '<button type="button" data-fm="delete" class="fm-del" title="Supprimer (Suppr)">Supprimer</button></div>'
     + '<div class="fm-main"><nav class="fm-side" aria-label="Raccourcis"></nav><div class="fm-list" role="listbox" aria-label="Fichiers"></div></div>'
+    + '<div class="fm-prog" hidden><span></span></div>'
     + '<div class="fm-status" role="status"></div>'
     + '<div class="fm-confirm" hidden><div class="fm-box" role="alertdialog" aria-modal="true" aria-label="Confirmer la suppression"></div></div>';
-  const q = s => el.querySelector(s), listEl = q('.fm-list'), statusEl = q('.fm-status'), confirmEl = q('.fm-confirm'), box = q('.fm-box');
-  let path = [...HOME], back = [], fwd = [], sel = null, hidden = false, sig = '', note = '', noteUntil = 0, pending = null;
-  const places = () => [['Raccourcis'], ['⌂', 'Dossier personnel', HOME], ['■', `Projet ${PROJ}`, PROJ_DIR], ['■', 'Documents', [...HOME, 'Documents']],
-    ['■', 'Téléchargements', [...HOME, 'Downloads']], ['▥', 'Corbeille', null], ['Périphériques'], ['/', 'Système de fichiers', []], ['▤', 'Fichiers temporaires', ['tmp']]];
+  const q = s => el.querySelector(s), listEl = q('.fm-list'), statusEl = q('.fm-status'), confirmEl = q('.fm-confirm'), box = q('.fm-box'), progEl = q('.fm-prog');
+  let path = [...HOME], back = [], fwd = [], sel = null, hidden = false, sig = '', note = '', noteUntil = 0, pending = null, act = null, busy = false;
+  const places = () => [['Raccourcis'], ['⌂', 'Dossier personnel', HOME], ['■', `Projet ${PROJ}`, PROJ_DIR], ['■', 'Autres projets', [...HOME, 'code']], ['■', 'Documents', [...HOME, 'Documents']],
+    ['■', 'Téléchargements', [...HOME, 'Downloads']], ['♪', 'Musique', [...HOME, 'Musique']], ['▶', 'Vidéos', [...HOME, 'Vidéos']], ['▥', 'Corbeille', null],
+    ['Périphériques'], ['/', 'Système de fichiers', []], ['▤', 'Fichiers temporaires', ['tmp']]];
   const same = (a, b) => a.length === b.length && a.every((s, i) => s === b[i]);
   const sigOf = () => { const n = nodeAt(path); return `${absPath(path)}|${hidden}|${n?.d ? Object.keys(n.k).join('/') : '∅'}`; };
   const names = () => {                          // dossiers d'abord, comme Thunar
@@ -5541,7 +5656,7 @@ function makeThunar() {
     const n = nodeAt(path), c = sel && n?.d ? n.k[sel] : null;
     const all = n?.d ? names().length : 0, hid = n?.d && !hidden ? Object.keys(n.k).filter(k => k.startsWith('.')).length : 0;
     const t = performance.now() < noteUntil ? note
-      : c ? `« ${sel} » · ${fmType(sel, c)} · ${fmSize(c)} · modifié le ${fmDate(c.mt)}`
+      : c ? `« ${sel} » · ${fmType(sel, c)} · ${c.d ? `${fmSize(c)}, ${fmtSize(nodeSize(c))}` : fmSize(c)} · modifié le ${fmDate(c.mt)}`
       : `${all} élément${all > 1 ? 's' : ''}${hid ? ` (+ ${hid} caché${hid > 1 ? 's' : ''})` : ''}${n?.many ? ` affichés sur ${frNumI(n.many)} : Thunar a renoncé` : ''}`;
     statusEl.textContent = t;
     statusEl.classList.toggle('note', performance.now() < noteUntil);
@@ -5554,6 +5669,7 @@ function makeThunar() {
       if (on && scroll) r.scrollIntoView({ block: 'nearest' });
     });
     status();
+    tools();
   }
   function draw() {
     if (!nodeAt(path)?.d) {                      // le dossier a disparu (rm, crash…) : on remonte jusqu'à ce qui existe
@@ -5569,8 +5685,12 @@ function makeThunar() {
     const hb = q('[data-fm="hidden"]');
     hb.setAttribute('aria-pressed', hidden);
     q('.fm-path').innerHTML = ['/', ...path].map((s, i) => `<button type="button" data-i="${i}"${i === path.length ? ' class="on" aria-current="location"' : ''}>${esc(s)}</button>`).join('');
+    const cap = diskCap(), used = Math.min(cap, diskUsed());
     q('.fm-side').innerHTML = places().map(([ic, t, p]) => t === undefined ? `<p>${esc(ic)}</p>`
-      : `<button type="button" data-place="${esc(t)}"${p && same(p, path) ? ' class="on"' : ''}${p && !nodeAt(p)?.d ? ' disabled' : ''}><span class="xw-ic">${esc(ic)}</span>${esc(t)}</button>`).join('');
+      : `<button type="button" data-place="${esc(t)}"${p && same(p, path) ? ' class="on"' : ''}${p && !nodeAt(p)?.d ? ' disabled' : ''}><span class="xw-ic">${esc(ic)}</span>${esc(t)}</button>`).join('')
+      + `<div class="fm-disk" title="${esc(part('disk').n)}"><span class="fm-dbar"><span style="width:${(used / cap * 100).toFixed(1)}%"${used / cap > .9 ? ' class="full"' : ''}></span></span>`
+      + `<small>${esc(fmtSize(cap - used))} libres sur ${esc(fmtSize(cap))}</small></div>`;
+    tools();
     listEl.innerHTML = '<div class="fm-row fm-head" aria-hidden="true"><span></span><span>Nom</span><span class="fm-s">Taille</span><span class="fm-t">Type</span><span class="fm-d">Modifié</span></div>'
       + list.map(k => {
         const c = n.k[k];
@@ -5582,6 +5702,149 @@ function makeThunar() {
       + (n.many ? `<p class="fm-more">… et ${frNumI(n.many - Object.keys(n.k).length)} autres éléments. Thunar a préféré ne pas les compter un par un.</p>` : '');
     status();
     if (xw.thunar) xfLabel('thunar');
+  }
+  function tools() {                             // la barre d'outils suit la sélection et le presse-papiers
+    const on = !!sel, t = (k, off) => { const b = q(`[data-fm="${k}"]`); if (b) b.disabled = off; };
+    ['cut', 'copy', 'rename', 'delete'].forEach(k => t(k, !on || busy));
+    t('paste', !FM_CLIP.items.length || busy); t('newdir', busy); t('newfile', busy); t('props', false);
+    listEl.querySelectorAll('.fm-row[data-k]').forEach(r => r.classList.toggle('cutting', FM_CLIP.op === 'cut' && FM_CLIP.items.some(s => same(s, [...path, r.dataset.k]))));
+  }
+  function dialog(html, onOk, focus = '[data-c="no"]') {   // une boîte : suppression, renommage, création, propriétés, erreurs
+    act = onOk;
+    box.innerHTML = html;
+    confirmEl.hidden = false;
+    const f = box.querySelector(focus);
+    f?.focus({ preventScroll: true });
+    return f;
+  }
+  const boxErr = t => { const p = box.querySelector('.fm-err'); if (p) { p.textContent = t; p.hidden = false; } };
+  function nameBox(title, val, ok, sub = '') {    // demander un nom (renommer, créer)
+    const inp = dialog(`<p class="ttl">${esc(title)}</p>${sub}<label class="fm-lbl">Nom <input class="fm-in" spellcheck="false" autocomplete="off" value="${esc(val)}"></label>`
+      + '<p class="fm-err" hidden></p><div class="pk-actions"><button type="button" data-c="ok">Valider</button><button type="button" data-c="no">Annuler</button></div>', () => ok(inp.value), '.fm-in');
+    const dot = val.lastIndexOf('.');
+    inp.setSelectionRange(0, dot > 0 ? dot : val.length);   // comme Thunar : le nom sans l'extension est sélectionné
+    inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); act?.(); } else if (ev.key === 'Escape') { ev.preventDefault(); closeConfirm(); } });
+  }
+  const badNew = (dir, v, old) => !v ? 'Le nom ne peut pas être vide.' : v === '.' || v === '..' ? 'Ce nom est réservé.' : v.includes('/') ? 'Pas de « / » dans un nom : c’est le séparateur des dossiers.'
+    : v !== old && Object.hasOwn(dir.k, v) ? `« ${v} » existe déjà dans ce dossier.` : badName(v) || '';
+  const rootNote = () => owner(path) === 'root' ? ' (dossier de root : les agents ont prêté leurs droits à Thunar)' : '';
+  function setClip(op) {
+    if (!sel) return;
+    FM_CLIP.op = op; FM_CLIP.items = [[...path, sel]];
+    tools();
+    flash(`« ${sel} » ${op === 'cut' ? 'coupé : collez-le ailleurs (Ctrl+V) pour le déplacer' : 'copié dans le presse-papiers (Ctrl+V pour coller)'}.`);
+  }
+  function crashMove(segs, verb) {                // déplacer ou renommer un élément vital : il disparaît de sa place, le système tombe
+    const path0 = absPath(segs);
+    closeConfirm();
+    xfFocus('zsh', false);
+    chain = chain.then(() => systemCrash(path0, [segs], {
+      cmd: `thunar --${verb === 'renommé' ? 'rename' : 'move'} ${path0}`, by: 'thunar',
+      intro: [[H(['thunar: ', 'wrn'], `« ${path0} » ${verb} : le système le cherche à sa place et ne le trouve plus.`), '', 700]],
+    })).catch(() => {});
+  }
+  function nmBack(src) {                          // node_modules déplacé ou renommé : un agent le réinstalle aussitôt
+    if (absPath(src) !== absPath([...PROJ_DIR, 'node_modules']) || !nodeAt(PROJ_DIR)) return '';
+    nodeAt(PROJ_DIR).k.node_modules = nodeModules();
+    return ' node_modules est aussitôt revenu : un agent l’a réinstallé, par réflexe.';
+  }
+  function progress(size, count, verb) {          // la copie : à la vitesse du disque, accélérée pour la démo
+    busy = true; tools();
+    const sp = DISK_SPEED[PC().disk] * 1e6, real = size / sp, dur = Math.max(400, Math.min(4000, real * 30)), t0 = performance.now(), bar = progEl.firstElementChild;
+    progEl.hidden = false;
+    return new Promise(res => {
+      const step = () => {
+        const f = Math.min(1, (performance.now() - t0) / dur);
+        bar.style.width = (f * 100).toFixed(1) + '%';
+        note = `${verb} de ${frNumI(count)} élément${count > 1 ? 's' : ''} : ${Math.floor(f * 100)} % · ${fmtSize(size * f)} sur ${fmtSize(size)} · ${frNumI(sp / 1e6)} Mo/s${PC().disk === 0 ? ' (le disque dur gratte)' : ''}`;
+        noteUntil = performance.now() + 2000; status();
+        if (f < 1 && el.isConnected) return requestAnimationFrame(step);
+        progEl.hidden = true; busy = false; res(real);
+      };
+      step();
+    });
+  }
+  const fmEta = s => s < 60 ? `${Math.max(1, Math.round(s))} s` : s < 3600 ? `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')}` : `${Math.floor(s / 3600)} h ${String(Math.round(s % 3600 / 60)).padStart(2, '0')}`;
+  async function paste(dest = path) {
+    if (!FM_CLIP.items.length) return flash('Le presse-papiers est vide : copiez ou coupez quelque chose d’abord.');
+    if (busy) return flash('Une copie est en cours. Le disque fait ce qu’il peut.');
+    if (mode !== 'idle') return flash('Impossible : le système est occupé à tout casser.');
+    const D = nodeAt(dest), cut = FM_CLIP.op === 'cut', items = FM_CLIP.items.filter(x => nodeAt(x));
+    if (!D?.d) return;
+    if (!items.length) { FM_CLIP.items = []; tools(); return flash('Ce qui était dans le presse-papiers n’existe plus.'); }
+    const into = items.find(x => isPrefix(x, dest));
+    if (into) return flash(`Impossible de ${cut ? 'déplacer' : 'copier'} « ${into.at(-1)} » dans lui-même : même Thunar a des limites.`);
+    if (cut && items.every(x => same(x.slice(0, -1), dest))) return flash('Couper puis coller au même endroit : rien n’a bougé. Comme le ticket.');
+    if (cut) { const f = items.find(x => isFatal(x, nodeAt(x))); if (f) return crashMove(f, 'déplacé'); }
+    const size = items.reduce((t, x) => t + nodeSize(nodeAt(x)), 0), count = items.reduce((t, x) => t + countNodes(nodeAt(x)), 0);
+    if (!cut && diskUsed() + size > diskCap()) {
+      return dialog(`<p class="ttl">Erreur lors de la copie</p><p>Plus d’espace disponible sur le périphérique : ${esc(fmtSize(size))} à copier, ${esc(fmtSize(Math.max(0, diskCap() - diskUsed())))} libres sur ${esc(fmtSize(diskCap()))} (${esc(part('disk').n)}).</p>`
+        + '<p class="dim">Supprimez quelque chose, ou achetez un plus gros disque (B, onglet Matériel PC).</p><div class="pk-actions"><button type="button" data-c="no">Fermer</button></div>', null);
+    }
+    const real = !cut && size > 20e6 ? await progress(size, count, 'Copie') : 0;
+    let last = '', back2 = '';
+    for (const x of items) {
+      const n = nodeAt(x);
+      if (!n) continue;
+      last = freeName(D, x.at(-1), cut ? '' : 'copie');
+      D.k[last] = cut ? n : fmClone(n);
+      if (cut) { removeAt(x); back2 += nmBack(x); }
+    }
+    if (cut) { FM_CLIP.items = []; FM_CLIP.op = ''; fixCwd(); }
+    sel = last;
+    draw(); mark(true);
+    flash(`${cut ? 'Déplacé' : 'Collé'} : ${items.length > 1 ? `${items.length} éléments` : `« ${last} »`}${size > 1e6 ? ` (${fmtSize(size)})` : ''}`
+      + (real > 2 ? `. Au rythme réel du disque, ${fmEta(real)} : Thunar a accéléré pour vous.` : '.') + rootNote() + back2);
+  }
+  function askRename(k) {
+    if (!k || busy) return;
+    const segs = [...path, k];
+    nameBox(`Renommer « ${k} »`, k, v => {
+      const D = nodeAt(path), n = nodeAt(segs), nv = v.trim();
+      if (!D || !n) return closeConfirm();
+      if (nv === k) return closeConfirm();
+      const bad = badNew(D, nv, k);
+      if (bad) return boxErr(bad);
+      if (isFatal(segs, n)) return crashMove(segs, 'renommé');
+      D.k[nv] = n; delete D.k[k]; n.mt = Date.now();
+      const nb = nmBack(segs);
+      if (FM_CLIP.items.some(x => same(x, segs))) FM_CLIP.items = [];
+      closeConfirm(); fixCwd();
+      sel = nv; draw(); mark(true);
+      flash(`« ${k} » renommé en « ${nv} ».${nb}`);
+    });
+  }
+  function askCreate(dir) {
+    if (busy) return;
+    const D = nodeAt(path);
+    if (!D?.d) return;
+    nameBox(dir ? 'Créer un dossier' : 'Créer un document vide', freeName(D, dir ? 'Nouveau dossier' : 'Nouveau document.txt'), v => {
+      const nv = v.trim(), bad = badNew(D, nv);
+      if (bad) return boxErr(bad);
+      D.k[nv] = dir ? mkD({}, { mt: Date.now() }) : mkF('', { mt: Date.now() });
+      closeConfirm();
+      sel = nv; draw(); mark(true);
+      flash(`${dir ? 'Dossier' : 'Document'} « ${nv} » créé dans ${tildePath(path)}${rootNote()}.`);
+    }, `<p class="dim">Dans ${esc(tildePath(path))}</p>`);
+  }
+  function showProps(k) {                         // propriétés : du fichier sélectionné, ou du dossier affiché
+    const segs = k != null ? [...path, k] : [...path], n = nodeAt(segs);
+    if (!n) return;
+    const name = segs.length ? segs.at(-1) : '/', size = nodeSize(n), perm = fmPerms(segs, n), cap = diskCap(), used = Math.min(cap, diskUsed());
+    const kids = n.d ? Object.values(n.k) : [], nd = kids.filter(c => c.d).length, nf = kids.length - nd, total = n.d ? countNodes(n) - 1 : 0;
+    const d = new Date(n.mt), dt = `${d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} à ${d.toTimeString().slice(0, 5)}`;
+    const row = (t, v) => `<dt>${t}</dt><dd>${v}</dd>`;
+    dialog(`<p class="ttl"><span class="fm-pic">${fmGlyph(name, n)}</span> Propriétés de « ${esc(name)} »</p><dl class="fm-props">`
+      + row('Type', esc(fmType(name, n))) + row('Emplacement', esc(segs.length ? absPath(segs.slice(0, -1)) : '(la racine)'))
+      + row('Taille', `${esc(fmtSize(size))}${size >= 1000 ? ` <span class="dim">(${frNumI(size)} octets)</span>` : ''}${n.many ? ' <span class="dim">· estimation : Thunar n’a pas tout compté</span>' : ''}`)
+      + (n.many ? row('Contenu', `${frNumI(n.many)} éléments <span class="dim">(Thunar n’en a ouvert que ${frNumI(kids.length)})</span>`)
+        : n.d ? row('Contenu', `${frNumI(nd)} dossier${nd > 1 ? 's' : ''}, ${frNumI(nf)} fichier${nf > 1 ? 's' : ''}${total > kids.length ? ` <span class="dim">(${frNumI(total)} éléments en tout)</span>` : ''}`) : '')
+      + row('Modifié', esc(dt)) + row('Propriétaire', esc(owner(segs)) + (owner(segs) === 'root' ? ' <span class="dim">(et les agents, en pratique)</span>' : ''))
+      + row('Permissions', `<code>${perm}</code> <span class="dim">${esc(PERM_TXT[perm])}</span>`)
+      + row('Volume', `<span class="fm-dbar big"><span style="width:${(used / cap * 100).toFixed(1)}%"${used / cap > .9 ? ' class="full"' : ''}></span></span>${esc(fmtSize(used))} utilisés sur ${esc(fmtSize(cap))} · ${esc(fmtSize(cap - used))} libres <span class="dim">(${esc(part('disk').n)})</span>`)
+      + (isFatal(segs, n) ? row('Attention', '<span class="warn">élément vital du système : ne pas le supprimer, le déplacer ni le renommer.</span>') : '')
+      + (n.code || /\.(md|ts|js|py|rs|sol)$/i.test(name) || isPrefix(PROJ_DIR, segs) ? row('Relu par', 'personne') : '')
+      + '</dl><div class="pk-actions"><button type="button" data-c="no">Fermer</button></div>', null);
   }
   function go(segs, push = true) {
     const n = nodeAt(segs);
@@ -5617,14 +5880,12 @@ function makeThunar() {
     if (mode !== 'idle') return flash(mode === 'gameover' ? 'Game over : tapez restart dans le terminal avant de supprimer quoi que ce soit.' : 'Impossible : le système est occupé à tout casser.');
     const fatal = isFatal(segs, n), cnt = n.d ? countNodes(n) - 1 : 0;
     pending = segs;
-    box.innerHTML = '<p class="ttl">Supprimer définitivement ?</p>'
+    dialog('<p class="ttl">Supprimer définitivement ?</p>'
       + `<p>« ${esc(absPath(segs))} »${cnt ? ` et ses ${frNumI(cnt)} élément${cnt > 1 ? 's' : ''} seront supprimés` : ' sera supprimé'} définitivement. Il n’y a pas de corbeille sur prod-01.</p>`
       + (fatal ? '<p class="warn">⚠ Élément vital du système. Thunar demande les droits root… les agents les lui ont déjà donnés.</p>' : '')
-      + '<div class="pk-actions"><button type="button" class="danger" data-c="ok">Supprimer</button><button type="button" data-c="no">Annuler</button></div>';
-    confirmEl.hidden = false;
-    box.querySelector('[data-c="no"]').focus({ preventScroll: true });
+      + '<div class="pk-actions"><button type="button" class="danger" data-c="ok">Supprimer</button><button type="button" data-c="no">Annuler</button></div>', doDelete);
   }
-  function closeConfirm() { confirmEl.hidden = true; pending = null; el.focus({ preventScroll: true }); }
+  function closeConfirm() { confirmEl.hidden = true; pending = null; act = null; el.focus({ preventScroll: true }); }
   function doDelete() {
     const segs = pending, n = segs && nodeAt(segs);
     closeConfirm();
@@ -5659,20 +5920,40 @@ function makeThunar() {
         ...(kd === 'text' ? [cat] : []),
         ...(kd !== 'dir' && kd !== 'text' ? [{ ic: PROGS.mousepad.icon, t: 'Ouvrir avec l’éditeur de texte', run: () => openWith('mousepad', segs) }] : []),
         '-',
+        { ic: '⤳', t: 'Couper', k: 'Ctrl+X', run: () => setClip('cut') },
+        { ic: '⧉', t: 'Copier', k: 'Ctrl+C', run: () => setClip('copy') },
+        ...(kd === 'dir' ? [{ ic: '⎘', t: 'Coller dans le dossier', off: !FM_CLIP.items.length, run: () => paste(segs) }] : []),
+        { ic: '✎', t: 'Renommer…', k: 'F2', run: () => askRename(k) },
+        '-',
         { ic: '✕', t: 'Supprimer', k: 'Suppr', danger: true, run: () => askDelete(k) },
+        '-',
+        { ic: 'i', t: 'Propriétés…', k: 'Alt+Entrée', run: () => showProps(k) },
       ]);
     }
     xfCtxOpen(x, y, [
+      { ic: '■', t: 'Créer un dossier…', k: 'Ctrl+Maj+N', run: () => askCreate(true) },
+      { ic: '□', t: 'Créer un document vide…', run: () => askCreate(false) },
+      { ic: '⎘', t: 'Coller', k: 'Ctrl+V', off: !FM_CLIP.items.length, run: () => paste() },
+      '-',
       { ic: '❯', t: 'Ouvrir un terminal ici', run: () => typeIntoShell(`cd ${shq(tildePath(path))}`) },
       { ic: '.', t: hidden ? 'Masquer les fichiers cachés' : 'Afficher les fichiers cachés', run: () => { hidden = !hidden; draw(); } },
       { ic: '↻', t: 'Actualiser', k: 'F5', run: () => draw() },
       '-',
       { ic: '↑', t: 'Dossier parent', k: '⌫', off: !path.length, run: () => go(path.slice(0, -1)) },
+      { ic: 'i', t: 'Propriétés du dossier…', run: () => showProps(null) },
     ]);
   }
   el.addEventListener('click', e => {
     const b = e.target.closest('button');
-    if (b?.closest('.fm-box')) return b.dataset.c === 'ok' ? doDelete() : closeConfirm();
+    if (b?.closest('.fm-box')) return b.dataset.c === 'ok' && act ? act() : closeConfirm();
+    const tool = b?.dataset.fm;
+    if (tool === 'newdir') return askCreate(true);
+    if (tool === 'newfile') return askCreate(false);
+    if (tool === 'cut' || tool === 'copy') return setClip(tool);
+    if (tool === 'paste') return paste();
+    if (tool === 'rename') return askRename(sel);
+    if (tool === 'props') return showProps(sel);
+    if (tool === 'delete') return sel && askDelete(sel);
     if (b?.dataset.fm === 'back' && back.length) { fwd.push(path); go(back.pop(), false); }
     else if (b?.dataset.fm === 'fwd' && fwd.length) { back.push(path); go(fwd.pop(), false); }
     else if (b?.dataset.fm === 'up') go(path.slice(0, -1));
@@ -5686,6 +5967,17 @@ function makeThunar() {
       sel = r ? r.dataset.k : null;
       mark();
     }
+  });
+  el.addEventListener('keydown', e => {          // les raccourcis avec Ctrl ou Alt (le gestionnaire global ne les transmet pas)
+    if (!confirmEl.hidden || e.target.closest?.('input, textarea')) return;
+    const k = e.key.toLowerCase();
+    if (e.ctrlKey && !e.altKey && k === 'c') setClip('copy');
+    else if (e.ctrlKey && !e.altKey && k === 'x') setClip('cut');
+    else if (e.ctrlKey && !e.altKey && k === 'v') paste();
+    else if (e.ctrlKey && e.shiftKey && k === 'n') askCreate(true);
+    else if (e.altKey && k === 'enter') showProps(sel);
+    else return;
+    e.preventDefault(); e.stopPropagation();
   });
   el.addEventListener('dblclick', e => { const r = e.target.closest('.fm-row[data-k]'); if (r) open(r.dataset.k); });
   listEl.addEventListener('contextmenu', e => {
@@ -5709,6 +6001,7 @@ function makeThunar() {
     else if (k === 'Enter') { if (sel) open(sel); }
     else if (k === 'Backspace') go(path.slice(0, -1));
     else if (k === 'Delete') { if (sel) askDelete(sel); }
+    else if (k === 'F2') { if (sel) askRename(sel); }
     else if (k === 'F5') draw();
     else if (k === 'Escape') { sel = null; mark(); }
     else if (k === 'ContextMenu' || (k === 'F10' && e.shiftKey)) {
