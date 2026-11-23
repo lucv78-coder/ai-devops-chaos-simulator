@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 9 485">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 9 497">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -59,7 +59,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 9 485 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 9 497 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## Le matériel
 
@@ -126,7 +126,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (9 485 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (9 497 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -205,8 +205,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 | <img src="assets/screen-store.png" alt="Le store, onglet Agents IA : un agent Claude Code supplémentaire, l'orchestrateur en plan mode, le terminal plus rapide, les modèles à acheter du Mistral Large 4 à 300 dollars au Claude Fable 5.2 à 300 000, puis les skills."> | <img src="assets/screen-agents.png" alt="Quatre agents Claude Code et leur orchestrateur, en plein travail."> |
 | **Le bureau Xfce** | **Mistral, un vendredi** |
 | <img src="assets/screen-xfce.png" alt="Le bureau Xfce : les icônes en colonnes à gauche (dossier personnel, système de fichiers, corbeille, terminal, Firefaux, Steam, Vibe CLI, Claude Code, store), puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."> | <img src="assets/screen-gameover.png" alt="Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."> |
-| **Le BIOS, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
-| <img src="assets/screen-bios.png" alt="Écran du BIOS VibeAward : Céléri G530, 4 Go testés, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, disque dur qui gratte, alim no-name qui siffle, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
+| **Le BIOS AMIVIBES, An Energy Star Ally** | **Vibian GNU/Linux 13 « friday »** |
+| <img src="assets/screen-post.png" alt="Le POST du BIOS AMIVIBES : Céléri G530 à 2,4 GHz, « Press DEL or F2 to run Setup », 4096MB OK, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, l’alimentation no-name qui siffle à +12 V, le disque dur détecté, logo Energy Star redessiné en haut à droite."> | <img src="assets/screen-tux.png" alt="Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."> |
 | **htop : le PC est à terre** | **matos.vibe, dans Firefaux** |
 | <img src="assets/screen-htop-patate.png" alt="htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."> | <img src="assets/screen-matos.png" alt="Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."> |
 | **Le rayon Matériel : commande bloquée** | **Le panier de matos.vibe** |
@@ -251,14 +251,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 9 485 lignes ?**
+**Pourquoi un seul fichier de 9 497 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 9 485 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 9 497 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
