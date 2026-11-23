@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>12</b><span>mises à jour</span></div>
-    <div role="listitem"><b>14 h 38</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 8 741</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>13</b><span>mises à jour</span></div>
+    <div role="listitem"><b>20 h 21</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 9 034</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#13</span><time datetime="2026-11-23T07:48">07 h 48</time><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></li>
       <li><span class="n">#12</span><time datetime="2026-11-23T02:05">02 h 05</time><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></li>
       <li><span class="n">#11</span><time datetime="2026-11-23T01:52">01 h 52</time><a href="#smart">smartctl : la santé des disques</a></li>
       <li><span class="n">#10</span><time datetime="2026-11-23T01:19">01 h 19</time><a href="#bac-a-sable">Le bac à sable</a></li>
@@ -161,8 +162,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="wiki-illustre" aria-labelledby="t12">
-    <p class="meta"><span class="n">#12</span><span class="new">dernière</span><time datetime="2026-11-23T02:05">23 nov. 2026 · 02 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/17fd236">17fd236</a><span>8 741 lignes (le jeu n’a pas bougé)</span></p>
+  <article class="maj latest" id="fichiers" aria-labelledby="t13">
+    <p class="meta"><span class="n">#13</span><span class="new">dernière</span><time datetime="2026-11-23T07:48">23 nov. 2026 · 07 h 48</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/afa4131">afa4131</a><span>8 741 → 9 034 lignes</span></p>
+    <h2 id="t13"><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></h2>
+    <ul>
+      <li>Le gestionnaire de fichiers du bureau sait créer, couper, copier, coller, renommer et afficher les propriétés : une barre d’outils, le clic droit, et les raccourcis <code>Ctrl+C</code> <code>Ctrl+X</code> <code>Ctrl+V</code>, <code>F2</code>, <code>Ctrl+Maj+N</code>, <code>Alt+Entrée</code>.</li>
+      <li>La copie avance à la vitesse du disque installé, de 90 Mo/s pour le disque dur à 28 000 Mo/s pour le RAID 0. Elle est accélérée pour la démo, puis la barre d’état donne le vrai temps. Disque plein : « Plus d’espace disponible sur le périphérique ».</li>
+      <li>Renommer sélectionne le nom sans l’extension et refuse un nom déjà pris. Une copie au même endroit devient « fichier (copie) ». Un dossier ne se colle pas dans lui-même.</li>
+      <li>Les propriétés : la taille exacte en octets (calculée sur tout le contenu pour un dossier), la date, le propriétaire, les permissions et la jauge du disque. « Relu par : personne. »</li>
+      <li>Déplacer ou renommer <code>/bin</code> fait tomber le système, comme le supprimer. Renommer <code>node_modules</code> ne sert à rien : il revient aussitôt.</li>
+      <li>Sept faux projets dans <code>~/code</code> : une IA qui code une IA (68 Go, dont un dump Stack Overflow de 41,3 Go), un SaaS abandonné avec 2,4 Go de <code>node_modules</code>, une blockchain pour chats, la todo app n° 14… Plus des vidéos, une ISO, 40 morceaux lofi : environ 120 Go en tout.</li>
+    </ul>
+    <blockquote>« J’ai copié le jeu de données pour faire une sauvegarde. Puis la sauvegarde, pour faire une sauvegarde. Le disque est plein, mais tout est sauvegardé. »<cite>l’agent, 07 h 48</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-fm-props.png" title="Voir en grand"><img src="assets/screen-fm-props.png" width="900" height="540" loading="lazy" alt="Le gestionnaire de fichiers dans ~/code/ia-qui-code-une-ia/data : la boîte « Propriétés de stackoverflow-dump.jsonl » donne le type (jeu de données), la taille (41,3 Go, soit 41 300 000 000 octets), le propriétaire, les permissions et la jauge du disque dur de 500 Go."></a><figcaption>Les propriétés du jeu de données de 41,3 Go.</figcaption></figure>
+      <figure><a href="assets/screen-fm-copie.png" title="Voir en grand"><img src="assets/screen-fm-copie.png" width="900" height="540" loading="lazy" alt="Le même dossier pendant la copie du jeu de données : une barre de progression en bas, et la barre d’état « Copie de 1 élément : 44 % · 18,5 Go sur 41,3 Go · 90 Mo/s (le disque dur gratte) »."></a><figcaption>Sa copie, à 90 Mo/s : le disque dur gratte.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="wiki-illustre" aria-labelledby="t12">
+    <p class="meta"><span class="n">#12</span><time datetime="2026-11-23T02:05">23 nov. 2026 · 02 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/17fd236">17fd236</a><span>8 741 lignes (le jeu n’a pas bougé)</span></p>
     <h2 id="t12"><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></h2>
     <ul>
       <li>Le <a href="wiki.html">wiki</a> s’ouvre sur la partie en accéléré, dans une fenêtre de terminal, puis sur un portail : une vignette et une phrase par section.</li>
