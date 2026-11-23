@@ -1753,7 +1753,7 @@ function saveGame() {
   if (!IDLE) return;
   G.t = Date.now();
   G.shipped = shipped;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); fsSave(); } catch {}   // fsSave : ignoré tant que le disque n'est pas monté (plus bas)
 }
 // score : projets shippés avec succès (Claude Code, Codex), gardé dans ce navigateur ; la version du projet en découle
 const SCORE_KEY = 'aidcs:score';
@@ -2703,7 +2703,45 @@ function buildFS() {
   });
 }
 
-let vfs = buildFS(), cwd = [...PROJ_DIR], oldpwd = null;
+/* le disque est persistant : fichiers, dossiers, paquets apt et dépendances npm se sauvegardent avec la partie, sous une clé à part,
+   réécrite seulement quand quelque chose a changé (rien en mode libre). Un crash système l'efface : retour à la sauvegarde de jeudi.
+   FS_VER : à augmenter quand buildFS() gagne des fichiers, pour qu'ils rejoignent les disques déjà sauvegardés. */
+const FS_KEY = SAVE_KEY + ':fs', FS_VER = 1;
+const FS_SAVE = (() => {
+  if (!IDLE) return null;
+  try { const o = JSON.parse(localStorage.getItem(FS_KEY)); return o?.root?.d === 1 && o.root.k?.home?.d === 1 ? o : null; } catch { return null; }
+})();
+function fsMerge(dst, src) {                      // ce qu'une mise à jour du jeu ajoute rejoint le disque sauvegardé, sans rien écraser
+  for (const [k, n] of Object.entries(src.k)) {
+    if (!Object.hasOwn(dst.k, k)) dst.k[k] = n;
+    else if (n.d && dst.k[k].d) fsMerge(dst.k[k], n);
+  }
+  return dst;
+}
+let vfs = FS_SAVE?.root || buildFS(), cwd = [...PROJ_DIR], oldpwd = null;
+if (FS_SAVE) {                                    // nom changé depuis (réglage commun à la partie et au bac à sable) : le dossier suit
+  const h = vfs.k.home, old = h.k[USER]?.d === 1 ? USER : Object.keys(h.k).find(k => h.k[k].d && h.k[k].k.code?.d);
+  if (!old || (old !== USER && Object.hasOwn(h.k, USER))) vfs = buildFS();
+  else {
+    if (old !== USER) {
+      h.k[USER] = h.k[old]; delete h.k[old];
+      USER_FILES().forEach(([segs, k]) => { const n = nodeAt(segs); if (n && !n.d) { n.t = USER_TEXT[k](USER); n.sz = n.t.length; } });
+    }
+    if (FS_SAVE.v !== FS_VER) fsMerge(vfs, buildFS());
+  }
+}
+if (FS_SAVE?.npm) Object.assign(npmDeps, { dependencies: { ...FS_SAVE.npm.dependencies }, devDependencies: { ...FS_SAVE.npm.devDependencies } });
+let fsLast = '';
+function fsSave() {                               // appelé par saveGame (toutes les 5 s, et en quittant la page)
+  if (!IDLE || crashKind === 'sys') return;       // pendant un crash système, le disque n'est déjà plus là
+  const o = JSON.stringify({ v: FS_VER, root: vfs, apt: [...installed], up: aptUpgradable, npm: npmDeps });
+  if (o !== fsLast) { localStorage.setItem(FS_KEY, o); fsLast = o; }
+}
+function fsDrop() {                               // crash système : au prochain démarrage, la sauvegarde de jeudi
+  if (!IDLE) return;
+  try { localStorage.removeItem(FS_KEY); } catch { /* tant pis */ }
+  fsLast = '';
+}
 function nodeAt(segs) {
   let n = vfs;
   for (const s of segs) { if (!n?.d || !Object.hasOwn(n.k, s)) return null; n = n.k[s]; }
@@ -3087,6 +3125,7 @@ async function systemCrash(label, targets, opts = {}) {
   if (mode !== 'idle') return;
   mode = 'shipping';                             // verrouille le terminal comme pendant un ship
   crashKind = 'sys';
+  fsDrop();
   crashPath = label;
   crashCmd = opts.cmd || `rm -rf ${label}`;
   crashBy = opts.by || 'rm';
@@ -3235,7 +3274,8 @@ const CATALOG = {
 const DEFAULT_INSTALLED = ['atop', 'atril', 'bash', 'coreutils', 'curl', 'docker.io', 'firefaux', 'git', 'golang', 'htop', 'libc6', 'linux-image-6.11.0-friday', 'lm-sensors', 'mousepad', 'nano',
   'nodejs', 'npm', 'python3', 'smartmontools', 'steam', 'sudo', 'systemd', 'thunar', 'tree', 'vim', 'xfce4', 'zsh'];
 const startPkgs = () => DEFAULT_INSTALLED.filter(pkHas);   // machine neuve : sans les paquets de départ pas encore installés
-let installed = new Set(startPkgs()), aptUpgradable = 412;
+let installed = new Set(FS_SAVE?.apt ? [...FS_SAVE.apt.filter(n => !STARTER_PKGS.includes(n) && (Object.hasOwn(CATALOG, n) || DEFAULT_INSTALLED.includes(n))),
+  ...startPkgs().filter(n => STARTER_PKGS.includes(n))] : startPkgs()), aptUpgradable = Number.isFinite(FS_SAVE?.up) ? FS_SAVE.up : 412;
 // paquets essentiels : [chemin affiché, dossiers supprimés] ; les enlever fait tomber le système
 const ESSENTIAL = {
   libc6: ['/lib/x86_64-linux-gnu', [['lib', 'x86_64-linux-gnu']]],
@@ -3992,7 +4032,7 @@ async function runCommand(raw) {
   const sudoable = s => Object.hasOwn(FS_CMDS, s) || Object.hasOwn(PKG_CMDS, s);
   if (head === 'sudo' && !installed.has('sudo')) {   // désinstallé avec apt : bravo
     notInstalled('sudo', 'sudo');
-    return shellPrint('… sauf que pour l’installer, il faut sudo.', 'dim');
+    return shellPrint('… sauf que pour l’installer, il faut sudo. Reste la sauvegarde de jeudi, restaurée après chaque crash système.', 'dim');
   }
   if (head === 'sudo' && sudoable((words[1] || '').toLowerCase())) {
     shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
@@ -7879,8 +7919,7 @@ function resetGame() {
   G = G_DEF();
   platInit();
   if (SANDBOX) sandboxFill();
-  installed = new Set(startPkgs());               // machine neuve : les paquets de départ repartent
-  pkFsSync();
+  resetFS();                                      // machine neuve : paquets de départ, fichiers et dépendances d'origine
   cartClear();
   lastOrder = null;
   setScore(0);
