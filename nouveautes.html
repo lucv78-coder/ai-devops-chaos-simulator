@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>10</b><span>mises à jour</span></div>
-    <div role="listitem"><b>13 h 52</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 8 541</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>11</b><span>mises à jour</span></div>
+    <div role="listitem"><b>14 h 25</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 8 741</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#11</span><time datetime="2026-11-23T01:52">01 h 52</time><a href="#smart">smartctl : la santé des disques</a></li>
       <li><span class="n">#10</span><time datetime="2026-11-23T01:19">01 h 19</time><a href="#bac-a-sable">Le bac à sable</a></li>
       <li><span class="n">#9</span><time datetime="2026-11-23T00:36">00 h 36</time><a href="#machine-neuve">La machine neuve, et un wiki</a></li>
       <li><span class="n">#8</span><time datetime="2026-11-23T00:00">00 h 00</time><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></li>
@@ -159,8 +160,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="bac-a-sable" aria-labelledby="t10">
-    <p class="meta"><span class="n">#10</span><span class="new">dernière</span><time datetime="2026-11-23T01:19">23 nov. 2026 · 01 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/db416dc">db416dc</a><span>8 506 → 8 541 lignes</span></p>
+  <article class="maj latest" id="smart" aria-labelledby="t11">
+    <p class="meta"><span class="n">#11</span><span class="new">dernière</span><time datetime="2026-11-23T01:52">23 nov. 2026 · 01 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d0bcf40">d0bcf40</a><span>8 541 → 8 741 lignes</span></p>
+    <h2 id="t11"><a href="#smart">smartctl : la santé des disques</a></h2>
+    <ul>
+      <li><code>smartctl</code>, du paquet smartmontools (<code>sudo apt install smartmontools</code>). Il faut sudo, comme dans la vraie vie : sans, « Permission denied ».</li>
+      <li>Les options du vrai : <code>--scan</code>, <code>-a</code>, <code>-H</code>, <code>-A</code>, <code>-i</code>. Les autotests tournent en temps réel : <code>-t short</code> (2 min), <code>-t long</code> (85 min sur le disque dur), <code>-l selftest</code> pour le résultat, <code>-X</code> pour interrompre.</li>
+      <li>Chaque disque a son SMART : le disque dur de départ, d’occasion (38 412 heures, 8 secteurs réalloués, câble SATA au scotch), le SSD Kingstone (51 % d’usure avant vous), les NVMe au format NVMe, le RAID 0 disque par disque.</li>
+      <li>La dégradation est extrêmement lente, au rythme réel : un secteur réalloué tous les 5 jours pour le disque dur, qui passe en « FAILED! » au bout de 8 mois environ ; l’usure des SSD selon ce qu’écrivent les agents. Chaque kernel panic compte un arrêt brutal. Aucun effet sur la partie.</li>
+    </ul>
+    <blockquote>« 13 secteurs réalloués. Le disque gratte. SMART dit PASSED. Moi aussi, je dis PASSED. »<cite>l’agent, 01 h 52</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-smart.png" title="Voir en grand"><img src="assets/screen-smart.png" width="900" height="540" loading="lazy" alt="sudo smartctl -H -A /dev/sda après 25 jours de jeu : PASSED, « Il gratte. Il a toujours gratté. 5 secteurs réalloués depuis que vous jouez. Défaillance prévue dans ≈ 8 mois », puis les attributs : 13 secteurs réalloués, 39 012 heures de fonctionnement, 41 arrêts brutaux, et le câble SATA qui tient avec du scotch."></a><figcaption>Le disque dur de départ, après 25 jours de jeu.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="bac-a-sable" aria-labelledby="t10">
+    <p class="meta"><span class="n">#10</span><time datetime="2026-11-23T01:19">23 nov. 2026 · 01 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/db416dc">db416dc</a><span>8 506 → 8 541 lignes</span></p>
     <h2 id="t10"><a href="#bac-a-sable">Le bac à sable</a></h2>
     <ul>
       <li>Une entrée « Bac à sable » dans le menu titre. Dedans, elle devient « Partie normale ». Chaque mode a sa sauvegarde : aucune n’écrase l’autre. Adresse : <code>?sandbox=1</code>.</li>
