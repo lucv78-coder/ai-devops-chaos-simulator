@@ -238,6 +238,49 @@ body[data-view="zsh"] #shell.out { opacity: 0; pointer-events: none; }
 .at-hot { color: var(--red); }
 .at-warm { color: var(--cyan); }
 
+/* Paramètres et /agents en jeu : une fenêtre sous Xfce, ou un écran du terminal façon nmtui (cadre double, sélection en vidéo inverse, <boutons>) */
+.dlgw { overflow: auto; padding: 1em 2ch; background: var(--panel); line-height: 1.5; }
+.dlgw:not(.tui) .pk-title { display: none; }     /* la barre de la fenêtre porte déjà le titre */
+.dlgw.tui { display: grid; align-content: start; justify-items: center; padding: 1em 1ch 1.6em; background: var(--bg); }
+.tui-top { width: min(80ch, 100%); margin-bottom: 1.4em; color: var(--dim); white-space: normal; }
+.dlgw.tui > .st-panel, .dlgw.tui > .pk-form { position: relative; width: min(78ch, 100%); padding: 1.4em 2ch 1em; border: 3px double var(--fg); background: var(--bg); box-shadow: 1.2ch .9em 0 rgba(0, 0, 0, .55); }
+.dlgw.tui .pk-title { position: absolute; top: -.85em; left: 50%; transform: translateX(-50%); padding: 0 1ch; background: var(--bg); white-space: nowrap; }
+.dlgw.tui .pk-title::before { content: "┤ "; color: var(--fg); font-weight: 400; }
+.dlgw.tui .pk-title::after { content: " ├"; color: var(--fg); font-weight: 400; }
+.dlgw.tui .st-row { border-radius: 0; }
+.dlgw.tui .st-row.on, .dlgw.tui .st-row.on * { background: var(--fg); color: var(--bg) !important; }
+.dlgw.tui .pk-row { border-radius: 0; }
+.dlgw.tui .pk-row:focus-within, .dlgw.tui .pk-row:focus-within * { background: var(--fg); color: var(--bg) !important; }
+.dlgw.tui .pk-row:focus-within input::before { color: var(--bg) !important; }
+.dlgw.tui .pk-form fieldset, .dlgw.tui .st-save { border-top-style: dashed; }
+.dlgw.tui .pk-actions { justify-content: center; }
+.dlgw.tui .pk-actions button, .dlgw.tui .st-save button { padding: 0 .4ch; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--fg) !important; font-weight: 400; }
+.dlgw.tui .pk-actions button::before, .dlgw.tui .st-save button::before { content: "<"; }
+.dlgw.tui .pk-actions button::after, .dlgw.tui .st-save button::after { content: ">"; }
+.dlgw.tui .pk-actions .primary { font-weight: 700; }
+.dlgw.tui .pk-actions button:focus-visible, .dlgw.tui .st-save button:focus-visible, .dlgw.tui .pk-actions button:hover, .dlgw.tui .st-save button:hover { background: var(--fg) !important; color: var(--bg) !important; outline: none; }
+.dlgw.tui .st-wipe.armed { background: var(--red) !important; color: var(--ink) !important; }
+.dlgw.tui .pk-hint { margin-top: .5em; text-align: center; }
+.dlgw.tui .st-imp textarea { border-style: dashed; border-radius: 0; }
+/* nano : la barre du haut en vidéo inverse, le texte, la ligne d'état, deux lignes de raccourcis (cliquables) */
+.nn { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; padding: 0; background: var(--bg); }
+.nn-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 2ch; padding: 0 1ch; background: var(--fg); color: var(--bg); white-space: pre; }
+.nn-top .f { overflow: hidden; text-align: center; text-overflow: ellipsis; }
+.nn-top .m { text-align: right; }
+.nn-body { position: relative; min-height: 0; }
+.nn-txt { display: block; width: 100%; height: 100%; padding: .2em 1ch; border: 0; outline: none; resize: none; background: var(--bg); color: var(--fg); font: inherit; line-height: var(--lh); white-space: pre; overflow: auto; tab-size: 8; caret-color: var(--fg); scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.nn-txt[readonly] { color: var(--dim); }
+.nn-help { position: absolute; inset: 0; overflow: auto; padding: .4em 2ch 1em; background: var(--bg); color: var(--fg); white-space: pre-wrap; }
+.nn-help:focus { outline: none; }
+.nn-line { min-height: var(--lh); padding: 0 1ch; text-align: center; white-space: pre; overflow: hidden; }
+.nn-line > span { padding: 0 .3ch; background: var(--fg); color: var(--bg); }
+.nn-ask { display: flex; gap: 1ch; margin: 0 -1ch; padding: 0 1ch; background: var(--fg); color: var(--bg); text-align: left; }
+.nn-ask input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--bg); font: inherit; caret-color: var(--bg); }
+.nn-keys { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 1ch; padding: 0 1ch .15em; }
+.nn-keys button { display: flex; gap: .7ch; overflow: hidden; color: var(--fg); text-align: left; white-space: nowrap; }
+.nn-keys button b { padding: 0 .2ch; background: var(--fg); color: var(--bg); font-weight: 400; }
+.nn-keys button:hover { color: var(--orange); }
+@media (max-width: 640px) { .nn-keys { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* sélecteur d'agents */
 #picker {
   margin: auto; width: min(76ch, calc(100vw - 2ch)); max-height: calc(100dvh - 2em); overflow: auto;
@@ -247,8 +290,8 @@ body[data-view="zsh"] #shell.out { opacity: 0; pointer-events: none; }
 #picker::backdrop, #settings::backdrop { background: rgba(0, 0, 0, .6); }
 .pk-title { color: var(--orange); font-weight: 700; }
 .pk-sub { color: var(--dim); margin-bottom: .8em; }
-#picker fieldset { border: 0; border-top: 1px solid var(--sep); padding: .5em 0 .6em; }
-#picker legend { padding-right: 1ch; color: var(--dim); }
+.pk-form fieldset { min-width: 0; border: 0; border-top: 1px solid var(--sep); padding: .5em 0 .6em; }
+.pk-form legend { padding-right: 1ch; color: var(--dim); }
 .pk-row { display: flex; align-items: center; gap: 1ch; padding: 0 .5ch; border-radius: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; }
 .pk-row:hover, .pk-row:focus-within { background: rgba(255, 255, 255, .06); }
 .pk-row input { appearance: none; -webkit-appearance: none; display: inline-grid; place-content: center; width: 3ch; height: var(--lh); margin: 0; font: inherit; color: var(--dim); cursor: pointer; }
@@ -1172,7 +1215,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   </div>
 </section>
 <dialog id="picker" aria-labelledby="pk-title">
-  <form method="dialog">
+  <form method="dialog" class="pk-form">
     <p class="pk-title" id="pk-title">/agents · composer l’équipe</p>
     <p class="pk-sub">Choisissez qui travaille, qui commande et comment les volets se rangent.</p>
     <fieldset id="pk-agents"><legend>Agents</legend></fieldset>
@@ -1204,7 +1247,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <p class="t-foot">↑↓ choisir · Entrée valider</p>
   <p class="t-credit">Créé par <b>LVT-DEV</b> · © 2026 · parodie · CC BY-NC 4.0, pas d’usage commercial</p>
 </section>
-<dialog id="settings" aria-labelledby="st-title">
+<dialog id="settings" aria-labelledby="st-title"><div class="st-panel" id="st-panel">
   <p class="pk-title" id="st-title">⚙ Paramètres</p>
   <p class="pk-sub">Les réglages sont gardés dans ce navigateur.</p>
   <div id="st-rows"></div>
@@ -1232,7 +1275,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <button type="button" id="st-reset">Réglages d’origine</button>
     <button type="button" id="st-wipe" class="st-wipe" hidden>Réinitialiser la partie</button>
   </div>
-</dialog>
+</div></dialog>
 <dialog id="store" aria-labelledby="sto-title">
   <p class="pk-title" id="sto-title">Store des agents</p>
   <p class="pk-sub" id="sto-sub"></p>
@@ -2698,6 +2741,7 @@ const FILE_HELP = () => [
   [H(['  cd <dossier>      ', 'org'], 'se déplacer · cd .. remonte · cd ~ rentre · cd / va à la racine'), '', 20],
   [H(['  pwd · cat <fich.> ', 'org'], 'où suis-je · lire un fichier'), '', 20],
   [H(['  mkdir · touch     ', 'org'], 'créer un dossier · créer un fichier'), '', 20],
+  [H(['  nano <fichier>    ', 'org'], 'éditer un fichier dans le terminal · ^O écrire · ^X quitter · sudo nano pour ceux de root'), '', 20],
   [H(['  rmdir · rm -r     ', 'org'], 'supprimer un dossier… mais pas n’importe lequel'), '', 20],
 ];
 const SETUP_HELP = () => [
@@ -3424,7 +3468,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -4295,6 +4339,7 @@ async function runCommand(raw) {
     return shellPrint('Le coffre de prod se force depuis le bunker : tapez fallout, puis hack.', 'dim');
   }
   const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg;   // firefox, chromium… : c'est Firefaux
+  if (progCmd === 'nano' || progCmd === 'pico') return nanoCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // l'éditeur du terminal
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
     if (!installed.has(progCmd)) return notInstalled(progCmd, progCmd);
     if (PROGS[progCmd].gui && !xfOn) {           // thunar sans bureau : comme sous Linux, pas d'affichage
@@ -4758,6 +4803,10 @@ const PROGS = {
   atril: { label: 'Visionneuse', delay: 1000, gui: true, cat: 'Accessoires', icon: '▧', menu: 'Visionneuse de documents', desc: 'Atril · les PDF', make: () => makeViewer() },
   firefaux: { label: 'Firefaux', delay: 1000, gui: true, cat: 'Internet', icon: '◍', menu: 'Navigateur web (Firefaux)', desc: 'le Web, en moins bien · store IA et matos.vibe', make: () => makeBrowser() },
   steam: { label: 'Steam', delay: 1000, gui: true, cat: 'Jeux', icon: '◎', menu: 'Steam', desc: '412 jeux, 3 lancés · les succès de celui-ci', make: () => makeSteam() },
+  // nomenu : pas dans le menu Applications. nano : l'éditeur du terminal ; réglages et /agents : leur fenêtre (Xfce) ou leur écran (terminal)
+  nano: { label: 'nano', delay: 1000, nomenu: true, icon: '✎', make: () => makeNano() },
+  'settings-ui': { label: 'réglages', delay: 1000, nomenu: true, icon: '⚙', make: () => makeDlgHost('settings') },
+  'agents-ui': { label: 'agents', delay: 1000, nomenu: true, icon: '◆', make: () => makeDlgHost('agents') },
   vlc: { label: 'VLC', delay: 250, gui: true, cat: 'Multimédia', icon: '▲', menu: 'Lecteur multimédia VLC', desc: 'la musique · les morceaux se téléchargent sur telecharge.vibe', make: () => makeVlc() },
 };
 function renderTabs() {
@@ -5604,7 +5653,8 @@ function afterResize() {
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
-const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66] };
+const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66],
+  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -5626,6 +5676,7 @@ function crtFlash() {                            // le tube se rallume quand Xor
 }
 async function xfEnter() {
   ach('xfce');
+  ['settings-ui', 'agents-ui'].forEach(closeTab);   // l'écran du terminal ne devient pas une fenêtre : on le referme
   const gfx = SETTINGS.find(s => s.key === 'gfx').options.find(o => o.v === prefs.gfx)?.label || prefs.gfx;
   await printLines([
     [H(['startx', 'org'], ' → Xorg :0 sur vt7 · amdgpu · Radeon RX 7900 XTX · 3840×2160 à 144 Hz'), 'dim', 160],
@@ -5653,7 +5704,7 @@ function xfExit(quiet) {
   if (!xfOn) return;
   xfMenuClose();
   xfCtxClose();
-  tabs.filter(t => PROGS[t].gui).forEach(closeTab);   // thunar n'a plus d'affichage : il se ferme avec la session
+  tabs.filter(t => PROGS[t].gui || t === 'settings-ui' || t === 'agents-ui').forEach(closeTab);   // thunar n'a plus d'affichage : il se ferme avec la session
   for (const n of Object.keys(xw)) xfRemove(n);
   xfOn = false;
   document.body.classList.remove('xfce');
@@ -5852,7 +5903,7 @@ setInterval(xfPanelTick, 1000);
 function xfMenuOpen() {
   const item = (id, ic, t, d) => `<button type="button" role="menuitem" class="xf-it" data-app="${id}"><span class="xw-ic">${esc(ic)}</span>`
     + `<span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`;
-  const progs = Object.keys(PROGS).filter(k => PROGS[k].make);
+  const progs = Object.keys(PROGS).filter(k => PROGS[k].make && !PROGS[k].nomenu);
   xfMenuEl.innerHTML = `<p class="xf-who">${esc(USER)}@prod-01 <span class="dim">· Vibian GNU/Linux 13 (friday)</span></p>`
     + ['Accessoires', 'Internet', 'Jeux', 'Multimédia', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
       + progs.filter(k => (PROGS[k].cat || 'Système') === c).map(k => item(k, PROGS[k].icon || '▤', PROGS[k].menu || k,
@@ -6852,6 +6903,298 @@ function makeSteam() {
   return { el, key, render: () => draw(), redraw: () => draw(true), title: () => 'Bibliothèque · Steam', tname: () => 'Steam' };
 }
 
+/* ---------- Paramètres et /agents en jeu : une fenêtre sous Xfce, un écran du terminal sinon (façon nmtui) ----------
+   Le contenu ne change pas : le panneau des réglages et le formulaire des agents quittent leur boîte le temps de l'ouverture
+   (touches, export, import et réinitialisation compris), puis y retournent. La boîte reste celle de l'écran titre. */
+function makeDlgHost(kind) {
+  const st = kind === 'settings', panel = st ? stPanel : pkForm, home = st ? stDlg : picker, tui = !xfOn;
+  const el = document.createElement('div');
+  el.className = 'prog dlgw' + (tui ? ' tui' : '');
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', st ? 'Paramètres' : 'Composer l’équipe d’agents');
+  if (tui) el.innerHTML = `<p class="tui-top">${esc(USER)}@prod-01 · ${st ? 'réglages' : '/agents'} (ncurses) · Échap : retour au terminal</p>`;
+  el.appendChild(panel);
+  el.addEventListener('focus', () => { if (st) stRender(true); else pkFocus(); });   // la fenêtre prend la main : le curseur entre dans le panneau
+  return { el, key: () => {}, render: () => {}, close: () => { home.appendChild(panel); if (st) stCleanup(); },
+    title: () => st ? 'Paramètres' : '/agents · composer l’équipe', tname: () => st ? 'Paramètres' : 'Agents' };
+}
+
+/* ---------- nano : l'éditeur de texte du terminal ----------
+   La barre du haut, le texte, la ligne d'état et deux lignes de raccourcis, cliquables (les téléphones n'ont pas de Ctrl).
+   Les fichiers du disque du jeu ; sans sudo, ceux de root se lisent mais ne s'écrivent pas. Les raccourcis que le navigateur
+   garde pour lui sont évités (^W fermerait l'onglet, ^T et ^N aussi) : ici, on cherche avec ^F. */
+const NANO_KEYS = [['^G', 'Aide', 'help'], ['^O', 'Écrire', 'write'], ['^F', 'Chercher', 'find'], ['^K', 'Couper', 'cut'], ['^C', 'Position', 'pos'],
+  ['^X', 'Quitter', 'exit'], ['^R', 'Lire fichier', 'read'], ['^\\', 'Remplacer', 'repl'], ['^U', 'Coller', 'paste'], ['^S', 'Enregistrer', 'save']];
+const NANO_HELP = `Aide de nano · GNU nano 8.2, édition prod-01
+
+nano est un éditeur de texte pour les humains. Sur prod-01, c’est le seul qui ne fait pas de segfault.
+Tapez votre texte, ^O pour l’écrire dans un fichier, ^X pour quitter. ^ veut dire Ctrl.
+
+^G  F1   cette aide                          ^X  F2   quitter (nano demande s’il faut sauver)
+^O  F3   écrire le fichier, sous un autre nom au besoin
+^S       enregistrer, sans question
+^F  F6   chercher ; Entrée sans rien taper : l’occurrence suivante
+^\\       chercher, puis remplacer partout
+^K       couper la ligne (plusieurs ^K à la suite : plusieurs lignes)
+^U       coller ce qui a été coupé
+^R       insérer le contenu d’un autre fichier
+^C       la position du curseur
+Tab      une tabulation · Ctrl+Z annule, Ctrl+V colle, comme partout
+
+Pourquoi ^F et pas ^W pour chercher ? Ici, ^W fermerait l’onglet de votre navigateur, et le jeu avec. Les agents ont testé.
+Les fichiers de root (/etc, /usr…) s’écrivent avec sudo nano. Les binaires s’affichent, mais ne s’écrivent pas.
+
+^X pour revenir au texte.`;
+function makeNano() {
+  const el = document.createElement('div');
+  el.className = 'prog nn';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Éditeur de texte nano');
+  el.innerHTML = '<div class="nn-top"><span>  GNU nano 8.2</span><span class="f"></span><span class="m"></span></div>'
+    + '<div class="nn-body"><textarea class="nn-txt" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Texte du fichier"></textarea>'
+    + '<div class="nn-help" tabindex="-1" hidden></div></div>'
+    + '<div class="nn-line" aria-live="polite"></div><div class="nn-keys"></div>';
+  const q = s => el.querySelector(s), ta = q('.nn-txt'), help = q('.nn-help'), line = q('.nn-line'), keysEl = q('.nn-keys');
+  let file = null, sudo = false, saved = '', ro = false, cutBuf = '', cutChain = false, lastFind = '', ask = null, msgT = 0;
+  const dirty = () => !ro && ta.value !== saved;
+  const nLines = t => !t ? 0 : t.split('\n').length - (t.endsWith('\n') ? 1 : 0);
+  const lignes = n => `${frNumI(n)} ligne${n > 1 ? 's' : ''}`;
+  function keys(set) {                           // les raccourcis du moment : l'édition, une question, l'aide
+    const list = set === 'ask' ? [['Entrée', 'Valider', 'ok'], ['^C', 'Annuler', 'cancel']]
+      : set === 'yn' ? [['O', 'Oui', 'yes'], ['N', 'Non', 'no'], ['^C', 'Annuler', 'cancel']]
+      : set === 'help' ? [['^X', 'Revenir au texte', 'helpx']] : NANO_KEYS;
+    keysEl.innerHTML = list.map(([k, t, a]) => `<button type="button" data-n="${a}"><b>${esc(k)}</b>${esc(t)}</button>`).join('');
+  }
+  function top() {
+    q('.nn-top .f').textContent = file ? tildePath(file) : 'Nouveau tampon';
+    q('.nn-top .m').textContent = ro ? 'Lecture seule' : dirty() ? 'Modifié' : '';
+    if (xw.nano) xfLabel('nano');
+  }
+  function msg(t) {
+    ask = null;
+    keys();
+    clearTimeout(msgT);
+    line.innerHTML = t ? `<span>[ ${esc(t)} ]</span>` : '';
+    if (t) msgT = setTimeout(() => { if (!ask) line.innerHTML = ''; }, 7000);
+  }
+  function focusTa(pos) {
+    ta.focus({ preventScroll: true });
+    if (pos != null) { ta.setSelectionRange(pos, pos); ta.scrollTop = ta.scrollLeft = 0; }
+  }
+  function prompt(label, def, ok) {              // une question avec un champ : Entrée valide, Échap ou ^C annule
+    clearTimeout(msgT);
+    ask = { ok };
+    line.innerHTML = `<label class="nn-ask"><span>${esc(label)}</span><input spellcheck="false" autocomplete="off" autocapitalize="off"></label>`;
+    keys('ask');
+    const inp = line.querySelector('input');
+    inp.value = def || '';
+    inp.focus();
+    inp.select();
+  }
+  function yesno(label, yes, no) {               // O, N ou ^C
+    clearTimeout(msgT);
+    ask = { yes, no };
+    line.innerHTML = `<div class="nn-ask"><span>${esc(label)}</span></div>`;
+    keys('yn');
+    el.focus({ preventScroll: true });
+  }
+  function cancel(t = 'Annulé') { msg(t); focusTa(); }
+  function answer(a) {                           // une réponse, au clavier ou au doigt
+    const cur = ask;
+    if (!cur) return;
+    if (a === 'cancel') return cancel();
+    if (a === 'ok' && cur.ok) { const v = line.querySelector('input')?.value || ''; ask = null; keys(); line.innerHTML = ''; return cur.ok(v); }
+    if ((a === 'yes' || a === 'no') && cur.yes) { ask = null; keys(); line.innerHTML = ''; return (a === 'yes' ? cur.yes : cur.no)(); }
+  }
+  function open(arg, su) {
+    sudo = !!su;
+    ro = false;
+    file = null;
+    let note = '';
+    const segs = arg ? (Array.isArray(arg) ? arg : resolvePath(arg)) : null, c = segs && nodeAt(segs);
+    if (!segs) ta.value = '';
+    else if (c?.d) { ta.value = ''; note = `« ${tildePath(segs)} » est un répertoire`; }
+    else if (!c) { file = [...segs]; ta.value = ''; note = 'Nouveau fichier'; }
+    else {
+      if (c.code && !c.t) c.t = hackerCode(ri(24, 48)).join('\n');   // comme Mousepad : le code généré devient le contenu
+      file = [...segs];
+      ro = !!c.b;
+      ta.value = ro ? binaryText(segs.at(-1)) : c.t || '';
+      note = ro ? 'Fichier binaire : lecture seule' : `Lecture de ${lignes(nLines(ta.value))}${!sudo && owner(segs) === 'root' ? ' · fichier de root : sudo nano pour l’écrire' : ''}`;
+    }
+    saved = ta.value;
+    ta.readOnly = ro;
+    help.hidden = true;
+    cutChain = false;
+    top();
+    msg(note);
+    focusTa(0);
+  }
+  function write(segs, then) {                   // vrai si c'est écrit
+    if (ro) { msg('Fichier binaire : rien à écrire'); return false; }
+    const dir = nodeAt(segs.slice(0, -1)), k = segs.at(-1), path = tildePath(segs);
+    if (!k || badName(k)) { msg(`Nom de fichier invalide${k ? ' : ' + badName(k) : ''}`); return false; }
+    if (!dir?.d) { msg(`Erreur à l’écriture de ${path} : aucun fichier ou dossier de ce type`); return false; }
+    if (dir.k[k]?.d) { msg(`Erreur à l’écriture de ${path} : c’est un répertoire`); return false; }
+    if (!sudo && owner(segs) === 'root') { msg(`Erreur à l’écriture de ${path} : permission non accordée (sudo nano ${path})`); return false; }
+    const fresh = !dir.k[k], c = dir.k[k] || (dir.k[k] = mkF(''));
+    if (fresh) dir.mt = Date.now();
+    Object.assign(c, { t: ta.value, sz: new TextEncoder().encode(ta.value).length, mt: Date.now() });
+    delete c.b; delete c.au;
+    file = [...segs];
+    saved = ta.value;
+    top();
+    msg(`Écriture de ${lignes(nLines(saved))}`);
+    if (claudeOn && leadOn() && absPath(file) === absPath([...PROJ_DIR, 'CLAUDE.md'])) {
+      leadLog(H(['● ', 'fgc'], 'CLAUDE.md updated (in nano, respect). Forwarding it to the agents. None of them will read it.'));
+    }
+    then?.();
+    return true;
+  }
+  function writeAs(then) {                       // ^O : le nom, puis, s'il désigne un autre fichier qui existe, « l'écraser ? »
+    if (ro) return msg('Fichier binaire : rien à écrire');
+    prompt('Nom du fichier à écrire : ', file ? tildePath(file) : '', v => {
+      if (!v.trim()) return cancel();
+      const segs = resolvePath(v.trim()), ex = nodeAt(segs);
+      if (ex && !ex.d && (!file || absPath(segs) !== absPath(file))) return yesno('Le fichier existe. L’ÉCRASER ? ', () => { write(segs, then); focusTa(); }, () => cancel());
+      write(segs, then);
+      focusTa();
+    });
+  }
+  function quit() { closeTab('nano'); }
+  function insert(t) {                           // insertText garde l'historique d'annulation (Ctrl+Z)
+    if (ro) return msg('Lecture seule');
+    ta.focus({ preventScroll: true });
+    if (!document.execCommand('insertText', false, t)) ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end');
+    top();
+  }
+  function cut() {
+    if (ro) return msg('Lecture seule');
+    const v = ta.value;
+    let a = ta.selectionStart, b = ta.selectionEnd;
+    if (a === b) { a = v.lastIndexOf('\n', a - 1) + 1; const e = v.indexOf('\n', b); b = e < 0 ? v.length : e + 1; }   // pas de sélection : la ligne
+    const piece = v.slice(a, b);
+    if (!piece) return msg('Rien à couper');
+    cutBuf = cutChain ? cutBuf + piece : piece;
+    ta.setSelectionRange(a, b);
+    insert('');
+    cutChain = true;
+  }
+  function paste() { if (!cutBuf) return msg('Le tampon de coupe est vide : ^K pour couper une ligne'); insert(cutBuf); }
+  function find(s) {
+    const v = ta.value, from = ta.selectionEnd;
+    let i = v.indexOf(s, from), wrap = false;
+    if (i < 0) { i = v.indexOf(s); wrap = i >= 0; }
+    if (i < 0) return cancel(`« ${s} » introuvable`);
+    ta.focus({ preventScroll: true });
+    ta.setSelectionRange(i, i + s.length);
+    const ln = v.slice(0, i).split('\n').length;   // la ligne trouvée, à l'écran
+    ta.scrollTop = Math.max(0, (ln - 4) * parseFloat(getComputedStyle(ta).lineHeight || '18'));
+    msg(wrap ? 'Recherche reprise au début' : '');
+  }
+  function pos() {
+    const v = ta.value, p = ta.selectionStart, before = v.slice(0, p), ln = before.split('\n').length, tot = Math.max(1, v.split('\n').length);
+    const col = p - before.lastIndexOf('\n'), lineLen = (v.split('\n')[ln - 1] || '').length + 1, pc = (a, b) => Math.round(a / Math.max(1, b) * 100);
+    msg(`ligne ${ln}/${tot} (${pc(ln, tot)} %), col. ${col}/${lineLen} (${pc(col, lineLen)} %), car. ${p}/${v.length} (${pc(p, v.length)} %)`);
+    focusTa();
+  }
+  function run(a) {
+    if (a !== 'cut') cutChain = false;
+    if (a === 'help') { help.textContent = NANO_HELP; help.hidden = false; keys('help'); help.focus({ preventScroll: true }); return; }
+    if (a === 'helpx') { help.hidden = true; keys(); focusTa(); return; }
+    if (a === 'write') return writeAs();
+    if (a === 'save') return file ? write(file) : writeAs();
+    if (a === 'exit') {
+      if (!dirty()) return quit();
+      return yesno('Sauver le tampon modifié ? ', () => (file ? write(file, quit) : writeAs(quit)), quit);
+    }
+    if (a === 'find') {
+      return prompt(`Chercher${lastFind ? ` [${lastFind}]` : ''} : `, '', v => { const t = v || lastFind; if (!t) return cancel(); lastFind = t; find(t); });
+    }
+    if (a === 'repl') {
+      if (ro) return msg('Lecture seule');
+      return prompt('Chercher (à remplacer) : ', lastFind, v => {
+        if (!v) return cancel();
+        lastFind = v;
+        prompt(`Remplacer « ${v} » par : `, '', r => {
+          const n = ta.value.split(v).length - 1;
+          if (!n) return cancel(`« ${v} » introuvable`);
+          ta.focus({ preventScroll: true });
+          ta.select();
+          insert(ta.value.split(v).join(r));
+          msg(`${n} occurrence${n > 1 ? 's' : ''} remplacée${n > 1 ? 's' : ''}`);
+          focusTa(0);
+        });
+      });
+    }
+    if (a === 'cut') return cut();
+    if (a === 'paste') return paste();
+    if (a === 'pos') return pos();
+    if (a === 'read') {
+      if (ro) return msg('Lecture seule');
+      return prompt('Fichier à insérer : ', '', v => {
+        const segs = resolvePath(v.trim()), c = v.trim() && nodeAt(segs);
+        if (!c) return cancel(`Fichier introuvable : ${v.trim() || '(rien)'}`);
+        if (c.d) return cancel(`« ${tildePath(segs)} » est un répertoire`);
+        const t = c.b ? binaryText(segs.at(-1)) : c.t || '';
+        insert(t);
+        msg(`Insertion de ${lignes(nLines(t))}`);
+      });
+    }
+  }
+  el.addEventListener('keydown', e => {
+    const k = e.key, kl = k.length === 1 ? k.toLowerCase() : k, ctrl = e.ctrlKey && !e.metaKey;
+    if (!help.hidden) {
+      if ((ctrl && (kl === 'x' || kl === 'g')) || k === 'Escape' || k === 'F1' || k === 'F2') { e.preventDefault(); run('helpx'); }
+      return;
+    }
+    if (ask?.ok) {
+      if (k === 'Enter') { e.preventDefault(); answer('ok'); }
+      else if (k === 'Escape' || (ctrl && kl === 'c')) { e.preventDefault(); answer('cancel'); }
+      return;
+    }
+    if (ask?.yes) {
+      e.preventDefault();
+      if (kl === 'o' || kl === 'y') answer('yes');
+      else if (kl === 'n') answer('no');
+      else if (k === 'Escape' || (ctrl && kl === 'c')) answer('cancel');
+      return;
+    }
+    if (k === 'Tab' && !e.shiftKey && !ctrl && e.target === ta && !ro) { e.preventDefault(); insert('\t'); return; }
+    const a = ctrl && k === '\\' ? 'repl'                                    // AltGr+8 sur un clavier français : Ctrl et Alt à la fois
+      : ctrl && !e.altKey && !e.shiftKey ? { g: 'help', o: 'write', s: 'save', f: 'find', x: 'exit', k: 'cut', u: 'paste', c: 'pos', r: 'read' }[kl]
+      : !ctrl && !e.altKey ? { F1: 'help', F2: 'exit', F3: 'write', F6: 'find' }[k] : null;
+    if (!a) { if (k.length === 1 || k === 'Backspace' || k === 'Delete' || k === 'Enter') cutChain = false; return; }
+    e.preventDefault();
+    e.stopPropagation();
+    run(a);
+  });
+  keysEl.addEventListener('click', e => {        // les raccourcis, au doigt ou à la souris
+    const b = e.target.closest('[data-n]');
+    if (!b) return;
+    const a = b.dataset.n;
+    if (['ok', 'cancel', 'yes', 'no'].includes(a)) answer(a);
+    else run(a);
+  });
+  ta.addEventListener('input', top);
+  el.addEventListener('focus', () => { if (!help.hidden) help.focus({ preventScroll: true }); else if (ask?.ok) line.querySelector('input')?.focus(); else if (!ask) focusTa(); });
+  keys();
+  open(null);
+  return { el, key: () => {}, render: top, redraw: top, open, busy: dirty, say: t => msg(t),
+    title: () => `nano · ${file ? tildePath(file) : 'nouveau tampon'}`, tname: () => 'nano' };
+}
+function nanoCmd(args, su) {                      // nano [fichier], sudo nano [fichier]
+  if (!installed.has('nano')) return notInstalled('nano', 'nano');
+  const f = args.find(a => !a.startsWith('-') && !a.startsWith('+'));
+  if (su) shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+  if (tabs.includes('nano') && PROGS.nano.busy()) {
+    switchTab('nano');
+    return PROGS.nano.say('Tampon modifié : ^O pour l’écrire ou ^X pour quitter, avant d’ouvrir autre chose');
+  }
+  openTab('nano');
+  PROGS.nano.open(f, su);
+}
+
 /* ---------- la musique : de vrais morceaux (assets/musique), faits par des humains ----------
    Un morceau = une entrée de TRACKS. telecharge.vibe le propose ; le fichier téléchargé (~/Downloads) porte au: <clé>,
    et VLC le lit. Le .m4a d'origine si le navigateur lit l'AAC, sinon le .mp3 de secours (Chromium libre, certains Linux). */
@@ -7596,7 +7939,7 @@ function setPref(s, v) {
 }
 
 /* menu des réglages : flèches pour choisir et changer, Entrée pour modifier un texte, Échap pour fermer */
-const stDlg = $('#settings'), stRows = $('#st-rows'), stDesc = $('#st-desc');
+const stDlg = $('#settings'), stPanel = $('#st-panel'), stRows = $('#st-rows'), stDesc = $('#st-desc');
 let stSel = 0, stEdit = false, stDraft = '', stMsg = null;
 function stRender(focus = true) {
   stRows.innerHTML = SETTINGS.map((s, i) => {
@@ -7771,15 +8114,26 @@ stImpGo.addEventListener('click', () => {
   location.reload();
 });
 stDlg.addEventListener('close', () => { impReset(); saveMsg(''); });
+/* les réglages : la boîte sur l'écran titre ; en jeu, une fenêtre (Xfce) ou l'écran du terminal (le panneau change d'hôte) */
+const stInWin = () => stPanel.parentElement !== stDlg;
 function openSettings() {
   if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden || mode === 'launching' || mode === 'rebooting') return;
+  if (tabs.includes('settings-ui')) return switchTab('settings-ui');
   stSel = 0;
   stEdit = false;
   stMsg = null;
+  if (titleEl.hidden && !booting) { openTab('settings-ui'); stRender(); return; }
   stDlg.showModal();
   stRender();
 }
-stDlg.addEventListener('keydown', e => {
+function closeSettings() { if (stDlg.open) stDlg.close(); else closeTab('settings-ui'); }
+function stCleanup() { wipeDisarm(); impReset(); saveMsg(''); }   // la boîte, la fenêtre ou l'écran se ferme
+stPanel.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && stInWin()) {         // la boîte a son « cancel » ; la fenêtre et l'écran du terminal, ceci
+    e.preventDefault();
+    if (stEdit) { stEdit = false; stMsg = null; stRender(); } else closeSettings();
+    return;
+  }
   if (stEdit) { if (e.key === 'Enter') { e.preventDefault(); stCommit(); } return; }   // Échap : voir « cancel »
   if (e.target.closest('.pk-actions, .st-save')) return;   // boutons, et le code de sauvegarde qu'on colle : les touches leur reviennent
   const s = SETTINGS[stSel], k = e.key;
@@ -7800,7 +8154,7 @@ stDlg.addEventListener('keydown', e => {
   }
 });
 stDlg.addEventListener('cancel', e => { if (stEdit) { e.preventDefault(); stEdit = false; stMsg = null; stRender(); } });   // Échap annule la saisie
-stDlg.addEventListener('input', e => { if (e.target.matches('.st-in')) stDraft = e.target.value; });
+stPanel.addEventListener('input', e => { if (e.target.matches('.st-in')) stDraft = e.target.value; });
 stRows.addEventListener('click', e => {
   const row = e.target.closest('.st-row');
   if (!row || e.target.closest('.st-in')) return;
@@ -7810,7 +8164,7 @@ stRows.addEventListener('click', e => {
   else if (s.type === 'text') { stEdit = true; stDraft = prefs[s.key]; }
   stRender();
 });
-$('#st-close').addEventListener('click', () => stDlg.close());
+$('#st-close').addEventListener('click', closeSettings);
 $('#st-reset').addEventListener('click', () => {
   SETTINGS.forEach(s => { if (prefs[s.key] !== s.def && !(s.check && s.check(s.def))) setPref(s, s.def); });
   stEdit = false;
@@ -8370,7 +8724,7 @@ async function restart() {
 }
 
 /* ---------- sélecteur d'agents ---------- */
-const picker = $('#picker');
+const picker = $('#picker'), pkForm = picker.querySelector('form');
 (function buildPicker() {
   const box = $('#pk-agents');
   AGENTS.forEach((a, i) => {
@@ -8399,12 +8753,22 @@ function openPicker() {
   picker.querySelectorAll('input[name="agent"]').forEach(i => { i.checked = cfg.agents.includes(+i.value); });
   ['model', 'lead', 'layout'].forEach(k => { const r = picker.querySelector(`input[name="${k}"][value="${cfg[k]}"]`); if (r) r.checked = true; });
   picker.returnValue = '';
-  picker.showModal();
-  picker.querySelector('input[name="agent"]').focus();
+  if (tabs.includes('agents-ui')) switchTab('agents-ui');
+  else openTab('agents-ui');                     // une fenêtre sous Xfce, l'écran du terminal sinon
+  pkFocus();
 }
-picker.addEventListener('close', () => {
-  if (picker.returnValue !== 'ok') return;
-  const f = new FormData(picker.querySelector('form'));
+const pkFocus = () => (pkForm.querySelector('input[name="agent"]:checked') || pkForm.querySelector('input')).focus({ preventScroll: true });
+picker.addEventListener('close', () => { if (picker.returnValue === 'ok') pkApply(); });
+pkForm.addEventListener('submit', e => {         // hors de la boîte, method="dialog" ne fait rien : « Lancer » ou « Annuler », ici
+  if (pkForm.parentElement === picker) return;
+  e.preventDefault();
+  const ok = e.submitter?.value !== 'cancel';
+  closeTab('agents-ui');
+  if (ok) pkApply();
+});
+pkForm.addEventListener('keydown', e => { if (e.key === 'Escape' && pkForm.parentElement !== picker) { e.preventDefault(); closeTab('agents-ui'); } });
+function pkApply() {
+  const f = new FormData(pkForm);
   const agents = f.getAll('agent').map(Number);
   if (!agents.length) { toast('Il faut au moins un agent pour casser la prod.'); return; }
   if (IDLE && agents.length > G.agents) { toast(`Vous n’avez que ${plural(G.agents, 'agent')} : les autres s’achètent au store (<kbd>B</kbd>).`); return; }
@@ -8414,7 +8778,7 @@ picker.addEventListener('close', () => {
   saveCfg();
   rebuild();
   toast(`<kbd>${agents.length}× ${cfg.model}</kbd> · orchestrateur ${cfg.lead} · disposition ${cfg.layout}`, 2200);
-});
+}
 
 function rebuild() {
   buildPanes();
@@ -10060,6 +10424,7 @@ async function pcCrash(kind, L) {
   ach('pccrash');
   const dk = diskSt(); dk.pan++; dk.cyc++;       // SMART : un arrêt brutal (Unsafe Shutdowns), puis un rallumage
   [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
+  ['settings-ui', 'agents-ui'].forEach(closeTab);
   const co = part('cool'), ps = part('psu'), g = part('gpu'), was = claudeOn;
   const vr = kind === 'vram' ? `${MODELS[L.model].name}${L.n > 1 ? ` × ${L.n} agents` : ''} : ${go1(L.need)} Go demandés, ${g.n} : ${go1(g.vram)} Go` : '';
   const why = kind === 'vram' ? `VRAM épuisée (${vr})` : kind === 'heat' ? `surchauffe à ${Math.round(Math.max(100, PCS.temp))} °C (${co.n}, ${co.w} W, pour ${Math.round(L.heat)} W de chaleur)`
@@ -10108,6 +10473,7 @@ async function pcReboot() {                      // reboot : un redémarrage pro
   pcDown = true;
   mode = 'rebooting';
   [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
+  ['settings-ui', 'agents-ui'].forEach(closeTab);
   const was = claudeOn;
   shellPrint(H(['Broadcast message from root@prod-01', 'wrn'], ` (pts/0) (${new Date().toLocaleTimeString('fr-FR')}) :`));
   shellPrint(H(['The system will reboot now!', 'wrn'], ['  DEL (ou F2) pendant le POST : le setup du BIOS.', 'dim']));
