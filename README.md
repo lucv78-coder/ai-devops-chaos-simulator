@@ -16,7 +16,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 10 558">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 10 924">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -62,6 +62,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **La facture d'électricité.** Le compteur tourne tant que les agents travaillent : ce que tire le PC, overclocking compris, divisé par le rendement de l'alim (la no-name en perd un tiers). Payée à chaque ship, avec les tokens. L'IA locale ne paie pas de tokens, mais elle paie l'électricité. Les contrats Vibe Énergie vont des heures creuses au petit réacteur modulaire.
 - **Les succès, dans Steam.** 39 succès (dont 9 cachés) : ships, trésorerie, matériel, BIOS, memtest86+, et quelques bêtises (rm -rf /, shipper un vendredi). Steam s'ouvre enfin dans Xfce, avec la fiche du jeu, le temps de jeu et des pourcentages de joueurs inventés. Une notification à chaque succès. Rien ne se débloque dans le bac à sable : c'est de la triche.
 - **VLC, et la musique.** `sudo apt install vlc`, puis la musique se télécharge dans Firefaux, sur telecharge.vibe (trois publicités, un compte à rebours, et le vrai lien, en tout petit). Double-cliquez-la dans Thunar : VLC la joue, avec un spectre en caractères. Le premier morceau est de Christopher GASQ, le seul humain à avoir produit quelque chose de concret sur ce jeu. Les MP3 des agents, eux, ne contiennent que du silence.
+- **nano, et des réglages en plein écran.** `nano fichier` ouvre un vrai nano dans le terminal : ^O écrire, ^X quitter, et ^F pour chercher, parce que ^W fermerait l'onglet du navigateur. Les réglages (`M`) et le choix des agents (`A`) ont leur propre écran dans le terminal, façon nmtui, et leur vraie fenêtre sous Xfce.
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. `sudo smartctl -a /dev/sda` lit le SMART du disque dur d'occasion : 38 412 heures, un secteur réalloué de plus tous les 5 jours, FAILED! dans 8 mois environ. L'agent, lui, dit que tout va bien.
 - **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow, GitHype (le GitHub qui a racheté le nom de domaine) et lolama.vibe pour les modèles locaux. Toute autre adresse a été hallucinée par votre agent.
@@ -70,7 +71,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 10 558 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 10 924 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -137,7 +138,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (10 558 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (10 924 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -228,6 +229,8 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
   <a href="assets/screen-vram.png"><img src="assets/readme/cap-vram.png" width="49%" alt="Kernel panic : la VRAM a dit non. Un kernel panic plein écran : « lolama: CUDA error: out of memory (tried to allocate 6,4 GiB) », puis « Kernel panic - not syncing: NVRM: GPU out of memory (Jemma 3 4B × 2 agents : 6,4 Go demandés, GéFarce GTX 1060 : 6 Go) », la pile d'appels avec gpu_vram_alloc et friday_deploy, et « Rebooting in 4 seconds.. »."></a>
   <a href="assets/screen-telecharge.png"><img src="assets/readme/cap-telecharge.png" width="49%" alt="telecharge.vibe, dans Firefaux. Trois publicités (un faux bouton TÉLÉCHARGER, « votre PC est lent », un faux installeur .exe), puis musique chris 1.m4a, de Christopher Gasq, téléchargé dans ~/Downloads."></a>
   <a href="assets/screen-vlc.png"><img src="assets/readme/cap-vlc.png" width="49%" alt="VLC, Mon morceau 35. Christopher Gasq en lecture, le spectre en caractères, les infos et le crédit, avec le lien vers son GitHub."></a>
+  <a href="assets/screen-nano.png"><img src="assets/readme/cap-nano.png" width="49%" alt="nano, dans le terminal. CLAUDE.md modifié, une règle n° 1 « écrite dans nano, par un humain », et la question « Sauver le tampon modifié ? »."></a>
+  <a href="assets/screen-reglages.png"><img src="assets/readme/cap-reglages.png" width="49%" alt="Les réglages, façon nmtui. Un cadre double titré Paramètres, la ligne Graphismes en vidéo inverse, et les boutons entre chevrons."></a>
 </p>
 
 ## <img src="assets/readme/g-roadmap.svg" width="30" height="30" align="top" alt=""> Roadmap
@@ -261,6 +264,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Des succès Steam, pour qu'il y ait enfin quelque chose à débloquer
 - [x] Exporter sa partie, pour avoir enfin une sauvegarde plus récente que celle de jeudi
 - [x] De la musique, faite par un humain (une première), et VLC pour l'écouter
+- [x] nano, parce qu'il fallait bien un éditeur dont on sait sortir
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -270,14 +274,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 10 558 lignes ?**
+**Pourquoi un seul fichier de 10 924 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 10 558 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 10 924 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.

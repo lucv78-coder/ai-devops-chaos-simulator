@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>21</b><span>mises à jour</span></div>
-    <div role="listitem"><b>35 h 40</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 10 558</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>22</b><span>mises à jour</span></div>
+    <div role="listitem"><b>36 h 58</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 10 924</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#22</span><time datetime="2026-11-24T00:25">00 h 25</time><a href="#nano">nano, et des réglages qui ont leur propre écran</a></li>
       <li><span class="n">#21</span><time datetime="2026-11-23T23:07">23 h 07</time><a href="#vlc">VLC, et la première musique faite par un humain</a></li>
       <li><span class="n">#20</span><time datetime="2026-11-23T20:54">20 h 54</time><a href="#sauvegarde">Exporter et importer la partie</a></li>
       <li><span class="n">#19</span><time datetime="2026-11-23T20:04">20 h 04</time><a href="#succes">Les succès, dans Steam</a></li>
@@ -170,8 +171,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="vlc" aria-labelledby="t21">
-    <p class="meta"><span class="n">#21</span><span class="new">dernière</span><time datetime="2026-11-23T23:07">23 nov. 2026 · 23 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/570a965">570a965</a><span>10 149 → 10 558 lignes</span></p>
+  <article class="maj latest" id="nano" aria-labelledby="t22">
+    <p class="meta"><span class="n">#22</span><span class="new">dernière</span><time datetime="2026-11-24T00:25">24 nov. 2026 · 00 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/012df46">012df46</a><span>10 558 → 10 924 lignes</span></p>
+    <h2 id="t22"><a href="#nano">nano, et des réglages qui ont leur propre écran</a></h2>
+    <ul>
+      <li>nano, l’éditeur du terminal : nano fichier (sudo nano pour ceux de root ; pico aussi). La barre du haut, la ligne d’état, deux lignes de raccourcis, qui se cliquent : ^O écrire, ^X quitter (« Sauver le tampon modifié ? »), ^F chercher, ^\ remplacer, ^K couper, ^U coller, ^R insérer un fichier, ^C la position, ^G l’aide. Sous Xfce, il a sa fenêtre.</li>
+      <li>Chercher, c’est ^F : ^W fermerait l’onglet du navigateur, et le jeu avec. L’aide de nano le dit.</li>
+      <li>settings (ou M) et agents (ou A) : en jeu, un écran du terminal façon nmtui (cadre double, sélection en vidéo inverse, &lt;Fermer&gt;), et une vraie fenêtre sous Xfce, dans la barre des tâches. L’écran titre garde sa boîte. Rien ne change dedans : export, import, Entrée pour lancer l’équipe, Échap pour annuler.</li>
+      <li>Corrigé : la plus longue ligne de modèles ne déborde plus du formulaire des agents.</li>
+    </ul>
+    <blockquote>« nano ? Un éditeur dont on sait comment sortir. Les agents trouvent ça louche. »<cite>l’agent, 00 h 25</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-nano.png" title="Voir en grand"><img src="assets/screen-nano.png" width="900" height="540" loading="lazy" alt="nano dans le terminal : ~/code/atlas/CLAUDE.md modifié, une règle n° 1 ajoutée « écrite dans nano, par un humain », et en bas la question « Sauver le tampon modifié ? » avec O Oui, N Non, ^C Annuler."></a><figcaption>nano : CLAUDE.md, écrit par un humain.</figcaption></figure>
+      <figure><a href="assets/screen-reglages.png" title="Voir en grand"><img src="assets/screen-reglages.png" width="900" height="540" loading="lazy" alt="Les Paramètres en écran du terminal, façon nmtui : un cadre double titré « Paramètres », la ligne Graphismes en vidéo inverse, et les boutons &lt;Réinitialiser la partie&gt;, &lt;Réglages d’origine&gt;, &lt;Fermer&gt;."></a><figcaption>Les réglages, dans le terminal.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="vlc" aria-labelledby="t21">
+    <p class="meta"><span class="n">#21</span><time datetime="2026-11-23T23:07">23 nov. 2026 · 23 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/570a965">570a965</a><span>10 149 → 10 558 lignes</span></p>
     <h2 id="t21"><a href="#vlc">VLC, et la première musique faite par un humain</a></h2>
     <ul>
       <li>VLC, le lecteur multimédia : sudo apt install vlc, puis Applications › Multimédia, ou l’icône du bureau. Lecture, pause, avance, volume (retenu), boucle, et un spectre dessiné en caractères. En ligne, il écoute vraiment la musique ; en local, il fait semblant.</li>
