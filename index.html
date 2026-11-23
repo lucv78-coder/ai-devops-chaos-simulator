@@ -944,6 +944,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <nav class="t-menu" aria-label="Menu principal">
     <button type="button" data-t="continue" hidden>Continuer</button>
     <button type="button" data-t="start">Nouvelle partie</button>
+    <button type="button" data-t="sandbox">Bac à sable</button>
     <button type="button" data-t="settings">Paramètres</button>
     <button type="button" data-t="news">Nouveautés</button>
     <button type="button" data-t="wiki">Aide (wiki)</button>
@@ -1684,10 +1685,11 @@ let chaos = false;
    moins la facture API depuis le ship précédent ; le store vend agents, terminal, skills, orchestrateur, et la migration vers
    Claude Code ou Codex. ?idle=0 : bac à sable, tout débloqué (les tests s'en servent). Partie sauvegardée dans ce navigateur. */
 const IDLE = Q.get('idle') !== '0';
-const SAVE_KEY = 'aidcs:save';
+const SANDBOX = IDLE && Q.get('sandbox') === '1';   // bac à sable (menu titre) : la partie idle, tout débloqué, sauvegardée à part
+const SAVE_KEY = SANDBOX ? 'aidcs:sandbox' : 'aidcs:save';
 // machine neuve : ces paquets et les CLI d'agents s'installent à la main (G.pk, G.cli) ; ?setup=0 installe tout
 const STARTER_PKGS = ['xfce4', 'htop', 'atop', 'lm-sensors', 'firefaux', 'thunar', 'mousepad', 'atril', 'steam'];
-const SETUP_SKIP = Q.get('setup') === '0';
+const SETUP_SKIP = Q.get('setup') === '0' || SANDBOX;   // le bac à sable est livré installé
 const CLI_INST = {                                // la vraie commande d'installation de chaque CLI (et une autre façon)
   mistral: { cmd: 'curl -LsSf https://mistral.ai/vibe/install.sh | bash', alt: 'uv tool install mistral-vibe' },
   codex: { cmd: 'sudo npm install -g @openai/codex' },
@@ -1811,7 +1813,7 @@ function updateLabels() {
   $('#squad').textContent = `${n}× ${cfg.model}${leadOn() ? ' + orchestrateur' : ''}`;
   $('#lead-sub').textContent = `${cli().leadSub} · ${n} agent${n > 1 ? 's' : ''}`;
   grid.setAttribute('aria-label', `${n} agent${n > 1 ? 's' : ''} ${cfg.model} en cours d'exécution`);
-  document.title = claudeOn ? `${GAME} · ${n}× ${cfg.model}` : GAME;
+  document.title = (claudeOn ? `${GAME} · ${n}× ${cfg.model}` : GAME) + (SANDBOX ? ' · bac à sable' : '');
   updateFoot();
 }
 function updateFoot() {
@@ -3959,7 +3961,7 @@ function cliDone(p) {                             // installé : il le reste d'u
 }
 async function cliInstall(p, how) {               // l'installation, en quelques lignes plausibles
   if (cliHas(p)) {
-    shellPrint(H(['✓ ', 'okc'], `${CLIS[p].label} est déjà installé${IDLE && !SETUP_SKIP ? '' : ' (mode libre : tout l’est)'}. Il s’est mis à jour tout seul pendant que vous tapiez.`));
+    shellPrint(H(['✓ ', 'okc'], `${CLIS[p].label} est déjà installé${!IDLE ? ' (mode libre : tout l’est)' : SANDBOX ? ' (bac à sable : tout l’est)' : SETUP_SKIP ? ' (?setup=0 : tout l’est)' : ''}. Il s’est mis à jour tout seul pendant que vous tapiez.`));
     return;
   }
   const job = startJob(), nP = ri(70, 99);    // le même nombre de paquets d'une ligne à l'autre
@@ -4115,6 +4117,7 @@ function loginBanner(note) {
   const motd = nodeAt(['etc', 'motd']);
   if (motd && !motd.d) motd.t.split('\n').forEach(t => shellPrint(t));
   if (note) shellPrint(note);
+  if (SANDBOX) shellPrint(H(['Bac à sable : ', 'wrn'], 'tout est débloqué (plateformes, modèles, skills, matériel, modes boost sans limite par jour). Sauvegarde à part : la partie normale n’est pas touchée (menu titre › ', ['Partie normale', 'org'], ').'));
   shellPrint('');
   shellPrint(claudeOn ? H(`${cli().label} tourne dans l’onglet `, [provider, 'org'], ' · ', ['help', 'org'], ' pour la liste des commandes.')
     : IDLE && !cliHas(G.ai) ? H('Machine neuve : rien n’est installé, pas même votre agent. ', [CLIS[G.ai].label, 'b'], ' d’abord : ', [CLI_INST[G.ai].cmd, 'org'],
@@ -6456,13 +6459,14 @@ function stCommit() {
 const stWipe = $('#st-wipe');                    // réinitialiser la partie (mode idle) : deux appuis
 let wipeAt = 0;
 stWipe.hidden = !IDLE;
-function wipeDisarm() { wipeAt = 0; stWipe.classList.remove('armed'); stWipe.textContent = 'Réinitialiser la partie'; }
+function wipeDisarm() { wipeAt = 0; stWipe.classList.remove('armed'); stWipe.textContent = SANDBOX ? 'Réinitialiser le bac à sable' : 'Réinitialiser la partie'; }
 stWipe.addEventListener('click', () => {
   if (performance.now() - wipeAt > 8000) {
     wipeAt = performance.now();
     stWipe.classList.add('armed');
     stWipe.textContent = 'Confirmer : tout effacer';
-    stMsg = [`Réinitialiser la partie : ${plural(shipped, 'projet')}, $${usd(G.money)}, les achats et le matériel seront effacés. Appuyez encore pour confirmer.`, 'err'];
+    stMsg = [SANDBOX ? `Réinitialiser le bac à sable : ${plural(shipped, 'projet')} effacés, tout redevient débloqué. La partie normale n’est pas touchée. Appuyez encore pour confirmer.`
+      : `Réinitialiser la partie : ${plural(shipped, 'projet')}, $${usd(G.money)}, les achats et le matériel seront effacés. Appuyez encore pour confirmer.`, 'err'];
     stRender(false);
     return;
   }
@@ -6471,6 +6475,7 @@ stWipe.addEventListener('click', () => {
   location.reload();
 });
 stDlg.addEventListener('close', wipeDisarm);
+wipeDisarm();                                    // le libellé : partie ou bac à sable
 function openSettings() {
   if (stDlg.open || picker.open || storeDlg.open || !panicEl.hidden || mode === 'launching' || mode === 'rebooting') return;
   stSel = 0;
@@ -6711,12 +6716,15 @@ const titleEl = $('#title'), titleBtns = [...titleEl.querySelectorAll('[data-t]'
 const QUIT_MSGS = ['Impossible de quitter : le projet n’est pas encore shippé.', 'Toujours pas shippé. Toujours pas de sortie.',
   'Les agents ont désactivé le bouton Quitter. Pour votre sécurité.'];
 let quitTries = 0;
-function updateTitle() { $('#t-player').textContent = `joueur : ${USER} · v${VERSION}`; }
+function updateTitle() { $('#t-player').textContent = `joueur : ${USER} · v${VERSION}${SANDBOX ? ' · bac à sable : tout est débloqué' : ''}`; }
 const tBtns = () => titleBtns.filter(b => !b.hidden);   // « Continuer » n'existe qu'avec une partie en cours
 let newConfirm = false;
 function showTitle() {
   titleEl.querySelector('.t-art').innerHTML = asciiTitle();
   titleEl.querySelector('[data-t="continue"]').hidden = !(IDLE && hasSave());
+  const sb = titleEl.querySelector('[data-t="sandbox"]');
+  sb.hidden = !IDLE;                             // le mode libre (?idle=0) a déjà tout : pas de bac à sable
+  sb.textContent = SANDBOX ? 'Partie normale' : 'Bac à sable';
   titleEl.hidden = false;
   $('#app').inert = true;
   tBtns()[0].focus({ preventScroll: true });
@@ -6742,8 +6750,14 @@ titleEl.addEventListener('click', e => {
     powerOn();
   }
   else if (b.dataset.t === 'settings') openSettings();
-  else if (b.dataset.t === 'news') location.href = 'nouveautes.html';
-  else if (b.dataset.t === 'wiki') location.href = 'wiki.html';                // l'aide complète : commandes, store, matériel   // le journal des mises à jour (la partie est sauvegardée en partant)
+  else if (b.dataset.t === 'news') location.href = 'nouveautes.html';         // le journal des mises à jour (la partie est sauvegardée en partant)
+  else if (b.dataset.t === 'wiki') location.href = 'wiki.html';                // l'aide complète : commandes, store, matériel
+  else if (b.dataset.t === 'sandbox') {          // bac à sable ⇄ partie normale : deux sauvegardes, aucune n'écrase l'autre
+    saveGame();
+    const q = new URLSearchParams(location.search);
+    if (SANDBOX) q.delete('sandbox'); else q.set('sandbox', '1');
+    location.href = location.pathname + (q.toString() ? '?' + q : '');
+  }
   else {
     titleMsg.textContent = QUIT_MSGS[Math.min(quitTries++, QUIT_MSGS.length - 1)];
     if (quitTries >= QUIT_MSGS.length) { b.setAttribute('aria-disabled', 'true'); b.textContent = 'Quitter (désactivé par les agents)'; }
@@ -6755,7 +6769,9 @@ titleEl.addEventListener('keydown', e => {
   const bs = tBtns(), i = bs.indexOf(document.activeElement);
   bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus();
 });
-titleBtns.forEach(b => b.addEventListener('mouseenter', () => b.focus({ preventScroll: true })));
+let tMoved = false;                              // le survol ne prend le focus qu'après un vrai mouvement : pas sous un curseur immobile au chargement
+addEventListener('pointermove', e => { if (e.movementX || e.movementY) tMoved = true; }, { passive: true });   // (sinon, après « Bac à sable », « Partie normale » arrive sous la souris)
+titleBtns.forEach(b => b.addEventListener('mouseenter', () => { if (tMoved) b.focus({ preventScroll: true }); }));
 async function launchAgents() {                  // claude ou codex : même équipe, autre fournisseur (voir setProvider)
   mode = 'launching';
   shellForm.hidden = true;                       // pendant le démarrage, pas d'invite
@@ -7426,7 +7442,7 @@ function boostCheck(p) {                          // peut-on lancer le mode de c
   if (!G.own[p]) return { ok: false, short: 'licence', why: `${C.label} : licence non achetée (store, onglet Plateformes).` };
   if (!st?.own) return { ok: false, short: 'à acheter', why: `Mode ${B.name} non acheté : store, onglet Agents IA, section Modes.` };
   if (st.left > 0) return { ok: false, short: 'actif', why: `${B.name} est déjà actif : encore ${mmss(st.left)}.` };
-  if (st.day === today()) return { ok: false, short: 'demain', why: `${B.name} a déjà servi aujourd’hui. Il revient à minuit, dans ${fmtEta(untilMidnight())}.` };
+  if (st.day === today() && !SANDBOX) return { ok: false, short: 'demain', why: `${B.name} a déjà servi aujourd’hui. Il revient à minuit, dans ${fmtEta(untilMidnight())}.` };
   if (!boostRunning(p)) return { ok: false, short: 'équipe à l’arrêt', why: `${C.label} doit tourner (premier plan ou arrière-plan) : le chrono ne part qu’avec l’équipe.` };
   if (mode !== 'idle' || paused) return { ok: false, short: 'pas maintenant', why: `Pas maintenant : ${paused ? 'le jeu est en pause' : 'attendez que les agents travaillent'}.` };
   return { ok: true, short: B.cmd, why: '' };
@@ -7443,7 +7459,7 @@ function boostStart(p) {
   hudNote(`${C.glyph} ${B.name} : ×${frx(B.work)} de travail pendant ${mmss(st.left)}${B.tok > 1 ? ` · ×${frx(B.tok)} de tokens` : ''}`, 'ok');
   saveGame();
   renderHud();
-  return { ok: true, msg: `${B.name} activé pour ${C.label} : ${mmss(st.left)} à ×${frx(B.work)} de travail. Une fois par jour : le prochain, demain.` };
+  return { ok: true, msg: `${B.name} activé pour ${C.label} : ${mmss(st.left)} à ×${frx(B.work)} de travail. ${SANDBOX ? 'Bac à sable : relançable dès qu’il s’arrête.' : 'Une fois par jour : le prochain, demain.'}` };
 }
 function boostTick(dt) {                          // le chrono : il ne tourne que quand l'équipe travaille
   if (!IDLE || !G.boost) return;
@@ -7543,9 +7559,27 @@ function idleApply() {                           // la config du jeu suit la par
   si = termIdx();
   speed = SPEEDS[si];
 }
+function sandboxFill() {                         // bac à sable : tout est acheté, installé, téléchargé
+  const all = o => Object.fromEntries(Object.keys(o).map(k => [k, 1]));
+  const gpu = PARTS.gpu.t.length - 1;
+  let nLoc = 1;                                   // l'IA locale : autant d'agents que la VRAM en tient (chacun la double)
+  while (nLoc < AGENTS.length && vramFor('kwen72b', nLoc + 1) <= PARTS.gpu.t[gpu].vram) nLoc++;
+  Object.assign(G, {
+    sbx: 1, money: 1e7, ai: 'claude', lead: LEAD_TIER.length - 1, term: ECO.term.length - 1,
+    own: { mistral: 1, codex: 1, claude: 1, local: 1 }, cli: { mistral: 1, codex: 1, claude: 1 }, pk: STARTER_PKGS.slice(),
+    rt: all(LOCAL_RT), models: all(MODELS), sk: all(SKILLS), bg: {},
+    team: { mistral: AGENTS.length, codex: AGENTS.length, claude: AGENTS.length, local: nLoc },
+    pm: { mistral: 'large', codex: 'astra', claude: 'fable', local: 'kwen72b' },
+    pc: { ...Object.fromEntries(SLOTS.map(k => [k, PARTS[k].t.length - 1])), disk: PARTS.disk.t.length - 2 },   // pas le RAID 0 : il est au store, pour les joueurs
+    boost: Object.fromEntries(Object.keys(BOOST).map(p => [p, { own: 1, lvl: BOOST_EXT.length }])),
+  });
+  G.agents = G.team[G.ai];
+  G.model = G.pm[G.ai];
+}
 function resetGame() {
   G = G_DEF();
   platInit();
+  if (SANDBOX) sandboxFill();
   installed = new Set(startPkgs());               // machine neuve : les paquets de départ repartent
   pkFsSync();
   cartClear();
@@ -7695,7 +7729,7 @@ function renderHud() {
   const next = ECO.value(shipped) - G.bill;
   $('#hud-money').textContent = usd(G.money);
   hudEl.querySelector('.hud-money').classList.toggle('neg', G.money < 0);
-  $('#hud-ver').textContent = `${PROJ} v${verStr()}`;
+  $('#hud-ver').textContent = `${SANDBOX ? 'bac à sable · ' : ''}${PROJ} v${verStr()}`;
   $('.hud-fill').style.width = (pct * 100).toFixed(1) + '%';
   $('.hud-bar').setAttribute('aria-valuenow', Math.floor(pct * 100));
   $('#hud-pct').textContent = Math.floor(pct * 100) + ' %';
@@ -8479,6 +8513,7 @@ async function launchLines(line, wait, restored = []) {
 
 initSettings();                                  // thème, taille, graphismes, nom : avant la première mise en page
 if (IDLE) {                                      // mode idle : la partie sauvegardée, et ce qui s'est passé pendant l'absence
+  if (SANDBOX && !G.sbx) { sandboxFill(); saveGame(); }   // premier passage dans le bac à sable : tout est débloqué
   idleApply();
   const gap = (Date.now() - G.t) / 1000;
   if (G.running && gap > 60) idleWelcome = { gap, ...ecoOffline(Math.min(gap, ECO.offlineMax), false) };
