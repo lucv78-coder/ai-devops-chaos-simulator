@@ -783,6 +783,65 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .bi-prog { width: 40ch; max-width: 80vw; height: .7em; border: 1px solid var(--dim2); }
 .bi-prog i { display: block; width: 0; height: 100%; background: var(--orange); transition: width .15s; }
 .bi-ok { color: var(--green); } .bi-fail { color: var(--red); } .bi-warn { color: var(--yellow); }
+.bi-del { padding: .5em .8ch; margin: -.5em -.8ch; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline dotted; text-underline-offset: .2em; cursor: pointer; }
+/* le setup du BIOS (DEL ou F2 pendant le POST), façon AMIBIOS : gris, bleu, une seule police */
+#bios.setup:not([hidden]) { display: grid; place-items: center; padding: .6em 1ch; white-space: normal; font-size: clamp(8px, min(1.75vw, 2.75vh), 24px); }   /* plein écran, comme en mode texte */
+.ami {
+  --a-bg: #aaa; --a-fg: #00a; --a-hi: #fff; --a-sel: #5c5c5c; --a-bar: #00a; --a-bar-fg: #ddd; --a-pop-fg: #fff; --a-warn: #800;
+  position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; width: min(100%, 92ch); height: min(100%, 34em);
+  background: var(--a-bg); color: var(--a-fg); line-height: 1.45; text-shadow: none; white-space: pre;
+}
+:root[data-theme="abri"] .ami { --a-bg: #0c3a1c; --a-fg: #3dff7e; --a-hi: #04140a; --a-sel: #3dff7e; --a-bar: #04140a; --a-bar-fg: #8cffb2; --a-pop-fg: #8cffb2; --a-warn: #d2ffe2; }
+.ami button { padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ami-head, .ami-foot { padding: .1em 1ch; background: var(--a-bar); color: var(--a-bar-fg); text-align: center; overflow: hidden; text-overflow: ellipsis; }
+.ami-tabs { display: flex; padding: 0 1ch; background: var(--a-bar); overflow-x: auto; scrollbar-width: none; }
+.ami-tabs button { flex: none; padding: .05em 1.6ch; color: var(--a-bar-fg); }
+.ami-tabs button[aria-selected="true"] { background: var(--a-bg); color: var(--a-fg); }
+.ami-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(22ch, 30ch); min-height: 0; margin: .5em 1ch; border: 3px double var(--a-fg); }
+.ami-main { position: relative; min-width: 0; min-height: 0; overflow: auto; padding: .4em 1ch; scrollbar-width: thin; }
+.ami-side { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; border-left: 1px solid var(--a-fg); }
+.ami-help { min-height: 0; overflow: auto; padding: .4em 1ch; white-space: normal; }
+.ami-keys { padding: .4em 1ch; border-top: 1px solid var(--a-fg); }
+.ami-keys > * { display: block; width: 100%; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.ami-keys b { display: inline-block; min-width: 6ch; }
+.ami-keys button:hover { text-decoration: underline; }
+.ami-t.w { color: var(--a-warn); }
+.ami-sp { height: 1.45em; }
+.ami-row { display: grid; grid-template-columns: minmax(14ch, 26ch) minmax(0, 1fr); gap: 1ch; width: 100%; }
+.ami-row > span { overflow: hidden; text-overflow: ellipsis; }
+.ami-it.on { background: var(--a-sel); color: var(--a-hi); }
+.ami-pop { position: absolute; inset: 0; display: grid; place-items: center; padding: 1em; background: rgba(0, 0, 0, .15); }
+.ami-box {
+  display: grid; gap: .3em; min-width: min(34ch, 100%); max-width: min(60ch, 100%); max-height: 80%; padding: .3em 1ch .5em;
+  border: 3px double var(--a-pop-fg); background: var(--a-bar); color: var(--a-pop-fg); white-space: normal; box-shadow: 1ch .6em 0 rgba(0, 0, 0, .55);
+}
+.ami-bt { text-align: center; border-bottom: 1px solid var(--a-pop-fg); }
+.ami-opts { position: relative; max-height: 12em; overflow: auto; }
+.ami .ami-opt { display: block; width: 100%; padding: 0 1ch; }
+.ami-opt.on, .ami-btns .on { background: var(--a-bg); color: var(--a-fg); }
+:root[data-theme="abri"] .ami-opt.on, :root[data-theme="abri"] .ami-btns .on { background: var(--a-fg); color: var(--a-hi); }
+.ami-q { text-align: center; }
+.ami-btns { display: flex; justify-content: center; gap: 3ch; }
+@media (max-width: 640px) {
+  #bios.setup:not([hidden]) { font-size: clamp(8px, 2.9vw, 13px); }
+  .ami-tabs button { padding: .05em .8ch; }
+  .ami-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .ami-side { grid-template-rows: auto auto; border-left: 0; border-top: 1px solid var(--a-fg); }
+  .ami-help { max-height: 5.8em; }
+  .ami-keys { display: flex; flex-wrap: wrap; gap: 0 2ch; }
+  .ami-keys > * { width: auto; }
+  .ami-keys > span { display: none; }            /* au doigt : seulement les touches qu'on peut toucher */
+}
+/* overclocking instable : des bandes, des caractères parasites, l'écran qui saute (DEL au démarrage, Vibe Tweaker, pour baisser) */
+#ocg { position: fixed; inset: 0; z-index: 10; overflow: hidden; pointer-events: none; }
+#ocg i { position: absolute; left: 0; right: 0; display: block; font-style: normal; white-space: pre; overflow: hidden; }
+#ocg .b { backdrop-filter: invert(1) hue-rotate(180deg); }
+#ocg .c { backdrop-filter: hue-rotate(110deg) saturate(4); background: rgba(255, 0, 110, .12); }
+#ocg .t { color: var(--g); background: var(--bg); line-height: 1.2; }
+#app.ocg-on { translate: var(--ocx, 3px) 0; text-shadow: 2px 0 rgba(255, 0, 80, .75), -2px 0 rgba(0, 230, 255, .75); }
+#app[data-oc="3"] { animation: ocjit 2.3s steps(1) infinite; }
+@keyframes ocjit { 0%, 93% { transform: none; } 94% { transform: translateX(3px) skewX(-2deg); } 96% { transform: translateX(-2px); } 98% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { #app.ocg-on { translate: none; } #app[data-oc="3"] { animation: none; } }
 @container (max-width: 96ch) { .fm-row { grid-template-columns: 2ch minmax(0, 1fr) 14ch 14ch; } .fm-row .fm-t { display: none; } }   /* fenêtre étroite : moins de colonnes */
 @container (max-width: 78ch) { .fm-main { grid-template-columns: minmax(0, 1fr); } .fm-side { display: none; } }
 @container (max-width: 50ch) { .fm-row { grid-template-columns: 2ch minmax(0, 1fr) 14ch; } .fm-row .fm-d { display: none; } }
@@ -1000,6 +1059,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 </dialog>
 <div id="fps" hidden aria-hidden="true"></div>
 <div id="boot" aria-hidden="true"></div>
+<div id="ocg" aria-hidden="true"></div>
 <div id="bios" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -2378,6 +2438,7 @@ const PRE_HELP_LINES = () => [
   [H(['    --model <nom>   ', 'org'], modelsOf('mistral').join(' · ')), '', 20],
   [H(['    --agents <n>    ', 'org'], `de 1 à ${AGENTS.length} agents, quel que soit le fournisseur`), '', 20],
   [H(['  htop · atop       ', 'org'], 'moniteurs système : le PC est-il à terre ? (aussi : sensors, free, sudo smartctl -a)'), '', 20],
+  [H(['  reboot            ', 'org'], 'redémarrer le PC · DEL (ou F2) pendant le POST : le BIOS, pour overclocker'), '', 20],
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
     [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
@@ -2408,6 +2469,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['  model <nom>      ', 'org'], modelsOf().join(' · ')), '', 20],
   [H(['  cost             ', 'org'], 'la facture détaillée, aux tarifs réels de chaque modèle'), '', 20],
   [H(['  htop · atop      ', 'org'], 'voir la machine souffrir · q pour quitter'), '', 20],
+  [H(['  reboot           ', 'org'], 'redémarrer (les agents repartent) · DEL pendant le POST : le BIOS, l’overclocking'), '', 20],
   ...(IDLE ? [[H(['  store · B        ', 'org'], 'agents, orchestrateur, modèles, skills, plateformes, matériel · la barre shippe toute seule'), '', 20],
     [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20],
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
@@ -3069,7 +3131,7 @@ const FS_CMDS = {
 
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad',
-  'model', 'npm', 'npx', 'pwd',
+  'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
@@ -3872,7 +3934,7 @@ function fetchLines() {                          // neofetch / fastfetch : la vr
     tx(USER, 'org b') + '@' + tx('prod-01', 'org b'), esc('-'.repeat(USER.length + 8)),
     ['OS', 'Vibian GNU/Linux 13 (friday) x86_64'], ['Host', `${part('mobo').n} (${pcDiag().host})`], ['Kernel', '6.11.0-friday'],
     ['Uptime', `${d ? d + ' days, ' : ''}${h} hours, ${m} mins`], ['Packages', `${2150 + installed.size} (dpkg), ${num(nmCount())} (npm)`],
-    ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', `${part('cpu').n} (${HW.threads}) @ ${part('cpu').ghz.toFixed(3)}GHz`],
+    ['Shell', 'zsh 5.9'], ['DE', 'Plasma 6.2 (Wayland)'], ['Terminal', GAME], ['CPU', `${part('cpu').n} (${HW.threads}) @ ${(cpuMhz() / 1000).toFixed(3)}GHz`],
     ['GPU', part('gpu').n], ['Memory', `${Math.round(s.used)}MiB / ${Math.round(HW.mem)}MiB`], ['Disk (/)', part('disk').n],
     ['Agents', claudeOn ? `${panes.length} × ${cfg.model} via ${cli().label} (orchestrateur ${MODELS[LEAD_MODEL].name})${bgTeams().map(t => ` + ${t.n} × ${t.model} via ${CLIS[t.ai].label} (arrière-plan)`).join('')}` : 'aucun (ni claude, ni codex, ni mistral lancé)'],
     '', ['errc', 'wrn', 'okc', 'cy', 'blu', 'mg', 'org', 'fgc'].map(c => tx('███', c)).join(''),
@@ -3910,6 +3972,10 @@ async function runCommand(raw) {
   if (mode === 'launching') return shellPrint(H(['busy ', 'wrn'], 'claude démarre. Patientez.'));
   if (mode !== 'idle') return shellPrint(H(['busy ', 'wrn'], `${crashKind === 'sys' ? 'rm' : 'npm'} est occupé à tout casser. Patientez.`));
   if (hackGame) return hackInput(cmd);           // partie de hack en cours : tout ce qu'on tape est une tentative
+  if (/^(sudo )?(reboot|systemctl reboot|shutdown -r( now)?|init 6)$/.test(low) && (head !== 'sudo' || installed.has('sudo'))) {   // BIOS compris (DEL : le setup)
+    if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+    return pcReboot();
+  }
 
   const shipCmd = /^(npm run ship|npm run deploy|npm publish|ship|yarn ship|pnpm ship)\b/.test(low) || /push.*--force.*prod/.test(low);
   const order = BOSS.find(b => b.toLowerCase() === low.replace(/[’‘]/g, "'").replace(/^@all /, '').replace(/[\s.!?]+$/, ''));
@@ -4484,13 +4550,13 @@ let bootT = Date.now() - ri(3 * 86400, 9 * 86400) * 1000;                       
    100 °C : le PC tombe et redémarre (BIOS compris). htop, sensors et free montrent tout ça. */
 const PARTS = {
   cpu: { name: 'Processeur', ic: '▦', t: [
-    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W · socket LGA1155', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', so: 'LGA1155', thr: 2, cap: 1, perf: 1, ghz: 2.4, tdp: 65, cost: 0 },
-    { n: 'Corps i5-3570 (Leboncoin)', s: '4 cœurs · 3,4 GHz · 77 W · socket LGA1155', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké. Même socket que le Céléri : il rentre dans la carte mère d’origine.', so: 'LGA1155', thr: 4, cap: 2.6, perf: 1.25, ghz: 3.4, tdp: 77, cost: 45 },
-    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W · socket RM4', d: 'Le raisin, c’est bon pour le code. Et pour le moral. Demande une carte mère RM4, donc de la DDR4.', so: 'RM4', thr: 12, cap: 5, perf: 1.55, ghz: 4.4, tdp: 65, cost: 260 },
-    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W · socket RM5', d: 'Du cache empilé jusqu’au plafond. Socket RM5 : nouvelle carte mère, et DDR5 obligatoire.', so: 'RM5', thr: 16, cap: 8, perf: 1.8, ghz: 5.05, tdp: 120, cost: 950 },
-    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W · socket LGA1851', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi. Socket LGA1851 : encore une carte mère.', so: 'LGA1851', thr: 24, cap: 12, perf: 2, ghz: 5.7, tdp: 250, cost: 3200 },
-    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W · socket RM5', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent. 170 W : il lui faut des VRM costauds.', so: 'RM5', thr: 32, cap: 17, perf: 2.2, ghz: 5.7, tdp: 170, cost: 9500 },
-    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W · socket sTF5', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable. Socket grand comme une tartine.', so: 'sTF5', thr: 128, cap: 34, perf: 2.4, ghz: 5.1, tdp: 350, cost: 32000 },
+    { n: 'Céléri G530', s: '2 cœurs · 2,4 GHz · 65 W · socket LGA1155', d: 'De 2011. Le céleri de la micro-informatique : beaucoup d’eau, peu de calories.', so: 'LGA1155', thr: 2, cap: 1, perf: 1, ghz: 2.4, tdp: 65, oc: .15, cost: 0 },
+    { n: 'Corps i5-3570 (Leboncoin)', s: '4 cœurs · 3,4 GHz · 77 W · socket LGA1155', d: 'Vendu « comme neuf, jamais overclocké ». Il a été overclocké. Même socket que le Céléri : il rentre dans la carte mère d’origine.', so: 'LGA1155', thr: 4, cap: 2.6, perf: 1.25, ghz: 3.4, tdp: 77, oc: .06, cost: 45 },
+    { n: 'Raisin 5 5600', s: '6 cœurs / 12 threads · 4,4 GHz · 65 W · socket RM4', d: 'Le raisin, c’est bon pour le code. Et pour le moral. Demande une carte mère RM4, donc de la DDR4.', so: 'RM4', thr: 12, cap: 5, perf: 1.55, ghz: 4.4, tdp: 65, oc: .1, cost: 260 },
+    { n: 'Raisin 7 7800X3D', s: '8 cœurs / 16 threads · 5 GHz · 120 W · socket RM5', d: 'Du cache empilé jusqu’au plafond. Socket RM5 : nouvelle carte mère, et DDR5 obligatoire.', so: 'RM5', thr: 16, cap: 8, perf: 1.8, ghz: 5.05, tdp: 120, oc: .04, cost: 950 },
+    { n: 'Corps Ultra 9 285K', s: '24 cœurs · 5,7 GHz · 250 W · socket LGA1851', d: 'Dont 16 cœurs « efficaces ». Personne ne sait à quoi. Socket LGA1851 : encore une carte mère.', so: 'LGA1851', thr: 24, cap: 12, perf: 2, ghz: 5.7, tdp: 250, oc: .07, cost: 3200 },
+    { n: 'Raisin 9 9950X3D', s: '16 cœurs / 32 threads · 5,7 GHz · 170 W · socket RM5', d: 'De quoi compiler le noyau pendant que huit agents le réécrivent. 170 W : il lui faut des VRM costauds.', so: 'RM5', thr: 32, cap: 17, perf: 2.2, ghz: 5.7, tdp: 170, oc: .06, cost: 9500 },
+    { n: 'ThreadFlipper 7980X', s: '64 cœurs / 128 threads · 350 W · socket sTF5', d: '128 threads pour huit agents qui attendent la réponse de l’API. Indispensable. Socket grand comme une tartine.', so: 'sTF5', thr: 128, cap: 34, perf: 2.4, ghz: 5.1, tdp: 350, oc: .12, cost: 32000 },
   ] },
   mobo: { name: 'Carte mère', ic: '▧', t: [
     { n: 'H61 OEM', s: 'LGA1155 · DDR3 · VRM 95 W · 1 PCIe x16 · 0 M.2', d: 'Récupérée dans un PC de bureau de 2011. Deux slots de RAM, dont un qui marche quand on appuie dessus.', so: 'LGA1155', ddr: 3, vrm: 95, pcie: 1, m2: 0, cost: 0 },
@@ -4501,13 +4567,13 @@ const PARTS = {
     { n: 'ThreadFlipper TRX50', s: 'sTF5 · DDR5 · VRM 400 W · 4 PCIe x16 · 4 M.2 PCIe 5', d: 'Quatre slots PCIe x16 et un manuel de 300 pages, que l’agent a résumé en « ça va ».', so: 'sTF5', ddr: 5, vrm: 400, pcie: 4, m2: 4, gen5: 1, cost: 1500 },
   ] },
   ram: { name: 'Mémoire', ic: '▤', t: [
-    { n: '4 Go DDR3', s: '2 barrettes dépareillées · DDR3', d: 'Une de 2012, une de 2014. Elles ne se parlent pas.', ddr: 3, go: 4, cost: 0 },
-    { n: '8 Go DDR3', s: '2 × 4 Go · 1 600 MHz · DDR3', d: 'Trouvée dans un tiroir, avec un câble VGA. Rentre dans la carte mère d’origine.', ddr: 3, go: 8, cost: 25 },
-    { n: '16 Go DDR4', s: '2 × 8 Go · 3 200 MHz · DDR4', d: 'Le minimum vital d’après les agents. Ne rentre que dans une carte mère DDR4.', ddr: 4, go: 16, cost: 60 },
-    { n: '32 Go DDR4', s: '2 × 16 Go · 3 600 MHz · DDR4', d: 'Huit agents, un orchestrateur, et encore de la place pour le doute.', ddr: 4, go: 32, cost: 140 },
-    { n: '32 Go DDR5', s: '2 × 16 Go · 6 000 MHz · DDR5', d: 'La même chose qu’en DDR4, en plus cher : le progrès. Obligatoire sur les cartes mères RM5 et LGA1851.', ddr: 5, go: 32, cost: 380 },
-    { n: '64 Go DDR5 RGB', s: '2 × 32 Go · 6 400 MHz · DDR5', d: 'La RAM qui brille va plus vite. C’est scientifique (source : l’agent).', ddr: 5, go: 64, cost: 1600 },
-    { n: '128 Go DDR5 ECC', s: '4 × 32 Go · DDR5 · corrige ses erreurs', d: 'La seule chose du projet qui corrige ses propres erreurs.', ddr: 5, go: 128, cost: 5200 },
+    { n: '4 Go DDR3', s: '2 barrettes dépareillées · 1 066 MHz · DDR3', d: 'Une de 2012, une de 2014. Elles ne se parlent pas, et la plus lente décide.', ddr: 3, go: 4, mhz: 1066, oc: .04, cost: 0 },
+    { n: '8 Go DDR3', s: '2 × 4 Go · 1 600 MHz · DDR3', d: 'Trouvée dans un tiroir, avec un câble VGA. Rentre dans la carte mère d’origine.', ddr: 3, go: 8, mhz: 1600, oc: .12, cost: 25 },
+    { n: '16 Go DDR4', s: '2 × 8 Go · 3 200 MHz · DDR4', d: 'Le minimum vital d’après les agents. Ne rentre que dans une carte mère DDR4.', ddr: 4, go: 16, mhz: 3200, oc: .12, cost: 60 },
+    { n: '32 Go DDR4', s: '2 × 16 Go · 3 600 MHz · DDR4', d: 'Huit agents, un orchestrateur, et encore de la place pour le doute.', ddr: 4, go: 32, mhz: 3600, oc: .08, cost: 140 },
+    { n: '32 Go DDR5', s: '2 × 16 Go · 6 000 MHz · DDR5', d: 'La même chose qu’en DDR4, en plus cher : le progrès. Obligatoire sur les cartes mères RM5 et LGA1851.', ddr: 5, go: 32, mhz: 6000, oc: .07, cost: 380 },
+    { n: '64 Go DDR5 RGB', s: '2 × 32 Go · 6 400 MHz · DDR5', d: 'La RAM qui brille va plus vite. C’est scientifique (source : l’agent).', ddr: 5, go: 64, mhz: 6400, oc: .06, cost: 1600 },
+    { n: '128 Go DDR5 ECC', s: '4 × 32 Go · 4 800 MHz · DDR5 · corrige ses erreurs', d: 'La seule chose du projet qui corrige ses propres erreurs.', ddr: 5, go: 128, mhz: 4800, oc: .14, ecc: 1, cost: 5200 },
   ] },
   gpu: { name: 'Carte graphique', ic: '▣', t: [
     { n: 'Chipset graphique intégré', s: 'mémoire partagée · 15 W', d: 'Affiche un terminal. La plupart du temps.', vram: .5, tdp: 15, rev: 1, tok: 1, llm: '', cost: 0 },
@@ -4547,6 +4613,46 @@ const SANDBOX_PC = { cpu: 3, mobo: 2, ram: 5, gpu: 4, disk: 3, psu: 4, cool: 3 }
 const PC = () => IDLE ? G.pc : SANDBOX_PC;
 const part = (slot, pc = PC()) => PARTS[slot].t[pc[slot]];
 const PCS = { temp: 36, oomAt: 0 };              // la température, en direct
+
+/* ---------- overclocking : le setup du BIOS (DEL ou F2 pendant le POST) règle le multiplicateur du processeur et la fréquence de la RAM ----------
+   Chaque puce a sa marge, tirée à l'installation (la loterie du silicium, de 70 à 130 % de la marge typique de la pièce). En dessous :
+   les agents vont plus vite, le processeur chauffe et consomme davantage. Au-delà : erreurs matérielles et glitchs, de plus en plus souvent
+   (ocU : 1 = 10 % au-dessus de la marge). Baisser la fréquence suffit à tout calmer. ratio 0, mhz 0 : Auto (d'origine). Les réglages
+   vivent dans la sauvegarde (la CMOS) ; changer de processeur ou de RAM les remet sur Auto. */
+const OC_DDR = { 3: [800, 1066, 1333, 1600, 1866, 2133, 2400], 4: [2133, 2400, 2666, 2933, 3200, 3466, 3600, 3733, 3866, 4000, 4266],
+  5: [4000, 4400, 4800, 5200, 5600, 6000, 6200, 6400, 6600, 6800, 7200, 7600, 8000] };
+let SB_OC = null;                                // mode libre : les réglages vivent le temps de la page
+const ocLot = () => Math.round((.7 + R() * .6) * 100) / 100;
+function ocSt() {                                // les réglages du BIOS (remis sur Auto quand la pièce change)
+  const pc = PC();
+  let o = IDLE ? G.oc : SB_OC;
+  if (!o || typeof o !== 'object') {
+    o = { cpuT: pc.cpu, ramT: pc.ram, ratio: 0, mhz: 0, lc: ocLot(), lr: ocLot(), quick: 1, err: 0, chg: '' };
+    if (IDLE) G.oc = o; else SB_OC = o;
+  }
+  if (o.cpuT !== pc.cpu) { if (o.ratio) o.chg = 'cpu'; Object.assign(o, { cpuT: pc.cpu, ratio: 0, lc: ocLot() }); }
+  if (o.ramT !== pc.ram) { if (o.mhz) o.chg = o.chg === 'cpu' ? 'both' : 'ram'; Object.assign(o, { ramT: pc.ram, mhz: 0, lr: ocLot() }); }
+  return o;
+}
+const cpuBase = (c = part('cpu')) => Math.round(c.ghz * 1000);   // MHz, d'origine
+const cpuMhz = () => ocSt().ratio * 100 || cpuBase();
+const ramMhz = () => ocSt().mhz || part('ram').mhz;
+const ocRange = (c = part('cpu')) => [Math.max(8, Math.round(c.ghz * 6)), Math.round(c.ghz * 14.5)];   // le multiplicateur : de −40 % à +45 %
+const frMhz = v => `${Math.round(v).toLocaleString('fr-FR')} MHz`;
+const ocPct = (f, b) => Math.round(f) === Math.round(b) ? 'd’origine' : `${f > b ? '+' : '−'}${Math.abs(Math.round((f / b - 1) * 100))} %`;
+function ocK(pc = PC()) {                        // fréquence du processeur et de la RAM, rapportée à l'origine (une autre pièce : 1)
+  const I = PC();
+  return { cr: pc.cpu === I.cpu ? cpuMhz() / cpuBase() : 1, rr: pc.ram === I.ram ? ramMhz() / part('ram').mhz : 1 };
+}
+function ocU(pc = PC()) {                        // l'instabilité : 0 = dans la marge ; 1 = 10 % au-delà ; 3 au plus
+  const I = PC(), o = ocSt(), c = part('cpu'), r = part('ram'), sc = cpuBase(c) * (1 + c.oc * o.lc), sr = r.mhz * (1 + r.oc * o.lr);
+  const u = (f, b) => Math.max(0, Math.min(3, (f - b) / (b * .1)));
+  return { cpu: pc.cpu === I.cpu ? u(cpuMhz(), sc) : 0, ram: pc.ram === I.ram ? u(ramMhz(), sr) : 0 };
+}
+function ocLoad(u, util, used, ram, ecc) {       // ce que l'instabilité pèse, selon la charge (l'ECC corrige les petites erreurs de RAM)
+  const cpu = u.cpu * (.35 + .65 * util), mem = (ecc ? Math.max(0, u.ram - 1) : u.ram) * (.5 + .5 * Math.min(1, used / ram));
+  return { cpu, mem, g: Math.max(cpu, mem) };
+}
 const GFX_HOG = () => prefs.gfx === 'rtx' || prefs.gfx === 'ia';
 function syncHW() {                              // htop, atop et neofetch lisent HW : il suit le matériel installé
   const c = part('cpu'), r = part('ram'), g = part('gpu'), d = part('disk');
@@ -4562,18 +4668,19 @@ function pcLoad(o = {}) {
   const bo = o.bg != null ? o : live && claudeOn && !paused && mode !== 'gameover' ? bgLoad() : { bg: 0, plats: 0 };
   const bg = bo.bg || 0, plats = bo.plats || 0, all = n + bg;   // les équipes en arrière-plan chargent la machine aussi (et chaque CLI en plus)
   const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog;
-  const util = Math.min(1, demand / c.cap);
+  const k = ocK(pc), cap = c.cap * k.cr, util = Math.min(1, demand / cap);   // overclocking : plus de puissance (et plus de chaleur)
   const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web;   // Go
   const swap = Math.max(0, used - r.go);
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
-  const heat = c.tdp * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
-  return { n, bg, plats, boost: c.perf ?? 1, demand, util, cap: c.cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
-    tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, c.cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
+  const heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
+  return { n, bg, plats, boost: (c.perf ?? 1) * (1 + .6 * (k.cr - 1)) * (1 + .3 * (k.rr - 1)), demand, util, cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
+    tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
 }
 function hwState(o = {}) {                       // le rendement de la machine : 1 = rien ne freine les agents ; 0 = PC à terre
   const L = pcLoad(o), temp = o.off ? L.tTarget : PCS.temp;
   const down = L.draw > L.psuW || (o.off && L.tTarget >= 100), hot = temp >= 90;
-  return { ...L, temp, hot, down, f: down ? 0 : L.cpuF * L.ramF * (hot ? .7 : 1) * L.io };
+  const pc = o.pc || PC(), u = ocU(pc), ug = o.off ? ocLoad(u, L.util, L.used, L.ram, part('ram', pc).ecc).g : 0;
+  return { ...L, temp, hot, down, oc: u, f: down ? 0 : L.cpuF * L.ramF * (hot ? .7 : 1) * L.io / (1 + .5 * ug + .5 * ug * ug) };
 }
 function pcVerdict(s) {                          // « OK », « TENDU » ou « À TERRE », et pourquoi
   const why = [];
@@ -4584,6 +4691,7 @@ function pcVerdict(s) {                          // « OK », « TENDU » ou « 
   if (s.temp >= 90) why.push(`throttling à ${Math.round(s.temp)} °C`);
   else if (s.temp >= 82) why.push(`${Math.round(s.temp)} °C`);
   if (!s.down && s.draw > .85 * s.psuW) why.push(`alim à ${Math.round(s.draw / s.psuW * 100)} %`);
+  if (s.oc && (s.oc.cpu > 0 || s.oc.ram > 0)) why.push('overclocking instable');
   const lvl = s.down || s.f < .5 || s.oom || s.temp >= 95 ? 'bad' : why.length ? 'mid' : 'ok';
   return { lvl, label: lvl === 'bad' ? 'À TERRE' : lvl === 'mid' ? 'TENDU' : 'OK', cls: lvl === 'bad' ? 'errc' : lvl === 'mid' ? 'wrn' : 'okc', why: why.join(' · ') || 'tout roule' };
 }
@@ -4876,7 +4984,7 @@ function sysSample() {
       s: p.s || (cpu >= 50 ? 'R' : melt && R() < .3 ? 'D' : 'S') };
   });
   for (const k of MON.procs.keys()) if (!seen.has(k)) MON.procs.delete(k);
-  const hw = hwState(), hot = hw.temp >= 90, ghz = part('cpu').ghz * 1000;
+  const hw = hwState(), hot = hw.temp >= 90, ghz = cpuMhz();
   const sum = procs.reduce((a, p) => a + p.cpu, 0), room = HW.threads * 100 * Math.max(.03, hw.util);
   if (!melt && sum > room) procs.forEach(p => { p.cpu *= room / sum; });   // 8 agents sur 2 cœurs : chacun n'en a qu'un bout
   const total = Math.min(HW.threads * 100, procs.reduce((a, p) => a + p.cpu, 0));
@@ -5451,6 +5559,7 @@ function xfMenuOpen() {
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
+    + item('reboot', '↻', 'Redémarrer', 'le PC repasse par le BIOS · DEL pour le setup')
     + item('logout', '↩', 'Déconnexion', 'quitter Xfce et revenir au terminal');
   xfMenuEl.hidden = false;
   xfAppsBtn.setAttribute('aria-expanded', 'true');
@@ -5465,6 +5574,7 @@ function xfMenuClose(back) {
 function xfLaunch(id) {
   xfMenuClose();
   if (id === 'logout') return xfExit();
+  if (id === 'reboot') return pcReboot();
   if (id === 'settings') return openSettings();
   if (id === 'store') return openStore();
   if (id === 'zsh') return xfFocus('zsh');
@@ -8092,6 +8202,7 @@ function ecoTick() {
   const now = performance.now(), dt = (now - ecoLast) / 1000;
   ecoLast = now;
   pcTick(Math.min(dt, 5), now);                  // température, alimentation, mémoire
+  ocTick(Math.min(dt, 5), now);                  // overclocking instable : glitchs et erreurs matérielles
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
@@ -8479,10 +8590,15 @@ async function biosBoot(o = {}) {
   if (Q.get('bios') === '0') { o.during?.(); o.then?.(); return; }
   booting = true;
   const el = biosEl;
-  let skip = false;
+  let skip = false, wake = null, prePost = true, postOn = false, wantSetup = false, setupKey = null;
   const skipper = e => {
+    if (setupKey) { if (e.type === 'keydown') setupKey(e); return; }   // le setup gère ses touches (et ses clics)
+    const del = e.type === 'keydown' ? ['Delete', 'Del', 'F2'].includes(e.key) : !!e.target.closest?.('.bi-del');
     if (e.type === 'keydown') { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
+    if (wantSetup || (del && prePost)) return;   // DEL pressé à temps : direction le setup ; martelé dès le kernel panic : on attend le POST
+    if (del && postOn && !skip) { wantSetup = true; wake?.(); return; }
     skip = true;
+    wake?.();
   };
   addEventListener('keydown', skipper, true);
   el.addEventListener('pointerdown', skipper);
@@ -8491,7 +8607,8 @@ async function biosBoot(o = {}) {
   el.classList.remove('out');
   el.hidden = false;
   const fast = reducedMotion.matches ? .25 : 1;
-  const wait = ms => skip ? Promise.resolve() : sleep(ms * fast);
+  const wait = (ms, k = fast) => skip || (postOn && wantSetup) ? Promise.resolve()   // une touche coupe l'attente en cours
+    : new Promise(res => { const t = setTimeout(() => { wake = null; res(); }, ms * k); wake = () => { clearTimeout(t); wake = null; res(); }; });
   const add = (h, cls = '', box = el) => { const d = document.createElement('div'); d.className = 'ln' + (cls ? ' ' + cls : ''); d.innerHTML = h; box.appendChild(d); return d; };
   const hint = () => add('Une touche ou un clic : passer le démarrage', 'bi-skip');
   o.during?.();                                  // sous l'écran noir : on coupe ce qui tournait
@@ -8525,46 +8642,72 @@ async function biosBoot(o = {}) {
     el.innerHTML = '';
     await wait(900);                             // le noir complet, ventilateurs coupés
   }
-  // 1. le POST du BIOS
-  const top = document.createElement('div');
-  top.className = 'bi-top';
-  top.innerHTML = `<div class="bi-post"></div><div class="bi-es">${ENERGY_STAR}</div>`;
-  el.appendChild(top);
-  hint();
-  const post = top.firstChild;
-  add('<b>VibeAward Modular BIOS v6.9PG</b>, An Energy Star Ally', '', post);
-  add('Copyright (C) 1984-2026, VibeAward Software, Inc.', 'dim', post);
-  add('', '', post);
-  add('PROD-01 BIOS rev. 2026.11 « friday »', '', post);
-  add('', '', post);
-  add(`Motherboard    : ${esc(mb.n)} · socket ${esc(mb.so)} · DDR${mb.ddr}`, '', post);
-  add(`Main Processor : ${esc(c.n)} ${frx(c.ghz)} GHz (${c.thr} threads)`, '', post);
-  const mem = add('Memory Testing :', '', post), total = r.go * 1048576;
-  for (let i = 1; i <= 14; i++) { mem.textContent = `Memory Testing : ${String(Math.round(total * i / 14)).padStart(10)}K`; await wait(34 * slow); }
-  mem.textContent += ` OK (DDR${r.ddr})`;
-  if (o.crash) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
-    : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
-    : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
-    : o.crash.kind === 'vram' ? 'Warning! Previous shutdown: GPU out of memory (le modèle local ne rentrait pas dans la VRAM).'
-    : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
-  if (pc.cool === 0) {
-    add('CPU Fan Error! Press F1 to Resume', 'bi-warn', post);
-    await wait(650);
-    add('  (F1 pressé automatiquement par un agent)', 'dim', post);
+  // 1. le POST du BIOS. DEL ou F2 (ou un clic sur DEL) avant qu'il ne finisse : le setup. « Save & Exit » : le PC redémarre, le POST repasse.
+  for (let pass = 0; ; pass++) {
+    el.innerHTML = '';
+    prePost = false;
+    postOn = true;
+    const top = document.createElement('div');
+    top.className = 'bi-top';
+    top.innerHTML = `<div class="bi-post"></div><div class="bi-es">${ENERGY_STAR}</div>`;
+    el.appendChild(top);
+    hint();
+    const foot = document.createElement('div');
+    foot.className = 'bi-foot';
+    foot.innerHTML = '<div class="ln">Press <button type="button" class="bi-del" tabindex="-1">DEL</button> or <b>F2</b> to enter SETUP, <b>ESC</b> to skip memory test</div><div class="ln dim">11/22/2026-i440VX-VIBE-6A79PROD-00 (friday)</div>';
+    el.appendChild(foot);
+    const post = top.firstChild, oc = ocSt(), mhz = cpuMhz(), rm = ramMhz(), b0 = cpuBase(c);
+    add('<b>VibeAward Modular BIOS v6.9PG</b>, An Energy Star Ally', '', post);
+    add('Copyright (C) 1984-2026, VibeAward Software, Inc.', 'dim', post);
+    add('', '', post);
+    add('PROD-01 BIOS rev. 2026.11 « friday »', '', post);
+    add('', '', post);
+    add(`Motherboard    : ${esc(mb.n)} · socket ${esc(mb.so)} · DDR${mb.ddr}`, '', post);
+    add(`Main Processor : ${esc(c.n)} ${frx(+(mhz / 1000).toFixed(3))} GHz (${c.thr} threads)`
+      + (oc.ratio ? ` · ${oc.ratio} x 100 MHz, ${mhz > b0 ? 'overclocké' : mhz < b0 ? 'sous-cadencé' : 'réglé à la main'}` : ''), '', post);
+    const mem = add('Memory Testing :', '', post), total = r.go * 1048576, full = oc.quick === 0, steps = full ? 40 : 14;   // Quick Boot coupé : le test complet
+    for (let i = 1; i <= steps; i++) { mem.textContent = `Memory Testing : ${String(Math.round(total * i / steps)).padStart(10)}K`; await wait((full ? 48 : 34) * slow); }
+    mem.textContent += ` OK (DDR${r.ddr}${oc.mhz ? `-${rm}, ${rm > r.mhz ? 'overclockée' : rm < r.mhz ? 'sous-cadencée' : 'réglée à la main'}` : ''})`;
+    if (o.crash && !pass) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
+      : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
+      : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
+      : o.crash.kind === 'vram' ? 'Warning! Previous shutdown: GPU out of memory (le modèle local ne rentrait pas dans la VRAM).'
+      : 'Warning! Previous shutdown: power loss (l’alimentation a sifflé, puis plus rien).', 'bi-fail', post);
+    if (oc.chg && !pass) {                       // la pièce a changé : ses réglages repartent sur Auto
+      if (oc.chg !== 'ram') add('New CPU installed! Please enter Setup to configure your system. (CPU Ratio : Auto)', 'bi-warn', post);
+      if (oc.chg !== 'cpu') add('Memory configuration changed! DRAM Frequency reset to Auto.', 'bi-warn', post);
+      oc.chg = '';
+    }
+    if (oc.err && !pass) {                       // la session d'avant a fait des erreurs matérielles : l'overclocking ne tient pas
+      add(`Warning! Overclocking unstable : ${oc.err} erreur${oc.err > 1 ? 's' : ''} matérielle${oc.err > 1 ? 's' : ''} depuis le dernier démarrage. Press DEL to enter SETUP.`, 'bi-fail', post);
+      oc.err = 0;
+    }
+    if (pc.cool === 0) {
+      add('CPU Fan Error! Press F1 to Resume', 'bi-warn', post);
+      await wait(650);
+      add('  (F1 pressé automatiquement par un agent)', 'dim', post);
+    }
+    add('', '', post);
+    add('Detecting drives ...', '', post);
+    await wait(260 * slow);
+    add(`  Primary Master : ${esc(d.dev)}`, '', post);
+    add('  Primary Slave  : None (un agent l’a démonté pour voir)', 'dim', post);
+    add(`  Video          : ${esc(g.n)}`, '', post);
+    add(`  Power          : ${esc(ps.n)}${ps.noname ? ' (sifflement détecté)' : ''}`, '', post);
+    add(`  Cooling        : ${esc(co.n)}`, '', post);
+    await wait(1100 * Math.min(1.3, slow), 1);   // la fenêtre pour DEL : jamais raccourcie (mouvement réduit compris)
+    postOn = false;
+    if (!wantSetup) break;
+    add('', '', post);
+    add('Entering SETUP...', '', post);
+    await sleep(reducedMotion.matches ? 150 : 450);
+    const res = await amiSetup(el, k => { setupKey = k; });
+    wantSetup = false;
+    el.classList.remove('setup');
+    el.innerHTML = '';
+    if (res !== 'save') break;
+    await sleep(reducedMotion.matches ? 100 : 700);   // Save & Exit : le PC redémarre, écran noir
   }
-  add('', '', post);
-  add('Detecting drives ...', '', post);
-  await wait(260 * slow);
-  add(`  Primary Master : ${esc(d.dev)}`, '', post);
-  add('  Primary Slave  : None (un agent l’a démonté pour voir)', 'dim', post);
-  add(`  Video          : ${esc(g.n)}`, '', post);
-  add(`  Power          : ${esc(ps.n)}${ps.noname ? ' (sifflement détecté)' : ''}`, '', post);
-  add(`  Cooling        : ${esc(co.n)}`, '', post);
-  const foot = document.createElement('div');
-  foot.className = 'bi-foot';
-  foot.innerHTML = '<div class="ln">Press <b>DEL</b> to enter SETUP, <b>ESC</b> to skip memory test</div><div class="ln dim">11/22/2026-i440VX-VIBE-6A79PROD-00 (friday)</div>';
-  el.appendChild(foot);
-  await wait(1100 * Math.min(1.3, slow));
   // 2. GRUB
   el.innerHTML = '';
   hint();
@@ -8648,6 +8791,176 @@ async function biosBoot(o = {}) {
   el.innerHTML = '';
   booting = false;
 }
+/* ---------- le setup du BIOS (DEL ou F2 pendant le POST), façon AMIBIOS : gris et bleu, six onglets ----------
+   Main (le résumé), Vibe Tweaker (l'overclocking : multiplicateur du processeur, fréquence de la RAM), Advanced (températures, tensions),
+   Boot (Quick Boot coupé : un POST plus long, plus de temps pour DEL), Security, Exit. Au clavier : flèches, Entrée, + et −, F1, F9, F10,
+   Échap ; à la souris ou au doigt, onglets, lignes, options et touches sont cliquables. « Save & Exit » enregistre (la CMOS, c'est la
+   sauvegarde) et redémarre. Renvoie 'save' ou 'discard'. */
+const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Exit'];
+const AMI_HELP = 'Vibe Tweaker : CPU Ratio (le multiplicateur du processeur) et DRAM Frequency (la RAM). Plus haut : les agents vont plus vite, '
+  + 'le processeur chauffe et consomme davantage. Trop haut : glitchs à l’écran, erreurs matérielles, agents qui plantent. Chaque puce a sa marge '
+  + '(la loterie du silicium) : montez par paliers, redescendez au premier glitch. F10 : enregistrer et redémarrer · Échap : quitter sans enregistrer '
+  + '· F9 : tout sur Auto. Le POST est de VibeAward, le setup d’American Megavibes : un agent a fusionné les deux branches. Il a gardé les deux.';
+const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', def: 'Load Optimal Defaults?' };
+function amiSetup(el, bindKey) {
+  return new Promise(done => {
+    const st = ocSt(), c = part('cpu'), r = part('ram'), co = part('cool'), ps = part('psu'), d = part('disk');
+    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1 };   // les réglages en cours d'édition
+    const [lo, hi] = ocRange(c), fC = v => v * 100 || cpuBase(c), fR = v => v || r.mhz;
+    const cpuOpts = [0, ...Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)], ramOpts = [0, ...(OC_DDR[r.ddr] || [])];
+    const fan = co.w <= 60 ? '900RPM (poussière : beaucoup)' : co.w >= 1000 ? 'N/A (azote liquide)' : `${ri(1100, 1900)}RPM`;
+    const t0 = Math.round(PCS.temp), deg = x => `${x}°C/${Math.round(x * 9 / 5 + 32)}°F`;
+    const clock = () => { const n = new Date(), p = x => String(x).padStart(2, '0');
+      return { time: `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`, date: `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][n.getDay()]} ${p(n.getMonth() + 1)}/${p(n.getDate())}/${n.getFullYear()}` }; };
+    const opt = (k, l, opts, show, help, f) => ({ k, l, opts, show, help, f, cur: () => P[k], set: v => { P[k] = v; } });   // f : la fréquence d'une option (0 : Auto)
+    const lock = (k, l, v, help, o = {}) => ({ k, l, v: () => v, help, lock: 1, ...o });
+    const act = (k, l, help, run) => ({ k, l, help, run, act: 1 });
+    let tab = 0, sel = -1, pop = null, closed = false;
+    const ask = a => { pop = { ask: a, ok: 0 }; };
+    const PAGES = () => [
+      [{ h: 'System Overview' }, {},
+        { t: 'AMIVIBES' }, { i: ['Version', '08.00.15 (friday)'] }, { i: ['Build Date', '11/20/26'] }, { i: ['ID', 'PROD-01'] }, {},
+        { h: 'Processor' }, { t: c.n }, { i: ['Speed', `${fC(P.ratio)}MHz`] }, { i: ['Count', `${c.thr} threads`] }, {},
+        { h: 'System Memory' }, { i: ['Size', `${r.go * 1024}MB · DDR${r.ddr}-${fR(P.mhz)}${r.ecc ? ' ECC' : ''}`] }, {},
+        lock('time', 'System Time', '', 'L’heure de la CMOS. Sa pile est morte en 2019 : un agent recopie l’heure depuis Internet à chaque démarrage.', { v: () => clock().time, clock: 'time' }),
+        lock('date', 'System Date', '', 'Vendredi, probablement. Ne shippez pas.', { v: () => clock().date, clock: 'date' })],
+      [{ h: 'Configure System Frequency/Voltage' }, {},
+        opt('ratio', 'CPU Ratio', cpuOpts, v => v ? String(v) : 'Auto', `Multiplicateur du processeur (× 100 MHz). Auto : ${frMhz(cpuBase(c))}. Plus haut : agents plus rapides, processeur plus chaud. Trop haut : glitchs, erreurs, agents qui plantent.`, fC),
+        { i: ['Target CPU Frequency', `${fC(P.ratio)}MHz (${ocPct(fC(P.ratio), cpuBase(c))})`] },
+        opt('mhz', 'DRAM Frequency', ramOpts, v => v ? `DDR${r.ddr}-${v}MHz` : 'Auto', `Fréquence de la RAM. Auto : ${frMhz(r.mhz)}. Plus haut : agents un peu plus rapides. Trop haut : bits qui basculent, fichiers corrompus, écran qui bave.${r.ecc ? ' ECC : les petites erreurs sont corrigées.' : ''}`, fR),
+        { i: ['Target DRAM Frequency', `${fR(P.mhz)}MHz (${ocPct(fR(P.mhz), r.mhz)})`] }, {},
+        lock('vcore', 'CPU Core Voltage', 'Auto', 'Auto : un agent règle la tension. Il a mis 1,55 V « pour être sûr ».'),
+        lock('dramv', 'DRAM Voltage', 'Auto', 'Auto. Personne ne sait ce que fait ce réglage, l’agent non plus.'), {},
+        { t: 'Chaque puce a sa marge : la loterie du silicium.', w: 1 }, { t: 'Montez par paliers. Au premier glitch, redescendez.', w: 1 }],
+      [{ h: 'Hardware Health Configuration' }, {},
+        { i: ['CPU Temperature', deg(t0)] }, { i: ['MB Temperature', deg(Math.max(25, t0 - 7))] }, { i: ['CPU Fan Speed', fan] },
+        { i: ['VCORE Voltage', fC(P.ratio) > cpuBase(c) ? '1.552V (Auto, réglé par l’agent)' : '1.200V'] }, { i: ['+12V Voltage', ps.noname ? '11.1V (elle siffle)' : '12.096V'] },
+        { i: ['Power Supply', ps.n] }, {},
+        lock('fan', 'Smart Fan Control', 'Disabled', 'Le ventilateur n’a qu’une vitesse : à fond. Un agent a désactivé le reste « pour le silence ».'),
+        lock('virt', 'Vibe Virtualization Tech', 'Enabled', 'Activé : les agents lancent des conteneurs dans des conteneurs dans des conteneurs.')],
+      [{ h: 'Boot Settings Configuration' }, {},
+        opt('quick', 'Quick Boot', [1, 0], v => v ? 'Enabled' : 'Disabled', 'Enabled : POST rapide, DEL passe vite. Disabled : test complet de la mémoire, plus de temps pour appuyer sur DEL.'),
+        lock('quiet', 'Quiet Boot', 'Disabled', 'Pas de logo plein écran : on veut voir les erreurs. Il y en a.'),
+        lock('f1', 'Wait For ‘F1’ If Error', 'Disabled', 'Un agent appuie sur F1 à votre place. Il le fait très bien.'), {},
+        { h: 'Boot Device Priority' }, { i: ['1st Boot Device', d.n] }, { i: ['2nd Boot Device', 'Network : agent-3'] }, { i: ['3rd Boot Device', 'USB : backup-jeudi'] }],
+      [{ h: 'Security Settings' }, {},
+        { i: ['Supervisor Password', 'Installed (par un agent)'] }, { i: ['User Password', 'Not Installed'] }, {},
+        act('pw', 'Change Supervisor Password', 'Il faut l’ancien mot de passe. C’est l’agent qui l’a choisi.', () => { pop = { msg: 'Enter Current Password : ********. Invalid Password. Indice laissé par l’agent : « vendredi ».', ok: 0 }; }),
+        lock('bsv', 'Boot Sector Virus Protection', 'Disabled', 'Désactivé : les agents écrivent dans le secteur de démarrage. Pour optimiser.')],
+      [{ h: 'Exit Options' }, {},
+        act('save', 'Save Changes and Exit', 'Enregistre les réglages et redémarre (F10).', () => ask('save')),
+        act('discard', 'Discard Changes and Exit', 'Quitte sans rien enregistrer : le démarrage continue (Échap).', () => ask('discard')),
+        act('undo', 'Discard Changes', 'Revient aux réglages enregistrés, sans quitter.', () => ask('undo')),
+        act('def', 'Load Optimal Defaults', 'Tout sur Auto : fréquences d’origine, Quick Boot activé (F9).', () => ask('def'))],
+    ];
+    const page = () => PAGES()[tab];
+    const sels = L => L.map((it, i) => it.k ? i : -1).filter(i => i >= 0);
+    const val = it => it.opts ? it.show(it.cur()) : it.v();
+    const KEYS = [['←→', 'Select Screen'], ['↑↓', 'Select Item'], ['Enter', 'Change'], ['+ -', 'Change Option'], ['F1', 'General Help', 'help'],
+      ['F9', 'Optimized Defaults', 'def'], ['F10', 'Save and Exit', 'save'], ['ESC', 'Exit', 'discard']]
+      .map(([k, l, a]) => a ? `<button type="button" tabindex="-1" data-key="${a}"><b>${k}</b>${l}</button>` : `<span><b>${k}</b>${l}</span>`).join('');
+    const keep = (box, it) => {                  // la ligne choisie reste visible dans sa liste
+      if (!box || !it) return;
+      if (it.offsetTop < box.scrollTop) box.scrollTop = it.offsetTop;
+      else if (it.offsetTop + it.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = it.offsetTop + it.offsetHeight - box.clientHeight;
+    };
+    function render() {
+      if (closed) return;
+      const L = page(), S = sels(L);
+      if (!S.includes(sel)) sel = S[0] ?? -1;
+      const row = (it, i) => it.h ? `<div class="ami-h">${esc(it.h)}</div>` : it.t ? `<div class="ami-t${it.w ? ' w' : ''}">${esc(it.t)}</div>`
+        : it.i ? `<div class="ami-row ami-info"><span>${esc(it.i[0])}</span><span>: ${esc(it.i[1])}</span></div>`
+        : it.k ? `<button type="button" tabindex="-1" class="ami-row ami-it${i === sel ? ' on' : ''}" data-i="${i}"><span>${it.act ? '► ' : ''}${esc(it.l)}</span>`
+          + `<span${it.clock ? ` data-clock="${it.clock}"` : ''}>${it.act ? '' : `[${esc(val(it))}]`}</span></button>`
+        : '<div class="ami-sp"></div>';
+      const box = !pop ? '' : `<div class="ami-pop"><div class="ami-box" role="dialog" aria-modal="true" aria-label="${pop.opts ? 'Options' : 'Message'}">`
+        + (pop.opts ? `<div class="ami-bt">Options</div><div class="ami-opts">${pop.opts.opts.map((v, i) => `<button type="button" tabindex="-1" class="ami-opt${i === pop.idx ? ' on' : ''}" data-o="${i}">${esc(pop.opts.show(v))}</button>`).join('')}</div>`
+          : `<div class="ami-q">${esc(pop.ask ? AMI_ASK[pop.ask] : pop.msg)}</div><div class="ami-btns">${(pop.ask ? ['Ok', 'Cancel'] : ['Ok']).map((b, i) => `<button type="button" tabindex="-1" class="${i === pop.ok ? 'on' : ''}" data-b="${i}">[ ${b} ]</button>`).join('')}</div>`)
+        + '</div></div>';
+      el.innerHTML = '<div class="ami" role="application" aria-label="BIOS Setup Utility"><div class="ami-head">BIOS SETUP UTILITY</div>'
+        + `<div class="ami-tabs" role="tablist">${AMI_TABS.map((n, i) => `<button type="button" role="tab" tabindex="-1" data-tab="${i}" aria-selected="${i === tab}">${esc(n)}</button>`).join('')}</div>`
+        + `<div class="ami-body"><div class="ami-main">${L.map(row).join('')}</div><div class="ami-side">`
+        + `<div class="ami-help" aria-live="polite">${esc((L[sel] || {}).help || 'Utilisez ← → pour changer d’onglet. L’overclocking est dans Vibe Tweaker.')}</div><div class="ami-keys">${KEYS}</div></div></div>`
+        + '<div class="ami-foot">v02.69 (C)Copyright 1985-2026, American Megavibes, Inc.</div>' + box + '</div>';
+      keep(el.querySelector('.ami-main'), el.querySelector('.ami-it.on'));
+      keep(el.querySelector('.ami-opts'), el.querySelector('.ami-opt.on'));
+    }
+    const change = dir => {                      // + et − : depuis Auto, le cran juste au-dessus (ou au-dessous) de l'origine ; Auto ne revient que par la liste ou F9
+      const it = page()[sel];
+      if (!it?.opts) return;
+      const cur = it.cur(), b = it.f?.(0);
+      if (it.f && !cur) { const c2 = it.opts.filter(v => v && (dir > 0 ? it.f(v) > b : it.f(v) < b)); if (c2.length) it.set(dir > 0 ? c2[0] : c2[c2.length - 1]); return; }
+      const j = it.opts.indexOf(cur) + dir;
+      if (j >= (it.f ? 1 : 0) && j < it.opts.length) it.set(it.opts[j]);
+    };
+    const move = dir => { const S = sels(page()); if (S.length) sel = S[(S.indexOf(sel) + dir + S.length) % S.length]; };
+    const enter = () => {
+      const it = page()[sel];
+      if (!it) return;
+      if (it.run) it.run();
+      else if (it.opts) pop = { opts: it, idx: Math.max(0, it.opts.indexOf(it.cur())) };
+      else pop = { msg: `${it.l} : non modifiable. ${it.help}`, ok: 0 };
+    };
+    const clockT = setInterval(() => { const k = clock(); el.querySelectorAll('[data-clock]').forEach(n => { n.textContent = `[${k[n.dataset.clock]}]`; }); }, 1000);
+    function finish(res) {
+      closed = true;
+      clearInterval(clockT);
+      el.removeEventListener('click', onClick);
+      bindKey(null);
+      if (res === 'save') { Object.assign(st, P); if (IDLE) saveGame(); }
+      done(res);
+    }
+    function doAct(a) {                          // Ok dans une boîte de confirmation
+      if (a === 'save' || a === 'discard') return finish(a);
+      Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1 } : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1 });
+    }
+    function onKey(e) {
+      const k = e.key;
+      if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(k)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (pop?.opts) {                           // la liste des options
+        const n = pop.opts.opts.length;
+        if (k === 'ArrowUp' || k === 'ArrowDown') pop.idx = (pop.idx + (k === 'ArrowDown' ? 1 : -1) + n) % n;
+        else if (k === 'PageUp' || k === 'PageDown') pop.idx = Math.max(0, Math.min(n - 1, pop.idx + (k === 'PageDown' ? 8 : -8)));
+        else if (k === 'Home' || k === 'End') pop.idx = k === 'Home' ? 0 : n - 1;
+        else if (k === 'Enter' || k === ' ') { pop.opts.set(pop.opts.opts[pop.idx]); pop = null; }
+        else if (k === 'Escape') pop = null;
+        else return;
+      } else if (pop) {                          // une question (Ok / Cancel) ou un message
+        const a = pop.ask, yes = k === 'Enter' || k === ' ' ? pop.ok === 0 : /^[yo]$/i.test(k) ? true : null;
+        if (a && ['ArrowLeft', 'ArrowRight', 'Tab'].includes(k)) pop.ok = 1 - pop.ok;
+        else if (k === 'Escape' || /^n$/i.test(k)) pop = null;
+        else if (yes != null) { pop = null; if (a && yes) { doAct(a); if (closed) return; } }
+        else return;
+      } else if (k === 'ArrowLeft' || k === 'ArrowRight') { tab = (tab + (k === 'ArrowRight' ? 1 : -1) + AMI_TABS.length) % AMI_TABS.length; sel = -1; }
+      else if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'Tab') move(k === 'ArrowUp' || (k === 'Tab' && e.shiftKey) ? -1 : 1);
+      else if (k === 'Enter' || k === ' ') enter();
+      else if (k === '+' || k === '=' || k === 'PageUp') change(1);
+      else if (k === '-' || k === 'PageDown') change(-1);
+      else if (k === 'F1') pop = { msg: AMI_HELP, ok: 0 };
+      else if (k === 'F9') ask('def');
+      else if (k === 'F10') ask('save');
+      else if (k === 'Escape') ask('discard');
+      else return;
+      render();
+    }
+    function onClick(e) {
+      const b = e.target.closest('button');
+      if (!b) { if (pop && !e.target.closest('.ami-box')) { pop = null; render(); } return; }
+      if (b.dataset.tab) { tab = +b.dataset.tab; sel = -1; pop = null; }
+      else if (b.dataset.i) { pop = null; sel = +b.dataset.i; enter(); }
+      else if (b.dataset.o && pop?.opts) { pop.opts.set(pop.opts.opts[+b.dataset.o]); pop = null; }
+      else if (b.dataset.b) { const a = pop?.ask, yes = b.dataset.b === '0'; pop = null; if (a && yes) { doAct(a); if (closed) return; } }
+      else if (b.dataset.key) { if (b.dataset.key === 'help') pop = { msg: AMI_HELP, ok: 0 }; else ask(b.dataset.key); }
+      render();
+    }
+    el.addEventListener('click', onClick);
+    bindKey(onKey);
+    el.classList.add('setup');
+    render();
+  });
+}
 function powerOn(after) {                        // écran titre → allumage → terminal
   diskSt().cyc++;                                // SMART : un cycle d'allumage de plus
   return biosBoot({ then: () => { startGame(); after?.(); } });
@@ -8724,10 +9037,103 @@ async function pcCrash(kind, L) {
     if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
   } });
 }
+async function pcReboot() {                      // reboot : un redémarrage propre, BIOS compris (DEL pendant le POST : le setup)
+  if (pcDown || booting || mode !== 'idle') return;
+  pcDown = true;
+  mode = 'rebooting';
+  [storeDlg, stDlg, picker].forEach(d => { if (d.open) d.close(); });
+  const was = claudeOn;
+  shellPrint(H(['Broadcast message from root@prod-01', 'wrn'], ` (pts/0) (${new Date().toLocaleTimeString('fr-FR')}) :`));
+  shellPrint(H(['The system will reboot now!', 'wrn'], ['  DEL (ou F2) pendant le POST : le setup du BIOS.', 'dim']));
+  if (IDLE) { G.running = 0; saveGame(); }
+  await sleep(reducedMotion.matches ? 0 : 600);
+  diskSt().cyc++;                                // SMART : un cycle d'allumage de plus
+  await biosBoot({ during: haltSession, then: () => {
+    mode = 'idle';
+    pcDown = false;
+    const o = ocSt(), set = [o.ratio ? `processeur à ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})` : '', o.mhz ? `RAM à ${frMhz(ramMhz())} (${ocPct(ramMhz(), part('ram').mhz)})` : ''].filter(Boolean);
+    shellPrint(H(['✓ ', 'okc'], 'Le PC a redémarré.', set.length ? [` BIOS : ${set.join(', ')}.`, 'dim'] : ''));
+    if (was) { shellPrint(H(['tmux attach ', 'dim'], '· vos agents repartent.')); submit(IDLE ? G.ai : provider); }
+    if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
+  } });
+}
 function raidFail() {                            // RAID 0 : quatre fois plus vite, quatre fois plus de risques
   G.prog = 0;
   hudNote('✗ Un disque du RAID 0 a lâché : le projet en cours est perdu (aucune sauvegarde, comme promis)', 'bug');
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'errc', t: '✗ md0 : disque 3 mort · le RAID 0 emporte le projet en cours avec lui' }, true); });
+}
+/* ---------- overclocking instable : glitchs à l'écran, erreurs matérielles, agents qui plantent ----------
+   Plus la fréquence dépasse la marge de la puce, plus c'est fréquent ; la charge aggrave (les agents sur le processeur, la RAM pleine).
+   L'ECC corrige les petites erreurs de RAM (un message, pas de dégâts). Le remède : reboot, DEL pendant le POST, et baisser dans Vibe Tweaker. */
+const appEl = $('#app'), ocgEl = $('#ocg');
+const OCX = { hintAt: 0, wallAt: 0, gT: 0 };
+const OC_CPU_ERR = [
+  () => `mce: [Hardware Error]: CPU ${ri(0, Math.max(0, part('cpu').thr - 1))}: Machine Check: 0 Bank 5: be000000${hex(8)}`,
+  () => `node[${ri(31337, 39999)}]: segfault at 0 ip 00007f${hex(10)} sp 00007ffd${hex(8)} error 4 in libnode.so.115`,
+  () => `traps: node[${ri(31337, 39999)}] trap invalid opcode ip:7f${hex(10)} (Illegal instruction)`,
+  () => `watchdog: BUG: soft lockup - CPU#${ri(0, Math.max(0, part('cpu').thr - 1))} stuck for ${ri(22, 27)}s! [node:${ri(31337, 39999)}]`,
+  () => 'gcc: internal compiler error: Segmentation fault (program cc1plus)',
+  () => `calcul faux : 2 + 2 = 5 (le processeur à ${frMhz(cpuMhz())} a arrondi)`,
+];
+const OC_RAM_ERR = [
+  () => `EDAC MC0: 1 UE memory read error on DIMM_A${ri(1, 2)} (page:0x${hex(5)} offset:0x${hex(3)})`,
+  () => `BUG: Bad page state in process node  pfn:${hex(6)}`,
+  () => `general protection fault, probably for non-canonical address 0xdead${hex(12)}: 0000 [#1] SMP`,
+  () => `npm ERR! Unexpected token in JSON at position ${ri(1000, 99999)} (un bit a basculé dans package-lock.json)`,
+  () => `error: object file .git/objects/${hex(2)}/${hex(38)} is corrupt (la RAM l’a modifié)`,
+  () => `sha512 mismatch : node_modules/${pick(['left-pad', 'is-odd', 'lodash', 'react-dom', 'typescript'])} corrompu en mémoire`,
+];
+function ocTick(dt, now) {
+  const u = ocU(), top = Math.max(u.cpu, u.ram), lv = top >= 1.2 ? '3' : top >= .5 ? '2' : top > 0 ? '1' : '';
+  if ((appEl.dataset.oc || '') !== lv) { if (lv) appEl.dataset.oc = lv; else delete appEl.dataset.oc; }
+  if (!top || booting || pcDown || mode === 'rebooting' || !titleEl.hidden || !panicEl.hidden || document.hidden) return;
+  const L = hwState(), ecc = !!part('ram').ecc, x = ocLoad(u, L.util, L.used, L.ram, ecc), rate = v => v > 0 ? .015 + .12 * v + .1 * v * v : 0;
+  if (chance(rate(x.g) * dt)) ocGlitch(x.g);
+  if (chance(rate(x.cpu) * .8 * dt)) ocError('cpu', x.cpu, now);
+  else if (chance(rate(x.mem) * .8 * dt)) ocError('ram', x.mem, now);
+  else if (ecc && u.ram > 0 && chance(.03 * dt)) ocError('ecc', 0, now);   // l'ECC corrige : un message, pas de dégâts
+}
+function ocGlitch(g) {                           // une bouffée de glitchs : bandes, caractères parasites, l'écran qui saute
+  clearTimeout(OCX.gT);
+  const rm = reducedMotion.matches, n = 1 + Math.min(6, Math.floor(g * 2 + R() * 2)), junk = '▓▒░█▀▄■□◘◙¶§¤ÆØ#%&@$01';
+  const C = ['var(--red)', 'var(--cyan)', 'var(--magenta)', 'var(--green)', 'var(--yellow)'];
+  ocgEl.innerHTML = Array.from({ length: n }, () => {
+    const top = (R() * 96).toFixed(1), k = R();
+    if (k < .45 || rm) return `<i class="t" style="top:${top}vh;--g:${pick(C)}">${esc(Array.from({ length: 160 }, () => R() < .3 ? ' ' : junk[Math.floor(R() * junk.length)]).join(''))}</i>`;
+    return `<i class="${k < .75 ? 'c' : 'b'}" style="top:${top}vh;height:${(.6 + R() * (1.5 + 2.5 * Math.min(2, g))).toFixed(1)}vh"></i>`;
+  }).join('');
+  if (!rm) { appEl.style.setProperty('--ocx', `${((R() < .5 ? -1 : 1) * (2 + R() * 3 * Math.min(2, g))).toFixed(1)}px`); appEl.classList.add('ocg-on'); }
+  OCX.gT = setTimeout(() => { ocgEl.innerHTML = ''; appEl.classList.remove('ocg-on'); }, 90 + R() * (110 + 110 * Math.min(2, g)));
+}
+function ocError(kind, x, now) {                 // une erreur matérielle : chez un agent (qui plante parfois), sinon dans le terminal
+  const o = ocSt(), ecc = kind === 'ecc';
+  const msg = ecc ? `EDAC MC0: 1 CE memory read error on DIMM_A${ri(1, 4)} (corrigée par l’ECC)` : pick(kind === 'cpu' ? OC_CPU_ERR : OC_RAM_ERR)();
+  const what = kind === 'cpu' ? `processeur à ${frMhz(cpuMhz())}` : `RAM à ${frMhz(ramMhz())}`;
+  const act = claudeOn && mode === 'idle' && !paused ? panes.filter(p => p.state !== 'down') : [];
+  if (ecc) {
+    if (!act.length) return;
+    const p = pick(act);
+    emit(p, { k: 'done', c: 'wrn', t: `⚠ ${msg}` }, true);
+    ping(p);
+    return IDLE && hudNote('⚠ ECC : une erreur de RAM corrigée (la seule chose du projet qui se corrige)', 'ok');
+  }
+  o.err = (o.err || 0) + 1;
+  const hint = now > OCX.hintAt;                 // le remède, rappelé au plus une fois par minute
+  if (hint) OCX.hintAt = now + 60000;
+  if (act.length) {
+    const p = pick(act);
+    emit(p, { k: 'done', c: 'errc', t: `✗ ${msg}` }, true);
+    ping(p);
+    if (IDLE && chance(Math.min(.85, .3 + .3 * x))) ecoCrash(p, now, ecoRates().down, `${what} : instable, l’agent a planté`);
+    if (IDLE) hudNote(`✗ Erreur matérielle (${what}) : ${hint ? 'overclocking instable · reboot, puis DEL au démarrage pour baisser la fréquence' : msg}`, 'bug');
+    if (!hint) return;
+  }
+  if (now < OCX.wallAt) return;                  // dans le terminal : le message du noyau, diffusé par syslogd (pas plus d'un toutes les 25 s)
+  OCX.wallAt = now + 25000;
+  const d = new Date(), up = (Date.now() - bootT) / 1000;
+  shellPrint(H([`Message from syslogd@prod-01 at ${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()} ${d.toTimeString().slice(0, 8)} ...`, 'errc']));
+  shellPrint(H([` kernel:[${up.toFixed(6).padStart(12)}] ${msg}`, 'errc']));
+  if (hint) shellPrint(H(['  ', ''], [`Overclocking instable (${what}) : `, 'wrn'], ['reboot', 'org'], ', puis DEL (ou F2) pendant le POST, onglet Vibe Tweaker, pour baisser la fréquence.'));
 }
 function pcTick(dt, now) {                       // température, alimentation, mémoire : le PC peut tomber (mode idle)
   const L = hwState();
@@ -8758,6 +9164,12 @@ function sensorsLines() {
     [H('Package id 0:  ', [`+${s.temp.toFixed(1)}°C`, tc], '  (high = +90.0°C, crit = +100.0°C)', s.temp >= 90 ? ['  ALARME : throttling', 'errc'] : ''), '', 15],
     [H(`fan1:          ${co.w <= 60 ? '900 RPM  (poussière : beaucoup)' : co.w >= 1000 ? '0 RPM  (azote liquide, pas besoin)' : `${ri(1100, 1900)} RPM`}`), '', 15],
     [H('power1:        ', [`${Math.round(s.draw)} W / ${ps.w} W`, s.draw > .85 * ps.w ? 'errc' : 'okc'], `  (${ps.n}${ps.noname ? ', elle siffle' : ''})`), '', 15],
+    ...(() => {                                  // les réglages du BIOS, s'ils ne sont pas sur Auto
+      const o = ocSt(), r = part('ram'), u = ocU();
+      return o.ratio || o.mhz || o.err ? [[H('vibe-tweaker:  ', [`CPU ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})`, u.cpu > 0 ? 'errc' : 'okc'], ' · ',
+        [`RAM DDR${r.ddr}-${ramMhz()} (${ocPct(ramMhz(), r.mhz)})`, u.ram > 0 ? 'errc' : 'okc'],
+        o.err ? [`  ${o.err} erreur${o.err > 1 ? 's' : ''} matérielle${o.err > 1 ? 's' : ''} depuis le démarrage`, 'errc'] : ''), '', 15]] : [];
+    })(),
     [H('État du PC :   ', [v.label, v.cls], ` · ${v.why}`), '', 15],
   ];
 }
