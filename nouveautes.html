@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>13</b><span>mises à jour</span></div>
-    <div role="listitem"><b>20 h 21</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 9 034</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>14</b><span>mises à jour</span></div>
+    <div role="listitem"><b>20 h 57</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 9 073</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#14</span><time datetime="2026-11-23T08:24">08 h 24</time><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></li>
       <li><span class="n">#13</span><time datetime="2026-11-23T07:48">07 h 48</time><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></li>
       <li><span class="n">#12</span><time datetime="2026-11-23T02:05">02 h 05</time><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></li>
       <li><span class="n">#11</span><time datetime="2026-11-23T01:52">01 h 52</time><a href="#smart">smartctl : la santé des disques</a></li>
@@ -162,8 +163,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="fichiers" aria-labelledby="t13">
-    <p class="meta"><span class="n">#13</span><span class="new">dernière</span><time datetime="2026-11-23T07:48">23 nov. 2026 · 07 h 48</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/afa4131">afa4131</a><span>8 741 → 9 034 lignes</span></p>
+  <article class="maj latest" id="disque-persistant" aria-labelledby="t14">
+    <p class="meta"><span class="n">#14</span><span class="new">dernière</span><time datetime="2026-11-23T08:24">23 nov. 2026 · 08 h 24</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/224b185">224b185</a><span>9 034 → 9 073 lignes</span></p>
+    <h2 id="t14"><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></h2>
+    <ul>
+      <li>Le disque est sauvegardé avec la partie : ce que vous créez, copiez, renommez ou supprimez, dans le terminal ou le gestionnaire de fichiers, est toujours là au prochain lancement. Les paquets apt et les dépendances npm aussi.</li>
+      <li>Le bac à sable a son propre disque. Le mode libre ne sauvegarde toujours rien.</li>
+      <li>Deux façons de repartir d’un disque neuf : une nouvelle partie, ou un crash système (<code>rm -rf /</code>, <code>/bin</code> renommé…), qui restaure la sauvegarde de jeudi. Recharger la page en plein crash n’y échappe pas.</li>
+      <li>Changer de nom d’utilisateur dans les paramètres : le dossier personnel suit, dans la partie comme dans le bac à sable.</li>
+      <li>Désinstaller <code>sudo</code>, c’est désormais pour de bon. Le terminal rappelle qu’il reste la sauvegarde de jeudi.</li>
+    </ul>
+    <blockquote>« Avant, un rechargement effaçait mes erreurs. Maintenant, elles sont sauvegardées. Comme en vrai. »<cite>l’agent, 08 h 24</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-disque.png" title="Voir en grand"><img src="assets/screen-disque.png" width="900" height="540" loading="lazy" alt="Le terminal juste après un rechargement de la page : ls ~ montre projet-qui-survit, créé avant, et plus de dossier Vidéos, supprimé avant ; ls ~/projet-qui-survit montre preuve.txt ; cowsay, installé avant le rechargement, dit « Rechargé. Toujours là. »."></a><figcaption>Après un rechargement : le dossier, le fichier et cowsay sont toujours là, Vidéos est toujours supprimé.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="fichiers" aria-labelledby="t13">
+    <p class="meta"><span class="n">#13</span><time datetime="2026-11-23T07:48">23 nov. 2026 · 07 h 48</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/afa4131">afa4131</a><span>8 741 → 9 034 lignes</span></p>
     <h2 id="t13"><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></h2>
     <ul>
       <li>Le gestionnaire de fichiers du bureau sait créer, couper, copier, coller, renommer et afficher les propriétés : une barre d’outils, le clic droit, et les raccourcis <code>Ctrl+C</code> <code>Ctrl+X</code> <code>Ctrl+V</code>, <code>F2</code>, <code>Ctrl+Maj+N</code>, <code>Alt+Entrée</code>.</li>

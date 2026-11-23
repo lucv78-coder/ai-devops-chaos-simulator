@@ -6,7 +6,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 9 034">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 9 073">
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
   <br>
@@ -50,7 +50,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **IA locale.** Installez Lolama ou StudioLM depuis Firefaux, puis un modèle de 2 à 72 milliards de paramètres. Zéro token facturé, toute la VRAM prise. Chaque agent ajouté double la VRAM demandée, et un modèle trop gros pour la carte graphique fait redémarrer le PC sur un kernel panic. L'agent appelle ça « de l'inférence souveraine ».
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
-- **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. Le gestionnaire de fichiers copie, coupe, colle, renomme et affiche les propriétés, à la vitesse du disque : 41,3 Go à 90 Mo/s, le disque dur gratte. `~/code` contient sept projets abandonnés, dont une IA de 68 Go et la todo app n° 14. La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`, ou le renommer. Vous ne devriez pas.
+- **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. Le gestionnaire de fichiers copie, coupe, colle, renomme et affiche les propriétés, à la vitesse du disque : 41,3 Go à 90 Mo/s, le disque dur gratte. `~/code` contient sept projets abandonnés, dont une IA de 68 Go et la todo app n° 14. Le disque est sauvegardé avec la partie : ce que vous créez ou supprimez est toujours là au prochain lancement, jusqu'au prochain crash système (retour à la sauvegarde de jeudi). La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`, ou le renommer. Vous ne devriez pas.
 - **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. `sudo smartctl -a /dev/sda` lit le SMART du disque dur d'occasion : 38 412 heures, un secteur réalloué de plus tous les 5 jours, FAILED! dans 8 mois environ. L'agent, lui, dit que tout va bien.
@@ -59,7 +59,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
-- **Monolithe artisanal.** 1 fichier, 9 034 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 9 073 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## Le matériel
 
@@ -126,7 +126,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (9 034 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (9 073 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -240,6 +240,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Un bac à sable, pour tout casser sans rien perdre
 - [x] Un SMART qui se dégrade, très lentement, comme tout le monde
 - [x] Copier-coller (le vrai, avec Ctrl+C ; l'agent, lui, le faisait déjà)
+- [x] Un disque qui se souvient de tout, comme Git, mais sans les conflits
 - [ ] Les virus (toujours vraiment prévu, celui-là)
 - [ ] AGI
 - [ ] Relire le code (doublon ajouté par l'agent ; personne n'ose l'enlever)
@@ -249,14 +250,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 9 034 lignes ?**
+**Pourquoi un seul fichier de 9 073 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 9 034 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 9 073 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
