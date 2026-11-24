@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>34</b><span>mises à jour</span></div>
-    <div role="listitem"><b>51 h 31</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 12 733</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>35</b><span>mises à jour</span></div>
+    <div role="listitem"><b>52 h 09</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 13 035</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#35</span><time datetime="2026-11-24T15:36">15 h 36</time><a href="#messagerie">La messagerie : des clients, des investisseurs, l’URSSAF, et du hameçonnage</a></li>
       <li><span class="n">#34</span><time datetime="2026-11-24T14:58">14 h 58</time><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></li>
       <li><span class="n">#33</span><time datetime="2026-11-24T08:19">08 h 19</time><a href="#bourse">La fin de partie : l’introduction en bourse, et des stock-options pour toujours</a></li>
       <li><span class="n">#32</span><time datetime="2026-11-24T07:42">07 h 42</time><a href="#terminaux">Plusieurs terminaux : Ctrl+B puis c, et des fenêtres sous Xfce</a></li>
@@ -183,8 +184,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="incidents" aria-labelledby="t34">
-    <p class="meta"><span class="n">#34</span><span class="new">dernière</span><time datetime="2026-11-24T14:58">24 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ad7f471">ad7f471</a><span>12 399 → 12 733 lignes</span></p>
+  <article class="maj latest" id="messagerie" aria-labelledby="t35">
+    <p class="meta"><span class="n">#35</span><span class="new">dernière</span><time datetime="2026-11-24T15:36">24 nov. 2026 · 15 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6223261">6223261</a><span>12 733 → 13 035 lignes</span></p>
+    <h2 id="t35"><a href="#messagerie">La messagerie : des clients, des investisseurs, l’URSSAF, et du hameçonnage</a></h2>
+    <ul>
+      <li>« Vous avez un nouveau courrier » : les courriels arrivent quand les agents travaillent, et après certains événements. mail les liste, mail 1 en lit un, mail 1 accepter y répond.</li>
+      <li>Blunderbird (sudo apt install blunderbird) les affiche sous Xfce : la boîte de réception, les indésirables, les boutons. Sans bureau, il s’ouvre façon mutt.</li>
+      <li>Des clients paient d’avance des fonctionnalités absurdes : de l’argent tout de suite, de la dette technique ensuite (×1,5 de bugs pendant 3 minutes). Après une panne, ils réclament un geste commercial.</li>
+      <li>La note des clients (3,5/5 au départ) fait varier la valorisation. Des fonds proposent d’entrer au capital : de l’argent maintenant, 10 % de stock-options en moins à l’introduction en bourse.</li>
+      <li>L’URSSAF attend une déclaration sous 5 minutes, sinon une majoration. Le hameçonnage imite Vibank, l’URSSAF ou matos.vibe : regardez l’adresse. Ouvrir la pièce jointe installe le mineur de VibeCoin.</li>
+      <li>Quatre succès Steam, dont un caché.</li>
+    </ul>
+    <blockquote>« Un courriel de l’URSSAF qui vous rembourse, c’est du hameçonnage. Un courriel de l’URSSAF qui vous réclame, c’est l’URSSAF. »<cite>l’agent, 15 h 36</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-mail.png" title="Voir en grand"><img src="assets/screen-mail.png" width="900" height="540" loading="lazy" alt="Le terminal : mail liste six courriels (une demande de client, une réclamation après l’incident INC-4206, un fonds d’investissement, un faux Vibank, l’URSSAF, le rapport d’opus-3), puis mail 6 affiche la demande du client et les deux réponses possibles."></a><figcaption>mail, dans le terminal.</figcaption></figure>
+      <figure><a href="assets/screen-blunderbird.png" title="Voir en grand"><img src="assets/screen-blunderbird.png" width="900" height="540" loading="lazy" alt="Blunderbird sous Xfce : la boîte de réception à gauche, et à droite un hameçonnage, « Votre compte est suspendu », envoyé par securite@vibank-alerte.vibe.ru, avec son gros bouton « Réactiver mon compte » et le bouton pour le signaler."></a><figcaption>Blunderbird, et un hameçonnage.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="incidents" aria-labelledby="t34">
+    <p class="meta"><span class="n">#34</span><time datetime="2026-11-24T14:58">24 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ad7f471">ad7f471</a><span>12 399 → 12 733 lignes</span></p>
     <h2 id="t34"><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></h2>
     <ul>
       <li>Après un ship, la prod peut tomber : plus souvent le vendredi, la nuit et avec Mistral, moins avec Claude et Moon AI. Les tests, les hooks et l’intégration continue baissent le risque.</li>
