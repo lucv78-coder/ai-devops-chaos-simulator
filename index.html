@@ -2185,7 +2185,7 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
 }
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
-  ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [] });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2268,6 +2268,9 @@ const ACH = [
   { id: 'blur', g: '◐', n: 'Flouté', d: 'Masquer une donnée sensible avec moon blur.', p: 5.8 },
   { id: 'tui', g: '▤', n: 'Pas besoin de bureau', d: 'Ouvrir la version terminal d’une appli graphique, sans Xfce.', p: 11.2 },
   { id: 'multi', g: '⧉', n: 'Multitâche', d: 'Avoir trois terminaux ouverts en même temps.', p: 9.1 },
+  { id: 'ipo', g: '♪', n: 'Ding ding ding', d: 'Introduire votre startup en bourse. La cloche, c’est vous qui la sonnez.', p: 3.6 },
+  { id: 'licorne', g: '¥', n: 'Licorne', d: 'Entrer en bourse avec une valorisation d’au moins un milliard.', p: 1.2, h: 1 },
+  { id: 'serial', g: '∞', n: 'Serial entrepreneur', d: 'Trois introductions en bourse. Trois startups, zéro client.', p: .6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3801,7 +3804,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4692,6 +4695,7 @@ async function runCommand(raw) {
   if (['exit', 'logout', 'quit'].includes(head) && prefs.theme === 'abri') return bunkerExit();   // dans le bunker, exit remonte à la surface
   if (['exit', 'logout'].includes(head) && liveTerm !== 'zsh') { const n = liveTerm; setTimeout(() => termClose(n), 0); return shellPrint('logout', 'dim'); }
   if (head === 'tmux') return tmuxCmd(rest);
+  if (head === 'ipo') return ipoCmd(rest);
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
     if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
     return void setTimeout(termNew, 0);          // après la commande : elle tient encore ce terminal
@@ -8652,6 +8656,7 @@ function webNorm(raw) {
 const wbBuyBtn = (attr, label, dis) => `<button type="button" class="wp-buy" ${attr}${dis ? ' disabled' : ''}>${esc(label)}</button>`;
 const WEB_LIVE = {
   money: () => `$${usd(G.money)}`,
+  val: () => bigMoney(valuation()),               // bourse.vibe : la valorisation
   pcnow: () => {
     const s = hwState(), v = pcVerdict(s);
     return `En ce moment : <b class="${v.cls}">${v.label}</b> <span class="dim">· ${esc(v.why)} · ${Math.round(s.temp)} °C · ${Math.round(s.draw)}/${s.psuW} W</span>`;
@@ -8675,6 +8680,7 @@ function webHome() {
       ${tile('https://telecharge.vibe/', 'telecharge.vibe', 'des fichiers 100 % sûrs · de la musique, faite par un humain')}
       ${tile('https://facture.vibe/', 'Vibank', 'votre compte, et ce que coûtent vos agents')}
       ${tile('https://urssaf.vibe/', 'urssaf.vibe', 'vos cotisations, et la taxe au giga')}
+      ${tile('https://bourse.vibe/', 'bourse.vibe', 'votre valorisation, et l’introduction en bourse')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
     </div></div>` };
@@ -8689,6 +8695,8 @@ function webSearch(u) {
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
   if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
     hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/bourse|ipo|valoris|licorne|action|nasdaq|lev[ée]e|investiss/.test(lq))
+    hit('https://bourse.vibe/', `${TICKER()} · ${PROJ.toUpperCase()} · le cours en direct`, 'La Bourse des licornes. Votre valorisation, et l’introduction en bourse quand elle dépasse 25 M$.');
   if (/moon|lune|realmoon|blur|stellarr/.test(lq))
     hit('https://realmoon.ai/', 'Moon AI · votre espace de travail avec l’IA', 'Dans ce jeu : la seule plateforme d’agents qui marche à peu près. Moon Blur masque les données sensibles détectées.');
   if (/urssaf|cotis|taxe|imp[oô]t|giga|assembl|acre|charges/.test(lq))
@@ -8864,8 +8872,94 @@ function webUrssaf() {
     <p class="dim">Vos cotisations apparaissent dans <a data-href="https://facture.vibe/">Vibank</a>, catégorie URSSAF.</p></div>` };
 }
 
+/* ---------- la Bourse (bourse.vibe) : la valorisation, et l'introduction en bourse (le prestige) ----------
+   La valorisation : le chiffre d'affaires cumulé × 40 (« parce que IA ») × un bonus de ships. À partir de 25 M$, la startup peut
+   entrer en bourse : elle est vendue au marché, une nouvelle commence de zéro (le PC, les fichiers, les paquets, les succès et le
+   temps de jeu restent), et les stock-options reçues accélèrent le travail de toutes les suivantes : +10 % chacune. */
+const IPO_MIN = 25e6;
+const valMult = () => 40 * (1 + shipped / 50);
+const valuation = () => (G.earned || 0) * valMult();
+const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6));
+const ipoMult = () => 1 + .1 * (G.ipo?.so || 0);
+const bigMoney = v => v >= 1e9 ? `$${frx((v / 1e9).toFixed(2))} Md` : v >= 1e6 ? `$${frx((v / 1e6).toFixed(1))} M` : `$${usd(v)}`;
+const TICKER = () => '$' + PROJ.toUpperCase().slice(0, 4);
+const BX_NEWS = () => [`${PROJ.toUpperCase()} lève des fonds sur la foi d’une démo qui plantait : « un signal de maturité », selon les investisseurs.`,
+  'Une startup valorisée deux milliards découvre qu’elle n’a pas de clients : « une phase normale de croissance ».', 'Le marché salue un résultat net négatif « en forte progression ».',
+  'Analyse : la bulle de l’IA n’éclatera pas, selon une IA.'];
+let ipoAsk = false;
+function vhAdd() {                                 // un point de plus sur le cours (à chaque ship)
+  if (!IDLE) return;
+  G.vh = G.vh || [];
+  G.vh.push([Date.now(), Math.round(valuation())]);
+  if (G.vh.length > 120) G.vh.splice(0, G.vh.length - 120);
+}
+function ipoDo() {                                 // sonner la cloche : la startup est vendue au marché, une nouvelle commence
+  if (!IDLE) return false;
+  const V = valuation();
+  if (V < IPO_MIN) return false;
+  const so = ipoGain(), ipo = { n: (G.ipo?.n || 0) + 1, so: (G.ipo?.so || 0) + so, best: Math.max(G.ipo?.best || 0, V) };
+  ach('ipo');
+  if (V >= 1e9) ach('licorne');
+  if (ipo.n >= 3) ach('serial');
+  const tx = [...(G.tx || []), [Date.now(), 'ipo', `Introduction en bourse de ${PROJ.toUpperCase()} (${bigMoney(V)}) : ${so} stock-options, bloquées quatre ans`, 0, 0]].slice(-200);
+  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, tx, ipo };
+  G = { ...G_DEF(), ...keep };
+  platInit();
+  if (SANDBOX) sandboxFill();
+  cartClear();
+  lastOrder = null;
+  ipoAsk = false;
+  setScore(0);
+  idleApply();
+  syncHW();
+  idleWelcome = null;
+  saveGame();
+  try { sessionStorage.setItem('aidcs:ipo', JSON.stringify([Math.round(V), so, ipo.so])); } catch { /* navigation privée : tant pis */ }
+  location.reload();                               // une nouvelle startup : on repart du démarrage, comme après une réinitialisation
+  return true;
+}
+function ipoCmd(a) {                               // ipo : la valorisation ; ipo --confirm : sonner la cloche
+  if (!IDLE) return shellPrint('Mode libre : pas d’actionnaires, pas de bourse.', 'dim');
+  const V = valuation(), so = ipoGain(), nx = 1 + .1 * ((G.ipo?.so || 0) + so);
+  if (a.includes('--confirm') || a.includes('-y')) {
+    if (V < IPO_MIN) return shellPrint(H(['✗ ', 'errc'], `Valorisation insuffisante : ${bigMoney(V)} sur ${bigMoney(IPO_MIN)}. Les investisseurs attendent quelques ships de plus.`));
+    shellPrint(H(['♪ ', 'org'], `Ding, ding, ding. ${PROJ.toUpperCase()} entre en bourse à `, [bigMoney(V), 'okc'], `. +${so} stock-options. Une nouvelle startup commence…`));
+    return void setTimeout(ipoDo, 900);
+  }
+  printLines([
+    [H([`${TICKER()} `, 'org b'], `· ${PROJ.toUpperCase()} · valorisation `, [bigMoney(V), 'okc']), '', 20],
+    [`Chiffre d’affaires cumulé : $${usd(G.earned || 0)} · ${plural(shipped, 'projet')} · multiple : ×${frx(valMult().toFixed(1))} (« parce que IA »)`, 'dim', 20],
+    V < IPO_MIN ? [H('Introduction en bourse : à partir de ', [bigMoney(IPO_MIN), 'org'], `. Il manque ${bigMoney(IPO_MIN - V)}.`), '', 20]
+      : [H('Prête pour l’introduction : ', [`+${so} stock-options`, 'okc'], ` (×${frx(nx.toFixed(1))} de travail pour toutes les startups suivantes). `, ['ipo --confirm', 'org'], ' pour sonner la cloche.'), '', 20],
+    ['Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF. Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.', 'dim', 20],
+    ...(G.ipo?.n ? [[`Déjà ${plural(G.ipo.n, 'introduction')} · ${G.ipo.so} stock-options · ×${frx(ipoMult().toFixed(1))} de travail · meilleure sortie : ${bigMoney(G.ipo.best)}`, 'dim', 20]] : []),
+    [H(['Le cours : ', 'dim'], ['bourse.vibe', 'org'], [', dans Firefaux.', 'dim']), '', 20],
+  ]);
+}
+function webBourse() {
+  const V = valuation(), so = ipoGain(), ok = IDLE && V >= IPO_MIN, vh = (G.vh || []).slice(-60), nx = 1 + .1 * ((G.ipo?.so || 0) + so);
+  const prev = vh.length > 1 ? vh.at(-2)[1] : 0, ch = prev ? (V - prev) / prev * 100 : 0, P = esc(PROJ.toUpperCase());
+  const chart = vh.length >= 2 ? lineChart(vh.map(([t, v]) => [t, v, `${txDate(t)} · ${bigMoney(v)}`]), `La valorisation de ${PROJ.toUpperCase()} sur les ${vh.length} derniers ships : de ${bigMoney(vh[0][1])} à ${bigMoney(vh.at(-1)[1])}.`, bigMoney)
+    : '<p class="dim">Le cours apparaîtra après quelques ships : les marchés ont besoin d’une courbe pour s’emballer.</p>';
+  const act = !IDLE ? '<p class="wp-band">Mode libre : pas d’actionnaires, pas de bourse.</p>'
+    : !ok ? `<p class="wp-band">Introduction en bourse à partir de <b>${bigMoney(IPO_MIN)}</b> de valorisation. Il manque ${bigMoney(IPO_MIN - V)} : quelques ships de plus, et les investisseurs vous trouveront « disruptif ».</p>`
+    : ipoAsk ? `<div class="ff-ask"><b>Introduire ${P} en bourse à ${bigMoney(V)} ?</b><span>Vous recevez <b>${so} stock-options</b> : ×${frx(nx.toFixed(1))} de travail pour toutes vos startups suivantes.</span>`
+      + '<span>Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF (une nouvelle société a droit à l’ACRE).</span>'
+      + '<span>Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.</span>'
+      + '<div class="row"><button type="button" class="wp-buy" data-ipo="go">Sonner la cloche</button><button type="button" class="dl-real" data-ipo="cancel">Pas encore</button></div></div>'
+    : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`;
+  return { title: `bourse.vibe · ${TICKER()}`, html: `<div class="wp vb"><h1>bourse.vibe</h1><p class="dim">La Bourse des licornes. Et des autres.</p>
+    <div class="vb-acct"><span class="k">${esc(TICKER())} · ${P} · Nasdaq-Vibe</span><span class="vb-bal" data-live="val">${bigMoney(V)}</span>
+    <span class="dim">${ch ? `${ch >= 0 ? '+' : '−'}${frx(Math.abs(ch).toFixed(1))} % depuis le dernier ship · ` : ''}chiffre d’affaires × ${frx(valMult().toFixed(1))} (« parce que IA »)</span></div>
+    <h2>Le cours</h2>${chart}
+    <h2>Introduction en bourse</h2>${act}
+    ${G.ipo?.n ? `<div class="wp-band"><p>Vos sorties : <b>${G.ipo.n}</b> · stock-options : <b>${G.ipo.so}</b> · travail : <b>×${frx(ipoMult().toFixed(1))}</b> · meilleure : <b>${bigMoney(G.ipo.best)}</b></p></div>` : ''}
+    <h2>À la une</h2><ul class="facts">${BX_NEWS().map(n => `<li>${esc(n)}</li>`).join('')}</ul>
+    <p class="dim">Dans le terminal : <code>ipo</code> pour la valorisation, <code>ipo --confirm</code> pour sonner la cloche.</p></div>` };
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
-const TX_CAT = { init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF' };
+const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
 const txDate = t => { const d = new Date(t), z = n => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 const isoLocal = t => {                          // 2026-11-24T04:01:34+01:00 : l'heure locale, avec son décalage (comme une vraie API)
@@ -8873,20 +8967,24 @@ const isoLocal = t => {                          // 2026-11-24T04:01:34+01:00 : 
   return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}${o < 0 ? '-' : '+'}${z(Math.trunc(o / 60))}:${z(o % 60)}`;
 };
 const txAmt = n => `${n < 0 ? '−' : '+'}$${usd(Math.abs(n))}`;
-function vbChart() {                               // le solde, opération après opération : une ligne, une grille discrète, un survol (date, libellé, solde)
-  const T = G.tx.slice(-60);
-  if (T.length < 2) return '<p class="dim">Le graphique apparaîtra après quelques opérations (un ship suffit, presque).</p>';
-  const ys = T.map(x => x[4]), lo = Math.min(0, ...ys), hi = Math.max(...ys), span = hi - lo || 1, W = 600, H = 160;
+function lineChart(T, aria, fy = v => `$${usd(v)}`) {   // une courbe [[date, valeur, info-bulle]] : une ligne, une grille discrète, un survol
+  const ys = T.map(x => x[1]), lo = Math.min(0, ...ys), hi = Math.max(...ys), span = hi - lo || 1, W = 600, H = 160;
   const X = i => i / (T.length - 1) * W, Y = v => H - 8 - (v - lo) / span * (H - 16);
-  const path = T.map((x, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(x[4]).toFixed(1)}`).join(' ');
+  const path = T.map((x, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(x[1]).toFixed(1)}`).join(' ');
   const grid = [0, .5, 1].map(f => `<line x1="0" x2="${W}" y1="${(8 + f * (H - 16)).toFixed(1)}" y2="${(8 + f * (H - 16)).toFixed(1)}" class="g"/>`).join('');
   const zero = lo < 0 ? `<line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" class="z"/>` : '';
-  const pts = T.map((x, i) => [+(X(i) / W * 100).toFixed(2), +(Y(x[4]) / H * 100).toFixed(2), `${txDate(x[0])} · solde $${usd(x[4])}\n${x[2]} · ${txAmt(x[3])}`]);   // deux lignes : la date et le solde, puis l'opération
-  return `<div class="vb-chart" data-pts="${esc(JSON.stringify(pts))}" role="img" aria-label="Le solde sur les ${T.length} dernières opérations : de $${usd(ys[0])} à $${usd(ys.at(-1))}.">`
-    + `<div class="vb-plot"><span class="vb-y hi">$${usd(hi)}</span><span class="vb-y lo">$${usd(lo)}</span>`
+  const pts = T.map((x, i) => [+(X(i) / W * 100).toFixed(2), +(Y(x[1]) / H * 100).toFixed(2), x[2]]);
+  return `<div class="vb-chart" data-pts="${esc(JSON.stringify(pts))}" role="img" aria-label="${esc(aria)}">`
+    + `<div class="vb-plot"><span class="vb-y hi">${fy(hi)}</span><span class="vb-y lo">${fy(lo)}</span>`
     + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${grid}${zero}<path d="${path}" class="l"/><line class="vb-x" x1="0" x2="0" y1="0" y2="${H}"/></svg>`
     + `<span class="vb-dot" hidden></span><span class="vb-tip" hidden></span></div>`
     + `<div class="vb-ts"><span>${txDate(T[0][0])}</span><span>${txDate(T.at(-1)[0])}</span></div></div>`;
+}
+function vbChart() {                               // le solde, opération après opération ; l'info-bulle : la date et le solde, puis l'opération
+  const T = G.tx.slice(-60);
+  if (T.length < 2) return '<p class="dim">Le graphique apparaîtra après quelques opérations (un ship suffit, presque).</p>';
+  return lineChart(T.map(x => [x[0], x[4], `${txDate(x[0])} · solde $${usd(x[4])}\n${x[2]}${['init', 'ipo'].includes(x[1]) ? '' : ` · ${txAmt(x[3])}`}`]),
+    `Le solde sur les ${T.length} dernières opérations : de $${usd(T[0][4])} à $${usd(T.at(-1)[4])}.`);
 }
 function vbHover(c, e) {                           // le survol du graphique : la ligne verticale, le point, l'info-bulle
   const pts = JSON.parse(c.dataset.pts || '[]'), r = c.querySelector('svg').getBoundingClientRect(), tip = c.querySelector('.vb-tip'), dot = c.querySelector('.vb-dot');
@@ -8912,7 +9010,7 @@ function webBill() {
   const spend = cats.length ? cats.map(([k, v]) => `<div class="vb-cat"><span>${esc(TX_CAT[k] || k)}</span><span class="vb-bar"><i style="width:${Math.max(1, v / top * 100).toFixed(1)}%"></i></span><b>$${usd(v)}</b></div>`).join('')
     : '<p class="dim">Aucune dépense. Profitez-en, ça ne dure pas.</p>';
   const ops = T.slice(-30).reverse().map(x => `<tr><td class="d">${txDate(x[0])}</td><td>${esc(x[2])} <span class="vb-tag">${esc(TX_CAT[x[1]] || x[1])}</span></td>`
-    + `<td class="m ${x[3] < 0 ? 'neg' : 'pos'}">${x[1] === 'init' ? '' : txAmt(x[3])}</td><td class="m">$${usd(x[4])}</td></tr>`).join('');
+    + `<td class="m ${x[3] < 0 ? 'neg' : 'pos'}">${['init', 'ipo'].includes(x[1]) ? '' : txAmt(x[3])}</td><td class="m">$${usd(x[4])}</td></tr>`).join('');
   return { title: 'Vibank · facture.vibe', html: `<div class="wp vb"><div class="vb-head"><span class="vb-logo" aria-hidden="true">V</span><div><h1>Vibank</h1>
     <p class="dim">La banque des développeurs qui ne relisent pas. Ni leurs relevés.</p></div></div>
     <div class="vb-acct"><span class="k">Compte courant · ${esc(VB_IBAN)} · ${esc(USER)}</span><span class="vb-bal" data-live="money">$${usd(G.money)}</span>
@@ -8940,7 +9038,7 @@ function bankCurl(path, w) {                       // curl facture.vibe : le rel
     [H(`Solde au ${stamp} : `, [`$${usd(G.money)}`, G.money < 0 ? 'errc' : 'okc']), '', 20],
     [`À prélever au prochain ship : $${usd(G.bill)} de tokens · $${usd(G.elec || 0)} d’électricité`, 'dim', 20], ['', '', 20],
     [`${'Date'.padEnd(13)}${'Libellé'.padEnd(46)}${'Montant'.padStart(14)}${'Solde'.padStart(15)}`, 'dim', 20]];
-  T.forEach(([t, c, l, m, b]) => L.push([H(txDate(t).padEnd(13), (l.length > 44 ? l.slice(0, 43) + '…' : l).padEnd(46), [(c === 'init' ? '' : txAmt(m)).padStart(14), m < 0 ? 'errc' : 'okc'], `$${usd(b)}`.padStart(15)), '', 15]));
+  T.forEach(([t, c, l, m, b]) => L.push([H(txDate(t).padEnd(13), (l.length > 44 ? l.slice(0, 43) + '…' : l).padEnd(46), [(['init', 'ipo'].includes(c) ? '' : txAmt(m)).padStart(14), m < 0 ? 'errc' : 'okc'], `$${usd(b)}`.padStart(15)), '', 15]));
   if (!T.length) L.push(['Aucune opération pour l’instant : shippez quelque chose.', 'dim', 20]);
   L.push(['', '', 20], [H([`(${T.length} dernière${T.length > 1 ? 's' : ''} opération${T.length > 1 ? 's' : ''} sur ${G.tx.length} conservées · `, 'dim'], ['curl facture.vibe/api', 'org'], [' pour le JSON)', 'dim']), '', 20]);
   if (w === 'wget') {                              // wget enregistre la page, comme le vrai
@@ -9036,7 +9134,7 @@ const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
-  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?bourse\.vibe/i, webBourse], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
@@ -9171,6 +9269,7 @@ function makeBrowser() {
       else if (k === 'ublock') { flash(ffAddon('toggle:ublock')); draw(true); }
     } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
     else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
+    else if (e.target.closest('[data-ipo]')) { const a = e.target.closest('[data-ipo]').dataset.ipo; if (a === 'go') { flash('Ding, ding, ding…'); setTimeout(ipoDo, 600); } else { ipoAsk = a === 'ask'; draw(true); } }
     else if (e.target.closest('[data-urssaf]')) { ach('recours'); flash(`Contestation enregistrée sous le n° ${ri(100000, 999999)}. Délai de réponse : 6 à 18 mois. Les prélèvements continuent en attendant.`); }
     else if (e.target.closest('[data-addon]')) { const m = ffAddon(e.target.closest('[data-addon]').dataset.addon); if (m) flash(m); draw(true); }
     else if (h) go(h.dataset.href);
@@ -10535,7 +10634,7 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
   const sp = speed * hw.f, tk = skillMult('tok') * hw.tok * (B?.tok ?? 1);   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
   const tin = ECO.tin * sp * tk * skillMult('tin'), tout = ECO.tout * sp * tk, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
-    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
+    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1) * ipoMult(),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
     crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1), fail: a.fail * skillMult('fail'),
     tin, tout, cost: (tin * m.in + tout * m.out) / 1e6, lv, leadK, lead: leadK * (tin * lm.in + tout * lm.out) / 1e6,
     hw,
@@ -10674,6 +10773,7 @@ function autoShip() {                            // barre pleine : en production
   txAdd('elec', `Électricité · ${ELEC.tiers[G.elecT || 0].n}`, -elec, m0 + val - cost - elec);
   if (cot) { txAdd('urssaf', `URSSAF · cotisations sur ${PROJ}@${v}`, -cot); G.urssaf.paid += cot; G.urssaf.n++; ach('cotisant'); }
   setScore(shipped + 1);                         // score, version suivante, sauvegarde
+  vhAdd();                                       // bourse.vibe : un point de plus sur le cours
   const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
   if (day.getDay() === 5) ach('friday');
   if (day.getHours() === 3) ach('night');
@@ -10722,6 +10822,7 @@ function ecoOffline(secs, session = true) {
     if (out.urssaf) { txAdd('urssaf', 'URSSAF · cotisations (en arrière-plan)', -out.urssaf, m0 + out.gain - out.urssaf); ach('cotisant'); }
     txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain + out.urssaf);
     setScore(shipped);
+    vhAdd();
   }
   return out;
 }
@@ -12282,6 +12383,10 @@ requestAnimationFrame(frame);
 initTabs();                                      // zsh d'abord : on tape « claude » pour lancer les agents (?boot=0 : directement claude)
 if (claudeOn && Q.get('help') !== '0') setTimeout(() => toast(HELP, 5000), 600);
 if (!claudeOn && Q.get('title') !== '0') showTitle();   // l'écran titre ouvre le jeu (?title=0 : directement le zsh)
+try {                                            // retour d'une introduction en bourse : la cloche a sonné
+  const x = JSON.parse(sessionStorage.getItem('aidcs:ipo') || 'null');
+  if (x) { sessionStorage.removeItem('aidcs:ipo'); titleMsg.textContent = `Introduction en bourse : ${PROJ.toUpperCase()} valorisée ${bigMoney(x[0])}. +${x[1]} stock-options (${x[2]} en tout : ×${frx((1 + .1 * x[2]).toFixed(1))} de travail). Une nouvelle startup commence.`; }
+} catch { /* tant pis */ }
 try { if (sessionStorage.getItem('aidcs:wiped')) { sessionStorage.removeItem('aidcs:wiped'); titleMsg.textContent = 'Partie réinitialisée : retour au PC patate.'; } } catch { /* tant pis */ }
 try {                                            // retour d'un import : ce qui vient d'arriver
   const imp = sessionStorage.getItem('aidcs:imported');
