@@ -860,6 +860,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-ubo.off b { background: var(--dim2); }
 .ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
 .ff-ask ul { padding-left: 2ch; }
+/* bourse.vibe : le choix du défi de la startup suivante */
+.ch-pick { display: grid; gap: .3em; margin: .3em 0; padding: .4em 1.2ch .6em; border: 1px solid var(--rule); border-radius: 3px; }
+.ch-pick legend { padding: 0 .6ch; color: var(--dim); }
+.ch-pick label { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 1ch; }
+.ch-pick label .dim { grid-column: 2; font-size: .9em; }
 .ff-dark { filter: brightness(.8) contrast(1.08); }
 /* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
 .mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
@@ -2091,7 +2096,7 @@ const usdFine = n => n < 0.01 ? n.toFixed(4) : usd(n);
 const usage = { in: 0, out: 0, usd: 0, by: {} };
 function bill(model, tin, tout) {
   const m = MODELS[model], b = usage.by[model] || (usage.by[model] = { in: 0, out: 0, usd: 0 });
-  const d = (tin * m.in + tout * m.out) / 1e6;
+  const d = (tin * m.in + tout * m.out) / 1e6 * (IDLE && G.chal === 'budget' ? 2 : 1);   // défi « Tokens au prix fort »
   b.in += tin; b.out += tout; b.usd += d;
   usage.in += tin; usage.out += tout; usage.usd += d;
   if (IDLE) { G.bill += d; G.spent += d; }      // mode idle : déduit au prochain ship
@@ -2224,7 +2229,7 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
-  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0 });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '' });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2318,6 +2323,8 @@ const ACH = [
   { id: 'phish', g: '⚑', n: 'Pas né de la dernière pluie', d: 'Signaler un courriel d’hameçonnage. L’adresse était fausse, vous l’avez vu.', p: 23.1 },
   { id: 'hamecon', g: '⊗', n: 'Hameçonné', d: 'Ouvrir la pièce jointe (ou le lien) d’un courriel d’hameçonnage.', p: 8.2, h: 1 },
   { id: 'levee', g: '↗', n: 'Tour de table', d: 'Faire entrer un fonds au capital de votre startup.', p: 6.4 },
+  { id: 'defi', g: '◈', n: 'Contraintes créatives', d: 'Réussir un défi : entrer en bourse avec la contrainte choisie à l’introduction précédente.', p: 2.1 },
+  { id: 'defis', g: '❖', n: 'Masochiste', d: 'Réussir les cinq défis.', p: .2, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3180,6 +3187,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
     [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  defi             ', 'org'], 'le défi de la startup en cours (choisi à l’introduction en bourse) et ceux réussis · defi abandon'), '', 20],
     [H(['  mail             ', 'org'], 'le courrier : les clients, les investisseurs, l’URSSAF, le hameçonnage · mail <n> pour lire, mail <n> <action> pour répondre (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20],
     [H(['  incident         ', 'org'], 'l’astreinte : la panne de prod en cours et les pistes (systemctl, journalctl, kubectl, df, dig, certbot, git log) · incident agent : la confier'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
@@ -3857,7 +3865,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4752,6 +4760,7 @@ async function runCommand(raw) {
   if (head === 'ipo') return ipoCmd(rest);
   if (['incident', 'incidents', 'pager', 'pagerdoudou', 'astreinte'].includes(head)) return incCmd(rest);
   if (head === 'mail' || head === 'mailx') return mailCmd(rest);
+  if (head === 'defi' || head === 'défi' || head === 'defis' || head === 'défis') return defiCmd(rest);
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
     if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
@@ -4894,7 +4903,7 @@ async function runCommand(raw) {
   if (head === 'date') {
     const d = new Date();
     return shellPrint(H(d.toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      [d.getDay() === 5 ? '   (vendredi : ne shippez pas)' : '', 'wrn']));
+      [d.getDay() === 5 ? '   (vendredi : ne shippez pas)' : isFri() ? '   (défi : c’est vendredi, tous les jours)' : '', 'wrn']));
   }
   if (head === 'whoami') return shellPrint(`${USER} (mais ce sont surtout les agents qui travaillent)`);
   if (head === 'sudo') return shellPrint('Vous n’êtes pas dans le fichier sudoers. Cet incident sera signalé.', 'errc');
@@ -6128,6 +6137,9 @@ const xfIcon = n => isTerm(n) ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].
 function xfShown(n) { return !!xw[n] && !xw[n].min && !xw[n].closed; }
 
 function xfceCmd(args) {
+  if (IDLE && G.chal === 'nodesk' && !xfOn && !args.some(a => /^(--?)?(quit|logout|off|exit|stop)$/.test(a))) {   // le défi « Sans bureau »
+    return shellPrint(H(['✗ ', 'errc'], 'Défi « Sans bureau » : Xfce refuse de démarrer. Tout se fait dans le terminal (', ['defi abandon', 'org'], ' pour renoncer).'));
+  }
   if (args.some(a => /^(--?)?(quit|logout|off|exit|stop)$/.test(a))) {
     return xfOn ? xfExit() : shellPrint(H('Xfce n’est pas lancé. Tapez ', ['xfce', 'org'], ' pour ouvrir le bureau.'), 'dim');
   }
@@ -8913,7 +8925,7 @@ function urssafDue(val, tok = 0, n = shipped) {   // → { items: [[nom, montant
   const items = [['Cotisations sociales des agents (CSA)', val * .08, '8 %'], ['CRDT · remboursement de la dette technique', val * .005, '0,5 %'],
     [`Taxe au giga · ${go} Go de RAM`, val * giga, `${frx(+(giga * 100).toFixed(2))} %`], ['Formation professionnelle des agents', val * .0055, '0,55 %'],
     ['Taxe sur les tokens hallucinés', tok * .02, '2 % des tokens']];
-  if (new Date().getDay() === 5) items.push(['Forfait social du vendredi', val * .03, '3 %']);
+  if (isFri()) items.push(['Forfait social du vendredi', val * .03, '3 %']);
   return { items, total: items.reduce((a, x) => a + x[1], 0) };
 }
 function webUrssaf() {
@@ -8943,7 +8955,7 @@ function webUrssaf() {
 const IPO_MIN = 25e6;
 const valMult = () => 40 * (1 + shipped / 50);
 const valuation = () => (G.earned || 0) * valMult() * repK();
-const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6) * (G.dil ?? 1));   // une levée de fonds dilue : moins de stock-options
+const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6) * (G.dil ?? 1) * chalK());   // une levée de fonds dilue : moins de stock-options
 const ipoMult = () => 1 + .1 * (G.ipo?.so || 0);
 const bigMoney = v => v >= 1e9 ? `$${frx((v / 1e9).toFixed(2))} Md` : v >= 1e6 ? `$${frx((v / 1e6).toFixed(1))} M` : `$${usd(v)}`;
 const TICKER = () => '$' + PROJ.toUpperCase().slice(0, 4);
@@ -8957,16 +8969,19 @@ function vhAdd() {                                 // un point de plus sur le co
   G.vh.push([Date.now(), Math.round(valuation())]);
   if (G.vh.length > 120) G.vh.splice(0, G.vh.length - 120);
 }
-function ipoDo() {                                 // sonner la cloche : la startup est vendue au marché, une nouvelle commence
+function ipoDo(next = '') {                        // sonner la cloche : la startup est vendue au marché, une nouvelle commence (next : son défi)
   if (!IDLE) return false;
   const V = valuation();
   if (V < IPO_MIN) return false;
-  const so = ipoGain(), ipo = { n: (G.ipo?.n || 0) + 1, so: (G.ipo?.so || 0) + so, best: Math.max(G.ipo?.best || 0, V) };
+  const won = CHAL[G.chal] ? G.chal : '', done = { ...(G.ipo?.done || {}), ...(won ? { [won]: 1 } : {}) }, nx = CHAL[next] ? next : '';
+  const so = ipoGain(), ipo = { n: (G.ipo?.n || 0) + 1, so: (G.ipo?.so || 0) + so, best: Math.max(G.ipo?.best || 0, V), done };
   ach('ipo');
+  if (won) ach('defi');
+  if (Object.keys(CHAL).every(k => done[k])) ach('defis');
   if (V >= 1e9) ach('licorne');
   if (ipo.n >= 3) ach('serial');
   const tx = [...(G.tx || []), [Date.now(), 'ipo', `Introduction en bourse de ${PROJ.toUpperCase()} (${bigMoney(V)}) : ${so} stock-options, bloquées quatre ans`, 0, 0]].slice(-200);
-  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, tx, ipo };
+  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, tx, ipo, chal: nx };
   G = { ...G_DEF(), ...keep };
   platInit();
   if (SANDBOX) sandboxFill();
@@ -8978,17 +8993,20 @@ function ipoDo() {                                 // sonner la cloche : la star
   syncHW();
   idleWelcome = null;
   saveGame();
-  try { sessionStorage.setItem('aidcs:ipo', JSON.stringify([Math.round(V), so, ipo.so])); } catch { /* navigation privée : tant pis */ }
+  try { sessionStorage.setItem('aidcs:ipo', JSON.stringify([Math.round(V), so, ipo.so, won, nx])); } catch { /* navigation privée : tant pis */ }
   location.reload();                               // une nouvelle startup : on repart du démarrage, comme après une réinitialisation
   return true;
 }
 function ipoCmd(a) {                               // ipo : la valorisation ; ipo --confirm : sonner la cloche
   if (!IDLE) return shellPrint('Mode libre : pas d’actionnaires, pas de bourse.', 'dim');
   const V = valuation(), so = ipoGain(), nx = 1 + .1 * ((G.ipo?.so || 0) + so);
+  const di = a.indexOf('--defi'), dn = di >= 0 ? (a[di + 1] || '') : '';
+  if (di >= 0 && !CHAL[dn]) return shellPrint(H(['✗ ', 'errc'], `Défi inconnu : « ${dn || '(aucun)'} ». Défis : ${Object.keys(CHAL).join(', ')} (defi pour le détail).`));
   if (a.includes('--confirm') || a.includes('-y')) {
     if (V < IPO_MIN) return shellPrint(H(['✗ ', 'errc'], `Valorisation insuffisante : ${bigMoney(V)} sur ${bigMoney(IPO_MIN)}. Les investisseurs attendent quelques ships de plus.`));
+    if (dn) shellPrint(H(['◈ ', 'org'], `Défi de la prochaine startup : ${CHAL[dn].n} (${CHAL[dn].d}) · +${Math.round(CHAL[dn].b * 100)} % de stock-options à sa propre introduction.`));
     shellPrint(H(['♪ ', 'org'], `Ding, ding, ding. ${PROJ.toUpperCase()} entre en bourse à `, [bigMoney(V), 'okc'], `. +${so} stock-options. Une nouvelle startup commence…`));
-    return void setTimeout(ipoDo, 900);
+    return void setTimeout(() => ipoDo(dn), 900);
   }
   printLines([
     [H([`${TICKER()} `, 'org b'], `· ${PROJ.toUpperCase()} · valorisation `, [bigMoney(V), 'okc']), '', 20],
@@ -8997,6 +9015,8 @@ function ipoCmd(a) {                               // ipo : la valorisation ; ip
       : [H('Prête pour l’introduction : ', [`+${so} stock-options`, 'okc'], ` (×${frx(nx.toFixed(1))} de travail pour toutes les startups suivantes). `, ['ipo --confirm', 'org'], ' pour sonner la cloche.'), '', 20],
     ['Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF. Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.', 'dim', 20],
     ...(G.ipo?.n ? [[`Déjà ${plural(G.ipo.n, 'introduction')} · ${G.ipo.so} stock-options · ×${frx(ipoMult().toFixed(1))} de travail · meilleure sortie : ${bigMoney(G.ipo.best)}`, 'dim', 20]] : []),
+    ...(CHAL[G.chal] ? [[H('Défi en cours : ', [CHAL[G.chal].n, 'org'], ` · stock-options +${Math.round(CHAL[G.chal].b * 100)} % (déjà comptées)`), '', 20]] : []),
+    [H(['Un défi pour la startup suivante : ', 'dim'], ['ipo --confirm --defi <défi>', 'org'], [` (${Object.keys(CHAL).join(', ')} : `, 'dim'], ['defi', 'org'], [' pour le détail).', 'dim']), '', 20],
     [H(['Le cours : ', 'dim'], ['bourse.vibe', 'org'], [', dans Firefaux.', 'dim']), '', 20],
   ]);
 }
@@ -9010,6 +9030,8 @@ function webBourse() {
     : ipoAsk ? `<div class="ff-ask"><b>Introduire ${P} en bourse à ${bigMoney(V)} ?</b><span>Vous recevez <b>${so} stock-options</b> : ×${frx(nx.toFixed(1))} de travail pour toutes vos startups suivantes.</span>`
       + '<span>Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF (une nouvelle société a droit à l’ACRE).</span>'
       + '<span>Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.</span>'
+      + `<fieldset class="ch-pick"><legend>Un défi pour la startup suivante (facultatif) : plus de stock-options à son introduction</legend>`
+      + `<label><input type="radio" name="chal" value="" checked> Aucun</label>${Object.entries(CHAL).map(([k, c]) => `<label><input type="radio" name="chal" value="${k}"> <b>${esc(c.n)}</b> · +${Math.round(c.b * 100)} %${G.ipo?.done?.[k] ? ' · <span class="okc">réussi</span>' : ''}<span class="dim">${esc(c.d)}</span></label>`).join('')}</fieldset>`
       + '<div class="row"><button type="button" class="wp-buy" data-ipo="go">Sonner la cloche</button><button type="button" class="dl-real" data-ipo="cancel">Pas encore</button></div></div>'
     : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`;
   return { title: `bourse.vibe · ${TICKER()}`, html: `<div class="wp vb"><h1>bourse.vibe</h1><p class="dim">La Bourse des licornes. Et des autres.</p>
@@ -9018,6 +9040,7 @@ function webBourse() {
     <span class="dim">Note des clients : ${repStars()} (×${frx(repK().toFixed(2))} sur la valorisation)${(G.dil ?? 1) < 1 ? ` · votre part du capital : ${Math.round(G.dil * 100)} % (levées de fonds)` : ''}</span></div>
     <h2>Le cours</h2>${chart}
     <h2>Introduction en bourse</h2>${act}
+    ${IDLE && CHAL[G.chal] ? `<div class="wp-band"><p>Défi en cours : <b>${esc(CHAL[G.chal].n)}</b> · ${esc(CHAL[G.chal].d)} À l’introduction : +${Math.round(CHAL[G.chal].b * 100)} % de stock-options (déjà comptées ci-dessus).</p></div>` : ''}
     ${G.ipo?.n ? `<div class="wp-band"><p>Vos sorties : <b>${G.ipo.n}</b> · stock-options : <b>${G.ipo.so}</b> · travail : <b>×${frx(ipoMult().toFixed(1))}</b> · meilleure : <b>${bigMoney(G.ipo.best)}</b></p></div>` : ''}
     <h2>À la une</h2><ul class="facts">${BX_NEWS().map(n => `<li>${esc(n)}</li>`).join('')}</ul>
     <p class="dim">Dans le terminal : <code>ipo</code> pour la valorisation, <code>ipo --confirm</code> pour sonner la cloche.</p></div>` };
@@ -9063,7 +9086,7 @@ const lcFirst = t => t.charAt(0).toLowerCase() + t.slice(1);
 function incRisk() {                               // la probabilité qu'un ship fasse tomber la prod
   if (!IDLE || shipped < 3) return 0;
   const d = new Date(), plat = { mistral: 1.6, local: 1.4, codex: 1, claude: .9, moon: .6 }[G.ai] ?? 1;
-  return Math.min(.5, .07 * plat * (d.getDay() === 5 ? 2 : 1) * (d.getHours() < 6 ? 1.5 : 1) * skillMult('inc'));
+  return Math.min(.5, .07 * plat * (isFri() ? 2 : 1) * (d.getHours() < 6 ? 1.5 : 1) * skillMult('inc'));
 }
 function incStart(k) {                             // PagerDoudou sonne
   if (!IDLE || G.inc) return false;
@@ -9144,7 +9167,7 @@ function incCmd(rest) {                            // incident : la panne en cou
       ...S.log.slice().reverse().map(([t, k, d, l, h]) => [`  ${txDate(t)}  ${(INC_KINDS[k]?.t || k).padEnd(44)} ${fmtEta(d).padStart(9)}  ${('−$' + usd(l)).padStart(12)}  ${INC_HOW[h] || h}`, '', 15])]);
   }
   if (!I) return printLines([[H(['✓ ', 'okc'], 'Aucun incident ouvert : la prod est verte (pour l’instant).'), '', 20],
-    [`${S.n ? `${plural(S.n, 'incident')} depuis le début de la startup · ` : ''}risque au prochain ship : ${Math.round(incRisk() * 100)} %${new Date().getDay() === 5 ? ' (vendredi : ×2)' : ''} · incident log : l’historique · status.vibe, dans Firefaux`, 'dim', 20]]);
+    [`${S.n ? `${plural(S.n, 'incident')} depuis le début de la startup · ` : ''}risque au prochain ship : ${Math.round(incRisk() * 100)} %${isFri() ? ' (vendredi : ×2)' : ''} · incident log : l’historique · status.vibe, dans Firefaux`, 'dim', 20]]);
   const K = INC_KINDS[I.k];
   if (G.sk.runbook && !I.rb) I.rb = chance(1 / 3) ? pick(Object.keys(INC_KINDS).filter(x => x !== I.k)) : I.k;   // une fois sur trois, la procédure d'un autre incident
   return printLines([
@@ -9582,6 +9605,36 @@ function makeMutt() {                              // façon mutt : l'index des 
   return { el, key, render: () => render(), redraw: () => render(true), title: () => 'mutt', tname: () => 'mutt' };
 }
 
+/* ---------- les défis : à l'introduction en bourse, une contrainte pour la startup suivante ----------
+   Elle dure jusqu'à l'introduction de cette startup-là, qui rapporte alors plus de stock-options (le bonus du défi). defi abandon :
+   la contrainte saute, le bonus aussi. Les défis réussis restent (G.ipo.done). */
+const CHAL = {
+  local: { n: '100 % IA locale', d: 'Pas de licence Codex, Claude Code ni Moon AI : Mistral et l’IA locale seulement.', b: .5 },
+  nodesk: { n: 'Sans bureau', d: 'Xfce refuse de démarrer : tout se fait dans le terminal.', b: .3 },
+  friday: { n: 'Vendredi permanent', d: 'Tous les jours sont des vendredis : deux fois plus d’incidents de prod, et le forfait social de l’URSSAF.', b: .5 },
+  solo: { n: 'Un seul agent', d: 'Un agent par équipe : le store n’en vend plus.', b: 1 },
+  budget: { n: 'Tokens au prix fort', d: 'Les tokens coûtent deux fois plus cher.', b: .4 },
+};
+function chalK() { return IDLE && CHAL[G.chal] ? 1 + CHAL[G.chal].b : 1; }                 // le bonus de stock-options du défi en cours
+function chalBan(p) { return IDLE && G.chal === 'local' && !['mistral', 'local'].includes(p); }   // « 100 % IA locale » : pas d'autre licence
+function isFri() { return new Date().getDay() === 5 || (IDLE && G.chal === 'friday'); }      // un vendredi (un vrai, ou le défi)
+function defiCmd(a) {                              // defi : le défi en cours, ceux réussis ; defi abandon
+  if (!IDLE) return shellPrint('Mode libre : pas de bourse, pas de défi.', 'dim');
+  const C = CHAL[G.chal], done = G.ipo?.done || {};
+  if (['abandon', 'abandonner', 'stop'].includes(a[0])) {
+    if (!C) return shellPrint('Aucun défi en cours.', 'dim');
+    G.chal = '';
+    saveGame();
+    return shellPrint(H(['✓ ', 'okc'], `Défi « ${C.n} » abandonné : la contrainte saute, le bonus de stock-options aussi.`));
+  }
+  return printLines([
+    C ? [H('Défi en cours : ', [C.n, 'org'], ` · ${C.d} À l’introduction en bourse : +${Math.round(C.b * 100)} % de stock-options.`), '', 20]
+      : [H('Aucun défi en cours. Il se choisit à l’introduction en bourse : ', ['bourse.vibe', 'org'], ', ou ', ['ipo --confirm --defi <défi>', 'org'], '.'), 'dim', 20],
+    ...Object.entries(CHAL).map(([k, c]) => [H(done[k] ? ['  ✓ ', 'okc'] : '    ', [k.padEnd(8), 'org'], `${c.n} · +${Math.round(c.b * 100)} % · ${c.d}`), '', 20]),
+    [`${Object.keys(done).length} défi${Object.keys(done).length > 1 ? 's' : ''} réussi${Object.keys(done).length > 1 ? 's' : ''} sur ${Object.keys(CHAL).length}${C ? ' · defi abandon : renoncer (sans bonus)' : ''}`, 'dim', 20],
+  ]);
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
 const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF', incident: 'Incidents', client: 'Clients', levee: 'Levée de fonds' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
@@ -9893,7 +9946,7 @@ function makeBrowser() {
       else if (k === 'ublock') { flash(ffAddon('toggle:ublock')); draw(true); }
     } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
     else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
-    else if (e.target.closest('[data-ipo]')) { const a = e.target.closest('[data-ipo]').dataset.ipo; if (a === 'go') { flash('Ding, ding, ding…'); setTimeout(ipoDo, 600); } else { ipoAsk = a === 'ask'; draw(true); } }
+    else if (e.target.closest('[data-ipo]')) { const a = e.target.closest('[data-ipo]').dataset.ipo; if (a === 'go') { const ch = el.querySelector('input[name="chal"]:checked')?.value || ''; flash('Ding, ding, ding…'); setTimeout(() => ipoDo(ch), 600); } else { ipoAsk = a === 'ask'; draw(true); } }
     else if (e.target.closest('[data-urssaf]')) { ach('recours'); flash(`Contestation enregistrée sous le n° ${ri(100000, 999999)}. Délai de réponse : 6 à 18 mois. Les prélèvements continuent en attendant.`); }
     else if (e.target.closest('[data-addon]')) { const m = ffAddon(e.target.closest('[data-addon]').dataset.addon); if (m) flash(m); draw(true); }
     else if (h) go(h.dataset.href);
@@ -11557,7 +11610,7 @@ const storeDlg = $('#store');
 let stoTab = 'ia';                               // rayon affiché : agents IA ou matériel PC
 function aiItems() {
   const it = [], lv = Math.min(3, G.lead || 0), T = LEAD_TIER[lv + 1], C = CLIS[G.ai];
-  it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: `Agent ${C.label} supplémentaire`, lvl: `${G.agents}/8`, done: G.agents >= 8, cost: agentPrice(G.ai),
+  it.push({ cat: 'Équipe', id: 'agent', ic: '+', name: `Agent ${C.label} supplémentaire`, lvl: `${G.agents}/8`, done: G.agents >= 8, cost: agentPrice(G.ai), need: IDLE && G.chal === 'solo' ? 'défi : un seul agent' : '',
     desc: G.ai === 'local' ? `Gratuit, mais chaque agent double la VRAM : ${go1(vramFor(G.pm.local, G.agents))} → ${go1(vramFor(G.pm.local, G.agents + 1))} Go (carte graphique : ${go1(gpuVram())} Go).`
       : `Plus de bras, plus de tokens${lv ? '' : ', et plus de pertes de coordination sans orchestrateur'}. Chaque plateforme a sa propre équipe (onglet Plateformes).` });
   it.push({ cat: 'Équipe', id: 'lead', ic: '✱', name: (T || LEAD_TIER[3]).name, lvl: `niveau ${lv}/3`, done: lv >= 3, cost: ECO.leadCost[lv] ?? 0,
@@ -11770,7 +11823,7 @@ function bgStop(p) {
 }
 function buyAgent(p) {
   const n = G.team[p] || 0, c = agentPrice(p);
-  if (!IDLE || !G.own[p] || n >= AGENTS.length || G.money < c) return '';
+  if (!IDLE || !G.own[p] || n >= AGENTS.length || G.money < c || G.chal === 'solo') return '';   // défi « Un seul agent » : le store n'en vend plus
   G.money -= c;
   txAdd('store', `Store des agents · un agent ${CLIS[p].label}`, -c);
   G.team[p] = n + 1;
@@ -11782,7 +11835,7 @@ function buyAgent(p) {
   return `${plural(G.team[p], 'agent')} ${CLIS[p].label} désormais. Le nouveau lit déjà le README (en diagonale).`;
 }
 function buyLicence(p) {                         // changer de plateforme : l'équipe migre au premier plan, l'ancienne reste disponible
-  if (!IDLE || G.own[p] || G.money < PLATS[p].cost) return '';
+  if (!IDLE || G.own[p] || G.money < PLATS[p].cost || chalBan(p)) return '';   // défi « 100 % IA locale »
   G.money -= PLATS[p].cost;
   txAdd('licence', `Licence ${CLIS[p].label}`, -PLATS[p].cost);
   G.own[p] = 1;
@@ -11805,14 +11858,14 @@ function platRow(p) {                            // une ligne de l'onglet Platef
     acts = btn('', 'à installer (Firefaux)', true);
     info = localHint();
   } else if (!own) {
-    acts = btn(`data-buy="${p}"`, `Licence · ${money0(P.cost)}`, G.money < P.cost);
+    acts = chalBan(p) ? btn('', 'défi : interdite', true) : btn(`data-buy="${p}"`, `Licence · ${money0(P.cost)}`, G.money < P.cost);
     info = P.desc;
   } else if (!cliHas(p)) {                       // licence en poche, CLI pas installé : ça se passe dans le terminal
     acts = btn('', 'CLI à installer', true);
     info = `${p === 'mistral' ? 'Gratuit' : 'Licence achetée'}. Le CLI s’installe dans le terminal : ${CLI_INST[p].cmd}`;
   } else {
     const ac = agentPrice(p), f = teamFlow(p);
-    acts = btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : p === 'local' ? `Agent + · ${go1(vramFor(G.pm.local, n + 1))} Go de VRAM` : `Agent + · ${money0(ac)}`,
+    acts = G.chal === 'solo' ? btn('', 'défi : un seul agent', true) : btn(`data-buy="agent:${p}"`, n >= AGENTS.length ? 'équipe complète' : p === 'local' ? `Agent + · ${go1(vramFor(G.pm.local, n + 1))} Go de VRAM` : `Agent + · ${money0(ac)}`,
       n >= AGENTS.length || G.money < ac, n >= AGENTS.length ? 'owned' : '');
     if (!main) {
       const k = bg ? null : bgCheck(p);
@@ -13021,7 +13074,7 @@ if (claudeOn && Q.get('help') !== '0') setTimeout(() => toast(HELP, 5000), 600);
 if (!claudeOn && Q.get('title') !== '0') showTitle();   // l'écran titre ouvre le jeu (?title=0 : directement le zsh)
 try {                                            // retour d'une introduction en bourse : la cloche a sonné
   const x = JSON.parse(sessionStorage.getItem('aidcs:ipo') || 'null');
-  if (x) { sessionStorage.removeItem('aidcs:ipo'); titleMsg.textContent = `Introduction en bourse : ${PROJ.toUpperCase()} valorisée ${bigMoney(x[0])}. +${x[1]} stock-options (${x[2]} en tout : ×${frx((1 + .1 * x[2]).toFixed(1))} de travail). Une nouvelle startup commence.`; }
+  if (x) { sessionStorage.removeItem('aidcs:ipo'); titleMsg.textContent = `Introduction en bourse : ${PROJ.toUpperCase()} valorisée ${bigMoney(x[0])}. +${x[1]} stock-options (${x[2]} en tout : ×${frx((1 + .1 * x[2]).toFixed(1))} de travail). Une nouvelle startup commence.${x[3] && CHAL[x[3]] ? ` Défi réussi : ${CHAL[x[3]].n}.` : ''}${x[4] && CHAL[x[4]] ? ` Son défi : ${CHAL[x[4]].n}.` : ''}`; }
 } catch { /* tant pis */ }
 try { if (sessionStorage.getItem('aidcs:wiped')) { sessionStorage.removeItem('aidcs:wiped'); titleMsg.textContent = 'Partie réinitialisée : retour au PC patate.'; } } catch { /* tant pis */ }
 try {                                            // retour d'un import : ce qui vient d'arriver
