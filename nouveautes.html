@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>22</b><span>mises à jour</span></div>
-    <div role="listitem"><b>36 h 58</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 10 924</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>23</b><span>mises à jour</span></div>
+    <div role="listitem"><b>38 h 08</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 10 971</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#23</span><time datetime="2026-11-24T01:35">01 h 35</time><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></li>
       <li><span class="n">#22</span><time datetime="2026-11-24T00:25">00 h 25</time><a href="#nano">nano, et des réglages qui ont leur propre écran</a></li>
       <li><span class="n">#21</span><time datetime="2026-11-23T23:07">23 h 07</time><a href="#vlc">VLC, et la première musique faite par un humain</a></li>
       <li><span class="n">#20</span><time datetime="2026-11-23T20:54">20 h 54</time><a href="#sauvegarde">Exporter et importer la partie</a></li>
@@ -171,8 +172,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="nano" aria-labelledby="t22">
-    <p class="meta"><span class="n">#22</span><span class="new">dernière</span><time datetime="2026-11-24T00:25">24 nov. 2026 · 00 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/012df46">012df46</a><span>10 558 → 10 924 lignes</span></p>
+  <article class="maj latest" id="correctifs" aria-labelledby="t23">
+    <p class="meta"><span class="n">#23</span><span class="new">dernière</span><time datetime="2026-11-24T01:35">24 nov. 2026 · 01 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/18bfe89">18bfe89</a><span>10 924 → 10 971 lignes</span></p>
+    <h2 id="t23"><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></h2>
+    <ul>
+      <li>Lolama est un paquet : sudo apt install lolama (ollama marche aussi). apt remove le retire. Le bouton de lolama.vibe et le script curl restent, et apt sait ce qu’ils ont installé.</li>
+      <li>Une commande inconnue reste inconnue, même quand les agents tournent : plus de code au hasard pour une faute de frappe. Le code se demande : vibe « fais un site » (ou vibe -p « … », comme le vrai Vibe CLI) l’écrit tout de suite dans le terminal, et le facture à Codestral. vibe seul lance toujours l’équipe Mistral.</li>
+      <li>Le pingouin du démarrage est redessiné en pixel art : masque blanc, bec, ailerons, et des lunettes de soleil qui lui tombent sur les yeux pendant le chargement. Il se dandine (sauf si le système demande moins d’animations).</li>
+      <li>La barre de chargement de Vibian avance par à-coups : des bonds, des arrêts, jamais au même endroit, et 99 % qui dure. Comme une vraie.</li>
+    </ul>
+    <blockquote>« 99 %, c’est déjà presque fini. Comme mes tests. »<cite>l’agent, 01 h 35</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-tux.png" title="Voir en grand"><img src="assets/screen-tux.png" width="900" height="540" loading="lazy" alt="L’écran de démarrage de Vibian GNU/Linux 13 « friday » : un pingouin en pixel art, lunettes de soleil sur les yeux, et la barre de chargement bloquée à 99 % sur « Presque prêt (c’est faux)… »."></a><figcaption>Le nouveau pingouin, et 99 % qui dure.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="nano" aria-labelledby="t22">
+    <p class="meta"><span class="n">#22</span><time datetime="2026-11-24T00:25">24 nov. 2026 · 00 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/012df46">012df46</a><span>10 558 → 10 924 lignes</span></p>
     <h2 id="t22"><a href="#nano">nano, et des réglages qui ont leur propre écran</a></h2>
     <ul>
       <li>nano, l’éditeur du terminal : nano fichier (sudo nano pour ceux de root ; pico aussi). La barre du haut, la ligne d’état, deux lignes de raccourcis, qui se cliquent : ^O écrire, ^X quitter (« Sauver le tampon modifié ? »), ^F chercher, ^\ remplacer, ^K couper, ^U coller, ^R insérer un fichier, ^C la position, ^G l’aide. Sous Xfce, il a sa fenêtre.</li>

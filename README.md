@@ -16,7 +16,7 @@
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 10 924">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 10 971">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -50,11 +50,12 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Agentic-first.** De 1 à 8 agents en parallèle, plus un orchestrateur qui délègue tout, y compris la délégation.
 - **Zero-shot deploy.** La barre de ship se remplit toute seule et le projet part en prod sans que personne sache ce qu'il contient. Exactement comme en vrai.
 - **Hallucination-native.** Les agents Mistral inventent des fichiers, des API, des bugs et, une fois, un collègue.
+- **Vibe à la demande.** `vibe "fais un site"` : Vibe CLI écrit le code tout de suite dans le terminal, et le facture. Une faute de frappe, elle, reste une faute de frappe : plus de code au hasard.
 - **Token-aware.** Chaque ship rapporte de l'argent, moins la facture des tokens. Spoiler : la facture gagne souvent.
 - **Store intégré.** Trois rayons : agents IA, plateformes, matériel PC. Trois niveaux d'orchestrateur, des modèles plus chers, un terminal plus rapide et 14 skills, de « tests unitaires » à « lire CLAUDE.md (pour de vrai) », à un million de dollars.
 - **Multi-plateforme.** Démarrez sur le pire agent, puis achetez Codex et Claude Code. Chaque plateforme garde son équipe : une au premier plan, les autres en arrière-plan, si le PC suit. Avant, c'était un choix irréversible, comme un mariage. Maintenant, c'est trois factures de tokens.
 - **Modes boost.** `ultracode` pour Claude Code, `xhigh` pour Codex, `flash` pour Mistral : achetés au store, une minute par jour, prolongeables jusqu'à trois. L'agent a demandé un mode boost pour le mode boost. On lui a dit de revenir demain.
-- **IA locale.** Installez Lolama ou StudioLM depuis Firefaux, puis un modèle de 2 à 72 milliards de paramètres. Zéro token facturé, toute la VRAM prise. Chaque agent ajouté double la VRAM demandée, et un modèle trop gros pour la carte graphique fait redémarrer le PC sur un kernel panic. L'agent appelle ça « de l'inférence souveraine ».
+- **IA locale.** Installez Lolama (`sudo apt install lolama`, ou depuis Firefaux) ou StudioLM, puis un modèle de 2 à 72 milliards de paramètres. Zéro token facturé, toute la VRAM prise. Chaque agent ajouté double la VRAM demandée, et un modèle trop gros pour la carte graphique fait redémarrer le PC sur un kernel panic. L'agent appelle ça « de l'inférence souveraine ».
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. Le gestionnaire de fichiers copie, coupe, colle, renomme et affiche les propriétés, à la vitesse du disque : 41,3 Go à 90 Mo/s, le disque dur gratte. `~/code` contient sept projets abandonnés, dont une IA de 68 Go et la todo app n° 14. Le disque est sauvegardé avec la partie : ce que vous créez ou supprimez est toujours là au prochain lancement, jusqu'au prochain crash système (retour à la sauvegarde de jeudi). La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`, ou le renommer. Vous ne devriez pas.
@@ -66,12 +67,12 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
 - **Observabilité de niveau entreprise.** `htop` dit si le PC est OK, TENDU ou À TERRE, et pourquoi. `sensors` et `free` confirment. `sudo smartctl -a /dev/sda` lit le SMART du disque dur d'occasion : 38 412 heures, un secteur réalloué de plus tous les 5 jours, FAILED! dans 8 mois environ. L'agent, lui, dit que tout va bien.
 - **Firefaux.** Un navigateur dans Xfce, avec ses sites : Vibegle (résultats hallucinés), le store des agents, matos.vibe pour les composants, StackUnderflow, GitHype (le GitHub qui a racheté le nom de domaine) et lolama.vibe pour les modèles locaux. Toute autre adresse a été hallucinée par votre agent.
-- **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde. Ou Suppr pendant le POST, si vous êtes assez rapide : le setup du BIOS, façon AMIBIOS, pour overclocker le processeur et la RAM. Trop loin, l'écran glitche, les erreurs matérielles pleuvent et les agents plantent. On redescend d'un cran. `reboot` pour y retourner. Puis GRUB, avec un vrai menu : memtest86+ (enfin lancé), un mode sans agents, et un Windows 11 qui se met à jour.
+- **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin à lunettes, avec une barre de chargement qui avance par à-coups et s'arrête à 99 %. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde. Ou Suppr pendant le POST, si vous êtes assez rapide : le setup du BIOS, façon AMIBIOS, pour overclocker le processeur et la RAM. Trop loin, l'écran glitche, les erreurs matérielles pleuvent et les agents plantent. On redescend d'un cran. `reboot` pour y retourner. Puis GRUB, avec un vrai menu : memtest86+ (enfin lancé), un mode sans agents, et un Windows 11 qui se met à jour.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 10 924 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 10 971 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -113,7 +114,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 | **Vibe CLI** (Mistral) | gratuite | Codestral 25.08 | « Production-ready. » Il hallucine, plante, redémarre, et recommence. |
 | **Codex** | $1 500 | GPT-6.1 Terra : 1,6× le travail de Codestral, trois fois moins de bugs | « Enfin du sérieux. » |
 | **Claude Code** | $12 000 | Claude Opus 5.5 : 2,5× le travail de Codestral, quatre fois moins de bugs | « Celui-là signe ses commits. » |
-| **IA locale** (Lolama ou StudioLM) | gratuite, à installer depuis Firefaux | Jemma 3 2B : 13 % du travail de Codestral, 1,7 Go de VRAM | « Souverain. » Il tourne sur un grille-pain, à la vitesse d'un grille-pain. |
+| **IA locale** (Lolama ou StudioLM) | gratuite : `sudo apt install lolama`, ou depuis Firefaux | Jemma 3 2B : 13 % du travail de Codestral, 1,7 Go de VRAM | « Souverain. » Il tourne sur un grille-pain, à la vitesse d'un grille-pain. |
 
 - **Chaque plateforme a son équipe.** Une licence recrute votre équipe à l'identique et la passe au premier plan. L'ancienne n'est pas licenciée : elle attend dans un tmux détaché.
 - **Premier plan, arrière-plan.** Une plateforme tient l'onglet des agents, les autres travaillent en fond. Il faut 4 threads et 8 Go pour deux plateformes, 12 threads et 16 Go pour trois. La RAM, l'alim et la chauffe sont vérifiées avant le lancement.
@@ -138,7 +139,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (10 924 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (10 971 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -187,7 +188,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - `htop` ;
 - `plateformes`, `switch codex` et `bg mistral` ;
 - `ultracode` (ou `xhigh`, `flash`), une fois le mode acheté ;
-- `lolama pull 4b`, `lolama run 4b` et `lolama ps` (ou `studiolm load 4b`), une fois Lolama installé depuis Firefaux ;
+- `lolama pull 4b`, `lolama run 4b` et `lolama ps` (ou `studiolm load 4b`), une fois Lolama installé (`sudo apt install lolama`) ;
 - `sensors` et `free` ;
 - `sudo smartctl -a /dev/sda`, une fois smartmontools installé ;
 - `firefaux` (ou `firefox`, il ne fait pas la différence) ;
@@ -218,7 +219,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
   <a href="assets/screen-xfce.png"><img src="assets/readme/cap-xfce.png" width="49%" alt="Le bureau Xfce. Le bureau Xfce : les icônes en colonnes à gauche (dossier personnel, système de fichiers, corbeille, terminal, Firefaux, Steam, Vibe CLI, Claude Code, store), puis Claude Code, le gestionnaire de fichiers et htop dans des fenêtres."></a>
   <a href="assets/screen-gameover.png"><img src="assets/readme/cap-gameover.png" width="49%" alt="Mistral, un vendredi. Écran GAME OVER après un ship avec Mistral : 8 agents perdus, dignité 404."></a>
   <a href="assets/screen-post.png"><img src="assets/readme/cap-post.png" width="49%" alt="Le BIOS AMIVIBES, An Energy Star Ally. Le POST du BIOS AMIVIBES : Céléri G530 à 2,4 GHz, « Press DEL or F2 to run Setup », 4096MB OK, « CPU Fan Error! Press F1 » pressé automatiquement par un agent, l’alimentation no-name qui siffle à +12 V, le disque dur détecté, logo Energy Star redessiné en haut à droite."></a>
-  <a href="assets/screen-tux.png"><img src="assets/readme/cap-tux.png" width="49%" alt="Vibian GNU/Linux 13 « friday ». Écran de démarrage de Vibian GNU/Linux : un pingouin en ASCII avec des lunettes de soleil et VIBIAN sur le ventre, une barre de chargement et le message « Montage de ~/prompts… »."></a>
+  <a href="assets/screen-tux.png"><img src="assets/readme/cap-tux.png" width="49%" alt="Vibian GNU/Linux 13 « friday ». Écran de démarrage de Vibian GNU/Linux : un pingouin en pixel art avec des lunettes de soleil, et la barre de chargement bloquée à 99 % sur « Presque prêt (c’est faux)… »."></a>
   <a href="assets/screen-htop-patate.png"><img src="assets/readme/cap-htop-patate.png" width="49%" alt="htop : le PC est à terre. htop avec quatre agents sur le PC patate : deux cœurs saturés, swap entamé, 94 °C en rouge, et la ligne « État du PC : À TERRE · CPU saturé · swap 0,6 Go · throttling à 94 °C »."></a>
   <a href="assets/screen-matos.png"><img src="assets/readme/cap-matos.png" width="49%" alt="matos.vibe, dans Firefaux. Le navigateur Firefaux sur matos.vibe : la config actuelle, le diagnostic « patate », et les processeurs du Céléri G530 au ThreadFlipper 7980X à 32 000 dollars."></a>
   <a href="assets/screen-store-pc.png"><img src="assets/readme/cap-store-pc.png" width="49%" alt="Le rayon Matériel : commande bloquée. Le rayon Matériel PC du store : la jauge d'alimentation à 125 W sur 300, une carte mère B450 dans le panier, deux incompatibilités en rouge (le Céléri G530 n'a pas le bon socket, la DDR3 n'est pas la bonne génération) et le bouton « Commande bloquée »."></a>
@@ -274,14 +275,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 10 924 lignes ?**
+**Pourquoi un seul fichier de 10 971 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 10 924 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 10 971 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
