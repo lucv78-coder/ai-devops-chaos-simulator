@@ -861,6 +861,37 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
 .ff-ask ul { padding-left: 2ch; }
 .ff-dark { filter: brightness(.8) contrast(1.08); }
+/* Vibank (facture.vibe) : le solde, le graphique, les dépenses, les opérations */
+.vb h2 { margin: 1.2em 0 .5em; color: var(--orange); font-size: 1em; }
+.vb-head { display: flex; align-items: center; gap: 1.6ch; }
+.vb-logo { display: grid; place-items: center; width: 2.4em; height: 2.4em; border-radius: 50%; background: var(--orange); color: var(--ink); font-size: 1.3em; font-weight: 700; }
+.vb-head h1 { margin: 0; }
+.vb-acct { display: grid; gap: .2em; margin-top: 1em; padding: .9em 1.8ch; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); }
+.vb-acct .k { color: var(--dim); font-size: .9em; }
+.vb-bal { color: var(--fg); font-size: 2em; font-weight: 700; }
+.vb-chart { margin: 1.6em 0 .5em; }
+.vb-plot { position: relative; height: 9.5em; margin-left: 9em; }   /* à gauche : la marge des valeurs */
+.vb-plot svg { display: block; width: 100%; height: 100%; overflow: visible; cursor: crosshair; }
+.vb-ts { display: flex; justify-content: space-between; margin: .3em 0 0 11.25em; color: var(--dim); font-size: .8em; }
+.vb-chart .l { fill: none; stroke: var(--orange); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.vb-chart .g { stroke: var(--sep); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.vb-chart .z { stroke: var(--dim2); stroke-width: 1; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.vb-chart .vb-x { stroke: var(--dim); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: 0; }
+.vb-y { position: absolute; left: -11.25em; width: 10.5em; color: var(--dim); font-size: .8em; text-align: right; transform: translateY(-50%); pointer-events: none; }
+.vb-y.hi { top: 5%; } .vb-y.lo { top: 95%; }   /* sur les lignes de grille du haut et du bas */
+.vb-dot { position: absolute; width: .7em; height: .7em; margin: -.35em 0 0 -.35em; border: 2px solid var(--bg2); border-radius: 50%; background: var(--orange); pointer-events: none; }
+.vb-tip { position: absolute; top: -.4em; transform: translate(-50%, -100%); width: max-content; max-width: 44ch; padding: .3em 1ch; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); color: var(--fg); font-size: .85em; white-space: pre-line; pointer-events: none; }
+.vb-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(30ch, 1fr)); gap: 0 3ch; }
+.vb-cat { display: grid; grid-template-columns: 16ch minmax(0, 1fr) max-content; align-items: center; gap: 1.4ch; padding: .15em 0; }
+.vb-bar { height: .5em; border-radius: 2px; background: var(--sep); overflow: hidden; }
+.vb-bar i { display: block; height: 100%; border-radius: 2px; background: var(--orange); }
+.vb-ops { width: 100%; border-collapse: collapse; }
+.vb-ops th { color: var(--dim); font-weight: 400; text-align: left; border-bottom: 1px solid var(--rule); padding: .2em 1ch; }
+.vb-ops td { padding: .25em 1ch; border-bottom: 1px solid var(--sep); }
+.vb-ops .d { color: var(--dim); white-space: nowrap; }
+.vb-ops .m { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.vb-ops .pos { color: var(--green); } .vb-ops .neg { color: var(--red); }
+.vb-tag { margin-left: .6ch; padding: 0 .7ch; border: 1px solid var(--rule); border-radius: 3px; color: var(--dim); font-size: .8em; }
 .wp { max-width: 110ch; margin: 0 auto; display: grid; gap: .9em; }
 .wp h1 { font-size: 1.6em; line-height: 1.2; color: var(--orange); }
 .wp h2 { margin-top: .5em; padding-bottom: .2em; border-bottom: 1px solid var(--sep); font-size: 1.1em; color: var(--fg); }
@@ -2141,12 +2172,20 @@ const ACH = [
   { id: 'vibecoin', g: '¤', n: 'Mineur malgré vous', d: 'Laisser le mineur de VibeCoin tourner dix minutes. Quelqu’un, quelque part, vous remercie.', p: 3.3, h: 1,
     t: () => G.mal.miner && Date.now() - G.mal.miner > 6e5 },
   { id: 'credits', g: 'ⓘ', n: 'Générique de fin', d: 'Lire les crédits dans « À propos » : l’éditeur, les contributeurs et les agents.', p: 4.1 },
+  { id: 'openbank', g: '≡', n: 'Open banking', d: 'Lire son compte Vibank en JSON : curl facture.vibe/api.', p: 6.6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
 G.ach = G.ach || {};                              // { id: date du déblocage }
 G.play = G.play || 0;                             // temps de jeu, en secondes (Steam l'affiche)
 G.ff = { addons: {}, ...(G.ff || {}) };          // le profil de Firefaux : ses modules (uBlock Origin…)
+G.tx = Array.isArray(G.tx) ? G.tx : [];            // Vibank : les opérations, [date, catégorie, libellé, montant, solde après] (les 200 dernières)
+if (IDLE && !G.tx.length && G.money) G.tx.push([Date.now(), 'init', 'Solde reporté à l’ouverture du compte', +G.money.toFixed(2), +G.money.toFixed(2)]);
+function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compte Vibank (rien en mode libre)
+  if (!IDLE || !amt || !Number.isFinite(amt)) return;
+  G.tx.push([Date.now(), cat, label, Math.round(amt * 100) / 100, Math.round(bal * 100) / 100]);
+  if (G.tx.length > 200) G.tx.splice(0, G.tx.length - 200);
+}
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -4649,6 +4688,8 @@ async function rtCurl() {                         // curl -fsSL https://lolama.v
 function setupCmd(w, cmd, low, sudo) {            // curl, wget, pip, pipx, uv : ce qui installe des agents
   if (w === 'curl' && !installed.has('curl')) return notInstalled('curl', 'curl');
   if (w === 'curl' || w === 'wget') {
+    const bank = /(?:^|\s)(?:https?:\/\/)?(?:www\.)?(?:facture|vibank)\.vibe(\/\S*)?/i.exec(cmd);   // Vibank : le relevé, ou le JSON
+    if (bank) return bankCurl((bank[1] || '/').toLowerCase(), w);
     const url = (/(https?:\/\/\S+|[\w.-]+\.(?:ai|com|vibe)\/\S*)/.exec(cmd) || [])[1] || '';
     if (!url) return shellPrint(H([`${w}: `, 'errc'], w === 'curl' ? 'try \'curl --help\' for more information' : 'URL manquante'));
     const hit = SETUP_URLS.find(x => x.re.test(url)), pipe = /\|\s*(sudo\s+)?(ba|z)?sh\b/.test(low);
@@ -5278,6 +5319,7 @@ function cartCheckout() {
   SLOTS.forEach(s => delete CART[s]);
   cartVer++;
   lastOrder = { id: `VIBE-${ri(1000, 9999)}`, lines, tot, warn };
+  txAdd('matos', `matos.vibe · commande ${lastOrder.id} (${plural(lines.length, 'article')})`, -tot);
   syncHW();
   saveGame();
   renderHud();
@@ -5330,6 +5372,7 @@ function pcMigrate() {                           // les sauvegardes d'avant la c
   const back = (slot, kind) => {                 // ce qui ne rentre toujours pas : repris au prix payé, remplacé par ce qui rentre
     while (pc[slot] > 0 && pcIssues(pc).some(i => i.kind === kind || (kind === 'm2' && i.kind === 'gen5'))) {
       G.money += PARTS[slot].t[pc[slot]].cost - PARTS[slot].t[pc[slot] - 1].cost;
+      txAdd('reprise', `matos.vibe · reprise : ${PARTS[slot].t[pc[slot]].n}`, PARTS[slot].t[pc[slot]].cost - PARTS[slot].t[pc[slot] - 1].cost);
       pc[slot]--;
     }
   };
@@ -7966,7 +8009,7 @@ const ffAdBanner = i => { const [t, d, b] = ADS[i % ADS.length]; return `<div cl
 const WEB_HOME = 'vibe://accueil';
 const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vibe/'], ['Matos.vibe', 'https://matos.vibe/'],
   ['GitHype', 'https://githype.vibe/'], ['Lolama', 'https://lolama.vibe/'], ['Télécharge.vibe', 'https://telecharge.vibe/'],
-  ['Facture', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
+  ['Vibank', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
 const webHost = u => (/^[a-z]+:\/\/([^/?#]+)/i.exec(u) || [, u])[1];
 function webNorm(raw) {
   const u = (raw || '').trim();
@@ -8001,7 +8044,7 @@ function webHome() {
       ${tile('https://githype.vibe/', 'GitHype', 'là où le code vient se faire forker · StudioLM')}
       ${tile('https://lolama.vibe/', 'lolama.vibe', 'des LLM en local : 0 API, toute votre VRAM')}
       ${tile('https://telecharge.vibe/', 'telecharge.vibe', 'des fichiers 100 % sûrs · de la musique, faite par un humain')}
-      ${tile('https://facture.vibe/', 'facture.vibe', 'ce que coûtent vos agents')}
+      ${tile('https://facture.vibe/', 'Vibank', 'votre compte, et ce que coûtent vos agents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
     </div></div>` };
@@ -8024,7 +8067,7 @@ function webSearch(u) {
     hit('https://githype.vibe/', 'GitHype : là où le code vient se faire forker', 'Tendances du jour : studiolm, lolama, awesome-vibecoding. 90 % des dépôts sont des « awesome-quelque-chose ».');
   hit('https://stackunderflow.vibe/', `« ${q || 'rien'} » : question fermée (doublon d’une question de 2009)`, 'Réponse acceptée : « Ça marche sur ma machine. » 0 vote, 4 127 vues.');
   hit(`https://blog-du-vibe.vibe/${encodeURIComponent(lq.replace(/\s+/g, '-') || 'rien')}`, `10 façons de ${q || 'ne rien faire'} avec l’IA (la 7e va supprimer votre prod)`, 'Article sponsorisé, écrit par un agent, relu par un autre agent, lu par personne.');
-  hit('https://facture.vibe/', 'Combien coûte vraiment un agent ? (spoiler : plus)', 'Votre facture de tokens, en temps réel. Asseyez-vous avant de cliquer.');
+  hit('https://facture.vibe/', 'Vibank · combien coûte vraiment un agent ? (spoiler : plus)', 'Votre compte, vos factures de tokens, en temps réel. Asseyez-vous avant de cliquer.');
   return { title: `${q || 'Recherche'} · Vibegle`, html: `<div class="wp"><form class="wp-search" data-search><input name="q" value="${esc(q)}" aria-label="Rechercher" spellcheck="false" autocomplete="off"></form>
     <p class="dim">Environ ${frNumI(ri(1200000, 9900000))} résultats (0,${ri(10, 99)} s) · dont ${ri(2, 9)} hallucinés</p>${res.join('')}</div>` };
 }
@@ -8095,16 +8138,92 @@ function webOrder() {
     <p class="dim">Un mail de confirmation a été envoyé à ${esc(USER)}@prod-01. Un agent l’a lu, puis archivé.</p>
     <p><a data-href="https://matos.vibe/">Retour au catalogue</a></p></div>` };
 }
+/* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
+const TX_CAT = { init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF' };
+const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
+const txDate = t => { const d = new Date(t), z = n => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)} ${z(d.getHours())}:${z(d.getMinutes())}`; };
+const isoLocal = t => {                          // 2026-11-24T04:01:34+01:00 : l'heure locale, avec son décalage (comme une vraie API)
+  const d = new Date(t), z = n => String(Math.abs(n)).padStart(2, '0'), o = -d.getTimezoneOffset();
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}${o < 0 ? '-' : '+'}${z(Math.trunc(o / 60))}:${z(o % 60)}`;
+};
+const txAmt = n => `${n < 0 ? '−' : '+'}$${usd(Math.abs(n))}`;
+function vbChart() {                               // le solde, opération après opération : une ligne, une grille discrète, un survol (date, libellé, solde)
+  const T = G.tx.slice(-60);
+  if (T.length < 2) return '<p class="dim">Le graphique apparaîtra après quelques opérations (un ship suffit, presque).</p>';
+  const ys = T.map(x => x[4]), lo = Math.min(0, ...ys), hi = Math.max(...ys), span = hi - lo || 1, W = 600, H = 160;
+  const X = i => i / (T.length - 1) * W, Y = v => H - 8 - (v - lo) / span * (H - 16);
+  const path = T.map((x, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(x[4]).toFixed(1)}`).join(' ');
+  const grid = [0, .5, 1].map(f => `<line x1="0" x2="${W}" y1="${(8 + f * (H - 16)).toFixed(1)}" y2="${(8 + f * (H - 16)).toFixed(1)}" class="g"/>`).join('');
+  const zero = lo < 0 ? `<line x1="0" x2="${W}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" class="z"/>` : '';
+  const pts = T.map((x, i) => [+(X(i) / W * 100).toFixed(2), +(Y(x[4]) / H * 100).toFixed(2), `${txDate(x[0])} · solde $${usd(x[4])}\n${x[2]} · ${txAmt(x[3])}`]);   // deux lignes : la date et le solde, puis l'opération
+  return `<div class="vb-chart" data-pts="${esc(JSON.stringify(pts))}" role="img" aria-label="Le solde sur les ${T.length} dernières opérations : de $${usd(ys[0])} à $${usd(ys.at(-1))}.">`
+    + `<div class="vb-plot"><span class="vb-y hi">$${usd(hi)}</span><span class="vb-y lo">$${usd(lo)}</span>`
+    + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${grid}${zero}<path d="${path}" class="l"/><line class="vb-x" x1="0" x2="0" y1="0" y2="${H}"/></svg>`
+    + `<span class="vb-dot" hidden></span><span class="vb-tip" hidden></span></div>`
+    + `<div class="vb-ts"><span>${txDate(T[0][0])}</span><span>${txDate(T.at(-1)[0])}</span></div></div>`;
+}
+function vbHover(c, e) {                           // le survol du graphique : la ligne verticale, le point, l'info-bulle
+  const pts = JSON.parse(c.dataset.pts || '[]'), r = c.querySelector('svg').getBoundingClientRect(), tip = c.querySelector('.vb-tip'), dot = c.querySelector('.vb-dot');
+  if (!pts.length || !r.width) return;
+  if (!e) { tip.hidden = dot.hidden = true; c.querySelector('.vb-x').style.opacity = 0; return; }
+  const i = Math.max(0, Math.min(pts.length - 1, Math.round((e.clientX - r.left) / r.width * (pts.length - 1)))), [x, y, t] = pts[i];
+  const ln = c.querySelector('.vb-x');
+  ln.setAttribute('x1', x * 6); ln.setAttribute('x2', x * 6); ln.style.opacity = 1;
+  Object.assign(dot.style, { left: `${x}%`, top: `${y}%` }); dot.hidden = false;
+  tip.textContent = t; tip.hidden = false;
+  tip.style.left = `${Math.min(Math.max(x, 18), 82)}%`;
+}
 function webBill() {
   const avg = shipped ? G.spent / shipped : 0;
   const row = (k, v) => `<p>${esc(k)} : <b>${v}</b></p>`;
-  return { title: 'facture.vibe · votre facture de tokens', html: `<div class="wp"><h1>facture.vibe</h1><p class="dim">Votre facture de tokens, en temps réel. Asseyez-vous.</p>
-    <div class="wp-band">${IDLE ? row('Trésorerie', `<span data-live="money">$${usd(G.money)}</span>`) + row('Gagné depuis le début', `$${usd(G.earned)}`)
-      + row('Dépensé en tokens', `$${usd(G.spent)}`) + row('Coût moyen d’un projet', `$${usd(avg)}`) + row('Projets shippés', String(shipped)) : ''}
-      ${row('Facture en cours', `<span data-live="bill">${WEB_LIVE.bill()}</span>`)}
-      ${IDLE ? row('Électricité en cours', `<span data-live="elec">${WEB_LIVE.elec()}</span>`) + row('Électricité depuis le début', `$${usd(G.elecTot || 0)} · ${frx((G.kwh || 0).toFixed(1))} kWh`)
-        + row('Contrat', esc(ELEC.tiers[G.elecT || 0].n)) : ''}</div>
-    <p class="dim">Astuce : une carte graphique fait tourner un relecteur local, qui économise un peu de tokens. Une alim avec un meilleur rendement fait tourner le compteur moins vite. Le reste, c’est la vie.</p></div>` };
+  const due = `<div class="wp-band">${row('Facture en cours', `<span data-live="bill">${WEB_LIVE.bill()}</span>`)}`
+    + `${IDLE ? row('Électricité en cours', `<span data-live="elec">${WEB_LIVE.elec()}</span>`) + row('Contrat', esc(ELEC.tiers[G.elecT || 0].n)) : ''}`
+    + '<p class="dim">Prélevées au prochain ship, avec ce qu’il rapporte.</p></div>';
+  if (!IDLE) return { title: 'Vibank · facture.vibe', html: `<div class="wp vb"><h1>Vibank</h1><p class="dim">Mode libre : pas de compte, pas de relevé. Juste la facture.</p>${due}</div>` };
+  const T = G.tx, out = {}, inn = T.filter(x => x[3] > 0 && x[1] !== 'init').reduce((a, x) => a + x[3], 0);
+  T.filter(x => x[3] < 0).forEach(x => { out[x[1]] = (out[x[1]] || 0) - x[3]; });
+  const cats = Object.entries(out).sort((a, b) => b[1] - a[1]), top = cats[0]?.[1] || 1;
+  const spend = cats.length ? cats.map(([k, v]) => `<div class="vb-cat"><span>${esc(TX_CAT[k] || k)}</span><span class="vb-bar"><i style="width:${Math.max(1, v / top * 100).toFixed(1)}%"></i></span><b>$${usd(v)}</b></div>`).join('')
+    : '<p class="dim">Aucune dépense. Profitez-en, ça ne dure pas.</p>';
+  const ops = T.slice(-30).reverse().map(x => `<tr><td class="d">${txDate(x[0])}</td><td>${esc(x[2])} <span class="vb-tag">${esc(TX_CAT[x[1]] || x[1])}</span></td>`
+    + `<td class="m ${x[3] < 0 ? 'neg' : 'pos'}">${x[1] === 'init' ? '' : txAmt(x[3])}</td><td class="m">$${usd(x[4])}</td></tr>`).join('');
+  return { title: 'Vibank · facture.vibe', html: `<div class="wp vb"><div class="vb-head"><span class="vb-logo" aria-hidden="true">V</span><div><h1>Vibank</h1>
+    <p class="dim">La banque des développeurs qui ne relisent pas. Ni leurs relevés.</p></div></div>
+    <div class="vb-acct"><span class="k">Compte courant · ${esc(VB_IBAN)} · ${esc(USER)}</span><span class="vb-bal" data-live="money">$${usd(G.money)}</span>
+    <span class="dim">Entrées : $${usd(inn)} · Sorties : $${usd(cats.reduce((a, c) => a + c[1], 0))} <span class="dim">(sur les ${T.length} dernières opérations)</span></span></div>
+    <h2>Le solde</h2>${vbChart()}
+    <div class="vb-cols"><div><h2>À prélever</h2>${due}</div><div><h2>Dépenses par catégorie</h2>${spend}</div></div>
+    <h2>Opérations</h2>${ops ? `<table class="vb-ops"><thead><tr><th>Date</th><th>Libellé</th><th class="m">Montant</th><th class="m">Solde</th></tr></thead><tbody>${ops}</tbody></table>` : '<p class="dim">Aucune opération pour l’instant.</p>'}
+    <div class="wp-band">${row('Gagné depuis le début', `$${usd(G.earned)}`) + row('Dépensé en tokens', `$${usd(G.spent)}`) + row('Coût moyen d’un projet', `$${usd(avg)}`)
+      + row('Projets shippés', String(shipped)) + row('Électricité depuis le début', `$${usd(G.elecTot || 0)} · ${frx((G.kwh || 0).toFixed(1))} kWh`)}</div>
+    <p class="dim">Dans le terminal : <code>curl facture.vibe</code> pour le relevé, <code>curl facture.vibe/api</code> pour le JSON. Astuce : une carte graphique fait tourner un relecteur local, qui économise un peu de tokens ; une meilleure alim fait tourner le compteur moins vite. Le reste, c’est la vie.</p></div>` };
+}
+function bankCurl(path, w) {                       // curl facture.vibe : le relevé ; /api : le JSON ; le reste : 404
+  if (!IDLE) return shellPrint(H([`${w}: `, 'errc'], 'Vibank : mode libre, pas de compte. ', ['La vraie partie en a un.', 'dim']));
+  const now = new Date(), z = n => String(n).padStart(2, '0'), stamp = `${z(now.getDate())}/${z(now.getMonth() + 1)}/${now.getFullYear()} ${z(now.getHours())}:${z(now.getMinutes())}`;
+  if (/^\/api\/?$/.test(path)) {
+    ach('openbank');
+    const o = { banque: 'Vibank', compte: VB_IBAN, titulaire: USER, devise: 'USD', solde: +G.money.toFixed(2),
+      a_prelever: { tokens: +G.bill.toFixed(2), electricite: +(G.elec || 0).toFixed(2) },
+      operations: G.tx.slice(-10).reverse().map(([t, c, l, m, b]) => ({ date: isoLocal(t), categorie: c, libelle: l, montant: m, solde: b })) };
+    return printLines(JSON.stringify(o, null, 2).split('\n').map(l => [l, '', 8]));
+  }
+  if (path !== '/' && path !== '') return printLines([['<!DOCTYPE html><html><body><pre>Cannot GET ' + path + '</pre></body></html>', '', 20], [H(['(404 · essayez ', 'dim'], ['curl facture.vibe', 'org'], [' ou ', 'dim'], ['curl facture.vibe/api', 'org'], [')', 'dim']), '', 20]]);
+  const T = G.tx.slice(-20).reverse();
+  const L = [[H(['Vibank', 'org b'], ' · relevé de compte'), '', 20], [`Compte courant ${VB_IBAN} · titulaire : ${USER}`, 'dim', 20],
+    [H(`Solde au ${stamp} : `, [`$${usd(G.money)}`, G.money < 0 ? 'errc' : 'okc']), '', 20],
+    [`À prélever au prochain ship : $${usd(G.bill)} de tokens · $${usd(G.elec || 0)} d’électricité`, 'dim', 20], ['', '', 20],
+    [`${'Date'.padEnd(13)}${'Libellé'.padEnd(46)}${'Montant'.padStart(14)}${'Solde'.padStart(15)}`, 'dim', 20]];
+  T.forEach(([t, c, l, m, b]) => L.push([H(txDate(t).padEnd(13), (l.length > 44 ? l.slice(0, 43) + '…' : l).padEnd(46), [(c === 'init' ? '' : txAmt(m)).padStart(14), m < 0 ? 'errc' : 'okc'], `$${usd(b)}`.padStart(15)), '', 15]));
+  if (!T.length) L.push(['Aucune opération pour l’instant : shippez quelque chose.', 'dim', 20]);
+  L.push(['', '', 20], [H([`(${T.length} dernière${T.length > 1 ? 's' : ''} opération${T.length > 1 ? 's' : ''} sur ${G.tx.length} conservées · `, 'dim'], ['curl facture.vibe/api', 'org'], [' pour le JSON)', 'dim']), '', 20]);
+  if (w === 'wget') {                              // wget enregistre la page, comme le vrai
+    const d = nodeAt(cwd);
+    if (d?.d) d.k['index.html'] = mkF(L.map(x => typeof x[0] === 'string' ? x[0] : '').join('\n'), { mt: Date.now() });
+    return printLines([[`--${now.toISOString().slice(0, 19).replace('T', ' ')}--  https://facture.vibe/`, '', 20], ['Résolution de facture.vibe… 10.4.2.13', '', 20],
+      ['Requête HTTP transmise, en attente de la réponse… 200 OK', '', 20], ['Enregistre : « index.html »', '', 20], [H(['« index.html » enregistré. ', 'okc'], ['cat index.html', 'org'], [' pour le lire (curl l’affiche directement).', 'dim']), '', 20]]);
+  }
+  return printLines(L);
 }
 function webSO() {
   const Q = [
@@ -8191,7 +8310,7 @@ const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
-  [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
@@ -8215,6 +8334,8 @@ function makeBrowser() {
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
   let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '', adPick = ri(0, 99);
   const pops = q('.wb-pops'), ubo = q('.wb-ubo');
+  el.addEventListener('pointermove', e => { const c = e.target.closest?.('.vb-chart'); if (c) vbHover(c, e); });   // Vibank : le graphique du solde
+  el.addEventListener('pointerout', e => { const c = e.target.closest?.('.vb-chart'); if (c && !c.contains(e.relatedTarget)) vbHover(c, null); });
   const web = () => /^https?:/i.test(url);         // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://)
   function popOpen() {                            // un pop-up de pub : il s'ouvre, il prend de la RAM, il a une croix minuscule
     if (!ffAdsOn()) { ffBlocked++; stat(); return; }   // bloqué : le badge d'uBlock compte tout de suite
@@ -9817,6 +9938,10 @@ function autoShip() {                            // barre pleine : en production
   }
   const val = ECO.value(shipped), cost = G.bill, elec = G.elec || 0, net = val - cost - elec;
   Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
+  const m0 = G.money - net;                      // Vibank : le ship, puis les deux prélèvements
+  txAdd('ship', `Ship ${PROJ}@${v}`, val, m0 + val);
+  txAdd('tokens', `Facture de tokens · ${CLIS[G.ai]?.label || 'API'}`, -cost, m0 + val - cost);
+  txAdd('elec', `Électricité · ${ELEC.tiers[G.elecT || 0].n}`, -elec);
   setScore(shipped + 1);                         // score, version suivante, sauvegarde
   const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
   if (day.getDay() === 5) ach('friday');
@@ -9843,7 +9968,7 @@ function ecoOffline(secs, session = true) {
   const main = ecoRates(n, true, { hw }), teams = [{ k: n, r: main }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))];
   let work = 0, bugs = 0, costS = main.lead;
   teams.forEach(({ k, r }) => { const up = 1 / (1 + r.crash * r.down); work += r.per * k * up; bugs += r.bug * k * up; costS += r.cost * k * up; });
-  const out = { ships: 0, gain: 0, cost: 0, fails: 0, elec: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5;
+  const out = { ships: 0, gain: 0, cost: 0, fails: 0, elec: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5, m0 = G.money;
   const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; out.elec += elecTick(hw, s); if (session) { usage.usd += c; } };
   let t = secs;
   while (t > 0 && out.ships < 10000) {
@@ -9860,7 +9985,11 @@ function ecoOffline(secs, session = true) {
     out.ships++;
     shipped++;
   }
-  if (out.ships) setScore(shipped);
+  if (out.ships) {                               // Vibank : une ligne pour les ships, une pour ce qui a été prélevé
+    txAdd('ship', out.ships > 1 ? `${frNumI(out.ships)} ships en arrière-plan` : 'Un ship en arrière-plan', out.gain, m0 + out.gain);
+    txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain);
+    setScore(shipped);
+  }
   return out;
 }
 let idleWelcome = null;                          // le résumé de l'absence, affiché quand la partie reprend
@@ -10066,6 +10195,7 @@ function buy(id) {
     const it = elecItem();
     if (it.done || G.money < it.cost) return '';
     G.money -= it.cost;
+    txAdd('elec', `Vibe Énergie · ${it.name}`, -it.cost);
     G.elecT = (G.elecT || 0) + 1;
     msg = `${it.name} : signé. Le kWh est à $${frx(kwhPrice().toFixed(4).replace(/0+$/, ''))}. L’agent a lu les conditions générales (il dit).`;
   }
@@ -10073,6 +10203,7 @@ function buy(id) {
     const it = aiItems().find(x => x.id === id);
     if (!it || itemState(it).dis) return '';
     G.money -= it.cost;
+    txAdd('store', `Store des agents · ${it.name}`, -it.cost);
     if (id === 'lead') {
       G.lead = Math.min(3, (G.lead || 0) + 1);
       if (G.lead === 1) { if (claudeOn) setLead('haut'); else cfg.lead = 'haut'; }
@@ -10171,6 +10302,7 @@ function buyAgent(p) {
   const n = G.team[p] || 0, c = agentPrice(p);
   if (!IDLE || !G.own[p] || n >= AGENTS.length || G.money < c) return '';
   G.money -= c;
+  txAdd('store', `Store des agents · un agent ${CLIS[p].label}`, -c);
   G.team[p] = n + 1;
   if (p === G.ai) {
     G.agents = G.team[p];
@@ -10182,6 +10314,7 @@ function buyAgent(p) {
 function buyLicence(p) {                         // changer de plateforme : l'équipe migre au premier plan, l'ancienne reste disponible
   if (!IDLE || G.own[p] || G.money < PLATS[p].cost) return '';
   G.money -= PLATS[p].cost;
+  txAdd('licence', `Licence ${CLIS[p].label}`, -PLATS[p].cost);
   G.own[p] = 1;
   G.team[p] = Math.max(1, G.team[G.ai] || 1);
   freeModels(p).forEach(k => { G.models[k] = 1; });
