@@ -977,6 +977,32 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .tui-line { min-height: 1.3em; padding: 0 .5ch; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .tui-line input { width: 60%; border: 0; background: transparent; color: var(--fg); font: inherit; outline: none; }
 .mc { grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.mt-sel { background: var(--dim2); color: var(--bg); }
+/* Blunderbird : les dossiers, la liste des messages, le message et ses boutons */
+.ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
+.ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
+.ml-bar b { color: var(--orange); }
+.ml-bar button, .ml-acts button { padding: .15em 1.2ch; border: 1px solid var(--rule); border-radius: 3px; background: none; color: var(--fg); }
+.ml-bar button[aria-pressed="true"] { border-color: var(--orange); color: var(--orange); }
+.ml-note { flex: 1 1 30ch; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-main { display: grid; grid-template-columns: minmax(24ch, 2fr) 3fr; min-height: 0; }
+.ml-list { min-height: 0; overflow: auto; border-right: 1px solid var(--rule); }
+.ml-it { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 1ch; width: 100%; padding: .45em 1ch; border: 0; border-bottom: 1px solid var(--sep); background: none; color: var(--dim); text-align: left; }
+.ml-it .f, .ml-it .s { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-it .s { grid-column: 1 / -1; }
+.ml-it .d { font-size: .85em; }
+.ml-it.new { color: var(--fg); font-weight: 700; }
+.ml-it.on { background: var(--panel); box-shadow: inset 3px 0 var(--orange); }
+.ml-read { min-height: 0; overflow: auto; padding: .8em 2ch; }
+.ml-read h3 { margin-bottom: .3em; color: var(--orange); }
+.ml-h { color: var(--dim); overflow-wrap: anywhere; }
+.ml-att { margin-top: .6em; padding: .3em 1ch; border: 1px dashed var(--rule); border-radius: 3px; }
+.ml-body p { margin: .5em 0; }
+.ml-acts { display: flex; flex-wrap: wrap; gap: .6em 1.4ch; margin-top: 1em; }
+.ml-acts button { border-color: var(--orange); color: var(--orange); }
+.ml-acts button.hot { background: var(--orange); color: var(--ink); font-weight: 700; }
+.ml-done { margin-top: 1em; color: var(--dim); font-style: italic; }
+@media (max-width: 760px) { .ml-main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 2fr) minmax(0, 3fr); } .ml-list { border-right: 0; border-bottom: 1px solid var(--rule); } }
 .mc-top { padding: 0 .5ch; background: var(--orange); color: var(--ink); white-space: pre; overflow: hidden; }
 .mc-panels, .mc-view { grid-row: 2; }
 .mc-panels { display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
@@ -2198,7 +2224,7 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
-  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0 });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2288,6 +2314,10 @@ const ACH = [
   { id: 'mttr', g: '◷', n: 'Une minute chrono', d: 'Résoudre un incident de prod en moins d’une minute.', p: 9.7 },
   { id: 'dns', g: 'NX', n: 'C’est toujours le DNS', d: 'Résoudre un incident DNS. Ce n’est jamais le DNS. Sauf quand c’est le DNS.', p: 12.5, h: 1 },
   { id: 'pire', g: '‽', n: 'J’ai tout arrangé', d: 'Confier un incident à un agent, et le voir empirer.', p: 15.8, h: 1 },
+  { id: 'mail1', g: '✉', n: 'Vous avez du courrier', d: 'Lire un premier courriel : mail, mutt ou Blunderbird.', p: 52.6 },
+  { id: 'phish', g: '⚑', n: 'Pas né de la dernière pluie', d: 'Signaler un courriel d’hameçonnage. L’adresse était fausse, vous l’avez vu.', p: 23.1 },
+  { id: 'hamecon', g: '⊗', n: 'Hameçonné', d: 'Ouvrir la pièce jointe (ou le lien) d’un courriel d’hameçonnage.', p: 8.2, h: 1 },
+  { id: 'levee', g: '↗', n: 'Tour de table', d: 'Faire entrer un fonds au capital de votre startup.', p: 6.4 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2303,7 +2333,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
 }
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
-if (G.inc) G.inc.ag = 0;                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
+if (G.inc) G.inc.ag = 0;
+G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3114,7 +3145,8 @@ const PRE_HELP_LINES = () => [
   ...(IDLE ? [[H(['  store             ', 'org'], 'acheter des agents, un terminal plus rapide, des skills, des modèles, Claude Code ou Codex'), '', 20],
     [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
-    [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · sudo apt install lolama (ou lolama.vibe, githype.vibe dans Firefaux)'), '', 20]] : []),
+    [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · sudo apt install lolama (ou lolama.vibe, githype.vibe dans Firefaux)'), '', 20],
+    [H(['  mail              ', 'org'], 'le courrier : clients, investisseurs, URSSAF, hameçonnage · mail <n> pour lire (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam), musique (vlc)'), '', 20],
   [H(['  settings          ', 'org'], 'réglages : couleurs, taille, graphismes, nom d’utilisateur'), '', 20],
@@ -3148,6 +3180,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
     [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  mail             ', 'org'], 'le courrier : les clients, les investisseurs, l’URSSAF, le hameçonnage · mail <n> pour lire, mail <n> <action> pour répondre (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20],
     [H(['  incident         ', 'org'], 'l’astreinte : la panne de prod en cours et les pistes (systemctl, journalctl, kubectl, df, dig, certbot, git log) · incident agent : la confier'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
@@ -3824,7 +3857,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'incident', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4024,6 +4057,7 @@ const CATALOG = {
   atril: ['1.26.2-1', 3470, 'atril', 'visionneuse de documents PDF (il lui faut le bureau)'],
   systemd: ['256.7-3', 9870, '', 'le gestionnaire du système, et de tout le reste (essentiel)'],
   tmux: ['3.5a-1', 1130, 'tmux', 'un terminal dans le terminal'],
+  blunderbird: ['1:128.5.0esr-1', 245800, 'blunderbird', 'client de courriel : les clients, les investisseurs, l’URSSAF, et le hameçonnage (sans bureau : façon mutt)'],
   tree: ['2.1.3-1', 112, 'tree', 'l’arborescence des dossiers'],
   vim: ['2:9.1.0861-1', 3910, 'vim', 'éditeur de texte (pour en sortir : voir Stack Overflow)'],
   vlc: ['3.0.21-0+deb13u1', 52800, 'vlc cvlc', 'lecteur multimédia : lit tout, même ce que les agents ont encodé (il lui faut le bureau)'],
@@ -4717,6 +4751,7 @@ async function runCommand(raw) {
   if (head === 'tmux') return tmuxCmd(rest);
   if (head === 'ipo') return ipoCmd(rest);
   if (['incident', 'incidents', 'pager', 'pagerdoudou', 'astreinte'].includes(head)) return incCmd(rest);
+  if (head === 'mail' || head === 'mailx') return mailCmd(rest);
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
     if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
@@ -4727,7 +4762,7 @@ async function runCommand(raw) {
     shellPrint(H(['zsh: command not found: ', 'errc'], 'hack'));
     return shellPrint('Le coffre de prod se force depuis le bunker : tapez fallout, puis hack.', 'dim');
   }
-  const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg;   // firefox, chromium… : c'est Firefaux
+  const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg === 'thunderbird' ? 'blunderbird' : rawProg;   // firefox, chromium… : c'est Firefaux
   if (progCmd === 'nano' || progCmd === 'pico') return nanoCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // l'éditeur du terminal
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
     if (!installed.has(PROGS[progCmd].pkg || progCmd)) return notInstalled(progCmd, PROGS[progCmd].pkg || progCmd);
@@ -5224,6 +5259,8 @@ const PROGS = {
   nvlc: { label: 'nvlc', delay: 250, nomenu: true, pkg: 'vlc', icon: '▲', make: () => makeNvlc() },
   steamcmd: { label: 'steamcmd', delay: 1000, nomenu: true, pkg: 'steam', icon: '◎', make: () => makeSteamcmd() },
   'xfce4-about': { label: 'À propos', delay: 2000, gui: true, nomenu: true, pkg: 'xfce4', icon: 'ⓘ', menu: 'À propos', make: () => makeAbout() },
+  mutt: { label: 'mutt', delay: 1000, nomenu: true, pkg: 'blunderbird', icon: '✉', make: () => makeMutt() },
+  blunderbird: { label: 'Courrier', delay: 1000, gui: true, cat: 'Internet', icon: '✉', menu: 'Courrier (Blunderbird)', desc: 'les clients, les investisseurs, l’URSSAF · et le hameçonnage', make: () => makeMail() },
   vlc: { label: 'VLC', delay: 250, gui: true, cat: 'Multimédia', icon: '▲', menu: 'Lecteur multimédia VLC', desc: 'la musique · les morceaux se téléchargent sur telecharge.vibe', make: () => makeVlc() },
 };
 function renderTabs() {
@@ -6083,7 +6120,7 @@ function afterResize() {
 const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'), xfAppsBtn = $('#xfce .xf-apps'), xfTasksEl = $('#xfce .xf-tasks');
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
-const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66],
+const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66], blunderbird: [.16, .07, .66, .8],
   nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82] };
 const xfName = n => n === 'zsh' ? 'Terminal' : PROGS[n]?.term ? `Terminal ${PROGS[n].term}` : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => isTerm(n) ? `${xfName(n)} · ${USER}@prod-01: ${tildePath(n === liveTerm ? cwd : TERMS[n]?.cwd || HOME)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
@@ -6444,8 +6481,9 @@ function xfIconList() {
     has('thunar') && { id: 'root', ic: '/', t: 'Système de fichiers', tip: '/ · ne rien supprimer (vraiment)' },
     { id: 'trash', ic: '▥', t: 'Corbeille', tip: 'vide : ici, on supprime avec rm -rf' },
     { id: 'zsh', ic: '❯', t: 'Terminal', tip: `zsh · ${tildePath(cwd)}` },
-    ...['firefaux', 'mousepad', 'atril', 'htop', 'vlc'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
-      t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système', vlc: 'VLC' }[k], tip: PROGS[k].desc })),
+    ...['firefaux', 'mousepad', 'atril', 'htop', 'vlc', 'blunderbird'].filter(has).map(k => ({ id: k, ic: PROGS[k].icon, on: open(k),
+      t: { firefaux: 'Firefaux', mousepad: 'Éditeur de texte', atril: 'Visionneuse PDF', htop: 'Moniteur système', vlc: 'VLC', blunderbird: 'Courrier' }[k],
+      tip: k === 'blunderbird' && IDLE ? `${mailUnread()} non lu${mailUnread() > 1 ? 's' : ''} · ${PROGS[k].desc}` : PROGS[k].desc })),
     has('steam') && { id: 'steam', ic: PROGS.steam.icon, on: open('steam'), t: 'Steam', tip: `412 jeux achetés, 3 lancés${ACH_ON ? ` · ${achN()}/${ACH.length} succès` : ''}` },
     ...['mistral', 'codex', 'claude'].filter(k => !IDLE || (G.own[k] && cliHas(k))).map(k => ({ id: k, ic: CLIS[k].glyph, on: plat(k),
       t: k === 'mistral' ? 'Vibe CLI' : CLIS[k].label,
@@ -7263,7 +7301,7 @@ const STEAM_LIB = [['Kubernetes Kart', 87], ['Merge Conflict Tactics', 41], ['St
 /* ---------- les versions terminal des applis graphiques (sans Xfce) : façon mc, lynx, nvlc et steamcmd ----------
    thunar, firefaux, vlc et steam, tapés sans bureau, ouvrent leur version terminal ; mousepad ouvre nano. Atril n'en a pas :
    cannot open display. Elles viennent avec le paquet de l'appli (mc avec thunar, lynx avec firefaux…), et s'ouvrent aussi sous Xfce. */
-const TERM_ALT = { thunar: 'mc', firefaux: 'lynx', vlc: 'nvlc', steam: 'steamcmd', mousepad: 'nano' };
+const TERM_ALT = { thunar: 'mc', firefaux: 'lynx', vlc: 'nvlc', steam: 'steamcmd', mousepad: 'nano', blunderbird: 'mutt' };
 const tuiKeys = list => list.map(([k, t, a]) => `<button type="button" data-tk="${a}"><b>${esc(k)}</b>${esc(t)}</button>`).join('');
 
 function makeMc() {                                // façon Midnight Commander : deux panneaux, les touches de fonction
@@ -8430,6 +8468,8 @@ const MAL_SRC = {   // d'où vient l'infection : le script déposé dans ~/Downl
   win11: ['windows11-setup.sh', 'Windows 11 s’installe… sur Linux. Le script windows11-setup.sh fait de son mieux, en arrière-plan.'],
   scare: ['antivirus-vibe-pro.sh', 'Antivirus Vibe Pro s’installe. Il avait trouvé 3 virus ; il en apporte un quatrième.'],
   dl: ['musique chris 1.m4a.sh', 'Il a quand même téléchargé ~/Downloads/musique chris 1.m4a.sh : une musique qui s’exécute toute seule.'],
+  mail: ['Facture_GPU_impayee.pdf.sh', 'La pièce jointe s’ouvre : Facture_GPU_impayee.pdf.sh. Ce n’était pas un PDF.'],
+  mailink: ['securite-vibank.sh', 'Le lien ouvre une « page de connexion », qui télécharge securite-vibank.sh. Il tourne, en arrière-plan.'],
   addon: ['', ''],
 };
 const CLAM = { old: [25012, 2012004], now: [27467, 2071855], main: 6647427, byte: 86 };   // les versions et signatures de la base (daily ; main, bytecode)
@@ -8902,8 +8942,8 @@ function webUrssaf() {
    temps de jeu restent), et les stock-options reçues accélèrent le travail de toutes les suivantes : +10 % chacune. */
 const IPO_MIN = 25e6;
 const valMult = () => 40 * (1 + shipped / 50);
-const valuation = () => (G.earned || 0) * valMult();
-const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6));
+const valuation = () => (G.earned || 0) * valMult() * repK();
+const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6) * (G.dil ?? 1));   // une levée de fonds dilue : moins de stock-options
 const ipoMult = () => 1 + .1 * (G.ipo?.so || 0);
 const bigMoney = v => v >= 1e9 ? `$${frx((v / 1e9).toFixed(2))} Md` : v >= 1e6 ? `$${frx((v / 1e6).toFixed(1))} M` : `$${usd(v)}`;
 const TICKER = () => '$' + PROJ.toUpperCase().slice(0, 4);
@@ -8974,7 +9014,8 @@ function webBourse() {
     : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`;
   return { title: `bourse.vibe · ${TICKER()}`, html: `<div class="wp vb"><h1>bourse.vibe</h1><p class="dim">La Bourse des licornes. Et des autres.</p>
     <div class="vb-acct"><span class="k">${esc(TICKER())} · ${P} · Nasdaq-Vibe</span><span class="vb-bal" data-live="val">${bigMoney(V)}</span>
-    <span class="dim">${ch ? `${ch >= 0 ? '+' : '−'}${frx(Math.abs(ch).toFixed(1))} % depuis le dernier ship · ` : ''}chiffre d’affaires × ${frx(valMult().toFixed(1))} (« parce que IA »)</span></div>
+    <span class="dim">${ch ? `${ch >= 0 ? '+' : '−'}${frx(Math.abs(ch).toFixed(1))} % depuis le dernier ship · ` : ''}chiffre d’affaires × ${frx(valMult().toFixed(1))} (« parce que IA »)</span>
+    <span class="dim">Note des clients : ${repStars()} (×${frx(repK().toFixed(2))} sur la valorisation)${(G.dil ?? 1) < 1 ? ` · votre part du capital : ${Math.round(G.dil * 100)} % (levées de fonds)` : ''}</span></div>
     <h2>Le cours</h2>${chart}
     <h2>Introduction en bourse</h2>${act}
     ${G.ipo?.n ? `<div class="wp-band"><p>Vos sorties : <b>${G.ipo.n}</b> · stock-options : <b>${G.ipo.so}</b> · travail : <b>×${frx(ipoMult().toFixed(1))}</b> · meilleure : <b>${bigMoney(G.ipo.best)}</b></p></div>` : ''}
@@ -9048,6 +9089,8 @@ function incEnd(how) {                             // la prod repart : les rembo
   S.lost += lost;
   if (how === 'fix' || how === 'agent') { S.fix++; S.best = S.best ? Math.min(S.best, dur) : dur; }
   S.log = [...S.log, [I.t0, I.k, Math.round(dur), lost, how]].slice(-12);
+  G.rep = Math.max(40, (G.rep ?? 70) - 1);       // chaque panne coûte un peu de la note des clients
+  if (EV_ON && lost > 0 && chance(MAIL_P.plainte)) setTimeout(() => mailPlainte(I, dur, lost), ri(5000, 20000));   // et un client écrit
   if (how === 'fix') { ach('pager'); if (dur < 60) ach('mttr'); if (I.k === 'dns') ach('dns'); }
   const why = how === 'auto' ? ' · quelqu’un a tout redémarré au hasard, et ça a marché (personne ne sait pourquoi)' : how === 'away' ? ' · pendant votre absence, l’astreinte (un agent) a tout redémarré' : '';
   shellPrint(H(['✓ ', 'okc'], `${I.id} résolu en ${fmtEta(Math.round(dur))}${why} · remboursements `, [`−$${usd(lost)}`, 'errc'], ' · la prod repart, le ship aussi.'));
@@ -9281,8 +9324,266 @@ function webStatus() {
     <p class="dim">Dans le terminal : <code>incident</code> pour le diagnostic, <code>incident agent</code> pour le confier, <code>incident log</code> pour l’historique.</p></div>` };
 }
 
+/* ---------- la messagerie : les clients, les investisseurs, l'URSSAF, le hameçonnage ----------
+   Les courriels arrivent dans /var/mail : sur un événement (une plainte après un incident, l'URSSAF tous les 12 ships après l'ACRE)
+   ou au hasard (toutes les 2 à 5 minutes, agents lancés, EV_ON). Ils se lisent avec mail (toujours là), mutt ou Blunderbird (sudo apt
+   install blunderbird). Certains demandent une décision : un client qui paie d'avance une fonctionnalité absurde (la dette technique :
+   ×1,5 de bugs pendant 3 minutes), une plainte (un geste commercial, ou la note des clients baisse), un fonds qui entre au capital
+   (de l'argent tout de suite, 10 % de stock-options en moins à l'introduction en bourse), l'URSSAF (déclarer sous 5 minutes, sinon une
+   majoration), un hameçonnage (le signaler, ou ouvrir la pièce jointe : le mineur). La note des clients (sur 100, 70 au départ) fait
+   varier la valorisation : ±1 % par point. */
+const MAIL_MAX = 40, MAIL_P = { plainte: .7 };   // MAIL_P : la probabilité qu'un client se plaigne après un incident
+const MAIL_CLIENTS = [['Boulangerie Ducoin', 'contact@boulangerie-ducoin.vibe'], ['Garage Vroum SARL', 'direction@garage-vroum.vibe'], ['Mairie de Saint-Vibe', 'dsi@saint-vibe.vibe'],
+  ['CryptoChats Ltd', 'ceo@cryptochats.vibe'], ['Cabinet Maître Lenoir', 'secretariat@lenoir-avocats.vibe'], ['Pizzeria Da Agente', 'ordini@da-agente.vibe']];
+const MAIL_ASKS = ['un mode sombre pour le mode sombre', 'que le bouton « Payer » paie moins cher', 'une IA qui réponde aux courriels de l’IA', 'la blockchain, mais pour les baguettes',
+  'exporter les PDF en PDF', 'un bouton « annuler le vendredi »', 'que le site marche aussi quand il est en panne', 'le même site que le concurrent, mais en mieux, pour hier'];
+const MAIL_FUNDS = [['Licorne Capital Partners', 'deals@licorne-capital.vibe'], ['Vibe Ventures', 'invest@vibe-ventures.vibe'], ['Seed & Pray', 'hello@seed-and-pray.vibe']];
+const MAIL_PHISH = [
+  { from: 'Vibank Sécurité', addr: 'securite@vibank-alerte.vibe.ru', subj: 'Votre compte est suspendu', link: 'Réactiver mon compte', src: 'mailink',
+    body: 'Cher client,\n\nSuite à une activité inhabituelle, votre compte Vibank est suspendu. Réactivez-le sous 24 h en confirmant vos identifiants.\n\nLe service sécurité de Vibank (le vrai)' },
+  { from: 'URSSAF', addr: 'remboursement@urssaf-remboursement.vibe.ru', subj: 'Vous avez droit à un remboursement de 412,00 $', link: 'Recevoir mon remboursement', src: 'mailink',
+    body: 'Madame, Monsieur,\n\nAprès un dernier calcul de vos cotisations, vous avez droit à un remboursement de 412,00 $. Pour le recevoir, confirmez vos coordonnées bancaires.\n\nL’URSSAF (on rembourse, maintenant)' },
+  { from: 'Matos.vibe Livraison', addr: 'colis@matos-vibe.colis-suivi.biz', subj: 'Votre colis est bloqué : 1,99 $ de frais de douane', link: 'Payer 1,99 $', src: 'mailink',
+    body: 'Bonjour,\n\nVotre carte graphique est bloquée en douane. Réglez 1,99 $ de frais pour la recevoir sous 48 h.\n\nLe service livraison' },
+  { from: 'Comptabilité', addr: 'compta@facture-vibe.top', subj: 'Facture GPU impayée (relance n° 3)', file: 'Facture_GPU_impayee.pdf.exe', src: 'mail',
+    body: 'Bonjour,\n\nVeuillez trouver ci-joint la facture impayée de votre carte graphique. Sans règlement, le dossier part au contentieux.\n\nLa comptabilité' },
+];
+const MAIL_INFO = [
+  () => ({ from: 'opus-3', addr: 'opus-3@agents.invalid', subj: 'Rapport hebdomadaire', body: `Bonjour,\n\nCette semaine : ${ri(300, 500)} PR ouvertes, 0 relue, ${ri(2, 9)} réunions sur la délégation. J’ai délégué ce rapport.\n\nopus-3, orchestrateur` }),
+  () => ({ from: 'Vibe Énergie', addr: 'newsletter@vibe-energie.vibe', subj: 'Votre consommation du mois', body: `Bonjour,\n\nVotre PC a consommé ${frNumI(G.kwh || 0)} kWh depuis le début. C’est beaucoup, et c’est très bien pour nous.\n\nVibe Énergie` }),
+  () => ({ from: 'GitHype', addr: 'noreply@githype.vibe', subj: `${PROJ} : votre dépôt a reçu 0 étoile`, body: 'Bonjour,\n\nVotre dépôt a reçu 0 étoile cette semaine, comme la semaine dernière. La régularité est une qualité.\n\nL’équipe GitHype' }),
+  () => ({ from: 'Vibank', addr: 'releve@vibank.vibe', subj: 'Votre relevé de compte est disponible', url: 'https://facture.vibe/', body: `Bonjour,\n\nVotre relevé est disponible dans votre espace. Solde : $${usd(G.money)}.\n\nVibank` }),
+  () => ({ from: 'StackUnderflow', addr: 'digest@stackunderflow.vibe', subj: 'Votre question a été fermée', body: 'Bonjour,\n\nVotre question « pourquoi la prod tombe le vendredi » a été fermée : doublon d’une question de 2009, restée sans réponse.\n\nStackUnderflow' }),
+];
+const MAIL_DONE = { accepter: 'accepté', refuser: 'refusé', geste: 'geste commercial accordé', ignorer: 'ignoré', declarer: 'déclaré', late: 'pas déclaré à temps : majoration', ouvrir: 'ouvert', signaler: 'signalé' };
+function debtK() { return IDLE && G.debt > Date.now() ? 1.5 : 1; }                       // la dette technique : ×1,5 de bugs
+function repK() { return 1 + ((G.rep ?? 70) - 70) / 100; }                               // la note des clients : ±1 % de valorisation par point
+const repStars = () => `${frx(((G.rep ?? 70) / 20).toFixed(1))}/5`;
+const mailUnread = () => (G.mail?.box || []).filter(m => !m.read && !m.junk).length;
+function mailRedraw() { PROGS.blunderbird.redraw?.(); PROGS.mutt.redraw?.(); if (xfOn) xfIconsSync?.(); }
+function mailAdd(m) {                              // un courriel arrive (rien en mode libre)
+  if (!IDLE) return null;
+  const M = G.mail;
+  M.seq++;
+  const x = { id: M.seq, t: Date.now(), read: 0, done: '', ...m };
+  M.box.push(x);
+  if (M.box.length > MAIL_MAX) M.box.splice(0, M.box.length - MAIL_MAX);
+  shellPrint(H(['✉ ', 'org'], 'Vous avez un nouveau courrier : ', [`« ${x.subj} »`, 'fgc'], [` (${x.from}) · `, 'dim'], [`mail ${x.id}`, 'org'], [' pour le lire', 'dim']));
+  toast(`<b>Nouveau courriel</b> · ${esc(x.from)} · ${esc(x.subj)}`, 3500);
+  mailRedraw();
+  saveGame();
+  return x;
+}
+function mailReq() {                               // un client paie d'avance une fonctionnalité absurde
+  const [n, a] = pick(MAIL_CLIENTS), ask = pick(MAIL_ASKS), pay = Math.max(1, Math.round(ECO.value(shipped) * ri(15, 30)) / 10);
+  return mailAdd({ k: 'req', from: n, addr: a, subj: `Demande : ${ask}`, pay,
+    body: `Bonjour,\n\nNous aimerions ${ask}. Nous payons d’avance : $${usd(pay)}. C’est urgent (depuis hier).\n\nCordialement,\n${n}` });
+}
+function mailPlainte(I, dur, lost) {               // après un incident : un client veut un geste commercial
+  const [n, a] = pick(MAIL_CLIENTS), g = Math.max(1, Math.round(lost * 50) / 100);
+  return mailAdd({ k: 'plainte', from: n, addr: a, subj: `Réclamation : ${I.id}`, pay: g,
+    body: `Bonjour,\n\nVotre service était en panne pendant ${fmtEta(Math.round(dur))} (${lcFirst(INC_KINDS[I.k].t)}). Nous exigeons un geste commercial : $${usd(g)}. Sinon, un avis une étoile sur Vibegle Maps.\n\n${n}` });
+}
+function mailVc() {                                // un fonds veut entrer au capital : de l'argent maintenant, moins de stock-options plus tard
+  const V = valuation(), pay = Math.round(V * .05), [n, a] = pick(MAIL_FUNDS);
+  return mailAdd({ k: 'vc', from: n, addr: a, subj: `Entrée au capital de ${PROJ.toUpperCase()}`, pay,
+    body: `Bonjour,\n\nNotre fonds souhaite entrer au capital de ${PROJ.toUpperCase()} : ${bigMoney(pay)} tout de suite, contre 10 % de la société. Votre valorisation (${bigMoney(V)}) nous plaît ; votre produit aussi (nous ne l’avons pas essayé).\n\nÀ l’introduction en bourse, vous recevrez 10 % de stock-options en moins.\n\nL’équipe d’investissement, ${n}` });
+}
+function mailUrssaf() {                            // la déclaration trimestrielle : sous 5 minutes
+  return mailAdd({ k: 'urssaf', from: 'URSSAF', addr: 'declaration@urssaf.vibe', subj: 'Déclaration trimestrielle à effectuer', due: Date.now() + 300e3,
+    body: 'Madame, Monsieur,\n\nVotre déclaration trimestrielle est à effectuer sous 5 minutes. Sans déclaration, une majoration de retard (10 % d’un ship) sera appliquée.\n\nVotre URSSAF (la vraie : urssaf.vibe)' });
+}
+const mailPhish = () => mailAdd({ k: 'phish', ...pick(MAIL_PHISH) });
+const mailInfo = () => mailAdd({ k: 'info', ...pick(MAIL_INFO)() });
+function mailLate(m) {                             // l'URSSAF n'a pas reçu la déclaration : majoration
+  const pen = Math.round(ECO.value(shipped) * 10) / 100;
+  m.done = 'late';
+  G.money -= pen;
+  txAdd('urssaf', 'URSSAF · majoration de retard (déclaration non faite)', -pen);
+  shellPrint(H(['✗ ', 'errc'], 'URSSAF : déclaration non faite à temps. Majoration de retard : ', [`−$${usd(pen)}`, 'errc'], '.'));
+  mailRedraw();
+  saveGame();
+}
+function mailTick() {                              // chaque seconde : les échéances de l'URSSAF, le courrier au hasard
+  if (!IDLE) return;
+  const M = G.mail, now = Date.now();
+  M.box.forEach(m => { if (m.k === 'urssaf' && !m.done && m.due && now > m.due) mailLate(m); });
+  if (!EV_ON || !claudeOn || !titleEl.hidden) return;
+  if (!M.next) M.next = now + ri(60, 180) * 1e3;
+  if (now < M.next) return;
+  M.next = now + ri(120, 300) * 1e3;
+  const r = R();
+  if (valuation() >= 2e6 && !M.box.some(m => m.k === 'vc' && !m.done) && r < .15) return mailVc();
+  if (shipped >= 2 && r < .5) return mailReq();
+  if (r < .78) return mailPhish();
+  mailInfo();
+}
+function mailActs(m) {                             // [[action, libellé]] : ce qu'on peut faire de ce courriel
+  if (m.k === 'phish') return [['ouvrir', m.file ? `Ouvrir ${m.file}` : m.link], ['signaler', 'Signaler : hameçonnage']];
+  if (m.k === 'info') return [...(m.url ? [['ouvrir', 'Ouvrir le lien']] : []), ['signaler', 'Signaler : hameçonnage']];
+  if (m.k === 'req') return [['accepter', `Accepter (+$${usd(m.pay)})`], ['refuser', 'Refuser']];
+  if (m.k === 'plainte') return [['geste', `Geste commercial (−$${usd(m.pay)})`], ['ignorer', 'Ignorer']];
+  if (m.k === 'vc') return [['accepter', `Accepter (+${bigMoney(m.pay)}, −10 % de stock-options)`], ['refuser', 'Refuser']];
+  return m.k === 'urssaf' ? [['declarer', 'Déclarer']] : [];
+}
+function mailAct(id, a) {                          // répondre à un courriel : → le message à afficher
+  const m = G.mail.box.find(x => x.id === id);
+  if (!m) return '✗ Courriel introuvable.';
+  a = (a || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (!mailActs(m).some(x => x[0] === a)) return `✗ Action impossible : ${a || '(aucune)'}. Possibles : ${mailActs(m).map(x => x[0]).join(', ') || 'aucune'}.`;
+  if (m.done && !(m.k === 'info' && a === 'ouvrir')) return `Déjà traité : ${MAIL_DONE[m.done] || m.done}.`;
+  m.read = 1;
+  ach('mail1');
+  const note = d => { G.rep = Math.max(40, Math.min(100, (G.rep ?? 70) + d)); };
+  let msg = '';
+  if (m.k === 'req' && a === 'accepter') {
+    G.money += m.pay; txAdd('client', `Acompte · ${m.from}`, m.pay); G.debt = Math.max(G.debt || 0, Date.now()) + 180e3; note(2);
+    msg = `✓ Accepté : +$${usd(m.pay)}. Les agents s’y mettent : de la dette technique, ×1,5 de bugs pendant 3 minutes. Note des clients : ${repStars()}.`;
+  } else if (m.k === 'req') { note(-1); msg = `Refusé. ${m.from} ira voir ailleurs (et reviendra). Note des clients : ${repStars()}.`; }
+  else if (m.k === 'plainte' && a === 'geste') { G.money -= m.pay; txAdd('client', `Geste commercial · ${m.from}`, -m.pay); note(1); msg = `✓ Geste commercial : −$${usd(m.pay)}. ${m.from} est rassuré. Note des clients : ${repStars()}.`; }
+  else if (m.k === 'plainte') { note(-3); msg = `Ignoré. ${m.from} publie un avis une étoile sur Vibegle Maps. Note des clients : ${repStars()}.`; }
+  else if (m.k === 'vc' && a === 'accepter') {
+    G.money += m.pay; txAdd('levee', `Levée de fonds · ${m.from}`, m.pay); G.dil = (G.dil ?? 1) * .9; ach('levee');
+    msg = `✓ ${m.from} entre au capital : +${bigMoney(m.pay)}. Votre part : ${Math.round(G.dil * 100)} % (10 % de stock-options en moins à l’introduction en bourse).`;
+  } else if (m.k === 'vc') msg = 'Refusé. Ils reviendront, avec un term sheet plus long.';
+  else if (m.k === 'urssaf') msg = '✓ Déclaré. L’URSSAF accuse réception, sous 6 à 18 mois.';
+  else if (m.k === 'phish' && a === 'ouvrir') { ach('hamecon'); msg = '✗ ' + malInfect(m.src || 'mail'); }
+  else if (a === 'signaler') {
+    m.junk = 1;
+    if (m.k === 'phish') ach('phish');
+    msg = m.k === 'phish' ? `✓ Signalé et rangé dans les indésirables. Bien vu : ${m.addr.split('@')[1]} n’a rien à voir avec l’expéditeur.` : 'Signalé. C’était un vrai courriel (faux positif) : rangé dans les indésirables quand même.';
+  } else if (m.k === 'info' && a === 'ouvrir') {
+    if (xfOn && installed.has('firefaux')) { xfLaunch('firefaux'); PROGS.firefaux.go?.(m.url); msg = `Le lien s’ouvre dans Firefaux : ${m.url}`; }
+    else msg = `Lien : ${m.url} (dans Firefaux, sous Xfce).`;
+  }
+  if (!(m.k === 'info' && a === 'ouvrir')) m.done = a;
+  saveGame();
+  mailRedraw();
+  return msg;
+}
+function mailText(m) {                             // le courriel en texte : les en-têtes, le corps, ce qui s'y attache
+  return [`De : ${m.from} <${m.addr}>`, `Objet : ${m.subj}`, `Date : ${new Date(m.t).toLocaleString('fr-FR')}`, ...(m.file ? [`Pièce jointe : ${m.file}`] : []), '',
+    ...m.body.split('\n'), ...(m.link ? ['', `[ ${m.link} ]`] : []), ...(m.url ? ['', `[ ${m.url} ]`] : []), ...(m.done ? ['', `(${MAIL_DONE[m.done] || m.done})`] : [])];
+}
+function mailCmd(a) {                              // mail : la liste ; mail <n> : le lire ; mail <n> <action> : répondre
+  if (!IDLE) return shellPrint('Mode libre : pas de courrier (personne n’a votre adresse).', 'dim');
+  const B = G.mail.box, n = a[0], id = parseInt(n, 10), u = mailUnread();
+  if (!n) {
+    if (!B.length) return shellPrint(`Pas de courrier pour ${USER}.`);
+    return printLines([[H([`/var/mail/${USER} : `, 'fgc'], `${plural(B.length, 'message')}, ${u} non lu${u > 1 ? 's' : ''}`), '', 15],
+      ...B.slice(-15).reverse().map(m => [H(m.read ? '   ' : [' N ', 'org'], `${String(m.id).padStart(3)}  ${txDate(m.t)}  ${m.from.slice(0, 22).padEnd(22)}  `, m.junk ? ['[indésirable] ', 'dim'] : '',
+        m.subj.length > 52 ? m.subj.slice(0, 51) + '…' : m.subj, m.done ? [`  (${MAIL_DONE[m.done] || m.done})`, 'dim'] : ''), '', 15]),
+      [H(['mail <n>', 'org'], [' pour lire, ', 'dim'], ['mail <n> <action>', 'org'], [' pour répondre · mutt ou Blunderbird : sudo apt install blunderbird', 'dim']), '', 15]]);
+  }
+  const m = B.find(x => x.id === id);
+  if (!m) return shellPrint(H(['✗ ', 'errc'], `Pas de message n° ${n}.`));
+  if (a[1]) { const r = mailAct(id, a[1]); return shellPrint(r, r.startsWith('✗') ? 'errc' : r.startsWith('✓') ? 'okc' : ''); }
+  if (!m.read) { m.read = 1; ach('mail1'); saveGame(); mailRedraw(); }
+  const acts = m.done ? [] : mailActs(m);
+  return printLines([...mailText(m).map((l, i) => [l, i < 3 ? 'fgc' : '', 12]),
+    ...(acts.length ? [['', '', 12], [H(['Répondre : ', 'dim'], ...acts.flatMap(([k, l], i) => [i ? ' · ' : '', [`mail ${m.id} ${k}`, 'org'], [` (${l})`, 'dim']])), '', 12]] : [])]);
+}
+function mailHtml(m) {                             // le courriel dans Blunderbird
+  const acts = m.done ? [] : mailActs(m);
+  return `<h3>${esc(m.subj)}</h3><p class="ml-h"><b>${esc(m.from)}</b> &lt;${esc(m.addr)}&gt; · ${esc(new Date(m.t).toLocaleString('fr-FR'))}</p>`
+    + (m.file ? `<p class="ml-att">Pièce jointe : <b>${esc(m.file)}</b></p>` : '')
+    + `<div class="ml-body">${m.body.split('\n').map(l => l ? `<p>${esc(l)}</p>` : '').join('')}</div>`
+    + (m.done ? `<p class="ml-done">${esc(MAIL_DONE[m.done] || m.done)}</p>` : '')
+    + (acts.length ? `<div class="ml-acts">${acts.map(([k, l]) => `<button type="button" data-mact="${k}"${(k === 'ouvrir' && m.k === 'phish') || k === 'accepter' ? ' class="hot"' : ''}>${esc(l)}</button>`).join('')}</div>` : '');
+}
+function makeMail() {                              // Blunderbird : les dossiers, la liste, le message, ses boutons
+  const el = document.createElement('div');
+  el.className = 'prog ml';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Courrier (Blunderbird)');
+  el.innerHTML = '<div class="ml-bar"><b>Blunderbird</b><button type="button" data-mf="in" aria-pressed="true"></button><button type="button" data-mf="junk" aria-pressed="false"></button>'
+    + '<span class="ml-note dim" role="status"></span></div><div class="ml-main"><div class="ml-list" role="listbox" aria-label="Messages"></div><div class="ml-read" tabindex="0"></div></div>';
+  const list = el.querySelector('.ml-list'), read = el.querySelector('.ml-read'), note = el.querySelector('.ml-note');
+  let box = 'in', sel = 0, sig = '';
+  const msgs = () => (G.mail?.box || []).filter(m => box === 'junk' ? m.junk : !m.junk).slice().reverse();
+  function draw(force) {
+    const L = msgs(), cur = L.find(m => m.id === sel) || L[0];
+    sel = cur ? cur.id : 0;
+    const sg = JSON.stringify([box, sel, G.mail?.seq, (G.mail?.box || []).map(m => [m.id, m.read, m.done, m.junk])]);
+    if (sg === sig && !force) return;
+    sig = sg;
+    el.querySelectorAll('[data-mf]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mf === box)));
+    el.querySelector('[data-mf="in"]').textContent = `Boîte de réception (${mailUnread()})`;
+    el.querySelector('[data-mf="junk"]').textContent = `Indésirables (${(G.mail?.box || []).filter(m => m.junk).length})`;
+    list.innerHTML = L.length ? L.map(m => `<button type="button" role="option" class="ml-it${m.read ? '' : ' new'}${m.id === sel ? ' on' : ''}" data-mid="${m.id}" aria-selected="${m.id === sel}">`
+      + `<span class="f">${esc(m.from)}</span><span class="d">${txDate(m.t)}</span><span class="s">${esc(m.subj)}</span></button>`).join('') : '<p class="dim" style="padding:.6em 1ch">Aucun message.</p>';
+    read.innerHTML = cur ? mailHtml(cur) : `<p class="dim">${IDLE ? 'Le courrier arrive tout seul : des clients, des investisseurs, l’URSSAF. Et des gens moins recommandables.' : 'Mode libre : personne n’a votre adresse.'}</p>`;
+  }
+  function open(id) {
+    const m = G.mail.box.find(x => x.id === id);
+    if (!m) return;
+    sel = id;
+    if (!m.read) { m.read = 1; ach('mail1'); saveGame(); }
+    draw(true);
+  }
+  el.addEventListener('click', e => {
+    const it = e.target.closest('[data-mid]'), f = e.target.closest('[data-mf]'), b = e.target.closest('[data-mact]');
+    if (it) open(+it.dataset.mid);
+    else if (f) { box = f.dataset.mf; sel = 0; draw(true); }
+    else if (b) { note.textContent = mailAct(sel, b.dataset.mact); draw(true); }
+  });
+  function key(e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const L = msgs(), i = L.findIndex(m => m.id === sel), j = Math.max(0, Math.min(L.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
+    if (L[j]) open(L[j].id);
+  }
+  draw(true);
+  return { el, key, render: () => draw(), redraw: () => draw(true), title: () => `Blunderbird · ${mailUnread()} non lu${mailUnread() > 1 ? 's' : ''}`, tname: () => 'Courrier' };
+}
+function makeMutt() {                              // façon mutt : l'index des messages, le message, les touches
+  const el = document.createElement('div');
+  el.className = 'prog lx mt';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Courrier en mode texte (façon mutt)');
+  el.innerHTML = '<div class="lx-top"><span class="mt-h"></span><span>façon mutt</span></div><pre class="lx-body mt-body"></pre><div class="tui-line mt-line" aria-live="polite"></div><div class="tui-keys">'
+    + tuiKeys([['↑↓', 'Messages', 'down'], ['Entrée', 'Lire', 'open'], ['i', 'Index', 'index'], ['a', 'Accepter', 'a'], ['r', 'Refuser', 'r'], ['s', 'Signaler', 's'], ['o', 'Ouvrir', 'o'], ['q', 'Quitter', 'quit']]) + '</div>';
+  const top = el.querySelector('.mt-h'), body = el.querySelector('.mt-body'), line = el.querySelector('.mt-line');
+  let sel = 0, reading = 0, sig = '';
+  const L = () => (G.mail?.box || []).slice().reverse();
+  function render(force) {
+    const B = L();
+    sel = Math.max(0, Math.min(B.length - 1, sel));
+    const sg = JSON.stringify([sel, reading, G.mail?.seq, B.map(m => [m.read, m.done, m.junk])]);
+    if (sg === sig && !force) return;
+    sig = sg;
+    if (reading) {
+      const m = B.find(x => x.id === reading);
+      top.textContent = `Message ${reading} · i : retour à l’index`;
+      body.textContent = m ? mailText(m).join('\n') : '';
+      return;
+    }
+    top.textContent = `/var/mail/${USER} [Messages : ${B.length} · Nouveaux : ${mailUnread()}]`;
+    body.innerHTML = B.length ? B.map((m, i) => `<span class="${i === sel ? 'mt-sel' : ''}">${esc(`${String(m.id).padStart(4)} ${m.junk ? 'J' : m.read ? ' ' : 'N'} ${txDate(m.t).slice(0, 5)}  ${m.from.slice(0, 22).padEnd(22)} (${m.subj})`)}</span>`).join('\n')
+      : (IDLE ? 'Pas de courrier.' : 'Mode libre : pas de courrier.');
+  }
+  function act(a) {
+    const B = L(), m = reading ? B.find(x => x.id === reading) : B[sel];
+    if (a === 'quit') { if (reading) { reading = 0; return render(true); } return closeTab('mutt'); }
+    if (a === 'index') { reading = 0; return render(true); }
+    if (a === 'down' || a === 'up') { if (!reading) { sel += a === 'down' ? 1 : -1; render(); } return; }
+    if (!m) return;
+    if (a === 'open') { reading = m.id; if (!m.read) { m.read = 1; ach('mail1'); saveGame(); } return render(true); }
+    const x = { a: { req: 'accepter', vc: 'accepter', plainte: 'geste', urssaf: 'declarer' }, r: { req: 'refuser', vc: 'refuser', plainte: 'ignorer' }, s: { phish: 'signaler', info: 'signaler' }, o: { phish: 'ouvrir', info: 'ouvrir' } }[a]?.[m.k];
+    line.textContent = x ? mailAct(m.id, x) : 'Rien de ce genre pour ce message (a : accepter, r : refuser, s : signaler, o : ouvrir).';
+    render(true);
+  }
+  function key(e) {
+    const a = { ArrowDown: 'down', ArrowUp: 'up', j: 'down', k: 'up', Enter: 'open', i: 'index', Escape: 'index', a: 'a', r: 'r', s: 's', o: 'o', q: 'quit', Q: 'quit' }[e.key];
+    if (a) { e.preventDefault(); act(a); }
+  }
+  el.addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (b) act(b.dataset.tk); });
+  render(true);
+  return { el, key, render: () => render(), redraw: () => render(true), title: () => 'mutt', tname: () => 'mutt' };
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
-const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF', incident: 'Incidents' };
+const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF', incident: 'Incidents', client: 'Clients', levee: 'Levée de fonds' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
 const txDate = t => { const d = new Date(t), z = n => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 const isoLocal = t => {                          // 2026-11-24T04:01:34+01:00 : l'heure locale, avec son décalage (comme une vraie API)
@@ -10959,7 +11260,7 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
   const tin = ECO.tin * sp * tk * skillMult('tin'), tout = ECO.tout * sp * tk, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
     per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1) * ipoMult(),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
-    crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1), fail: a.fail * skillMult('fail'),
+    crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1) * debtK(), fail: a.fail * skillMult('fail'),
     tin, tout, cost: (tin * m.in + tout * m.out) / 1e6, lv, leadK, lead: leadK * (tin * lm.in + tout * lm.out) / 1e6,
     hw,
   };
@@ -11109,6 +11410,7 @@ function autoShip() {                            // barre pleine : en production
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
   hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité${cot ? ` − $${usd(cot)} d’URSSAF` : ''} = ${signed(net)}`, 'ok');
+  if (EV_ON && shipped >= URSSAF_ACRE && shipped % 12 === 0) mailUrssaf();   // la déclaration trimestrielle
   if (EV_ON && chance(incRisk())) setTimeout(() => { if (mode === 'idle' && claudeOn) incStart(); }, ri(4000, 12000));   // le ship fait tomber la prod, quelques secondes après
   if (shipped === 1 || shipped % 10 === 0) {     // les jalons : le grand écran et une ligne dans le terminal
     showShipped(v, ri(3000, 4800));
@@ -11231,7 +11533,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
