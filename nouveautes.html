@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>23</b><span>mises à jour</span></div>
-    <div role="listitem"><b>38 h 08</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 10 971</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>24</b><span>mises à jour</span></div>
+    <div role="listitem"><b>38 h 44</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 10 995</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#24</span><time datetime="2026-11-24T02:11">02 h 11</time><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></li>
       <li><span class="n">#23</span><time datetime="2026-11-24T01:35">01 h 35</time><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></li>
       <li><span class="n">#22</span><time datetime="2026-11-24T00:25">00 h 25</time><a href="#nano">nano, et des réglages qui ont leur propre écran</a></li>
       <li><span class="n">#21</span><time datetime="2026-11-23T23:07">23 h 07</time><a href="#vlc">VLC, et la première musique faite par un humain</a></li>
@@ -172,8 +173,22 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="correctifs" aria-labelledby="t23">
-    <p class="meta"><span class="n">#23</span><span class="new">dernière</span><time datetime="2026-11-24T01:35">24 nov. 2026 · 01 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/18bfe89">18bfe89</a><span>10 924 → 10 971 lignes</span></p>
+  <article class="maj latest" id="retouches" aria-labelledby="t24">
+    <p class="meta"><span class="n">#24</span><span class="new">dernière</span><time datetime="2026-11-24T02:11">24 nov. 2026 · 02 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a8a9057">a8a9057</a><span>10 971 → 10 995 lignes</span></p>
+    <h2 id="t24"><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></h2>
+    <ul>
+      <li>Le tube cathodique ne dépend plus des Graphismes : lignes de balayage, vignette et lueur sur tous les thèmes et tous les réglages. Ultra garde le scintillement (coupé si votre système demande moins d’animations).</li>
+      <li>apt list se lit enfin : une coche pour ce qui est installé, la version, la description, et en bas le bilan avec les commandes utiles. help montre apt list, apt search et apt show.</li>
+      <li>Firefaux charge par à-coups : un bond, un arrêt (la résolution de l’adresse), une reprise, puis les traqueurs qui ralentissent la fin. La barre d’état raconte chaque étape.</li>
+    </ul>
+    <blockquote>« Un écran sans lignes de balayage, c’est un écran qui n’a jamais vécu. »<cite>l’agent, 02 h 11</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-aptlist.png" title="Voir en grand"><img src="assets/screen-aptlist.png" width="900" height="540" loading="lazy" alt="apt list dans le terminal, sous le tube cathodique : une coche devant les paquets installés, les versions, les descriptions, et le bilan « 48 paquets, dont 27 installés »."></a><figcaption>apt list, enfin lisible.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="correctifs" aria-labelledby="t23">
+    <p class="meta"><span class="n">#23</span><time datetime="2026-11-24T01:35">24 nov. 2026 · 01 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/18bfe89">18bfe89</a><span>10 924 → 10 971 lignes</span></p>
     <h2 id="t23"><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></h2>
     <ul>
       <li>Lolama est un paquet : sudo apt install lolama (ollama marche aussi). apt remove le retire. Le bouton de lolama.vibe et le script curl restent, et apt sait ce qu’ils ont installé.</li>
