@@ -1288,6 +1288,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 /* incident de prod : le badge rouge, qui clignote (sauf si le système demande moins d'animations) */
 .hud-inc { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--ink); background: var(--red); font-weight: 700; animation: blink 1.2s steps(2) infinite; }
 .hud-inc[hidden] { display: none; }
+.hud-world { flex: none; padding: 0 .8ch; border: 1px solid var(--orange); border-radius: 2px; color: var(--orange); }
+.hud-world[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .hud-inc { animation: none; } }
 /* status.vibe : l'état des services, l'incident en cours, l'historique */
 .st-band { padding: .7em 1.8ch; border-radius: 4px; font-weight: 700; }
@@ -1374,6 +1376,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <span class="hud-ship"><span id="hud-ver"></span><span class="hud-bar" role="progressbar" aria-label="Avancement du projet : ship automatique à 100 %" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="hud-fill"></span></span><b id="hud-pct">0 %</b><span class="dim" id="hud-eta"></span></span>
     <span class="hud-boost" id="hud-boost" hidden></span>
     <span class="hud-inc" id="hud-inc" hidden title="Incident de prod en cours : tapez incident"></span>
+    <span class="hud-world" id="hud-world" hidden title="Une panne du monde : tapez actu"></span>
     <span class="hud-info" id="hud-info" aria-live="off"></span>
     <button class="tbtn hud-store" type="button" data-act="store" aria-keyshortcuts="B"><kbd>B</kbd><span class="lbl"> store</span></button>
   </div>
@@ -2104,7 +2107,7 @@ const usdFine = n => n < 0.01 ? n.toFixed(4) : usd(n);
 const usage = { in: 0, out: 0, usd: 0, by: {} };
 function bill(model, tin, tout) {
   const m = MODELS[model], b = usage.by[model] || (usage.by[model] = { in: 0, out: 0, usd: 0 });
-  const d = (tin * m.in + tout * m.out) / 1e6 * (IDLE && G.chal === 'budget' ? 2 : 1);   // défi « Tokens au prix fort »
+  const d = (tin * m.in + tout * m.out) / 1e6 * (IDLE && G.chal === 'budget' ? 2 : 1) * (worldOn('price') ? 1.5 : 1);   // défi « Tokens au prix fort »
   b.in += tin; b.out += tout; b.usd += d;
   usage.in += tin; usage.out += tout; usage.usd += d;
   if (IDLE) { G.bill += d; G.spent += d; }      // mode idle : déduit au prochain ship
@@ -2238,7 +2241,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
-  pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2337,6 +2340,8 @@ const ACH = [
   { id: 'review', g: '⌕', n: 'Lignes relues : enfin', d: 'Fermer une pull request piégée, après l’avoir relue.', p: 13.3 },
   { id: 'review10', g: '≣', n: 'Relecteur', d: 'Relire dix pull requests.', p: 4.4 },
   { id: 'lgtm', g: 'LG', n: 'LGTM', d: 'Fusionner une pull request piégée sans l’avoir ouverte.', p: 27.5, h: 1 },
+  { id: 'multicloud', g: '⇉', n: 'Multi-cloud', d: 'Shipper pendant la panne de l’API de votre plateforme principale.', p: 5.9 },
+  { id: 'canicule', g: '°C', n: 'Il fait chaud dans la salle serveur', d: 'Traverser une canicule sans que le PC plante.', p: 14.6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2354,7 +2359,8 @@ G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des 
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
-G.pr = { ...G_DEF().pr, ...(G.pr || {}) };       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
+G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
+G.world = { ...G_DEF().world, ...(G.world || {}) };   // les pannes du monde : celle en cours, la prochaine, l'historique       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3166,6 +3172,7 @@ const PRE_HELP_LINES = () => [
     [H(['  plateformes       ', 'org'], 'vos plateformes · switch <plateforme> : premier plan · bg <plateforme> : arrière-plan'), '', 20],
     [H(['  ultracode         ', 'org'], 'mode boost de Claude Code (Codex : xhigh · Mistral : flash) · au store, 1 min par jour'), '', 20],
     [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · sudo apt install lolama (ou lolama.vibe, githype.vibe dans Firefaux)'), '', 20],
+    [H(['  actu              ', 'org'], 'les pannes du monde : celle en cours, les dernières'), '', 20],
     [H(['  mail              ', 'org'], 'le courrier : clients, investisseurs, URSSAF, hameçonnage · mail <n> pour lire (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam), musique (vlc)'), '', 20],
@@ -3200,6 +3207,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
     [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  actu             ', 'org'], 'les pannes du monde : celle en cours (API, canicule, prix des tokens, nouveau modèle, électricité), les dernières'), '', 20],
     [H(['  pr               ', 'org'], 'les pull requests des agents : pr list, pr diff <n> (relire), pr merge <n>, pr close <n> · au ship, ils fusionnent tout'), '', 20],
     [H(['  defi             ', 'org'], 'le défi de la startup en cours (choisi à l’introduction en bourse) et ceux réussis · defi abandon'), '', 20],
     [H(['  mail             ', 'org'], 'le courrier : les clients, les investisseurs, l’URSSAF, le hameçonnage · mail <n> pour lire, mail <n> <action> pour répondre (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20],
@@ -3879,7 +3887,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'actu', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4775,6 +4783,7 @@ async function runCommand(raw) {
   if (['incident', 'incidents', 'pager', 'pagerdoudou', 'astreinte'].includes(head)) return incCmd(rest);
   if (head === 'mail' || head === 'mailx') return mailCmd(rest);
   if (head === 'pr' || (head === 'gh' && rest[0] === 'pr')) return prCmd(head === 'gh' ? rest.slice(1) : rest);
+  if (['actu', 'actus', 'news', 'meteo', 'météo'].includes(head)) return worldCmd();
   if (head === 'defi' || head === 'défi' || head === 'defis' || head === 'défis') return defiCmd(rest);
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
@@ -5509,7 +5518,7 @@ function pcLoad(o = {}) {
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
   const heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
   return { n, bg, plats, boost: (c.perf ?? 1) * (1 + .6 * (k.cr - 1)) * (1 + .3 * (k.rr - 1)), demand, util, cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
-    tTarget: 30 + 62 * heat / co.w, cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
+    tTarget: 30 + (worldOn('heat') ? 12 : 0) + 62 * heat / co.w, cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
 }
 function hwState(o = {}) {                       // le rendement de la machine : 1 = rien ne freine les agents ; 0 = PC à terre
   const L = pcLoad(o), temp = o.off ? L.tTarget : PCS.temp;
@@ -8747,6 +8756,7 @@ const WEB_LIVE = {
   money: () => `$${usd(G.money)}`,
   val: () => bigMoney(valuation()),               // bourse.vibe : la valorisation
   inc: () => incBand(),                           // status.vibe : l'incident en cours
+  world: () => worldBand(),                       // Vibegle : la panne du monde en cours
   pcnow: () => {
     const s = hwState(), v = pcVerdict(s);
     return `En ce moment : <b class="${v.cls}">${v.label}</b> <span class="dim">· ${esc(v.why)} · ${Math.round(s.temp)} °C · ${Math.round(s.draw)}/${s.psuW} W</span>`;
@@ -8762,6 +8772,7 @@ function webHome() {
     <div class="wp-logo"><span class="okc">V</span><span class="errc">i</span><span class="wrn">b</span><span class="blu">e</span><span class="okc">g</span><span class="errc">l</span><span class="wrn">e</span></div>
     <form class="wp-search" data-search><input name="q" placeholder="Rechercher sur le Web ou demander à un agent" aria-label="Rechercher" spellcheck="false" autocomplete="off"></form>
     <p class="dim">Résultats générés par un agent qui ne sait pas non plus.</p></div>
+    <div data-live="world">${worldBand()}</div>
     <div class="wp-tiles">
       ${tile('https://store.agents.vibe/', 'store.agents.vibe', 'agents, terminal, skills, migration')}
       ${tile('https://matos.vibe/', 'matos.vibe', 'processeurs, cartes mères, RAM, cartes graphiques, alims')}
@@ -9357,6 +9368,7 @@ function webStatus() {
   return { title: `status.vibe · ${PROJ}`, html: `<div class="wp vb"><h1>status.vibe</h1><p class="dim">L’état de ${esc(PROJ)}, en production. Mis à jour en direct, rédigé par un agent.</p>
     <div data-live="inc">${incBand()}</div>
     <h2>Les services</h2><div class="st-svc">${svc}</div>
+    <h2>Les fournisseurs</h2><div class="st-svc">${['mistral', 'codex', 'claude', 'moon'].map(k => { const ko = G.world.ev?.k === 'api' && G.world.ev.p === k; return `<span>API ${esc(CLIS[k].label)}</span><b class="${ko ? 'ko' : 'ok'}">${ko ? 'Panne (529 Overloaded)' : 'Opérationnel'}</b>`; }).join('')}</div>
     <p class="dim">Disponibilité depuis le début de la startup : <b>${frx(up.toFixed(2))} %</b> (objectif : 99,99 %, fixé un vendredi).</p>
     <h2>Les derniers incidents</h2>${hist}
     <p class="dim">Dans le terminal : <code>incident</code> pour le diagnostic, <code>incident agent</code> pour le confier, <code>incident log</code> pour l’historique.</p></div>` };
@@ -9796,6 +9808,78 @@ function webPulls(u) {                             // GitHype : les PR ouvertes,
     <div class="pr-list">${rows}</div>${diff}
     ${IDLE && P.open.length ? '<p><button type="button" class="dl-real" data-pr="all">Tout fusionner sans lire (LGTM)</button></p>' : ''}
     <p class="dim">Dans le terminal : <code>pr list</code>, <code>pr diff &lt;n&gt;</code>, <code>pr merge &lt;n&gt;</code>, <code>pr close &lt;n&gt;</code>. Au ship, les agents fusionnent tout ce qui reste ouvert.</p></div>` };
+}
+
+/* ---------- les pannes du monde : des événements qui ne dépendent pas de vous ----------
+   Toutes les 6 à 12 minutes (agents lancés, EV_ON), pendant 1 min 30 à 5 min : la panne d'une API (la plateforme d'une de vos équipes ne
+   produit plus rien, ses tokens partent en nouvelles tentatives ; une autre plateforme au premier plan, l'arrière-plan ou l'IA locale
+   continuent), une canicule (+12 °C dans la pièce : le PC chauffe, ralentit, peut planter), la hausse du prix des tokens (×1,5), la
+   sortie d'un nouveau modèle (les agents lisent l'annonce : −30 % de travail), un pic de consommation (le kWh ×3). actu : ce qui se passe. */
+const WORLD = {
+  api: { n: p => `Panne de l’API ${CLIS[p].label}`, d: p => `${CLIS[p].label} répond « 529 Overloaded » : ses agents ne produisent plus rien, et leurs nouvelles tentatives se facturent. Une autre plateforme, l’arrière-plan ou l’IA locale continuent.`, dur: [120, 240] },
+  heat: { n: () => 'Canicule', d: () => '+12 °C dans la pièce : le PC chauffe, ralentit, et peut planter. Un meilleur refroidissement aide.', dur: [180, 300] },
+  price: { n: () => 'Hausse du prix des tokens', d: () => 'Les fournisseurs « alignent leurs prix sur la demande » : ×1,5 sur les tokens.', dur: [150, 270] },
+  hype: { n: () => 'Un nouveau modèle sort', d: () => 'Les agents lisent l’annonce, puis les réactions à l’annonce, puis les réactions aux réactions : −30 % de travail.', dur: [90, 180] },
+  elec: { n: () => 'Pic de consommation', d: () => 'Tout le pays a lancé ses agents en même temps : le kWh coûte trois fois plus cher.', dur: [120, 240] },
+};
+const API_PLATS = ['mistral', 'codex', 'claude', 'moon'];
+function worldOn(k) { const E = IDLE && G.world?.ev; return !!E && E.k === k && Date.now() < E.until; }
+function worldK(ai) {                              // ce que la panne en cours fait au travail et aux tokens d'une équipe
+  const E = IDLE && G.world?.ev;
+  if (!E || Date.now() >= E.until) return { work: 1, tok: 1 };
+  if (E.k === 'api' && E.p === ai) return { work: 0, tok: .2 };
+  if (E.k === 'hype') return { work: .7, tok: 1 };
+  return { work: 1, tok: 1 };
+}
+const worldName = E => WORLD[E.k].n(E.p);
+function worldStart(k, p) {                        // une panne du monde commence (k, p : pour forcer)
+  if (!IDLE || G.world.ev) return false;
+  if (!WORLD[k]) k = pick(Object.keys(WORLD));
+  if (k === 'api') {
+    const own = API_PLATS.filter(x => G.own[x]);
+    p = API_PLATS.includes(p) ? p : API_PLATS.includes(G.ai) && chance(.7) ? G.ai : pick(own.length ? own : ['mistral']);
+  }
+  const W = WORLD[k], dur = ri(...W.dur), E = G.world.ev = { k, p: p || '', t0: Date.now(), until: Date.now() + dur * 1000, crash: 0 };
+  G.world.n++;
+  shellPrint(H(['◌ Actualité : ', 'wrn'], [worldName(E), 'fgc'], ` · ${W.d(E.p)} (environ ${fmtEta(dur)}) · `, ['actu', 'org']));
+  if (k === 'api' && claudeOn && provider === p) panes.forEach(x => { if (x.state !== 'down') emit(x, { k: 'done', c: 'errc', t: `✗ API Error: 529 Overloaded · nouvelle tentative dans ${ri(2, 9)} s (facturée)` }, true); });
+  if (leadOn() && k === 'api' && provider === p) leadLog(H(['◌ ', 'wrn'], `${CLIS[p].label} API is down. I will wait. Billing will not.`));
+  hudNote(`◌ ${worldName(E)} · actu`, 'bug');
+  toast(`<b>Actualité</b> · ${esc(worldName(E))}`, 4000);
+  saveGame();
+  return true;
+}
+function worldEnd() {                              // la panne se termine
+  const E = G.world.ev;
+  if (!E) return;
+  G.world.ev = null;
+  G.world.log = [...G.world.log, [E.t0, E.k, E.p, Math.round((Date.now() - E.t0) / 1000)]].slice(-8);
+  if (E.k === 'heat' && !E.crash) ach('canicule');
+  shellPrint(H(['◌ ', 'dim'], `Fin : ${lcFirst(worldName(E))}.`, E.k === 'heat' && !E.crash ? ['  Le PC a tenu.', 'okc'] : ''));
+  saveGame();
+}
+function worldTick() {                             // chaque seconde : la fin de la panne en cours, la suivante (au hasard)
+  if (!IDLE) return;
+  const W = G.world, now = Date.now();
+  if (W.ev && now >= W.ev.until) worldEnd();
+  if (!EV_ON || !claudeOn || paused || !titleEl.hidden || W.ev) return;
+  if (!W.next) W.next = now + ri(360, 720) * 1e3;
+  if (now < W.next) return;
+  W.next = now + ri(360, 720) * 1e3;
+  worldStart();
+}
+function worldBand() {                             // Vibegle : la une
+  const E = IDLE && G.world?.ev;
+  return E ? `<p class="wp-band"><b>À la une · ${esc(worldName(E))}</b> · ${esc(WORLD[E.k].d(E.p))}</p>` : '';
+}
+function worldCmd() {                              // actu : la panne du monde en cours, et les dernières
+  if (!IDLE) return shellPrint('Mode libre : le monde vous laisse tranquille.', 'dim');
+  const W = G.world, E = W.ev;
+  return printLines([
+    E ? [H(['◌ ', 'wrn'], [worldName(E), 'fgc'], ` · encore ${fmtEta(Math.max(0, Math.round((E.until - Date.now()) / 1000)))} · ${WORLD[E.k].d(E.p)}`), '', 20]
+      : ['Rien à signaler : le monde tourne, vos agents aussi. Ça ne durera pas.', 'dim', 20],
+    ...W.log.slice().reverse().map(([t, k, pp, d]) => [`  ${txDate(t)}  ${WORLD[k] ? WORLD[k].n(pp || 'mistral') : k} · ${fmtEta(d)}`, 'dim', 20]),
+  ]);
 }
 
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
@@ -11229,7 +11313,7 @@ const ELEC = { kwh: .25, k: 1200, tiers: [
   { n: 'Petit réacteur modulaire', m: .05, cost: 900000, d: 'Livré avec un agent qui affirme avoir lu la doc de sûreté. −95 %. Le voisinage n’a pas été consulté.' },
 ] };
 const wallW = (L = hwState()) => L.draw / (part('psu').eff || .85);          // W au compteur (ce que tire le PC, plus ce que l'alim perd)
-const kwhPrice = () => ELEC.kwh * ELEC.tiers[Math.min(ELEC.tiers.length - 1, G.elecT || 0)].m;
+const kwhPrice = () => ELEC.kwh * ELEC.tiers[Math.min(ELEC.tiers.length - 1, G.elecT || 0)].m * (worldOn('elec') ? 3 : 1);   // un pic de consommation : ×3
 const elecRate = W => W / 1000 * kwhPrice() * ELEC.k / 3600;                 // $ par seconde de jeu
 function elecTick(hw, dt) {                      // le compteur tourne : la facture est payée au prochain ship, avec les tokens
   const W = wallW(hw), c = elecRate(W) * dt;
@@ -11475,9 +11559,9 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
   const hw = o.hw || (IDLE ? hwState(off ? { n, lead: lv ? 1 : 0, ...bgLoad(), off: true } : {}) : { f: 1, rev: 1, tok: 1, boost: 1, down: false });
   const B = !off && boostOn(ai) ? BOOST[ai] : null;   // mode boost en cours (ultracode, xhigh, flash) : jamais hors ligne
   const sp = speed * hw.f, tk = skillMult('tok') * hw.tok * (B?.tok ?? 1);   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
-  const tin = ECO.tin * sp * tk * skillMult('tin'), tout = ECO.tout * sp * tk, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
+  const W = worldK(ai), tin = ECO.tin * sp * tk * skillMult('tin') * W.tok, tout = ECO.tout * sp * tk * W.tok, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
-    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1) * ipoMult(),   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
+    per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1) * ipoMult() * W.work,   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
     crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1) * debtK(), fail: a.fail * skillMult('fail'),
     tin, tout, cost: (tin * m.in + tout * m.out) / 1e6, lv, leadK, lead: leadK * (tin * lm.in + tout * lm.out) / 1e6,
     hw,
@@ -11624,6 +11708,7 @@ function autoShip() {                            // barre pleine : en production
   vhAdd();                                       // bourse.vibe : un point de plus sur le cours
   const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
   if (day.getDay() === 5) ach('friday');
+  if (G.world.ev?.k === 'api' && G.world.ev.p === G.ai) ach('multicloud');   // l'API principale est en panne, et ça shippe quand même
   if (day.getHours() === 3) ach('night');
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
@@ -11728,6 +11813,9 @@ function renderHud() {
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
     : `tokens −$${usd(G.bill)} · électricité −$${usd(G.elec || 0)}${meter ? ` (${Math.round(wallW(r.hw))} W)` : ' (PC en veille)'} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
+  const we = $('#hud-world'), E = G.world.ev;     // une panne du monde : laquelle, combien de temps encore
+  we.hidden = !E;
+  if (E) we.textContent = `◌ ${worldName(E)} · ${mmss(Math.max(0, (E.until - Date.now()) / 1000))}`;
   const ie = $('#hud-inc'), I = G.inc;            // l'incident de prod : son numéro, sa durée, les remboursements
   ie.hidden = !I;
   if (I) ie.textContent = `▲ ${I.id} · ${mmss(incDur(I))} · −$${usd(I.lost)}`;
@@ -11752,7 +11840,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
@@ -12744,6 +12832,7 @@ function haltSession() {
 }
 async function pcCrash(kind, L) {
   if (pcDown || mode !== 'idle') return;
+  if (G.world?.ev) G.world.ev.crash = 1;          // une canicule traversée en plantant ne compte pas
   pcDown = true;
   mode = 'rebooting';
   ach('pccrash');
