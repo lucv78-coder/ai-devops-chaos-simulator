@@ -565,6 +565,33 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 }
 .xf-wall .t-art { margin: 0; font-size: min(16px, calc(70vw / 44), calc(42dvh / 21)); }
 .xf-wall p { color: var(--dim); }
+/* les fonds d'écran : le logo (par défaut), Tux, la grille rétro, le code, la citation, uni ; aux couleurs du thème */
+.xf-wall[data-wall="tux"] { opacity: .3; }
+.wall-tux svg { display: block; width: auto; height: min(34dvh, 40vw); image-rendering: pixelated; }
+.xf-wall[data-wall="grille"] { grid-template-rows: 1fr 1fr; place-content: stretch; justify-items: stretch; gap: 0; opacity: .5; overflow: hidden; }
+.wall-sun { align-self: end; justify-self: center; width: min(50dvh, 56vw); aspect-ratio: 2 / 1; border-radius: 999px 999px 0 0;
+  background: linear-gradient(to bottom, var(--yellow), var(--orange) 55%, var(--red));
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 45% 52%, #000 52% 64%, transparent 64% 70%, #000 70% 80%, transparent 80% 85%, #000 85%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 45% 52%, #000 52% 64%, transparent 64% 70%, #000 70% 80%, transparent 80% 85%, #000 85%); }
+.wall-grid { width: 220%; margin-left: -60%; border-top: 2px solid var(--orange); transform: perspective(240px) rotateX(58deg); transform-origin: top;
+  background-image: linear-gradient(var(--orange) 1px, transparent 1px), linear-gradient(90deg, var(--orange) 1px, transparent 1px); background-size: 3.2em 3.2em;
+  -webkit-mask-image: linear-gradient(#000 20%, transparent 90%); mask-image: linear-gradient(#000 20%, transparent 90%); }
+.xf-wall[data-wall="code"] { place-content: stretch; justify-items: stretch; opacity: .13; }
+.wall-code { margin: 0; padding: 1em 2ch; overflow: hidden; color: var(--fg); font-size: .85em; text-align: left; white-space: pre; }
+.xf-wall[data-wall="citation"] { opacity: .32; }
+.wall-quote { margin: 0 4ch; color: var(--orange); font-size: clamp(1.4em, 4vw, 2.8em); font-weight: 700; }
+.wall-quote span { display: block; margin-top: .7em; color: var(--dim); font-size: .38em; font-weight: 400; }
+/* Paramètres du bureau : les vignettes des fonds d'écran */
+.xfs-walls { display: grid; grid-template-columns: repeat(auto-fill, minmax(18ch, 1fr)); gap: .8em 1.2ch; margin-top: .6em; }
+.xfs-wall { display: grid; gap: .15em; padding: .5em 1ch .6em; border: 1px solid var(--rule); border-radius: 4px; color: var(--fg); text-align: left; }
+.xfs-wall:hover { border-color: var(--orange); }
+.xfs-wall.on { border-color: var(--orange); background: color-mix(in srgb, var(--orange) 14%, transparent); }
+.xfs-wall .pv { display: grid; place-items: center; height: 4.6em; margin-bottom: .35em; overflow: hidden; border-radius: 3px; background: var(--bg2); color: var(--orange); font-weight: 700; }
+.xfs-wall .pv svg { height: 80%; width: auto; image-rendering: pixelated; }
+.xfs-wall .pv.grille { background: linear-gradient(to bottom, transparent 50%, color-mix(in srgb, var(--orange) 30%, transparent) 50% 52%, transparent 52%), radial-gradient(circle at 50% 50%, var(--orange) 0 22%, transparent 23%), var(--bg2); }
+.xfs-wall .pv.code { justify-items: start; padding: .3em 1ch; color: var(--dim); font-size: .7em; font-weight: 400; white-space: pre; }
+.xfs-wall .d { color: var(--dim); font-size: .85em; }
+.xfs h3 { margin-top: .4em; }
 /* icônes du bureau (xfdesktop) : en colonnes à gauche, sous les fenêtres ; le fond reste cliquable entre elles */
 .xf-icons {
   position: absolute; top: .6em; bottom: .6em; left: .6ch; z-index: 0; pointer-events: none;
@@ -2277,7 +2304,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, xfw: {} });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2384,6 +2411,7 @@ const ACH = [
   { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
   { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
+  { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2406,7 +2434,8 @@ G.world = { ...G_DEF().world, ...(G.world || {}) };
 G.hum = { ...(G.hum || {}) };                     // les humains : { stag: { t, off (congés jusqu'à), fri (vendredis shippés) } }
 G.humS = { paid: 0, quit: 0, ...(G.humS || {}) };
 G.key = { ...G_DEF().key, ...(G.key || {}) };     // la clé d'API : sa version, .env suivi par git ou non, la prochaine fuite
-G.leakS = { ...G_DEF().leakS, ...(G.leakS || {}) };   // les pannes du monde : celle en cours, la prochaine, l'historique       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
+G.leakS = { ...G_DEF().leakS, ...(G.leakS || {}) };
+G.xfd = { ...G_DEF().xfd, ...(G.xfd || {}) };     // le bureau Xfce : le fond d'écran, la place des icônes, le lancement au démarrage   // les pannes du monde : celle en cours, la prochaine, l'historique       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3939,7 +3968,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-settings-manager', 'xfdesktop-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4850,6 +4879,14 @@ async function runCommand(raw) {
     return shellPrint('Le coffre de prod se force depuis le bunker : tapez fallout, puis hack.', 'dim');
   }
   const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg === 'thunderbird' ? 'blunderbird' : rawProg;   // firefox, chromium… : c'est Firefaux
+  if (Object.hasOwn(XFS_CMD, rawProg)) {          // les Paramètres du bureau : il leur faut le bureau
+    if (!installed.has('xfce4')) return notInstalled(rawProg, 'xfce4');
+    if (!xfOn) {
+      shellPrint(`(${rawProg}:${ri(30000, 39999)}): Gtk-WARNING **: ${new Date().toTimeString().slice(0, 8)}.${ri(100, 999)}: cannot open display: `, 'errc');
+      return shellPrint(H('Les paramètres du bureau ont besoin du bureau : tapez ', ['xfce', 'org'], `, puis ${rawProg}.`), 'dim');
+    }
+    return xfSettingsOpen(XFS_CMD[rawProg]);
+  }
   if (progCmd === 'nano' || progCmd === 'pico') return nanoCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // l'éditeur du terminal
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
     if (!installed.has(PROGS[progCmd].pkg || progCmd)) return notInstalled(progCmd, PROGS[progCmd].pkg || progCmd);
@@ -5345,6 +5382,7 @@ const PROGS = {
   lynx: { label: 'lynx', delay: 1000, nomenu: true, pkg: 'firefaux', icon: '◍', make: () => makeLynx() },
   nvlc: { label: 'nvlc', delay: 250, nomenu: true, pkg: 'vlc', icon: '▲', make: () => makeNvlc() },
   steamcmd: { label: 'steamcmd', delay: 1000, nomenu: true, pkg: 'steam', icon: '◎', make: () => makeSteamcmd() },
+  'xfce4-settings': { label: 'Paramètres du bureau', delay: 1000, gui: true, nomenu: true, pkg: 'xfce4', icon: '⚙', menu: 'Paramètres du bureau', make: () => makeXfSettings() },
   'xfce4-about': { label: 'À propos', delay: 2000, gui: true, nomenu: true, pkg: 'xfce4', icon: 'ⓘ', menu: 'À propos', make: () => makeAbout() },
   mutt: { label: 'mutt', delay: 1000, nomenu: true, pkg: 'blunderbird', icon: '✉', make: () => makeMutt() },
   blunderbird: { label: 'Courrier', delay: 1000, gui: true, cat: 'Internet', icon: '✉', menu: 'Courrier (Blunderbird)', desc: 'les clients, les investisseurs, l’URSSAF · et le hameçonnage', make: () => makeMail() },
@@ -6208,7 +6246,7 @@ const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
 const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66], blunderbird: [.16, .07, .66, .8],
-  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82] };
+  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82], 'xfce4-settings': [.22, .06, .56, .82] };
 const xfName = n => n === 'zsh' ? 'Terminal' : PROGS[n]?.term ? `Terminal ${PROGS[n].term}` : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => isTerm(n) ? `${xfName(n)} · ${USER}@prod-01: ${tildePath(n === liveTerm ? cwd : TERMS[n]?.cwd || HOME)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => isTerm(n) ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -6246,7 +6284,7 @@ async function xfEnter() {
   shell.inert = false;
   $('#foot').inert = true;                        // la barre tmux reste cachée sous le bureau
   xfceEl.hidden = false;
-  $('.xf-wall').innerHTML = `<div class="t-art">${asciiTitle()}</div><p>prod-01 · Vibian GNU/Linux 13 (friday) · ${GAME} v${VERSION}</p>`;
+  xfWallDraw();
   $('.xf-user').textContent = USER;
   xfIconSel = '';
   xfIconsSync(true);
@@ -6622,6 +6660,71 @@ function xfWinMenu(n, x, y) {
   ]);
 }
 
+/* le fond d'écran et les Paramètres du bureau (xfce4-settings-manager) : Bureau (le fond, bientôt les icônes), gardés dans la partie */
+const XF_WALLS = [['logo', 'Le logo', 'AI DevOps Chaos Simulator, en grand'], ['tux', 'Tux', 'le pingouin du démarrage'], ['grille', 'Grille rétro', 'un horizon néon, façon 1986'],
+  ['code', 'Code', 'du code que personne n’a relu'], ['citation', 'Citation', '« Ça marche sur ma machine. »'], ['uni', 'Uni', 'la couleur du thème, rien d’autre']];
+const XFS_CMD = { 'xfce4-settings-manager': 'bureau', 'xfdesktop-settings': 'bureau', 'xfce4-settings': 'bureau' };
+const xfWall = () => XF_WALLS.some(w => w[0] === G.xfd?.wall) ? G.xfd.wall : 'logo';
+function xfWallHtml(k) {
+  if (k === 'tux') return `<div class="wall-tux">${tuxSvg()}</div><p>Vibian GNU/Linux 13 (friday)</p>`;
+  if (k === 'grille') return '<div class="wall-sun"></div><div class="wall-grid"></div>';
+  if (k === 'code') return `<pre class="wall-code">${esc(hackerCode(70).join('\n'))}</pre>`;
+  if (k === 'citation') return '<blockquote class="wall-quote">« Ça marche sur ma machine. »<span>— un agent, un vendredi, à 17 h 58</span></blockquote>';
+  if (k === 'uni') return '';
+  return `<div class="t-art">${asciiTitle()}</div><p>prod-01 · Vibian GNU/Linux 13 (friday) · ${GAME} v${VERSION}</p>`;
+}
+function xfWallDraw() { const el = $('.xf-wall'), k = xfWall(); el.dataset.wall = k; el.innerHTML = xfWallHtml(k); }
+function xfWallSet(k) {                            // un autre fond : tout de suite, et gardé
+  if (!XF_WALLS.some(w => w[0] === k)) return false;
+  G.xfd = { ...G.xfd, wall: k };
+  if (k !== 'logo') ach('deco');
+  if (xfOn) xfWallDraw();
+  saveGame();
+  PROGS['xfce4-settings'].redraw?.();
+  return true;
+}
+const XFS_TABS = [['bureau', 'Bureau']];
+const XFS_PV = { logo: 'AI', citation: '« … »', uni: '' };
+const XFS_HTML = {
+  bureau: () => `<h3>Fond d’écran</h3><div class="xfs-walls">${XF_WALLS.map(([k, n, d]) => `<button type="button" class="xfs-wall${xfWall() === k ? ' on' : ''}" data-wall="${k}" aria-pressed="${xfWall() === k}">`
+    + `<span class="pv ${k}" aria-hidden="true">${k === 'tux' ? tuxSvg() : k === 'code' ? 'fn ship() {\n  // TODO\n}' : esc(XFS_PV[k] ?? '')}</span><b>${esc(n)}</b><span class="d">${esc(d)}</span></button>`).join('')}</div>`
+    + `<p class="abt-note">${IDLE ? 'Gardé dans la partie, avec la place des fenêtres. Clic droit sur le bureau : « Fond d’écran suivant ».' : 'Mode libre : le réglage vaut pour cette session.'}</p>`,
+};
+function xfSettingsOpen(tab) {                     // depuis le menu, le clic droit ou le terminal : la fenêtre, sur le bon onglet
+  if (!xfOn) return;
+  xfMenuClose();
+  openTab('xfce4-settings');
+  PROGS['xfce4-settings'].go?.(tab);
+}
+function makeXfSettings() {
+  const el = document.createElement('div');
+  el.className = 'prog abt xfs';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Paramètres du bureau');
+  el.innerHTML = '<div class="abt-head"><span class="abt-logo" aria-hidden="true">▨</span><div><h2>Paramètres du bureau</h2><p>xfce4-settings-manager · Xfce 4.20</p></div></div>'
+    + '<div class="abt-nav" role="tablist" aria-label="Paramètres du bureau"></div><div class="abt-body" role="tabpanel" tabindex="0"></div>';
+  const nav = el.querySelector('.abt-nav'), body = el.querySelector('.abt-body');
+  let tab = 'bureau', sig = '';
+  function draw(force) {
+    const n = XFS_TABS.map(([k, t]) => `<button type="button" role="tab" data-xfs="${k}" aria-selected="${k === tab}">${esc(t)}</button>`).join('');
+    if (nav.innerHTML !== n) nav.innerHTML = n;
+    const html = XFS_HTML[tab]();
+    if (html === sig && !force) return;
+    sig = html;
+    body.innerHTML = html;
+  }
+  function show(k) { tab = XFS_TABS.some(t => t[0] === k) ? k : 'bureau'; body.scrollTop = 0; draw(true); }
+  el.addEventListener('click', e => {
+    const t = e.target.closest('[data-xfs]'), w = e.target.closest('[data-wall]'), a = e.target.closest('[data-xfsa]');
+    if (t) show(t.dataset.xfs);
+    else if (w) xfWallSet(w.dataset.wall);
+    else if (a) XFS_ACT[a.dataset.xfsa]?.(a);
+  });
+  draw(true);
+  return { el, key: () => {}, render: () => draw(), redraw: () => draw(true), go: k => show(k), title: () => 'Paramètres du bureau', tname: () => 'Paramètres du bureau' };
+}
+const XFS_ACT = {};                                // les boutons des autres onglets (icônes, session) s'y ajoutent
+
 /* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
    navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
    d'une fenêtre à l'autre, et Ctrl+Alt pour le reste : ← → les moitiés de l'écran, ↑ agrandir, ↓ restaurer puis réduire, D le bureau
@@ -6724,6 +6827,7 @@ function xfMenuOpen() {
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('newterm', '❯', 'Nouveau terminal', 'une autre fenêtre : son dossier, son historique (ou Ctrl+B puis c)')
+    + item('xfce4-settings', '▨', 'Paramètres du bureau', 'fond d’écran, icônes, session et démarrage')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
     + item('xfce4-about', 'ⓘ', 'À propos', 'la config du PC, l’éditeur, les contributeurs, les agents')
     + item('reboot', '↻', 'Redémarrer', 'le PC repasse par le BIOS · DEL pour le setup')
@@ -6820,6 +6924,8 @@ deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'éc
     { ic: PROGS.thunar.icon, t: 'Gestionnaire de fichiers', run: () => xfLaunch('thunar') },
     { ic: '▦', t: 'Applications', k: 'Alt+F1', run: () => xfMenuOpen() },
     '-',
+    { ic: '▨', t: 'Fond d’écran suivant', run: () => xfWallSet(XF_WALLS[(XF_WALLS.findIndex(w => w[0] === xfWall()) + 1) % XF_WALLS.length][0]) },
+    { ic: '▨', t: 'Paramètres du bureau…', run: () => xfSettingsOpen('bureau') },
     { ic: '⚙', t: 'Paramètres', run: () => openSettings() },
     { ic: '↩', t: 'Déconnexion', run: () => xfExit() },
   ]);
@@ -9327,7 +9433,7 @@ function ipoDo(next = '') {                        // sonner la cloche : la star
   if (V >= 1e9) ach('licorne');
   if (ipo.n >= 3) ach('serial');
   const tx = [...(G.tx || []), [Date.now(), 'ipo', `Introduction en bourse de ${PROJ.toUpperCase()} (${bigMoney(V)}) : ${so} stock-options, bloquées quatre ans`, 0, 0]].slice(-200);
-  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, xfw: G.xfw, tx, ipo, chal: nx };
+  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, xfw: G.xfw, xfd: G.xfd, tx, ipo, chal: nx };
   G = { ...G_DEF(), ...keep };
   platInit();
   if (SANDBOX) sandboxFill();
