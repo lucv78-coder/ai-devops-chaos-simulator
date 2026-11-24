@@ -1377,6 +1377,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <span class="hud-boost" id="hud-boost" hidden></span>
     <span class="hud-inc" id="hud-inc" hidden title="Incident de prod en cours : tapez incident"></span>
     <span class="hud-world" id="hud-world" hidden title="Une panne du monde : tapez actu"></span>
+    <span class="hud-inc" id="hud-leak" hidden title="Clé d’API exposée : tapez keys"></span>
     <span class="hud-info" id="hud-info" aria-live="off"></span>
     <button class="tbtn hud-store" type="button" data-act="store" aria-keyshortcuts="B"><kbd>B</kbd><span class="lbl"> store</span></button>
   </div>
@@ -2241,7 +2242,8 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
-  pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2344,6 +2346,8 @@ const ACH = [
   { id: 'canicule', g: '°C', n: 'Il fait chaud dans la salle serveur', d: 'Traverser une canicule sans que le PC plante.', p: 14.6 },
   { id: 'humain', g: 'Hu', n: 'Un humain dans la boucle', d: 'Embaucher un humain. Il lit le code. Certains jours.', p: 18.9 },
   { id: 'burnout', g: 'zZ', n: 'Burn-out', d: 'Pousser un humain à la démission à force de shipper le vendredi.', p: 3.7, h: 1 },
+  { id: 'fuite', g: 'sk', n: 'sk-live-…', d: 'Se faire voler une clé d’API : un agent a commité le .env.', p: 22.2, h: 1 },
+  { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2364,7 +2368,9 @@ G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
 G.world = { ...G_DEF().world, ...(G.world || {}) };
 G.hum = { ...(G.hum || {}) };                     // les humains : { stag: { t, off (congés jusqu'à), fri (vendredis shippés) } }
-G.humS = { paid: 0, quit: 0, ...(G.humS || {}) };   // les pannes du monde : celle en cours, la prochaine, l'historique       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
+G.humS = { paid: 0, quit: 0, ...(G.humS || {}) };
+G.key = { ...G_DEF().key, ...(G.key || {}) };     // la clé d'API : sa version, .env suivi par git ou non, la prochaine fuite
+G.leakS = { ...G_DEF().leakS, ...(G.leakS || {}) };   // les pannes du monde : celle en cours, la prochaine, l'historique       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3178,6 +3184,7 @@ const PRE_HELP_LINES = () => [
     [H(['  lolama · studiolm ', 'org'], 'IA locale : 0 API, toute la VRAM · sudo apt install lolama (ou lolama.vibe, githype.vibe dans Firefaux)'), '', 20],
     [H(['  actu              ', 'org'], 'les pannes du monde : celle en cours, les dernières'), '', 20],
     [H(['  equipe            ', 'org'], 'vos humains (au store) : qui est là, qui est en congés, les salaires'), '', 20],
+    [H(['  keys              ', 'org'], 'la clé d’API des agents : keys rotate pour la révoquer si elle a fuité'), '', 20],
     [H(['  mail              ', 'org'], 'le courrier : clients, investisseurs, URSSAF, hameçonnage · mail <n> pour lire (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20]] : []),
   [H(['  tskill <nom|PID>  ', 'org'], 'arrêter un programme (tskill htop) ou, une fois lancés, les agents (tskill codex)'), '', 20],
   [H(['  xfce · startx     ', 'org'], 'bureau Xfce : fenêtres, menu, fichiers (thunar), éditeur (mousepad), PDF (atril), navigateur (firefaux), succès (steam), musique (vlc)'), '', 20],
@@ -3212,6 +3219,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
     [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  keys             ', 'org'], 'la clé d’API de vos agents : keys rotate pour la révoquer (si elle a fuité) · git rm --cached .env pour que git l’oublie'), '', 20],
     [H(['  equipe           ', 'org'], 'vos humains (au store) : qui est là, qui est en congés, la fatigue des vendredis, les salaires'), '', 20],
     [H(['  actu             ', 'org'], 'les pannes du monde : celle en cours (API, canicule, prix des tokens, nouveau modèle, électricité), les dernières'), '', 20],
     [H(['  pr               ', 'org'], 'les pull requests des agents : pr list, pr diff <n> (relire), pr merge <n>, pr close <n> · au ship, ils fusionnent tout'), '', 20],
@@ -3893,7 +3901,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4791,6 +4799,7 @@ async function runCommand(raw) {
   if (head === 'pr' || (head === 'gh' && rest[0] === 'pr')) return prCmd(head === 'gh' ? rest.slice(1) : rest);
   if (['actu', 'actus', 'news', 'meteo', 'météo'].includes(head)) return worldCmd();
   if (['equipe', 'équipe', 'humains', 'team'].includes(head)) return humanCmd();
+  if (['keys', 'key', 'cles', 'clés', 'cle', 'clé'].includes(head)) return keysCmd(rest);
   if (head === 'defi' || head === 'défi' || head === 'defis' || head === 'défis') return defiCmd(rest);
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
@@ -9286,11 +9295,13 @@ function incFix(fk, sudo) {                        // une commande qui répare q
 }
 function opsCmd(w, c, sudo) {                      // systemctl, journalctl, kubectl, df, dig, certbot, git log / revert ; false : pas pour nous
   const a = c.split(' ').slice(1), k = IDLE && G.inc?.k, I = IDLE && G.inc, out = L => printLines(L.map(x => Array.isArray(x) ? x : [x, '', 12]));
-  if (w === 'git' && (!installed.has('git') || !['log', 'revert'].includes(a[0]))) return false;
+  if (w === 'git' && (!installed.has('git') || !['log', 'revert', 'rm', 'show'].includes(a[0]))) return false;
   if (w === 'kubectl' && !['get', 'logs', 'rollout', 'describe'].includes(a[0])) return false;
   if (sudo) shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
   const fk = Object.keys(INC_KINDS).find(x => INC_KINDS[x].fix.test(c));
   if (fk) return incFix(fk, sudo);
+  if (w === 'git' && a[0] === 'rm') return leakUntrack(a);
+  if (w === 'git' && a[0] === 'show') return leakShow();
   if (w === 'git' && a[0] === 'revert') {
     if (k === 'dns' && a[1] && I.h.startsWith(a[1].slice(0, 7))) return incFix('dns', sudo);   // le hash vu dans git log
     return a[1] ? out([[`[main ${hex(7)}] Revert "fix: fix"`, '', 12], ['Les agents ont réappliqué le commit quatre secondes plus tard.', 'dim', 12]]).then(incNoEffect)
@@ -9730,7 +9741,7 @@ function prSee(pr) {                               // relire une PR : ses lignes
   saveGame();
 }
 function prBoom(pr) {                              // une PR piégée part en prod : ses conséquences
-  if (pr.k === 'key') { const c = Math.round(ECO.value(shipped) * 150) / 100; G.bill += c; return ` Des robots ont trouvé la clé : +$${usd(c)} de tokens sur la facture.`; }
+  if (pr.k === 'key') { const was = !!G.leak; leakStart('pr'); return was ? ' Une clé fuit déjà : une de plus.' : ' La clé est publique : des robots l’utilisent déjà (keys rotate).'; }
   if (pr.k === 'test') { G.debt = Math.max(G.debt || 0, Date.now()) + 300e3; return ' Plus de tests pour attraper les bugs : ×1,5 de bugs pendant 5 minutes.'; }
   if (G.inc) return ' La prod était déjà en panne : elle le reste.';
   setTimeout(() => { if (!G.inc) incStart(PR_TRAP[pr.k].inc); }, 2500);
@@ -9943,6 +9954,85 @@ function humanCmd() {                              // equipe : les humains, les 
     ...ks.map(k => { const h = G.hum[k], H0 = HUMANS[k]; return [H(`  ${H0.n.padEnd(28)} `, h.off > Date.now() ? [`en congés (encore ${fmtEta(Math.round((h.off - Date.now()) / 1000))})`, 'wrn'] : ['présent', 'okc'],
       ` · fatigue des vendredis : ${h.fri || 0}/${H0.quit}`), '', 20]; }),
     [`Et ${plural(G.agents, 'agent')}, qui ne prennent jamais de congés (ni de recul).`, 'dim', 20]]);
+}
+
+/* ---------- les secrets qui fuient : un agent commite le .env ----------
+   Au hasard (toutes les 15 à 25 minutes, agents lancés, EV_ON) ou par une PR piégée fusionnée : la clé d'API part dans un commit public.
+   GitHype la repère (un courriel), des robots aussi : ils consomment des tokens sur votre compte, de plus en plus vite (sur la facture,
+   au plus huit ships), jusqu'à ce que la clé soit révoquée (keys rotate). Tant que .env reste suivi par git, la nouvelle clé fuit à son
+   tour, deux minutes plus tard : git rm --cached .env. */
+const keyTail = v => ['4f2a', '9c1e', '7b3d', '8a6f', '0e5c', '2b9d', '1a7f', '3e8c'][(v - 1) % 8];
+const keyStr = v => `sk-live-…${keyTail(v)}`;
+function leakStart(src) {                          // la clé part dans un commit public
+  if (!IDLE || G.leak) return false;
+  const a = agentName({ n: ri(1, Math.max(1, G.agents)) });
+  G.key.tracked = 1;
+  G.key.again = 0;
+  G.leak = { t0: Date.now(), lost: 0, src, a };
+  G.leakS.n++;
+  ach('fuite');
+  shellPrint(H(['▲ GitHype · secret scanning : ', 'errc'], `une clé d’API (${keyStr(G.key.v)}) se trouve dans un commit public de ${PROJ} (.env, par ${a}). `, ['Des robots l’utilisent déjà.', 'wrn']));
+  shellPrint(H(['  ', 'dim'], ['keys rotate', 'org'], [' : révoquer la clé · ', 'dim'], ['git rm --cached .env', 'org'], [' : que git l’oublie (sinon, la nouvelle fuira aussi) · ', 'dim'], ['git show', 'org'], [' : le commit', 'dim']));
+  mailAdd({ k: 'info', from: 'GitHype', addr: 'security@githype.vibe', subj: `Clé d’API exposée dans ${USER}/${PROJ}`,
+    body: `Bonjour,\n\nNotre analyse des secrets a trouvé une clé d’API (${keyStr(G.key.v)}) dans un commit public de ${USER}/${PROJ} : le fichier .env, ajouté par ${a}.\n\nRévoquez-la tout de suite. Des robots parcourent les dépôts publics en permanence ; ils l’ont sans doute déjà.\n\nL’équipe sécurité de GitHype` });
+  hudNote(`▲ clé d’API exposée (${keyStr(G.key.v)}) · keys rotate`, 'bug');
+  toast('<b>GitHype</b> · clé d’API exposée dans un commit public', 5000);
+  saveGame();
+  return true;
+}
+function leakTick(dt) {                            // les robots consomment, de plus en plus vite ; la fuite suivante, si .env est encore suivi
+  if (!IDLE) return;
+  const L = G.leak, now = Date.now();
+  if (L && !paused) {
+    const cap = ECO.value(shipped) * 8, d = Math.min(cap - L.lost, ECO.value(shipped) * .02 * (1 + (now - L.t0) / 60e3) * Math.min(dt, 2));
+    if (d > 0) { L.lost += d; G.bill += d; }
+  }
+  if (!L && G.key.tracked && G.key.again && now >= G.key.again) leakStart('again');
+  if (!L && EV_ON && claudeOn && !paused) {
+    if (!G.key.next) G.key.next = now + ri(900, 1500) * 1e3;
+    else if (now >= G.key.next) { G.key.next = now + ri(900, 1500) * 1e3; leakStart('commit'); }
+  }
+}
+function leakEnd() {                               // keys rotate pendant une fuite : les robots s'arrêtent
+  const L = G.leak, dur = (Date.now() - L.t0) / 1000;
+  G.leak = null;
+  G.leakS.lost += L.lost;
+  G.leakS.best = G.leakS.best ? Math.min(G.leakS.best, dur) : dur;
+  if (dur < 60) ach('rotation');
+  if (G.key.tracked) G.key.again = Date.now() + ri(100, 140) * 1e3;   // .env encore dans git : la nouvelle clé y sera aussi
+  return { dur, lost: L.lost };
+}
+function keysCmd(a) {                              // keys : la clé ; keys rotate : la révoquer, en créer une autre
+  if (!IDLE) return shellPrint('Mode libre : pas de clé, pas de facture.', 'dim');
+  const sub = a[0] || '';
+  if (['rotate', 'revoke', 'regenerate', 'new'].includes(sub)) {
+    const old = keyStr(G.key.v);
+    G.key.v++;
+    if (!G.leak) { saveGame(); return shellPrint(H(['✓ ', 'okc'], `${old} révoquée, nouvelle clé : ${keyStr(G.key.v)}. Rien ne pressait, mais l’hygiène, c’est bien.`)); }
+    const r = leakEnd();
+    saveGame();
+    renderHud();
+    return printLines([[H(['✓ ', 'okc'], `${old} révoquée en ${fmtEta(Math.round(r.dur))}. Nouvelle clé : ${keyStr(G.key.v)}. Les robots ont consommé `, [`$${usd(r.lost)}`, 'errc'], ' de tokens (sur la prochaine facture).'), '', 20],
+      ...(G.key.tracked ? [[H(['  Mais .env est toujours suivi par git : la nouvelle clé partira au prochain commit. ', 'wrn'], ['git rm --cached .env', 'org']), '', 20]] : [])]);
+  }
+  if (sub && sub !== 'list' && sub !== 'ls') return shellPrint(H(['✗ ', 'errc'], `keys ${sub} : inconnu. keys, keys rotate.`));
+  return printLines([[H(['Clé d’API des agents : ', 'fgc'], [keyStr(G.key.v), 'org'], ' · ', G.leak ? [`exposée depuis ${fmtEta(Math.round((Date.now() - G.leak.t0) / 1000))} : −$${usd(G.leak.lost)} de tokens volés`, 'errc'] : ['active', 'okc']), '', 20],
+    [H(`.env : ${G.key.tracked ? 'suivi par git (il ne devrait pas)' : 'ignoré par git'} · fuites : ${G.leakS.n} · tokens volés en tout : $${usd(G.leakS.lost + (G.leak?.lost || 0))}`), 'dim', 20],
+    ...(G.leak ? [[H(['keys rotate', 'org'], [' pour la révoquer', 'dim']), '', 20]] : [])]);
+}
+function leakUntrack(a) {                          // git rm --cached .env : git oublie le fichier (et le .gitignore s'en souvient)
+  if (!a.some(x => x === '.env' || x.endsWith('/.env'))) return printLines([[`fatal: pathspec '${a.filter(x => !x.startsWith('-')).slice(1)[0] || ''}' did not match any files`, 'errc', 12]]);
+  if (!G.key.tracked) return printLines([["fatal: pathspec '.env' did not match any files", 'errc', 12], ['  (.env n’est plus suivi par git : c’est déjà fait)', 'dim', 12]]);
+  G.key.tracked = 0;
+  G.key.again = 0;
+  saveGame();
+  return printLines([["rm '.env'", '', 12], [H(['✓ ', 'okc'], '.env ajouté au .gitignore : le fichier reste sur le disque, plus dans git.', G.leak ? [' La clé exposée reste exposée : keys rotate.', 'wrn'] : ''), '', 12]]);
+}
+function leakShow() {                              // git show : le dernier commit (pendant une fuite : celui du .env)
+  if (!G.key.tracked) return printLines([[`commit ${hex(7)} (HEAD -> main)`, 'wrn', 12], ['    fix: fix', '', 12]]);
+  return printLines([[`commit ${hex(7)} (HEAD -> main, origin/main)`, 'wrn', 12], [`Author: ${G.leak?.a || agentName({ n: 1 })} <agents@agents.invalid>`, '', 12], ['', '', 12],
+    ['    chore: ajouter la config (pour que ça marche chez tout le monde)', '', 12], ['', '', 12], ['diff --git a/.env b/.env', 'dim', 12], ['new file mode 100644', 'dim', 12],
+    ['@@ -0,0 +1,3 @@', 'blu', 12], [`+AI_API_KEY=sk-live-4f2a9c1e7b3d8a6f0e5c2b9d1a7f${keyTail(G.key.v)}`, 'okc', 12], [`+DATABASE_URL=postgres://admin:vendredi@prod-01/${PROJ}`, 'okc', 12], ['+DEBUG=true', 'okc', 12]]);
 }
 
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
@@ -11882,6 +11972,9 @@ function renderHud() {
   const we = $('#hud-world'), E = G.world.ev;     // une panne du monde : laquelle, combien de temps encore
   we.hidden = !E;
   if (E) we.textContent = `◌ ${worldName(E)} · ${mmss(Math.max(0, (E.until - Date.now()) / 1000))}`;
+  const le = $('#hud-leak'), Lk = G.leak;           // une clé d'API exposée : ce que les robots ont déjà consommé
+  le.hidden = !Lk;
+  if (Lk) le.textContent = `CLÉ EXPOSÉE · −$${usd(Lk.lost)}`;
   const ie = $('#hud-inc'), I = G.inc;            // l'incident de prod : son numéro, sa durée, les remboursements
   ie.hidden = !I;
   if (I) ie.textContent = `▲ ${I.id} · ${mmss(incDur(I))} · −$${usd(I.lost)}`;
@@ -11908,6 +12001,7 @@ function ecoTick() {
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
   if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
+  if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
@@ -11978,7 +12072,7 @@ function storeItems() { return stoTab === 'pc' ? pcItems() : stoTab === 'plat' ?
 let platSeen = '';
 function itemState(it) {
   if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') || it.id === 'elec' ? 'max' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') || it.id === 'elec' ? 'max' : it.id.startsWith('human:') ? '✓ dans l’équipe' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
