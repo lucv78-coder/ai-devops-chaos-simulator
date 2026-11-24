@@ -895,6 +895,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-card .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5em 1ch; margin-top: .2em; }
 .wp-card .price { color: var(--orange); font-weight: 700; font-size: 1.1em; }
 .wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
+.wp-card .tag.bad { background: var(--red); }
 .wp-buy { padding: .15em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--orange); color: var(--ink); font-weight: 700; }
 .wp-buy:disabled { border-color: var(--sep); background: none; color: var(--dim); cursor: default; }
 /* telecharge.vibe : les publicités, le fichier, le vrai lien (tout petit), la barre de téléchargement */
@@ -2109,14 +2110,20 @@ const ACH = [
   { id: 'ublock', g: 'μ', n: 'Navigation sans pub', d: 'Installer uBlock Origin dans Firefaux.', p: 61.3 },
   { id: 'popups', g: '▣', n: 'Fenêtres surprises', d: 'Avoir trois pop-ups de pub ouverts en même temps dans Firefaux.', p: 18.2 },
   { id: 'adclick', g: '$', n: 'Cliqué sur la pub', d: 'Cliquer sur une publicité. Personne ne le fait. Sauf vous.', p: 7.7, h: 1 },
+  { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
+  { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
+    t: () => G.mal.ever && !G.mal.miner && !ffHas('freeblock') && !malFiles().length },
+  { id: 'vibecoin', g: '¤', n: 'Mineur malgré vous', d: 'Laisser le mineur de VibeCoin tourner dix minutes. Quelqu’un, quelque part, vous remercie.', p: 3.3, h: 1,
+    t: () => G.mal.miner && Date.now() - G.mal.miner > 6e5 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
 G.ach = G.ach || {};                              // { id: date du déblocage }
 G.play = G.play || 0;                             // temps de jeu, en secondes (Steam l'affiche)
 G.ff = { addons: {}, ...(G.ff || {}) };          // le profil de Firefaux : ses modules (uBlock Origin…)
+G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
-function ffAdsOn() { return !G.ff.addons.ublock?.on; }   // sans uBlock Origin actif : des pubs partout
+function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
 function ffAdLoad() {                            // ce que les pubs coûtent à la machine : un peu de RAM, un peu de processeur (Firefaux ouvert)
   if (!ffAdsOn() || !tabs.includes('firefaux')) return { ram: 0, cpu: 0 };
   return { ram: .15 + .35 * ffPops, cpu: .04 + .06 * ffPops };
@@ -3518,7 +3525,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3685,6 +3692,7 @@ const CATALOG = {
   atop: ['2.10.0-2', 412, 'atop', 'moniteur système détaillé'],
   bash: ['5.2.32-1', 1830, '', 'le shell de secours (essentiel)'],
   bat: ['0.24.0-2', 3120, 'batcat', 'cat, avec des couleurs et des ailes'],
+  clamav: ['1.4.1+dfsg-1', 31800, 'clamscan freshclam', 'l’antivirus libre : sudo freshclam, puis clamscan -r ~'],
   coreutils: ['9.4-3.1', 7210, '', 'ls, cp, rm… le strict minimum (essentiel)'],
   cowsay: ['3.03+dfsg2-8', 19, 'cowsay', 'une vache qui parle'],
   curl: ['8.10.1-2', 315, 'curl', 'télécharger des choses depuis le terminal'],
@@ -3740,7 +3748,7 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', lolama: 'lolama list, puis lolama pull 4b et lolama run 4b', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
+const APT_TRY = { clamav: 'sudo freshclam · clamscan -r --remove ~', cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', lolama: 'lolama list, puis lolama pull 4b et lolama run 4b', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
   xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
 const APT_ALIAS = { ollama: 'lolama', xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
 const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
@@ -4429,6 +4437,9 @@ async function runCommand(raw) {
     if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
     return smartCmd(cmd.trim().split(/\s+/).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // options sensibles à la casse : -H n'est pas -h
   }
+  if (cliWord === 'freshclam') return freshclamCmd(head === 'sudo');                   // ClamAV : la base de signatures
+  if (cliWord === 'clamscan' || cliWord === 'clamdscan') return clamscanCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1));   // ClamAV : l'analyse
+  if (cliWord === 'crontab') return crontabCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1));
   if (head === 'sensors') return installed.has('lm-sensors') ? printLines(sensorsLines()) : notInstalled('sensors', 'lm-sensors');   // l'état du PC : température, alimentation
   if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
@@ -4808,6 +4819,7 @@ async function killOne(t, word) {
   if (hits.some(p => p.pid === 1)) return shellPrint(H(['✗ ', 'errc'], `${word} ${t} ? Tuer init, c’est le kernel panic assuré. Pour tout casser, il y a plus simple : rm -rf /usr.`));
   if (hits.some(p => p.k === 'zsh')) return shellPrint(H(['✗ ', 'errc'], 'C’est le terminal dans lequel vous tapez. Refusé, pour votre bien.'));
   if (hits.every(p => p.s === 'Z')) return shellPrint(H(['✗ ', 'wrn'], `${t} (PID ${pids}) est déjà mort. Il refuse simplement de partir.`));
+  if (hits.some(p => p.k === 'miner')) return malKill(pids);
   const many = hits.length > 1, n = many ? `${hits.length} processus ${t}` : `${t} (PID ${pids})`, s = many ? 's' : '';
   shellPrint(hits.some(p => p.ag)
     ? H(['✓ ', 'okc'], `${n} tué${s}… `, [`et relancé${s} aussitôt par les agents : ils en avaient besoin pour « finir ».`, 'wrn'])
@@ -5088,12 +5100,12 @@ function pcLoad(o = {}) {
   const live = !o.off, sp = o.speed ?? speed;
   const n = o.n ?? (claudeOn && mode !== 'gameover' && !paused ? panes.filter(p => p.state !== 'down').length : 0);
   const lead = o.lead ?? (claudeOn && !paused && leadOn() ? 1 : 0);
-  const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0, ad = live ? ffAdLoad() : { ram: 0, cpu: 0 };
+  const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0, ad = live ? ffAdLoad() : { ram: 0, cpu: 0 }, mine = live && G.mal.miner ? 1 : 0;
   const bo = o.bg != null ? o : live && claudeOn && !paused && mode !== 'gameover' ? bgLoad() : { bg: 0, plats: 0 };
   const bg = bo.bg || 0, plats = bo.plats || 0, all = n + bg;   // les équipes en arrière-plan chargent la machine aussi (et chaque CLI en plus)
-  const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog + ad.cpu;
+  const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog + ad.cpu + .55 * mine;   // le mineur de VibeCoin : la moitié d'un processeur moyen
   const k = ocK(pc), cap = c.cap * k.cr, util = Math.min(1, demand / cap);   // overclocking : plus de puissance (et plus de chaleur)
-  const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web + ad.ram;   // Go (les pubs de Firefaux comprises)
+  const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web + ad.ram + .4 * mine;   // Go (les pubs de Firefaux et le mineur compris)
   const swap = Math.max(0, used - r.go);
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
   const heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
@@ -5351,6 +5363,7 @@ function procTemplates(load) {
     add('firefaux', 'dev', 'firefaux --new-window', 2.4 + ad.cpu * 20, 412 + Math.round(ad.ram * 300), 2900, 48);
     for (let i = 0; i < ffPops; i++) add(`ffpop${i}`, 'dev', `firefaux -contentproc -childID ${7 + i} -isForBrowser (pub : ${['rencontres', 'tokens gratuits', 'formation', 'Windows 11'][i % 4]})`, 1.1, 358, 1800, 22);
   }
+  if (G.mal.miner) add('miner', 'dev', '/home/dev/.cache/.kworker/kworker-update --donate-level 0 -o pool.vibecoin.vibe:3333 --threads auto', 97, 236, 2410, 8);
   if (claudeOn) {
     const dead = mode === 'gameover', ag = { ag: 1, s: dead ? 'Z' : '' };
     const cx = provider === 'codex';
@@ -7603,6 +7616,151 @@ function makeVlc() {
     title: () => T() ? `${T().title} - Lecteur multimédia VLC` : 'Lecteur multimédia VLC', tname: () => 'VLC' };
 }
 
+/* ---------- logiciels malveillants : ils arrivent par les pubs piégées, le faux bouton de telecharge.vibe et le faux bloqueur de pubs ----------
+   Un mineur de VibeCoin (kworker-update, caché dans ~/.cache) prend la moitié d'un processeur ; une tâche cron le relance si on le tue,
+   et au démarrage. ClamAV le trouve (après sudo freshclam) ; clamscan --remove supprime les fichiers, pas le processus : kill, ensuite,
+   et cette fois il ne revient pas. On peut aussi faire à la main : crontab -r, rm, kill. */
+const MAL_BIN = ['.cache', '.kworker', 'kworker-update'];          // sous ~
+const MAL_XPI = ['.firefaux', 'extensions', 'bloqueur-gratuit@pro2026.xpi'];
+const MAL_SIG = { bin: 'Unix.Coinminer.Xmrig-9951234-0', drop: 'Unix.Trojan.Dropper-7741203-0', xpi: 'Js.Adware.FakeBlock-1180422-0' };
+const MAL_SRC = {   // d'où vient l'infection : le script déposé dans ~/Downloads, et ce que dit Firefaux
+  tokens: ['recompense-1000000-tokens.sh', 'Félicitations ! Vos 1 000 000 de tokens arrivent : recompense-1000000-tokens.sh s’en occupe, en arrière-plan.'],
+  win11: ['windows11-setup.sh', 'Windows 11 s’installe… sur Linux. Le script windows11-setup.sh fait de son mieux, en arrière-plan.'],
+  scare: ['antivirus-vibe-pro.sh', 'Antivirus Vibe Pro s’installe. Il avait trouvé 3 virus ; il en apporte un quatrième.'],
+  dl: ['musique chris 1.m4a.sh', 'Il a quand même téléchargé ~/Downloads/musique chris 1.m4a.sh : une musique qui s’exécute toute seule.'],
+  addon: ['', ''],
+};
+const CLAM = { old: [25012, 2012004], now: [27467, 2071855], main: 6647427, byte: 86 };   // les versions et signatures de la base (daily ; main, bytecode)
+const malPath = rel => [...HOME, ...rel];
+function malPut(rel, sig, sz) {                    // dépose un fichier infecté sous ~ (et les dossiers qui manquent)
+  let n = nodeAt(HOME);
+  if (!n?.d) return;
+  rel.slice(0, -1).forEach(k => { if (!n.k[k]?.d) n.k[k] = mkD({}, { mt: Date.now() }); n = n.k[k]; });
+  n.k[rel.at(-1)] = mkF('', { b: 1, x: 1, sz, mt: Date.now(), mal: sig });
+}
+function malDrop(segs) { const d = nodeAt(segs.slice(0, -1)); if (d?.d) delete d.k[segs.at(-1)]; }
+const malBinOk = () => !!nodeAt(malPath(MAL_BIN))?.mal;
+function malFiles(n = vfs, segs = []) {            // les fichiers infectés, où qu'ils soient
+  if (!n) return [];
+  if (!n.d) return n.mal ? [segs] : [];
+  return Object.entries(n.k).flatMap(([k, c]) => malFiles(c, [...segs, k]));
+}
+function malInfect(src) {                          // → ce que dit Firefaux
+  const [file, msg] = MAL_SRC[src] || MAL_SRC.addon, first = !G.mal.miner;
+  if (file) malPut([...dlDir().slice(HOME.length), file], MAL_SIG.drop, ri(3e3, 9e3));
+  malPut(MAL_BIN, MAL_SIG.bin, 2.4e6);
+  Object.assign(G.mal, { miner: G.mal.miner || Date.now(), cron: 1, ever: 1 });
+  ach('infecte');
+  saveGame();
+  PROGS.thunar.redraw?.();
+  if (first) setTimeout(() => { if (G.mal.miner) toast('Le ventilateur s’emballe. Quelque chose tourne en arrière-plan : <b>htop</b> le sait.', 4200); }, 8000);
+  return msg;
+}
+function malKill(pids) {                           // kill kworker-update : cron le relance, tant que sa tâche et son fichier sont là
+  if (G.mal.cron && malBinOk()) return shellPrint(H(['✓ ', 'okc'], `kworker-update (PID ${pids}) tué… `, ['et relancé une minute plus tard par cron. Qui a mis ça dans votre crontab ? (crontab -l)', 'wrn']));
+  G.mal.miner = 0;
+  saveGame();
+  shellPrint(H(['✓ ', 'okc'], `kworker-update (PID ${pids}) tué. `, [G.mal.cron ? 'Son fichier n’existe plus : cron ne peut plus le relancer.' : 'Sans tâche cron, rien ne le relance.', 'dim']));
+}
+// au démarrage : le mineur revient (cron, @reboot) si sa tâche et son fichier sont toujours là
+G.mal.miner = G.mal.miner && G.mal.cron && malBinOk() ? G.mal.miner : G.mal.cron && malBinOk() ? Date.now() : 0;
+const MAL_CRON = ['* * * * * ~/.cache/.kworker/kworker-update --donate-level 0 >/dev/null 2>&1', '@reboot ~/.cache/.kworker/kworker-update --background'];
+function crontabCmd(a) {
+  const f = a.find(x => x.startsWith('-')) || '', none = () => shellPrint(`pas de crontab pour ${USER}`);
+  if (f === '-l') return G.mal.cron ? printLines([['# m h  dom mon dow   commande', 'dim', 20], ...MAL_CRON.map(l => [l, '', 20])]) : none();
+  if (f === '-r') {
+    if (!G.mal.cron) return none();
+    G.mal.cron = 0;
+    saveGame();
+    return shellPrint(H(['✓ ', 'okc'], 'Crontab supprimée.', G.mal.miner ? [' Le mineur tourne encore, mais plus rien ne le relancera : kill kworker-update.', 'dim'] : ''));
+  }
+  if (f === '-e') return shellPrint(H('Quelqu’un a déjà modifié votre crontab. Pour la lire : ', ['crontab -l', 'org'], ' ; pour la vider : ', ['crontab -r', 'org'], '.'));
+  return printLines([[H('Usage : ', ['crontab -l', 'org'], ' (lister) · ', ['crontab -r', 'org'], ' (supprimer) · ', ['crontab -e', 'org'], ' (modifier)'), '', 20]]);
+}
+const clamStamp = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}:${z(d.getMonth() + 1)}:${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; };
+async function freshclamCmd(sudo) {                // la base de signatures : sans elle, ClamAV ne connaît pas VibeCoin
+  if (!installed.has('clamav')) return notInstalled('freshclam', 'clamav');
+  if (!sudo) {
+    shellPrint('ERROR: Impossible d’ouvrir /var/log/clamav/freshclam.log en écriture (vérifiez les permissions !).', 'errc');
+    shellPrint('ERROR: Problème avec le journal interne (UpdateLogFile = /var/log/clamav/freshclam.log).', 'errc');
+    return shellPrint(H(['astuce : ', 'dim'], ['sudo freshclam', 'org']));
+  }
+  shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim']));
+  const job = startJob(), [v, n] = CLAM.now, up = G.mal.db;
+  try {
+    const lines = [[`Mise à jour de ClamAV démarrée le ${clamStamp()}`, '', 300]];
+    if (up) lines.push([`daily.cvd est à jour (version : ${v}, signatures : ${frNumI(n)}, f-level : 90, builder : raynman)`, '', 120]);
+    else lines.push([`daily : une nouvelle version est disponible (version distante : ${v})`, '', 500],
+      ['Temps :  2,1 s, reste : 0,0 s [========================>]   61,24 Mio/61,24 Mio', '', 700],
+      [`Test de la base : '/var/lib/clamav/tmp.4f2a1/clamav-7e1c.tmp-daily.cvd' ...`, '', 700],
+      ['Test de la base réussi.', 'okc', 200],
+      [`daily.cvd mis à jour (version : ${v}, signatures : ${frNumI(n)}, f-level : 90, builder : raynman)`, '', 120]);
+    lines.push([`main.cvd est à jour (version : 62, signatures : ${frNumI(CLAM.main)}, f-level : 90, builder : sigmgr)`, '', 120],
+      [`bytecode.cvd est à jour (version : 335, signatures : ${CLAM.byte}, f-level : 90, builder : raynman)`, '', 120]);
+    if (!up) lines.push([H(['(dont ', 'dim'], [MAL_SIG.bin, 'org'], [', ajoutée ce matin : un certain VibeCoin fait parler de lui)', 'dim']), '', 20]);
+    if (!await jobLines(job, lines)) return;
+    G.mal.db = 1;
+    saveGame();
+  } finally { endJob(job); }
+}
+async function clamscanCmd(args) {                 // clamscan [-r] [--remove] [-i] [chemin…] : le vrai format, en français
+  if (!installed.has('clamav')) return notInstalled('clamscan', 'clamav');
+  const flags = args.filter(a => a.startsWith('-')), paths = args.filter(a => !a.startsWith('-'));
+  if (flags.some(f => /^(-h|--help)$/.test(f))) {
+    return printLines([[H('Usage : ', ['clamscan [options] [fichier | dossier]…', 'org']), '', 20],
+      [H(['  -r, --recursive   ', 'org'], 'analyser les sous-dossiers'), '', 20], [H(['  -i, --infected    ', 'org'], 'n’afficher que les fichiers infectés'), '', 20],
+      [H(['  --remove          ', 'org'], 'supprimer les fichiers infectés (sans demander)'), '', 20], [H(['La base se met à jour avec ', 'dim'], ['sudo freshclam', 'org'], ['.', 'dim']), '', 20]]);
+  }
+  const rec = flags.some(f => /^(-[a-z]*r[a-z]*|--recursive(=yes)?)$/.test(f)), del = flags.some(f => /^--remove(=yes)?$/.test(f)), only = flags.some(f => /^(-[a-z]*i[a-z]*|--infected)$/.test(f));
+  const fresh = !!G.mal.db, job = startJob(), t0 = Date.now(), start = clamStamp(), [v, n] = fresh ? CLAM.now : CLAM.old;
+  try {
+    if (!fresh && !await jobLines(job, [['LibClamAV Warning: **************************************************', 'wrn', 20],
+      ['LibClamAV Warning: ***  La base de signatures a plus de 7 jours !  ***', 'wrn', 20],
+      ['LibClamAV Warning: ***   Mettez-la à jour dès que possible.       ***', 'wrn', 20],
+      ['LibClamAV Warning: **************************************************', 'wrn', 200]])) return;
+    let files = 0, dirs = 0, bytes = 0, shown = 0;
+    const hits = [], walk = (node, segs, top) => {
+      if (!node.d) { files += node.many || 1; bytes += node.sz || 0; if (node.mal && fresh) hits.push(segs); else if (!only && shown < 6) { shown++; shellPrint(`${absPath(segs)}: OK`, 'dim'); } return; }
+      dirs++;
+      if (top || rec) Object.keys(node.k).sort(byName).forEach(k => walk(node.k[k], [...segs, k], false));
+    };
+    for (const pth of paths.length ? paths : ['.']) {
+      const segs = resolvePath(pth), node = nodeAt(segs);
+      if (!node) { shellPrint(`${pth}: Aucun fichier ou dossier de ce type`, 'errc'); shellPrint(`ERROR: Impossible d’accéder au fichier ${pth}`, 'errc'); continue; }
+      walk(node, segs, true);
+    }
+    if (!only && files - shown - hits.length > 0) shellPrint(`[… ${frNumI(files - shown - hits.length)} autres fichiers : OK]`, 'dim');
+    for (const segs of hits) {
+      if (job.abort) break;
+      const sig = nodeAt(segs).mal;
+      shellPrint(H(`${absPath(segs)}: `, [`${sig} TROUVÉ`, 'errc']));
+      if (del) {
+        malDrop(segs);
+        shellPrint(`${absPath(segs)}: supprimé.`, 'okc');
+        if (sig === MAL_SIG.xpi && ffHas('freeblock')) delete G.ff.addons.freeblock;   // le module disparaît de Firefaux avec son fichier
+      }
+      await sleep(240);
+    }
+    if (!await jobLines(job, [['', '', Math.min(2400, 300 + files / 4)]])) return;
+    const ms = Date.now() - t0 + ri(600, 1400);
+    await jobLines(job, [['----------- RÉSUMÉ DE L’ANALYSE -----------', '', 40],
+      [`Virus connus : ${frNumI(n + CLAM.main + CLAM.byte)}`, '', 20], ['Version du moteur : 1.4.1', '', 20],
+      [`Dossiers analysés : ${frNumI(dirs)}`, '', 20], [`Fichiers analysés : ${frNumI(files)}`, '', 20],
+      [H('Fichiers infectés : ', [String(hits.length), hits.length ? 'errc' : 'okc']), '', 20],
+      [`Données analysées : ${fmtSize(bytes)}`, '', 20],
+      [`Temps : ${frx((ms / 1000).toFixed(3))} s (0 min ${Math.round(ms / 1000)} s)`, '', 20],
+      [`Début : ${start}`, '', 20], [`Fin :   ${clamStamp()}`, '', 20]]);
+    if (!fresh) shellPrint(H(['La base date de l’installation (version ', 'dim'], [String(v), 'dim'], [') : elle ne connaît pas VibeCoin. D’abord ', 'dim'], ['sudo freshclam', 'org'], [', puis recommencez.', 'dim']));
+    else if (hits.length && !del) shellPrint(H(['Pour les supprimer : ', 'dim'], [`clamscan -r --remove ${paths[0] || '~'}`, 'org']));
+    if (del && hits.length) {
+      saveGame();
+      PROGS.thunar.redraw?.();
+      if (G.mal.miner && !malBinOk()) shellPrint(H(['Le fichier du mineur est supprimé, mais son processus tourne encore en mémoire (clamscan ne tue rien) : ', 'wrn'], ['kill kworker-update', 'org']));
+    }
+    if (fresh && !hits.length && G.mal.miner && !rec) shellPrint(H(['Rien ici. Sans -r, les sous-dossiers ne sont pas analysés : ', 'dim'], ['clamscan -r ~', 'org']));
+  } finally { endJob(job); }
+}
+
 /* ---------- Firefaux : ses modules (about:addons, addons.firefaux.vibe), et des publicités tant qu'uBlock Origin n'est pas là ----------
    Les pubs : un bandeau en tête des pages web, et des pop-ups qui s'ouvrent au chargement (trois au plus) ; chaque pop-up est un
    processus de plus dans htop, et prend de la RAM (pcLoad). uBlock Origin les bloque toutes, et les compte. */
@@ -7612,14 +7770,19 @@ const ADDONS = {
     perm: ['Lire et modifier vos données sur tous les sites (pour y retirer les pubs)'] },
   dark: { n: 'Dark Reader', g: '◐', ver: '4.9.96', users: 6200431, stars: '4,6',
     d: 'Assombrit tous les sites. Le terminal était déjà sombre ; maintenant, le Web aussi.', perm: ['Lire et modifier vos données sur tous les sites'] },
+  freeblock: { n: 'Bloqueur de Pubs GRATUIT Pro 2026', g: '⊘', ver: '0.0.1-beta', users: 4, stars: '2,1', bad: 1,
+    d: 'Bloque 100 % des publicités. Sauf les siennes. Gratuit : le produit, c’est vous.',
+    perm: ['Lire et modifier vos données sur tous les sites', 'Lire vos mots de passe enregistrés (pour les protéger)', 'Utiliser votre processeur pendant vos pauses (et le reste du temps)',
+      'Désactiver les autres bloqueurs (« conflit de compatibilité »)'] },
 };
-const ADS = [   // [titre, texte, bouton, adresse (facultative)]
+const ADS = [   // [titre, texte, bouton, adresse (facultative), piège (facultatif : la source de l'infection, MAL_SRC)]
   ['Des agents IA célibataires près de chez vous', 'Ils hallucinent, mais ils sont disponibles ce soir.', 'Rencontrer'],
   ['Votre PC est lent !', 'Un vrai diagnostic, sur matos.vibe. Pour une fois, la pub dit vrai.', 'Accélérer mon PC', 'https://matos.vibe/'],
-  ['Gagnez 1 000 000 de tokens', 'Vous êtes le 1 000 000e visiteur de cette page. Comme les 999 999 autres.', 'Réclamer mes tokens'],
+  ['Gagnez 1 000 000 de tokens', 'Vous êtes le 1 000 000e visiteur de cette page. Comme les 999 999 autres.', 'Réclamer mes tokens', '', 'tokens'],
   ['Ce développeur a doublé sa vélocité', 'avec une astuce bizarre : il a arrêté de relire.', 'Lire l’article'],
   ['Devenez prompt engineer en 3 jours', 'Formation certifiante. Certifiée par nous.', 'S’inscrire'],
-  ['Windows 11 est prêt', 'Mise à jour à 99 %. Elle le restera.', 'Installer maintenant'],
+  ['Windows 11 est prêt', 'Mise à jour à 99 %. Elle le restera.', 'Installer maintenant', '', 'win11'],
+  ['Votre PC est infecté !', '3 virus détectés sur votre Linux. Nettoyez-les avec Antivirus Vibe Pro.', 'Nettoyer maintenant', '', 'scare'],
   ['Votre agent vous trompe', 'Il code pour d’autres projets la nuit. Découvrez avec qui.', 'Savoir'],
 ];
 let ffAsk = '';                                    // le module dont on demande l'ajout (addons.firefaux.vibe)
@@ -7636,7 +7799,14 @@ function ffAddon(act) {                            // « ask:k », « add:k », 
     G.ff.addons[k] = { on: 1, t: Date.now() };
     saveGame();
     if (k === 'ublock') { ach('ublock'); ffClosePops(); }
-    return `${A.n} a été ajouté à Firefaux.${k === 'ublock' ? ' Les pubs, elles, sont parties.' : ''}`;
+    if (A.bad) {                                   // le faux bloqueur : il coupe uBlock, dépose son module et un mineur
+      const ub = ffOn('ublock');
+      if (ub) G.ff.addons.ublock.on = 0;
+      malPut(MAL_XPI, MAL_SIG.xpi, 18e3);
+      malInfect('addon');
+      return `${A.n} a été ajouté à Firefaux.${ub ? ' Il a désactivé uBlock Origin (« conflit de compatibilité »).' : ''} Les pubs continuent : ce sont les siennes, maintenant.`;
+    }
+    return `${A.n} a été ajouté à Firefaux.${k === 'ublock' ? (ffOn('freeblock') ? ' Les pubs restent : le Bloqueur de Pubs GRATUIT les affiche lui-même.' : ' Les pubs, elles, sont parties.') : ''}`;
   }
   if (!ffHas(k)) return '';
   if (a === 'toggle') {
@@ -7647,19 +7817,20 @@ function ffAddon(act) {                            // « ask:k », « add:k », 
   }
   if (a === 'remove') {
     delete G.ff.addons[k];
+    if (A.bad) malDrop(malPath(MAL_XPI));         // Firefaux efface son fichier .xpi ; ce qu'il a installé à côté, non
     saveGame();
-    return `${A.n} a été supprimé.${k === 'ublock' ? ' Les pubs vous remercient.' : ''}`;
+    return `${A.n} a été supprimé.${k === 'ublock' ? ' Les pubs vous remercient.' : A.bad && G.mal.miner ? ' Ce qu’il a installé à côté, lui, tourne toujours.' : ''}`;
   }
   return '';
 }
 function ffClosePops() { document.querySelectorAll('.wb-pops .wb-pop').forEach(n => n.remove()); ffPops = 0; }
-const ffUsers = n => n >= 1e6 ? `${frx((n / 1e6).toFixed(1))} M d’utilisateurs` : `${frNumI(n)} utilisateurs`;
+const ffUsers = n => n >= 1e6 ? `${frx((n / 1e6).toFixed(1))} M d’utilisateurs` : n < 10 ? `${n} utilisateurs (dont ${n - 1} robots)` : `${frNumI(n)} utilisateurs`;
 function webAddons() {                             // about:addons : les modules installés
   const ks = Object.keys(G.ff.addons).filter(k => ADDONS[k]);
   const rows = ks.map(k => {
     const A = ADDONS[k], on = ffOn(k);
     return `<div class="wp-card${on ? ' own' : ' old'}"><span class="nm">${esc(A.g)} ${esc(A.n)} <span class="dim">${esc(A.ver)}</span></span>`
-      + `<span class="dim">${esc(A.d)}</span><span>${on ? '<span class="tag">activé</span>' : '<span class="dim">désactivé</span>'}</span><span></span>`
+      + `<span class="dim">${esc(A.d)}${A.bad ? ' <span class="tag bad">non vérifié par Firefaux</span>' : ''}</span><span>${on ? '<span class="tag">activé</span>' : '<span class="dim">désactivé</span>'}</span><span></span>`
       + `<div class="row"><button type="button" class="wp-buy" data-addon="toggle:${k}">${on ? 'Désactiver' : 'Activer'}</button>`
       + `<button type="button" class="dl-real" data-addon="remove:${k}">Supprimer</button></div></div>`;
   }).join('');
@@ -7673,12 +7844,12 @@ function webAddonStore() {                         // addons.firefaux.vibe : le 
     const A = ADDONS[k], has = ffHas(k);
     const ask = ffAsk === k ? `<div class="ff-ask"><b>Ajouter ${esc(A.n)} ?</b><span>Ce module pourra :</span><ul>${A.perm.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
       + `<div class="row"><button type="button" class="wp-buy" data-addon="add:${k}">Ajouter</button><button type="button" class="dl-real" data-addon="cancel">Annuler</button></div></div>` : '';
-    return `<div class="wp-card${has ? ' own' : ''}"><span class="nm">${esc(A.g)} ${esc(A.n)}${A.rec ? ' <span class="tag">recommandé</span>' : ''}</span>`
+    return `<div class="wp-card${has ? ' own' : ''}"><span class="nm">${esc(A.g)} ${esc(A.n)}${A.rec ? ' <span class="tag">recommandé</span>' : ''}${A.bad ? ' <span class="tag bad">non vérifié</span>' : ''}</span>`
       + `<span class="spec">★ ${esc(A.stars)} · ${ffUsers(A.users)}</span><span class="dim">${esc(A.d)}</span><span></span>`
       + `<div class="row">${has ? '<span class="tag">installé</span>' : `<button type="button" class="wp-buy" data-addon="ask:${k}">Ajouter à Firefaux</button>`}</div>${ask}</div>`;
   };
   return { title: 'Modules pour Firefaux', html: `<div class="wp"><h1>Modules pour Firefaux</h1>
-    <p>Des extensions pour un Firefaux à votre image. Toutes vérifiées par nos équipes (une personne, le lundi).</p>
+    <p>Des extensions pour un Firefaux à votre image. Presque toutes vérifiées par nos équipes (une personne, le lundi ; ce lundi-là, elle était malade).</p>
     <div class="wp-grid">${Object.keys(ADDONS).map(card).join('')}</div>
     <p class="dim">Vos modules se gèrent dans <a data-href="about:addons">about:addons</a> (le bouton ⧉ de la barre).</p></div>` };
 }
@@ -7957,7 +8128,8 @@ function makeBrowser() {
   }
   function adGo(i) {                              // on clique la pub : un succès (caché), et ce qu'elle promettait
     ach('adclick');
-    const link = ADS[i]?.[3];
+    const link = ADS[i]?.[3], trap = ADS[i]?.[4];
+    if (trap) return flash(malInfect(trap));      // la pub piégée : un script dans ~/Downloads, et un mineur en arrière-plan
     if (link) return go(link);
     flash('Merci pour votre clic. Un annonceur vient de gagner 0,0003 $. Et vous, une pub de plus.');
     popOpen();
@@ -8062,7 +8234,7 @@ function makeBrowser() {
     else if (ad) {                                 // les publicités : une seule mène quelque part
       if (ad.dataset.ad === 'pc') go('https://matos.vibe/');
       else flash(ad.dataset.ad === 'exe' ? 'Ceci est un Linux : un .exe ne s’ouvre pas ici. VLC s’installe avec sudo apt install vlc, dans le terminal.'
-        : 'C’était une publicité. Le vrai lien est plus bas, en tout petit. Comme toujours.');
+        : `C’était une publicité. Le vrai lien est plus bas, en tout petit. ${malInfect('dl')}`);   // le gros bouton : il télécharge quand même quelque chose
     }
     else if (dlo && DL?.name && installed.has('thunar')) { openTab('thunar'); PROGS.thunar.go?.(tildePath([...dlDir(), DL.name])); }
     else if (j) q(`#wb-${j.dataset.jump}`)?.scrollIntoView({ block: 'start' });
