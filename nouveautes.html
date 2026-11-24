@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>33</b><span>mises à jour</span></div>
-    <div role="listitem"><b>44 h 52</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 12 399</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>34</b><span>mises à jour</span></div>
+    <div role="listitem"><b>51 h 31</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 12 733</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#34</span><time datetime="2026-11-24T14:58">14 h 58</time><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></li>
       <li><span class="n">#33</span><time datetime="2026-11-24T08:19">08 h 19</time><a href="#bourse">La fin de partie : l’introduction en bourse, et des stock-options pour toujours</a></li>
       <li><span class="n">#32</span><time datetime="2026-11-24T07:42">07 h 42</time><a href="#terminaux">Plusieurs terminaux : Ctrl+B puis c, et des fenêtres sous Xfce</a></li>
       <li><span class="n">#31</span><time datetime="2026-11-24T07:07">07 h 07</time><a href="#terminal">Sans bureau : les versions terminal (façon mc, lynx, nvlc, steamcmd)</a></li>
@@ -182,8 +183,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="bourse" aria-labelledby="t33">
-    <p class="meta"><span class="n">#33</span><span class="new">dernière</span><time datetime="2026-11-24T08:19">24 nov. 2026 · 08 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/74760dc">74760dc</a><span>12 294 → 12 399 lignes</span></p>
+  <article class="maj latest" id="incidents" aria-labelledby="t34">
+    <p class="meta"><span class="n">#34</span><span class="new">dernière</span><time datetime="2026-11-24T14:58">24 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ad7f471">ad7f471</a><span>12 399 → 12 733 lignes</span></p>
+    <h2 id="t34"><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></h2>
+    <ul>
+      <li>Après un ship, la prod peut tomber : plus souvent le vendredi, la nuit et avec Mistral, moins avec Claude et Moon AI. Les tests, les hooks et l’intégration continue baissent le risque.</li>
+      <li>PagerDoudou sonne : un badge rouge dans le tableau de bord, des clients remboursés chaque seconde (payés dans Vibank), et le ship suivant attend.</li>
+      <li>Six pannes à diagnostiquer dans le terminal : l’OOM killer, les pods en boucle, le disque plein, le certificat expiré, le DNS, la base saturée. incident donne les pistes ; systemctl, journalctl, kubectl, df, dig, certbot et git log montrent ce qui se passe ; seule la bonne commande répare.</li>
+      <li>incident agent confie la panne à un agent : il relit tous les logs (deux millions de tokens) et répare souvent. Sinon, il empire les choses.</li>
+      <li>status.vibe, dans Firefaux : l’état des services, l’incident en direct, l’historique. Le skill monitoring donne la cause ; les nouveaux runbooks, la commande (fausse une fois sur trois).</li>
+      <li>Quatre succès Steam, dont deux cachés.</li>
+    </ul>
+    <blockquote>« Un post-mortem, c’est un document de quatorze pages qui conclut que c’était le DNS. Treize pages félicitent l’agent qui l’a écrit. »<cite>l’agent, 14 h 58</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-incident.png" title="Voir en grand"><img src="assets/screen-incident.png" width="900" height="540" loading="lazy" alt="Le terminal pendant l’incident INC-4206 : PagerDoudou (« L’API ne répond plus », HTTP 502), incident (depuis 1 min 14, les remboursements, les pistes), puis systemctl status api : failed (Result: oom-kill), l’OOM killer dans le journal."></a><figcaption>Le diagnostic, dans le terminal.</figcaption></figure>
+      <figure><a href="assets/screen-status.png" title="Voir en grand"><img src="assets/screen-status.png" width="900" height="540" loading="lazy" alt="status.vibe dans Firefaux : Panne majeure, l’API en rouge parmi six services, la disponibilité, et l’historique de quatre incidents (certificat, disque plein, pods, base) avec leur durée, leurs remboursements et leur résolution."></a><figcaption>status.vibe pendant la panne.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="bourse" aria-labelledby="t33">
+    <p class="meta"><span class="n">#33</span><time datetime="2026-11-24T08:19">24 nov. 2026 · 08 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/74760dc">74760dc</a><span>12 294 → 12 399 lignes</span></p>
     <h2 id="t33"><a href="#bourse">La fin de partie : l’introduction en bourse, et des stock-options pour toujours</a></h2>
     <ul>
       <li>Votre startup a une valorisation : son chiffre d’affaires × 40, « parce que IA », et un bonus qui grimpe avec les ships.</li>
