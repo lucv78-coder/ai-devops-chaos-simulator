@@ -594,8 +594,8 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xfs h3 { margin-top: .4em; }
 /* icônes du bureau (xfdesktop) : en colonnes à gauche, sous les fenêtres ; le fond reste cliquable entre elles */
 .xf-icons {
-  position: absolute; top: .6em; bottom: .6em; left: .6ch; z-index: 0; pointer-events: none;
-  display: grid; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, 6.2em); grid-auto-columns: 11ch; gap: .2em .6ch;
+  position: absolute; top: .6em; bottom: .6em; left: .6ch; right: .6ch; z-index: 0; pointer-events: none;
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, 6.2em); grid-template-columns: repeat(auto-fill, 11ch); grid-auto-columns: 11ch; gap: .2em .6ch;
 }
 .xf-ico {
   pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: .25em; min-width: 0; height: 6.2em;
@@ -618,6 +618,9 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-ico:focus { outline: none; }
 .xf-ico:focus-visible { border-color: var(--orange); border-style: dotted; }
 .xf-ico.sel .l { background: var(--orange); color: var(--ink); text-shadow: none; }
+.xf-ico { touch-action: none; }                 /* au doigt aussi, l'icône se glisse */
+.xf-ico.drag { position: relative; z-index: 2; opacity: .85; }
+.xf-ico-hint { pointer-events: none; border: 1px dashed var(--orange); border-radius: 3px; background: color-mix(in srgb, var(--orange) 10%, transparent); }
 .xf-menu {
   position: absolute; top: calc(var(--lh) + .5em); left: .5ch; z-index: 3;
   width: min(60ch, calc(100vw - 1ch)); max-height: calc(100% - var(--lh) - 1.2em); overflow: auto; padding: .3em 0 .4em;
@@ -2412,6 +2415,7 @@ const ACH = [
   { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
+  { id: 'rangement', g: '⊡', n: 'Bureau rangé', d: 'Déplacer une icône du bureau. Le reste du bureau, lui, ne se range pas.', p: 28.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6234,6 +6238,7 @@ function afterResize() {
   relayout();
   PROGS[view]?.redraw?.();
   if (xfOn) for (const n in xw) xfApply(xw[n]);   // les fenêtres restent dans le bureau
+  if (xfOn) xfIconsSync(true);                    // la grille des icônes suit la taille du bureau
 }
 
 /* ---------- session graphique Xfce (commande xfce, alias startx) ----------
@@ -6688,7 +6693,9 @@ const XFS_PV = { logo: 'AI', citation: '« … »', uni: '' };
 const XFS_HTML = {
   bureau: () => `<h3>Fond d’écran</h3><div class="xfs-walls">${XF_WALLS.map(([k, n, d]) => `<button type="button" class="xfs-wall${xfWall() === k ? ' on' : ''}" data-wall="${k}" aria-pressed="${xfWall() === k}">`
     + `<span class="pv ${k}" aria-hidden="true">${k === 'tux' ? tuxSvg() : k === 'code' ? 'fn ship() {\n  // TODO\n}' : esc(XFS_PV[k] ?? '')}</span><b>${esc(n)}</b><span class="d">${esc(d)}</span></button>`).join('')}</div>`
-    + `<p class="abt-note">${IDLE ? 'Gardé dans la partie, avec la place des fenêtres. Clic droit sur le bureau : « Fond d’écran suivant ».' : 'Mode libre : le réglage vaut pour cette session.'}</p>`,
+    + `<p class="abt-note">${IDLE ? 'Gardé dans la partie, avec la place des fenêtres. Clic droit sur le bureau : « Fond d’écran suivant ».' : 'Mode libre : le réglage vaut pour cette session.'}</p>`
+    + `<h3>Icônes</h3><p>Glissez une icône sur une case de la grille du bureau (sur une autre icône : elles échangent leur place). Au clavier : <kbd>Maj</kbd>+flèches. ${Object.keys(G.xfd?.ico || {}).length ? 'Vos icônes sont rangées à votre façon.' : 'Pour l’instant, elles sont en colonnes, dans l’ordre.'}</p>`
+    + `<p><button type="button" class="dl-real" data-xfsa="align"${Object.keys(G.xfd?.ico || {}).length ? '' : ' disabled'}>Aligner les icônes</button></p>`,
 };
 function xfSettingsOpen(tab) {                     // depuis le menu, le clic droit ou le terminal : la fenêtre, sur le bon onglet
   if (!xfOn) return;
@@ -6924,6 +6931,7 @@ deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'éc
     { ic: PROGS.thunar.icon, t: 'Gestionnaire de fichiers', run: () => xfLaunch('thunar') },
     { ic: '▦', t: 'Applications', k: 'Alt+F1', run: () => xfMenuOpen() },
     '-',
+    { ic: '⊡', t: 'Aligner les icônes', off: !Object.keys(G.xfd?.ico || {}).length, run: () => xfIconsAlign() },
     { ic: '▨', t: 'Fond d’écran suivant', run: () => xfWallSet(XF_WALLS[(XF_WALLS.findIndex(w => w[0] === xfWall()) + 1) % XF_WALLS.length][0]) },
     { ic: '▨', t: 'Paramètres du bureau…', run: () => xfSettingsOpen('bureau') },
     { ic: '⚙', t: 'Paramètres', run: () => openSettings() },
@@ -6956,13 +6964,13 @@ function xfIconList() {
   ].filter(Boolean);
 }
 function xfIconsSync(force) {                    // ne reconstruit que si la liste a changé (la sélection et le focus survivent)
-  if (!xfOn) return;
-  const list = xfIconList(), sig = list.map(i => `${i.id}${i.on ? '*' : ''}:${i.tip}`).join('|');
+  if (!xfOn || xfIcoDrag?.on) return;              // une icône glisse : on ne touche à rien
+  const list = xfIconList(), pos = xfIconPlace(list), sig = list.map(i => `${i.id}${i.on ? '*' : ''}:${i.tip}@${pos[i.id]}`).join('|');
   if (sig === xfIconSig && !force) return;
   xfIconSig = sig;
   const cur = document.activeElement?.closest?.('.xf-ico')?.dataset.ico;
   if (!list.some(i => i.id === xfIconSel)) xfIconSel = '';
-  xfIconsEl.innerHTML = list.map(i => `<button type="button" class="xf-ico${i.on ? ' on' : ''}${i.id === xfIconSel ? ' sel' : ''}" data-ico="${i.id}"`
+  xfIconsEl.innerHTML = list.map(i => `<button type="button" class="xf-ico${i.on ? ' on' : ''}${i.id === xfIconSel ? ' sel' : ''}" data-ico="${i.id}" style="grid-column:${pos[i.id][0]};grid-row:${pos[i.id][1]}"`
     + ` title="${esc(i.tip)}" aria-label="${esc(i.t)}${i.on ? ', ouvert' : ''}"><span class="g" aria-hidden="true">${esc(i.ic)}</span>`
     + `<span class="l" aria-hidden="true">${esc(i.t)}</span></button>`).join('');
   if (cur) xfIconsEl.querySelector(`[data-ico="${cur}"]`)?.focus({ preventScroll: true });
@@ -6987,24 +6995,30 @@ function xfIconOpen(id) {
 xfIconsEl.addEventListener('pointerdown', e => { xfIconTap = e.pointerType === 'touch'; });
 xfIconsEl.addEventListener('click', e => {
   const b = e.target.closest('.xf-ico');
-  if (!b) return;
+  if (!b || xfIcoDragged) return;                  // la fin d'un glissement n'ouvre rien
   xfIconSelect(b.dataset.ico);
   if (e.detail === 0 || xfIconTap) xfIconOpen(b.dataset.ico);   // Entrée ou Espace (detail 0), ou un tap
 });
 xfIconsEl.addEventListener('dblclick', e => {
   const b = e.target.closest('.xf-ico');
-  if (b && !xfIconTap) xfIconOpen(b.dataset.ico);
+  if (b && !xfIconTap && !xfIcoDragged) xfIconOpen(b.dataset.ico);
 });
-xfIconsEl.addEventListener('keydown', e => {     // flèches : haut et bas dans la colonne, gauche et droite d'une colonne à l'autre
-  const items = [...xfIconsEl.querySelectorAll('.xf-ico')], i = items.indexOf(document.activeElement);
-  if (i < 0) return;
-  const col = items.filter(b => b.offsetLeft === items[0].offsetLeft).length;
-  const d = { ArrowDown: 1, ArrowUp: -1, ArrowRight: col, ArrowLeft: -col }[e.key];
-  if (!d) return;
+xfIconsEl.addEventListener('keydown', e => {     // flèches : l'icône voisine sur la grille ; Maj+flèches : déplacer l'icône d'une case
+  const b = document.activeElement?.closest?.('.xf-ico'), d = { ArrowDown: [0, 1], ArrowUp: [0, -1], ArrowRight: [1, 0], ArrowLeft: [-1, 0] }[e.key];
+  if (!b || !d || e.ctrlKey || e.altKey) return;
   e.preventDefault();
-  const t = items[Math.min(items.length - 1, Math.max(0, i + d))];
-  t.focus();
-  xfIconSelect(t.dataset.ico);
+  const id = b.dataset.ico, pos = xfIconPlace(xfIconList()), cur = pos[id], [dc, dr] = d;
+  if (e.shiftKey) {
+    const { cols, rows } = xfGridSize();
+    xfIconMove(id, [Math.min(cols, Math.max(1, cur[0] + dc)), Math.min(rows, Math.max(1, cur[1] + dr))]);
+    return xfIconsEl.querySelector(`[data-ico="${id}"]`)?.focus({ preventScroll: true });
+  }
+  const score = q => dc ? Math.abs(q[0] - cur[0]) * 100 + Math.abs(q[1] - cur[1]) : Math.abs(q[1] - cur[1]) * 100 + Math.abs(q[0] - cur[0]);
+  const next = Object.entries(pos).filter(([k, q]) => k !== id && (dc ? Math.sign(q[0] - cur[0]) === dc : Math.sign(q[1] - cur[1]) === dr)).sort((x, y) => score(x[1]) - score(y[1]))[0];
+  if (!next) return;
+  const t = xfIconsEl.querySelector(`[data-ico="${next[0]}"]`);
+  t?.focus();
+  xfIconSelect(next[0]);
 });
 xfIconsEl.addEventListener('contextmenu', e => {
   const b = e.target.closest('.xf-ico');
@@ -7019,6 +7033,87 @@ xfIconsEl.addEventListener('contextmenu', e => {
   ]);
 });
 deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) xfIconSelect(''); });   // un clic sur le fond désélectionne
+
+/* les icônes sur une grille : chacune a sa case [colonne, rangée] (à partir de 1). Dès qu'on en déplace une, toutes les places sont
+   gardées dans la partie (G.xfd.ico) : rien ne saute ; une nouvelle icône (une appli installée) prend la première case libre,
+   colonne par colonne. « Aligner les icônes » oublie tout : les colonnes reviennent. */
+let xfIcoDrag = null, xfIcoDragged = false;
+function xfGridSize() {                            // les cases que la taille du bureau permet
+  const cs = getComputedStyle(xfIconsEl), n = v => v.split(' ').filter(x => /px$/.test(x)).length;
+  return { cols: Math.max(1, n(cs.gridTemplateColumns)), rows: Math.max(1, n(cs.gridTemplateRows)), cs };
+}
+function xfIconPlace(list) {                       // → { id: [col, rangée] } : les places gardées d'abord (si elles tiennent), les autres dans les cases libres
+  const { cols, rows } = xfGridSize(), saved = G.xfd?.ico || {}, used = new Set(), out = {};
+  list.forEach(i => { const q = saved[i.id]; if (Array.isArray(q) && q[0] <= cols && q[1] <= rows && !used.has(q + '')) { out[i.id] = [q[0], q[1]]; used.add(q + ''); } });
+  let c = 1, r = 1;
+  list.forEach(i => {
+    if (out[i.id]) return;
+    while (used.has(c + ',' + r)) { r++; if (r > rows) { r = 1; c++; } }
+    out[i.id] = [c, r];
+    used.add(c + ',' + r);
+  });
+  return out;
+}
+function xfIconMove(id, cell) {                    // une icône sur une case ; si elle est prise, les deux échangent leur place
+  const pos = xfIconPlace(xfIconList()), from = pos[id];
+  if (!from || (from[0] === cell[0] && from[1] === cell[1])) return false;
+  const other = Object.keys(pos).find(k => k !== id && pos[k][0] === cell[0] && pos[k][1] === cell[1]);
+  const ico = Object.fromEntries(Object.entries(pos).map(([k, q]) => [k, [...q]]));   // toutes les places, figées
+  ico[id] = [cell[0], cell[1]];
+  if (other) ico[other] = from;
+  G.xfd = { ...G.xfd, ico };
+  ach('rangement');
+  saveGame();
+  xfIconsSync(true);
+  xfIconSelect(id);
+  PROGS['xfce4-settings'].redraw?.();
+  return true;
+}
+function xfIconsAlign() {                          // retour aux colonnes, dans l'ordre
+  G.xfd = { ...G.xfd, ico: {} };
+  saveGame();
+  xfIconsSync(true);
+  PROGS['xfce4-settings'].redraw?.();
+}
+XFS_ACT.align = () => xfIconsAlign();
+function xfCellAt(x, y) {                          // la case sous le pointeur
+  const { cols, rows, cs } = xfGridSize(), R = xfIconsEl.getBoundingClientRect();
+  const cw = parseFloat(cs.gridTemplateColumns) || 1, rh = parseFloat(cs.gridTemplateRows) || 1, gx = parseFloat(cs.columnGap) || 0, gy = parseFloat(cs.rowGap) || 0;
+  return [Math.min(cols, Math.max(1, Math.floor((x - R.left) / (cw + gx)) + 1)), Math.min(rows, Math.max(1, Math.floor((y - R.top) / (rh + gy)) + 1))];
+}
+xfIconsEl.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.xf-ico');
+  if (b && e.button === 0) xfIcoDrag = { b, id: b.dataset.ico, sx: e.clientX, sy: e.clientY, on: false, cell: null, hint: null };
+});
+addEventListener('pointermove', e => {             // au-delà de 6 px, l'icône suit le pointeur ; la case visée est soulignée
+  const D = xfIcoDrag;
+  if (!D) return;
+  const dx = e.clientX - D.sx, dy = e.clientY - D.sy;
+  if (!D.on) {
+    if (Math.hypot(dx, dy) < 6) return;
+    D.on = true;
+    D.b.classList.add('drag');
+    D.hint = document.createElement('span');
+    D.hint.className = 'xf-ico-hint';
+    xfIconsEl.appendChild(D.hint);
+  }
+  D.b.style.transform = `translate(${dx}px, ${dy}px)`;
+  D.cell = xfCellAt(e.clientX, e.clientY);
+  Object.assign(D.hint.style, { gridColumn: String(D.cell[0]), gridRow: String(D.cell[1]) });
+});
+function xfIcoDrop(ok) {
+  const D = xfIcoDrag;
+  xfIcoDrag = null;
+  if (!D?.on) return;
+  xfIcoDragged = true;
+  setTimeout(() => { xfIcoDragged = false; }, 0);  // le clic qui suit le lâcher ne doit rien ouvrir
+  D.b.style.transform = '';
+  D.b.classList.remove('drag');
+  D.hint?.remove();
+  if (ok && D.cell) xfIconMove(D.id, D.cell);
+}
+addEventListener('pointerup', () => xfIcoDrop(true));
+addEventListener('pointercancel', () => xfIcoDrop(false));
 
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
    Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés, jauge du disque.
