@@ -597,6 +597,10 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
   background: var(--panel); border: 1px solid var(--orange); border-radius: 0 0 4px 4px; box-shadow: 0 .8em 2.4em rgba(0, 0, 0, .65);
 }
 .xf-menu[hidden] { display: none; }
+.xf-q { width: 100%; margin: .2em 0 .5em; padding: .25em 1ch; border: 1px solid var(--rule); border-radius: 3px; background: var(--bg); color: var(--fg); font: inherit; outline: none; }
+.xf-q:focus { border-color: var(--orange); }
+.xf-menu [hidden] { display: none; }
+.xf-none { padding: .4em 1ch; }
 /* gestionnaire de fenêtres : l'aperçu du bord pendant un glissement, le sélecteur Alt+² */
 .xf-snap { position: absolute; z-index: 10000000; border: 2px solid var(--orange); border-radius: 4px; background: color-mix(in srgb, var(--orange) 14%, transparent); pointer-events: none; transition: left .12s, top .12s, width .12s, height .12s; }
 .xf-snap[hidden] { display: none; }
@@ -2378,6 +2382,7 @@ const ACH = [
   { id: 'fuite', g: 'sk', n: 'sk-live-…', d: 'Se faire voler une clé d’API : un agent a commité le .env.', p: 22.2, h: 1 },
   { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
   { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
+  { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6546,6 +6551,33 @@ xfNotesEl.addEventListener('click', e => {
 addEventListener('pointerdown', e => { if (!xfNotesEl.hidden && !e.target.closest('#xf-notes, [data-tray="notes"]')) xfNotesToggle(false); }, true);
 addEventListener('keydown', e => { if (e.key === 'Escape' && !xfNotesEl.hidden) { e.preventDefault(); xfNotesToggle(false); } });
 
+/* la recherche du menu Applications : les mots de chaque entrée (sans accents ni majuscules), quelques synonymes, et les commandes
+   du terminal (elles s'y tapent toutes seules) */
+const xfNorm = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const XF_ALIAS = { firefaux: 'firefox navigateur web internet chrome', blunderbird: 'thunderbird mail courriel email', thunar: 'fichiers explorateur dossiers',
+  mousepad: 'texte notepad bloc-notes', atril: 'pdf documents', vlc: 'musique audio video', steam: 'jeux succes', htop: 'processus taches cpu', atop: 'disques reseau gpu',
+  zsh: 'terminal console shell', store: 'boutique acheter agents', settings: 'reglages parametres options couleurs', newterm: 'terminal console shell' };
+const MENU_CMDS = [['incident', 'l’astreinte : la panne de prod en cours'], ['mail', 'le courrier : clients, investisseurs, URSSAF'], ['pr list', 'les pull requests des agents'],
+  ['actu', 'les pannes du monde'], ['equipe', 'vos humains'], ['keys', 'la clé d’API des agents'], ['ipo', 'la valorisation, l’introduction en bourse'], ['defi', 'les défis de la startup'],
+  ['apt list', 'les paquets à installer'], ['plateformes', 'vos plateformes d’agents'], ['cost', 'la facture des agents'], ['score', 'les projets shippés'],
+  ['curl facture.vibe', 'le relevé de compte Vibank'], ['help', 'toutes les commandes']];
+function xfMenuFilter() {                          // ce qui correspond reste ; les catégories vides et les commandes sans résultat s'effacent
+  const q = xfNorm(xfMenuEl.querySelector('.xf-q').value.trim()), words = q.split(/\s+/).filter(Boolean);
+  let shown = 0;
+  xfMenuEl.querySelectorAll('[data-s]').forEach(b => { const ok = !words.length || words.every(w => b.dataset.s.includes(w)); b.hidden = !ok; if (ok) shown++; });
+  const cmds = xfMenuEl.querySelector('.xf-cmds');
+  cmds.hidden = !words.length || ![...cmds.querySelectorAll('[data-s]')].some(b => !b.hidden);
+  let cat = null, n = 0;
+  const close = () => { if (cat) cat.hidden = !n; };
+  [...xfMenuEl.children].forEach(c => {
+    if (c.matches('p.xf-cat')) { close(); cat = c; n = 0; }
+    else if (c.matches('hr')) { close(); cat = null; c.hidden = !!words.length; }
+    else if (c.matches('[data-s]') && !c.hidden) n++;
+  });
+  close();
+  xfMenuEl.querySelector('.xf-none').hidden = !words.length || shown > 0;
+}
+
 /* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
    navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
    d'une fenêtre à l'autre, et Ctrl+Alt pour le reste : ← → les moitiés de l'écran, ↑ agrandir, ↓ restaurer puis réduire, D le bureau
@@ -6632,10 +6664,11 @@ addEventListener('blur', () => xfSwEnd(false));
 
 /* menu Applications : construit à l'ouverture depuis CLIS et PROGS (un futur programme y apparaît tout seul) */
 function xfMenuOpen() {
-  const item = (id, ic, t, d) => `<button type="button" role="menuitem" class="xf-it" data-app="${id}"><span class="xw-ic">${esc(ic)}</span>`
+  const item = (id, ic, t, d) => `<button type="button" role="menuitem" class="xf-it" data-app="${id}" data-s="${esc(xfNorm(`${id} ${t} ${PROGS[id]?.desc || ''} ${XF_ALIAS[id] || ''}`))}"><span class="xw-ic">${esc(ic)}</span>`
     + `<span class="t">${esc(t)}</span><span class="d">${esc(d)}</span></button>`;
   const progs = Object.keys(PROGS).filter(k => PROGS[k].make && !PROGS[k].nomenu);
   xfMenuEl.innerHTML = `<p class="xf-who">${esc(USER)}@prod-01 <span class="dim">· Vibian GNU/Linux 13 (friday)</span></p>`
+    + '<input class="xf-q" type="search" placeholder="Rechercher une appli ou une commande…" aria-label="Rechercher dans le menu Applications" spellcheck="false" autocomplete="off">'
     + ['Accessoires', 'Internet', 'Jeux', 'Multimédia', 'Système'].map(c => `<p class="xf-cat">${c}</p>` + (c === 'Système' ? item('zsh', '❯', 'Émulateur de terminal', `zsh · ${tildePath(cwd)}`) : '')
       + progs.filter(k => (PROGS[k].cat || 'Système') === c).map(k => item(k, PROGS[k].icon || '▤', PROGS[k].menu || k,
         tabs.includes(k) ? '● ouvert' : installed.has(k) ? PROGS[k].desc || '' : `non installé · sudo apt install ${k}`)).join('')).join('')
@@ -6649,10 +6682,13 @@ function xfMenuOpen() {
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
     + item('xfce4-about', 'ⓘ', 'À propos', 'la config du PC, l’éditeur, les contributeurs, les agents')
     + item('reboot', '↻', 'Redémarrer', 'le PC repasse par le BIOS · DEL pour le setup')
-    + item('logout', '↩', 'Déconnexion', 'quitter Xfce et revenir au terminal');
+    + item('logout', '↩', 'Déconnexion', 'quitter Xfce et revenir au terminal')
+    + `<div class="xf-cmds" hidden><p class="xf-cat">Commandes du terminal</p>${MENU_CMDS.map(([c, d]) => `<button type="button" role="menuitem" class="xf-it" data-cmd="${esc(c)}" data-s="${esc(xfNorm(`${c} ${d}`))}">`
+      + `<span class="xw-ic">❯</span><span class="t">${esc(c)}</span><span class="d">${esc(d)}</span></button>`).join('')}</div>`
+    + '<p class="xf-none dim" hidden>Rien de tel. Les agents non plus ne trouvent pas.</p>';
   xfMenuEl.hidden = false;
   xfAppsBtn.setAttribute('aria-expanded', 'true');
-  xfMenuEl.querySelector('[role="menuitem"]').focus({ preventScroll: true });
+  xfMenuEl.querySelector('.xf-q').focus({ preventScroll: true });
 }
 function xfMenuClose(back) {
   if (xfMenuEl.hidden) return;
@@ -6674,12 +6710,25 @@ function xfLaunch(id) {
   typeIntoShell(id);                             // claude, codex, mistral (ou un programme absent) : le terminal tape la commande
 }
 xfAppsBtn.addEventListener('click', () => { if (xfMenuEl.hidden) xfMenuOpen(); else xfMenuClose(); });
-xfMenuEl.addEventListener('click', e => { const b = e.target.closest('[data-app]'); if (b) xfLaunch(b.dataset.app); });
-xfMenuEl.addEventListener('keydown', e => {
-  const items = [...xfMenuEl.querySelectorAll('[role="menuitem"]')], i = items.indexOf(document.activeElement);
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus(); }
-  else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); items[e.key === 'Home' ? 0 : items.length - 1].focus(); }
+xfMenuEl.addEventListener('click', e => {
+  const b = e.target.closest('[data-app], [data-cmd]');
+  if (!b) return;
+  if (xfMenuEl.querySelector('.xf-q')?.value.trim()) ach('recherche');   // lancé depuis la recherche
+  if (b.dataset.cmd) { xfMenuClose(); typeIntoShell(b.dataset.cmd); } else xfLaunch(b.dataset.app);
+});
+xfMenuEl.addEventListener('input', e => { if (e.target.matches('.xf-q')) xfMenuFilter(); });
+xfMenuEl.addEventListener('keydown', e => {      // les flèches parcourent ce qui reste ; Entrée dans le champ : le premier résultat
+  const q = xfMenuEl.querySelector('.xf-q'), items = [...xfMenuEl.querySelectorAll('[role="menuitem"]')].filter(x => !x.hidden && !x.closest('[hidden]')), i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const d = e.key === 'ArrowDown' ? 1 : -1;
+    items[i < 0 ? (d > 0 ? 0 : items.length - 1) : (i + d + items.length) % items.length]?.focus();
+  }
+  else if ((e.key === 'Home' || e.key === 'End') && e.target !== q) { e.preventDefault(); items[e.key === 'Home' ? 0 : items.length - 1]?.focus(); }
+  else if (e.key === 'Enter' && e.target === q) { e.preventDefault(); items[0]?.click(); }
+  else if (e.key === 'Escape' && q.value) { e.preventDefault(); q.value = ''; xfMenuFilter(); q.focus(); }
   else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); xfMenuClose(true); }
+  else if (e.target !== q && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); q.value += e.key; q.focus(); xfMenuFilter(); }   // taper sur une entrée : ça va dans la recherche
 });
 addEventListener('pointerdown', e => { if (!xfMenuEl.hidden && !e.target.closest('#xf-menu, .xf-apps')) xfMenuClose(); }, true);
 addEventListener('keydown', e => {               // Alt+F1 : le menu, comme sous Xfce
