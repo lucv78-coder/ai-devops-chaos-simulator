@@ -649,6 +649,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 }
 .xw.max .xw-grip { display: none; }
 .xw.drag { opacity: .92; }
+.xw.top .xw-t::before { content: '⊤ '; color: var(--orange); }   /* toujours au premier plan */
 .xw.drag .xw-body { pointer-events: none; }
 /* les programmes, une fois rangés dans leur fenêtre */
 body.xfce #shell { position: absolute; inset: 0; display: flex; flex-direction: column; height: auto; padding: .3em 1ch .35em; border-top: 0; }
@@ -2276,7 +2277,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, xfw: {} });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -6303,10 +6304,11 @@ function xfEnsure(n) {
     + '<button type="button" data-x="max" title="Agrandir" aria-label="Agrandir">□</button>'
     + '<button type="button" data-x="close" title="Fermer" aria-label="Fermer">✕</button></span></div>'
     + '<div class="xw-body"></div><span class="xw-grip" aria-hidden="true"></span>';
-  const k = Object.keys(xw).length % 5, [fx, fy, fw, fh] = XF_PLACE[n] || [.1 + .04 * k, .08 + .04 * k, .6, .64];
+  const k = Object.keys(xw).length % 5, S = IDLE && G.xfw?.[n], [fx, fy, fw, fh] = S || XF_PLACE[n] || [.1 + .04 * k, .08 + .04 * k, .6, .64];   // S : là où on l'avait laissée
   const dw = deskEl.clientWidth, dh = deskEl.clientHeight;   // clientWidth : insensible à l'animation du tube
-  const w = xw[n] = { n, el, body: el.querySelector('.xw-body'), x: dw * fx, y: dh * fy, w: dw * fw, h: dh * fh, min: false, max: dw < 760, closed: false, tile: '', prev: null };
-  el.style.zIndex = ++xfZ;
+  const w = xw[n] = { n, el, body: el.querySelector('.xw-body'), x: dw * fx, y: dh * fy, w: dw * fw, h: dh * fh, min: false, max: dw < 760 || !!S?.[4], closed: false, tile: '', prev: null, top: !!S?.[5] };
+  el.style.zIndex = (w.top ? 1e6 : 0) + (++xfZ);
+  el.classList.toggle('top', w.top);
   deskEl.appendChild(el);
   xfMount(n, w.body);
   xfApply(w);
@@ -6318,6 +6320,7 @@ function xfEnsure(n) {
   el.addEventListener('click', e => { if (isTerm(n) && n === liveTerm && !e.target.closest('button') && !String(getSelection())) shellIn.focus({ preventScroll: true }); });
   bar.addEventListener('pointerdown', e => xfDrag(e, w, 'move'));
   bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) xfMax(n); });
+  bar.addEventListener('contextmenu', e => { if (e.target.closest('button')) return; e.preventDefault(); xfFocus(n, false); xfWinMenu(n, e.clientX, e.clientY); });
   el.querySelector('.xw-grip').addEventListener('pointerdown', e => xfDrag(e, w, 'size'));
   el.querySelector('.xw-btns').addEventListener('click', e => {
     const b = e.target.closest('[data-x]');
@@ -6389,6 +6392,7 @@ function xfDrag(e, w, kind) {                    // barre de titre : déplacer (
     xfSnapHint('');
     if (zone === 'max') { w.prev = { ...o }; w.max = true; xfApply(w); }
     else if (zone) xfTile(w.n, zone, o);
+    xfGeomSave(w);
   };
   t.addEventListener('pointermove', mv);
   t.addEventListener('pointerup', up);
@@ -6400,7 +6404,7 @@ function xfFocus(n, domFocus = true) {           // passe la fenêtre devant, en
   const w = xfEnsure(n), fresh = view !== n || w.min || w.closed;
   w.min = w.closed = false;
   w.el.hidden = false;
-  if (+w.el.style.zIndex !== xfZ) w.el.style.zIndex = ++xfZ;
+  if (+w.el.style.zIndex % 1e6 !== xfZ) xfRaise(w);
   if (view !== n) { if (view) lastView = view; view = n; }
   xfMru = [n, ...xfMru.filter(k => k !== n)];       // le sélecteur Alt+² propose d'abord les plus récentes
   for (const k in xw) xw[k].el.classList.toggle('on', k === n);
@@ -6437,6 +6441,7 @@ function xfMax(n) {
   if (!w) return;
   w.max = !w.max;
   xfApply(w);
+  xfGeomSave(w);
 }
 function xfClose(n) {
   if (PROGS[n]?.term) return termClose(n);         // une fenêtre Terminal de plus : elle se ferme pour de bon
@@ -6461,6 +6466,12 @@ function xfSync() {                              // après chaque changement d'o
   }).join('');
   xfIconsSync();                                 // le point vert des icônes suit les programmes ouverts
 }
+xfTasksEl.addEventListener('contextmenu', e => {  // barre des tâches : le menu de la fenêtre
+  const b = e.target.closest('[data-w]');
+  if (!b) return;
+  e.preventDefault();
+  xfWinMenu(b.dataset.w, e.clientX, e.clientY);
+});
 xfTasksEl.addEventListener('click', e => {       // barre des tâches : un clic passe devant, un second réduit
   const b = e.target.closest('[data-w]');
   if (!b) return;
@@ -6578,6 +6589,39 @@ function xfMenuFilter() {                          // ce qui correspond reste ; 
   xfMenuEl.querySelector('.xf-none').hidden = !words.length || shown > 0;
 }
 
+/* la disposition gardée dans la partie : [x, y, largeur, hauteur] en fractions du bureau, agrandie, toujours au premier plan ;
+   le menu d'une fenêtre (clic droit sur sa barre de titre, ou sur son bouton dans la barre des tâches) ; toujours au premier plan */
+function xfGeomSave(w) {
+  if (!IDLE || !w?.n) return;
+  const dw = deskEl.clientWidth, dh = deskEl.clientHeight;
+  if (!dw || !dh) return;
+  G.xfw = { ...(G.xfw || {}), [w.n]: [w.x / dw, w.y / dh, w.w / dw, w.h / dh, w.max ? 1 : 0, w.top ? 1 : 0].map(v => Math.round(v * 1e4) / 1e4) };
+  saveGame();
+}
+function xfRaise(w) { w.el.style.zIndex = (w.top ? 1e6 : 0) + (++xfZ); }   // toujours au premier plan : au-dessus des autres, quoi qu'il arrive
+function xfTop(n) {
+  const w = xw[n];
+  if (!w) return;
+  w.top = !w.top;
+  w.el.classList.toggle('top', w.top);
+  xfRaise(w);
+  xfGeomSave(w);
+}
+function xfWinMenu(n, x, y) {
+  const w = xw[n];
+  if (!w) return;
+  xfCtxOpen(x, y, [
+    ...(w.min ? [{ ic: '▣', t: 'Afficher', run: () => xfFocus(n) }] : [{ ic: '─', t: 'Réduire', k: 'Ctrl+Alt+↓', run: () => xfMin(n) }]),
+    { ic: w.max ? '❐' : '□', t: w.max ? 'Restaurer' : 'Agrandir', k: 'Ctrl+Alt+↑', run: () => { xfFocus(n); xfMax(n); } },
+    { ic: '◧', t: 'Moitié gauche', k: 'Ctrl+Alt+←', run: () => { xfFocus(n); xfTile(n, 'l'); } },
+    { ic: '◨', t: 'Moitié droite', k: 'Ctrl+Alt+→', run: () => { xfFocus(n); xfTile(n, 'r'); } },
+    { ic: w.top ? '✓' : '', t: 'Toujours au premier plan', run: () => xfTop(n) },
+    ...(isTerm(n) ? ['-', { ic: '❯', t: 'Nouveau terminal', run: () => termNew() }] : []),
+    '-',
+    { ic: '✕', t: 'Fermer', k: 'Ctrl+Alt+W', danger: true, run: () => xfClose(n) },
+  ]);
+}
+
 /* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
    navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
    d'une fenêtre à l'autre, et Ctrl+Alt pour le reste : ← → les moitiés de l'écran, ↑ agrandir, ↓ restaurer puis réduire, D le bureau
@@ -6601,14 +6645,15 @@ function xfTile(n, side, prev) {                   // la moitié gauche ou droit
   const dw = deskEl.clientWidth, dh = deskEl.clientHeight;
   Object.assign(w, { max: false, tile: side, x: side === 'r' ? dw / 2 : 0, y: 0, w: dw / 2, h: dh });
   xfApply(w);
+  xfGeomSave(w);
   if (['l', 'r'].every(sd => Object.values(xw).some(x => x.tile === sd && !x.min && !x.closed))) ach('tiling');
 }
-function xfUp(n) { const w = xw[n]; if (w && !w.max) { w.max = true; xfApply(w); } }
+function xfUp(n) { const w = xw[n]; if (w && !w.max) { w.max = true; xfApply(w); xfGeomSave(w); } }
 function xfDown(n) {                               // agrandie : restaurée ; collée : sa taille d'avant ; sinon : réduite
   const w = xw[n];
   if (!w) return;
-  if (w.max) { w.max = false; xfApply(w); }
-  else if (w.tile) { Object.assign(w, w.prev || {}); w.tile = ''; xfApply(w); }
+  if (w.max) { w.max = false; xfApply(w); xfGeomSave(w); }
+  else if (w.tile) { Object.assign(w, w.prev || {}); w.tile = ''; xfApply(w); xfGeomSave(w); }
   else xfMin(n);
 }
 function xfDesk() {                                // Ctrl+Alt+D : tout réduire ; une seconde fois : tout revient
@@ -9282,7 +9327,7 @@ function ipoDo(next = '') {                        // sonner la cloche : la star
   if (V >= 1e9) ach('licorne');
   if (ipo.n >= 3) ach('serial');
   const tx = [...(G.tx || []), [Date.now(), 'ipo', `Introduction en bourse de ${PROJ.toUpperCase()} (${bigMoney(V)}) : ${so} stock-options, bloquées quatre ans`, 0, 0]].slice(-200);
-  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, tx, ipo, chal: nx };
+  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, xfw: G.xfw, tx, ipo, chal: nx };
   G = { ...G_DEF(), ...keep };
   platInit();
   if (SANDBOX) sandboxFill();
