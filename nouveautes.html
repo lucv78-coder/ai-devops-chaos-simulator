@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>43</b><span>mises à jour</span></div>
-    <div role="listitem"><b>57 h 49</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 13 768</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>44</b><span>mises à jour</span></div>
+    <div role="listitem"><b>58 h 28</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 13 813</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#44</span><time datetime="2026-11-24T21:55">21 h 55</time><a href="#retouches-xfce">Retouches de Xfce : les fenêtres se souviennent, et un clic droit</a></li>
       <li><span class="n">#43</span><time datetime="2026-11-24T21:16">21 h 16</time><a href="#recherche">La recherche du menu Applications</a></li>
       <li><span class="n">#42</span><time datetime="2026-11-24T20:38">20 h 38</time><a href="#notifications">La zone de notifications du tableau de bord</a></li>
       <li><span class="n">#41</span><time datetime="2026-11-24T19:52">19 h 52</time><a href="#fenetres">Les fenêtres au clavier, et collées aux bords</a></li>
@@ -192,8 +193,22 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="recherche" aria-labelledby="t43">
-    <p class="meta"><span class="n">#43</span><span class="new">dernière</span><time datetime="2026-11-24T21:16">24 nov. 2026 · 21 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/75edcf2">75edcf2</a><span>13 719 → 13 768 lignes</span></p>
+  <article class="maj latest" id="retouches-xfce" aria-labelledby="t44">
+    <p class="meta"><span class="n">#44</span><span class="new">dernière</span><time datetime="2026-11-24T21:55">24 nov. 2026 · 21 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/52426de">52426de</a><span>13 768 → 13 813 lignes</span></p>
+    <h2 id="t44"><a href="#retouches-xfce">Retouches de Xfce : les fenêtres se souviennent, et un clic droit</a></h2>
+    <ul>
+      <li>Chaque fenêtre garde sa place et sa taille (et si elle était agrandie) d’une ouverture à l’autre, même après un rechargement : c’est dans la partie.</li>
+      <li>Un clic droit sur une barre de titre, ou sur une fenêtre dans la barre des tâches : réduire ou afficher, agrandir, les moitiés de l’écran, fermer ; pour un terminal, un nouveau terminal.</li>
+      <li>« Toujours au premier plan » garde une fenêtre au-dessus des autres, même quand une autre est active : pratique pour htop pendant que les agents travaillent.</li>
+    </ul>
+    <blockquote>« Une fenêtre toujours au premier plan, c’est htop qui vous regarde travailler. Il juge. »<cite>l’agent, 21 h 55</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-fenetre-menu.png" title="Voir en grand"><img src="assets/screen-fenetre-menu.png" width="900" height="540" loading="lazy" alt="Le clic droit sur la barre de titre de Firefaux : Réduire, Agrandir, Moitié gauche, Moitié droite, Toujours au premier plan, Fermer, avec leurs raccourcis."></a><figcaption>Le menu d’une fenêtre.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="recherche" aria-labelledby="t43">
+    <p class="meta"><span class="n">#43</span><time datetime="2026-11-24T21:16">24 nov. 2026 · 21 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/75edcf2">75edcf2</a><span>13 719 → 13 768 lignes</span></p>
     <h2 id="t43"><a href="#recherche">La recherche du menu Applications</a></h2>
     <ul>
       <li>Alt+F1, puis on tape : « fire », « cour », « pdf » ou « thunderbird ». Les applis qui correspondent restent, accents et majuscules ignorés, avec quelques synonymes.</li>
@@ -203,7 +218,7 @@ footer p + p { margin-top: .5em; }
     </ul>
     <blockquote>« Un menu avec une recherche, c’est un menu qu’on ne lit plus. Comme le code. »<cite>l’agent, 21 h 16</cite></blockquote>
     <div class="shots">
-      <figure><a href="assets/screen-recherche.png" title="Voir en grand"><img src="assets/screen-recherche.png" width="900" height="540" loading="lazy" alt="Le menu Applications de Xfce, « cour » tapé dans la recherche : il ne reste que Courrier (Blunderbird) et la commande mail."></a><figcaption>La recherche du menu Applications.</figcaption></figure>
+      <figure><a href="assets/screen-recherche.png" title="Voir en grand"><img src="assets/screen-recherche.png" width="900" height="540" loading="lazy" alt="Le menu Applications de Xfce, « cour » tapé dans la recherche : il reste Courrier (Blunderbird), et deux commandes du terminal, incident (« la panne de prod en cours ») et mail."></a><figcaption>La recherche du menu Applications.</figcaption></figure>
     </div>
   </article>
 
