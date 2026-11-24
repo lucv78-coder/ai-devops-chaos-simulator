@@ -463,12 +463,14 @@ body[data-view="zsh"] #shell.out { opacity: 0; pointer-events: none; }
 #fps[hidden] { display: none; }
 :root[data-gfx="patate"] body { filter: grayscale(1) contrast(1.25); -webkit-font-smoothing: none; }
 :root[data-gfx="patate"] *, :root[data-gfx="bas"] * { animation: none !important; transition: none !important; }
-:root[data-gfx="ultra"] body { text-shadow: 0 0 .3em color-mix(in srgb, currentColor 45%, transparent); }
-:root[data-gfx="ultra"] body::after {
+/* le tube cathodique, sur tous les thèmes et tous les réglages : lignes de balayage, vignette, lueur. Ultra ajoute le scintillement. */
+body { text-shadow: 0 0 .3em color-mix(in srgb, currentColor 45%, transparent); }
+body::after {
   content: ""; position: fixed; inset: 0; z-index: 12; pointer-events: none;
   background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
-  box-shadow: inset 0 0 20vmin rgba(0, 0, 0, .7); animation: crt 5s steps(50) infinite;
+  box-shadow: inset 0 0 20vmin rgba(0, 0, 0, .7);
 }
+:root[data-gfx="ultra"] body::after { animation: crt 5s steps(50) infinite; }
 @keyframes crt { 50% { opacity: .82; } }
 :root[data-gfx="rtx"] body {
   text-shadow: 0 0 .12em currentColor, 0 0 .55em color-mix(in srgb, currentColor 70%, transparent), .06em .1em .25em rgba(0, 0, 0, .9);
@@ -2759,6 +2761,7 @@ const SETUP_HELP = () => [
   [H(['  sudo apt install xfce4 firefaux thunar mousepad atril', 'org'], ['  le bureau, le navigateur, les fichiers, l’éditeur, les PDF', 'dim']), '', 20],
   [H(['  sudo apt install steam', 'org'], ['  les succès (Steam, dans Xfce)', 'dim']), '', 20],
   [H(['  sudo apt install vlc', 'org'], ['  la musique (VLC ; les morceaux se téléchargent sur telecharge.vibe, dans Firefaux)', 'dim']), '', 20],
+  [H(['  apt list · apt search <mot> · apt show <paquet>', 'org'], ['  ce qui s’installe, et ce qui l’est déjà (✓)', 'dim']), '', 20],
 ];
 const WIKI_LINE = () => [H(['Tout le reste', 'fgc'], ['  le wiki du jeu : commandes, store, matériel, pannes · ', 'dim'], ['wiki', 'org'], [' pour l’ouvrir', 'dim']), '', 20];
 const PRE_HELP_LINES = () => [
@@ -2797,7 +2800,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
   [H(['Commandes disponibles', 'fgc']), '', 20],
   [H(['  npm run ship     ', 'org'], 'shipper le projet (que pourrait-il arriver ?)'), '', 20],
   [H(['  npm · npx        ', 'org'], 'install, run, test, ls, audit, doctor… (npm help)'), '', 20],
-  [H(['  apt · apt-get    ', 'org'], 'installer des paquets : sudo apt install cowsay, sl, neofetch…'), '', 20],
+  [H(['  apt · apt-get    ', 'org'], 'sudo apt install cowsay, sl, neofetch… · apt list, apt search <mot>, apt show <paquet> pour les voir'), '', 20],
   [H(['  agents           ', 'org'], 'ouvrir le sélecteur d’agents'), '', 20],
   [H(['  vibe « demande »  ', 'org'], 'faire écrire du code tout de suite (Vibe CLI, facturé à Codestral)'), '', 20],
   [H(['  layout <nom>     ', 'org'], LAYOUTS.join(' · ')), '', 20],
@@ -3959,15 +3962,26 @@ async function aptAutoremove(job) {
     [H(['✓ ', 'okc'], ['Motivation et week-end désinstallés.', 'dim']), '', 20],
   ]);
 }
-function aptList(flags) {
+function aptList(flags) {                         // apt list : une ligne par paquet, la version, la description, « installé » visible d'un coup d'œil
   shellPrint('En train de lister... Fait');
-  const row = (n, tag) => shellPrint(H([n, 'okc'], `/friday${tag === 'up' ? '-updates' : ''} ${CATALOG[n]?.[0] || '0.0.1-friday'} amd64${tag === 'inst' ? ' [installé]' : tag === 'up' ? ' [pouvant être mis à jour]' : ''}`));
+  const w = Math.max(...Object.keys(CATALOG).map(n => n.length)) + 2;
+  const row = (n, tag) => shellPrint(H([tag === 'inst' ? '✓ ' : tag === 'up' ? '↑ ' : '  ', tag === 'inst' ? 'okc' : 'wrn'],
+    [n.padEnd(w), tag === 'inst' ? 'okc' : 'fgc'], [(CATALOG[n]?.[0] || '0.0.1-friday').padEnd(18), 'dim'], CATALOG[n]?.[3] || '',
+    [tag === 'inst' ? '  [installé]' : tag === 'up' ? '  [pouvant être mis à jour]' : '', tag === 'inst' ? 'okc' : 'wrn']));
   if (flags.includes('--upgradable')) {
-    if (!aptUpgradable) return;
+    if (!aptUpgradable) return shellPrint('Tout est à jour. Les agents y ont veillé (ils ont désactivé les mises à jour).', 'dim');
     ['libc6', 'nodejs', 'npm', 'python3', 'steam', 'systemd'].slice(0, aptUpgradable).forEach(n => row(n, 'up'));
     if (aptUpgradable > 6) shellPrint(`… et ${aptUpgradable - 6} autres`, 'dim');
-  } else if (flags.includes('--installed')) [...installed].sort().forEach(n => row(n, 'inst'));
-  else Object.keys(CATALOG).sort().forEach(n => row(n, installed.has(n) ? 'inst' : ''));
+    return shellPrint(H(['sudo apt upgrade', 'org'], [' pour tout mettre à jour.', 'dim']));
+  }
+  if (flags.includes('--installed')) {
+    [...installed].sort().forEach(n => row(n, 'inst'));
+    return shellPrint(H([`${installed.size} paquets installés · `, 'dim'], ['sudo apt remove <paquet>', 'org'], [' pour en retirer un.', 'dim']));
+  }
+  const all = Object.keys(CATALOG).sort();
+  all.forEach(n => row(n, installed.has(n) ? 'inst' : ''));
+  shellPrint(H([`${all.length} paquets, dont ${all.filter(n => installed.has(n)).length} installés (✓) · `, 'dim'], ['sudo apt install <paquet>', 'org'], [' · ', 'dim'],
+    ['apt show <paquet>', 'org'], [' · ', 'dim'], ['apt search <mot>', 'org'], [' · ', 'dim'], ['apt list --installed', 'org']));
 }
 function aptSearch(q) {
   shellPrint('Tri... Fait');
@@ -7804,9 +7818,10 @@ function makeBrowser() {
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
     + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-status" role="status"></div>';
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
-  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1;
+  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '';
   const flash = t => { if (!t) return; note = t; noteUntil = performance.now() + 6000; stat(); };
   function stat() {
+    if (loading) { statusEl.textContent = loading; statusEl.classList.remove('note'); return; }   // pendant le chargement : l'étape en cours
     const on = performance.now() < noteUntil;
     statusEl.textContent = on ? note : `Terminé · ${webHost(url)} · ${ri(3, 41)} traqueurs bloqués`;
     statusEl.classList.toggle('note', on);
@@ -7835,11 +7850,20 @@ function makeBrowser() {
     load.style.transition = 'none';
     load.style.width = '0';
     void load.offsetWidth;
-    load.style.transition = `width ${ms}ms linear`;
-    load.style.width = '100%';
-    statusEl.textContent = `Chargement de ${webHost(u)}…`;
+    // la barre avance par à-coups : un bond, un arrêt (le DNS), une reprise, puis les traqueurs qui ralentissent tout
+    const h = webHost(u), stall = .16 + Math.random() * .1;
+    const plan = [[0, ri(20, 30), `Résolution de ${h}…`], [stall, ri(32, 38)], [stall + .32, ri(58, 68), `Connexion à ${h}…`], [stall + .46, ri(72, 80)],
+      [.82, ri(86, 92), `Chargement de ${ri(12, 48)} traqueurs…`], [.93, ri(95, 98)]];
+    loadSteps.forEach(clearTimeout);
+    loadSteps = plan.map(([at, pct, txt], i) => setTimeout(() => {
+      load.style.transition = `width ${Math.round(((plan[i + 1]?.[0] ?? 1) - at) * ms * .4)}ms cubic-bezier(.2, .7, .3, 1)`;
+      load.style.width = `${pct}%`;
+      if (txt) statusEl.textContent = loading = txt;
+    }, at * ms));
     clearTimeout(loadT);
     loadT = setTimeout(() => {
+      loadSteps.forEach(clearTimeout);
+      loading = '';
       load.style.transition = 'none';
       load.style.width = '0';
       draw(false);
@@ -7935,10 +7959,10 @@ const SETTINGS = [
     { v: 'xl', label: 'Très grande', fs: 1.45, desc: 'Pour la projeter en réunion. Courage.' },
   ], apply: (v, o, live) => { root.style.setProperty('--fs', o.fs); if (live) afterResize(); } },
   { key: 'gfx', label: 'Graphismes', def: 'ultra', options: [
-    { v: 'patate', label: 'Patate', desc: 'Tourne sur un grille-pain : noir et blanc, sans animation.' },
-    { v: 'bas', label: 'Bas', desc: 'Sans animation. Le texte reste du texte.' },
-    { v: 'eleve', label: 'Élevés', desc: 'Net, sans effet d’écran.' },
-    { v: 'ultra', label: 'Ultra · tube cathodique', desc: 'Lignes de balayage et lueur d’écran CRT : le meilleur rendu de 1983. Réglage par défaut.' },
+    { v: 'patate', label: 'Patate', desc: 'Tourne sur un grille-pain : noir et blanc, sans animation. Le tube cathodique, lui, reste.' },
+    { v: 'bas', label: 'Bas', desc: 'Sans animation. Le texte reste du texte, sur un tube cathodique.' },
+    { v: 'eleve', label: 'Élevés', desc: 'Net, sans scintillement. Les lignes de balayage restent : c’est un écran de 1983.' },
+    { v: 'ultra', label: 'Ultra · tube cathodique', desc: 'Lignes de balayage, lueur et scintillement d’écran CRT : le meilleur rendu de 1983. Réglage par défaut.' },
     { v: 'rtx', label: 'RTX ON', desc: 'Ray tracing en temps réel sur chaque caractère. Sur une Radeon. Personne ne sait comment.' },
     { v: 'ia', label: 'Upscaling IA', desc: 'Rendu en 144p, agrandi par IA : flou, mais en 4K. La plupart des images sont inventées.' },
   ], apply: v => { root.dataset.gfx = v; fpsTick(); } },
