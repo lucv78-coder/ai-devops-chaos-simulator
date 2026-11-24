@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>40</b><span>mises à jour</span></div>
-    <div role="listitem"><b>55 h 13</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 13 509</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>41</b><span>mises à jour</span></div>
+    <div role="listitem"><b>56 h 25</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 13 626</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#41</span><time datetime="2026-11-24T19:52">19 h 52</time><a href="#fenetres">Les fenêtres au clavier, et collées aux bords</a></li>
       <li><span class="n">#40</span><time datetime="2026-11-24T18:40">18 h 40</time><a href="#secrets">Les secrets qui fuient : un agent a commité le .env</a></li>
       <li><span class="n">#39</span><time datetime="2026-11-24T18:02">18 h 02</time><a href="#humains">Des humains : ils lisent le code, ils ont un salaire</a></li>
       <li><span class="n">#38</span><time datetime="2026-11-24T17:25">17 h 25</time><a href="#pannes">Les pannes du monde : quand ce n’est pas votre faute</a></li>
@@ -189,8 +190,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="secrets" aria-labelledby="t40">
-    <p class="meta"><span class="n">#40</span><span class="new">dernière</span><time datetime="2026-11-24T18:40">24 nov. 2026 · 18 h 40</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/485f755">485f755</a><span>13 415 → 13 509 lignes</span></p>
+  <article class="maj latest" id="fenetres" aria-labelledby="t41">
+    <p class="meta"><span class="n">#41</span><span class="new">dernière</span><time datetime="2026-11-24T19:52">24 nov. 2026 · 19 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/07457a0">07457a0</a><span>13 509 → 13 626 lignes</span></p>
+    <h2 id="t41"><a href="#fenetres">Les fenêtres au clavier, et collées aux bords</a></h2>
+    <ul>
+      <li>Alt+² (Alt+` en QWERTY) passe d’une fenêtre à l’autre : un sélecteur s’ouvre sur la fenêtre d’avant, chaque appui avance, Maj recule, relâcher Alt y va. Alt+Tab appartient à votre système, Alt+F4 fermerait le navigateur : le bureau du jeu prend les touches d’à côté.</li>
+      <li>Ctrl+Alt+← et → collent la fenêtre sur la moitié gauche ou droite de l’écran ; Ctrl+Alt+↑ l’agrandit ; Ctrl+Alt+↓ la restaure, puis la réduit. Ctrl+Alt+D montre le bureau (une seconde fois, tout revient) ; Ctrl+Alt+W ferme.</li>
+      <li>Glisser une fenêtre contre un bord la colle sur la moitié de l’écran, contre le haut l’agrandit : un aperçu montre où elle va. La reprendre lui rend sa taille d’avant.</li>
+      <li>Un succès Steam : deux fenêtres côte à côte.</li>
+    </ul>
+    <blockquote>« Un tiling window manager, c’est un bureau qui range les fenêtres à votre place. Comme les agents rangent le code : à moitié. »<cite>l’agent, 19 h 52</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-fenetres.png" title="Voir en grand"><img src="assets/screen-fenetres.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce : Firefaux collé sur la moitié gauche, le gestionnaire de fichiers sur la moitié droite, et au milieu le sélecteur Alt+² (Fichiers, Firefaux, Terminal)."></a><figcaption>Deux fenêtres côte à côte, et le sélecteur.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="secrets" aria-labelledby="t40">
+    <p class="meta"><span class="n">#40</span><time datetime="2026-11-24T18:40">24 nov. 2026 · 18 h 40</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/485f755">485f755</a><span>13 415 → 13 509 lignes</span></p>
     <h2 id="t40"><a href="#secrets">Les secrets qui fuient : un agent a commité le .env</a></h2>
     <ul>
       <li>Un agent commite le .env « pour que ça marche chez tout le monde » : la clé d’API part dans un commit public. GitHype prévient, par une alerte et un courriel.</li>
