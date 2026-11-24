@@ -1246,6 +1246,17 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 /* modes boost (ultracode, xhigh, flash) : le compte à rebours, la barre qui brille, le bouton U allumé */
 .hud-boost { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--ink); background: var(--yellow); font-weight: 700; }
 .hud-boost[hidden] { display: none; }
+/* incident de prod : le badge rouge, qui clignote (sauf si le système demande moins d'animations) */
+.hud-inc { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--ink); background: var(--red); font-weight: 700; animation: blink 1.2s steps(2) infinite; }
+.hud-inc[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .hud-inc { animation: none; } }
+/* status.vibe : l'état des services, l'incident en cours, l'historique */
+.st-band { padding: .7em 1.8ch; border-radius: 4px; font-weight: 700; }
+.st-band.ok { border: 1px solid var(--green); color: var(--green); }
+.st-band.ko { border: 1px solid var(--red); color: var(--red); }
+.st-band span { display: block; margin-top: .2em; color: var(--fg); font-weight: 400; }
+.st-svc { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: .2em 2ch; }
+.st-svc .ok { color: var(--green); } .st-svc .ko { color: var(--red); font-weight: 700; }
 #hud.boost .hud-fill { background: var(--yellow); box-shadow: 0 0 .7em var(--yellow); }
 .tbtn.boost.on { color: var(--ink); background: var(--yellow); }
 .tbtn.boost.on kbd { color: inherit; }
@@ -1323,6 +1334,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <span class="hud-money" title="Trésorerie : gains des projets shippés, moins la facture des tokens">$<b id="hud-money">0.00</b></span>
     <span class="hud-ship"><span id="hud-ver"></span><span class="hud-bar" role="progressbar" aria-label="Avancement du projet : ship automatique à 100 %" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="hud-fill"></span></span><b id="hud-pct">0 %</b><span class="dim" id="hud-eta"></span></span>
     <span class="hud-boost" id="hud-boost" hidden></span>
+    <span class="hud-inc" id="hud-inc" hidden title="Incident de prod en cours : tapez incident"></span>
     <span class="hud-info" id="hud-info" aria-live="off"></span>
     <button class="tbtn hud-store" type="button" data-act="store" aria-keyshortcuts="B"><kbd>B</kbd><span class="lbl"> store</span></button>
   </div>
@@ -2185,7 +2197,8 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
 }
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
-  ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [] });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
+  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2271,6 +2284,10 @@ const ACH = [
   { id: 'ipo', g: '♪', n: 'Ding ding ding', d: 'Introduire votre startup en bourse. La cloche, c’est vous qui la sonnez.', p: 3.6 },
   { id: 'licorne', g: '¥', n: 'Licorne', d: 'Entrer en bourse avec une valorisation d’au moins un milliard.', p: 1.2, h: 1 },
   { id: 'serial', g: '∞', n: 'Serial entrepreneur', d: 'Trois introductions en bourse. Trois startups, zéro client.', p: .6 },
+  { id: 'pager', g: '▲', n: 'Réveillé par le pager', d: 'Résoudre vous-même un incident de prod, dans le terminal.', p: 44.2 },
+  { id: 'mttr', g: '◷', n: 'Une minute chrono', d: 'Résoudre un incident de prod en moins d’une minute.', p: 9.7 },
+  { id: 'dns', g: 'NX', n: 'C’est toujours le DNS', d: 'Résoudre un incident DNS. Ce n’est jamais le DNS. Sauf quand c’est le DNS.', p: 12.5, h: 1 },
+  { id: 'pire', g: '‽', n: 'J’ai tout arrangé', d: 'Confier un incident à un agent, et le voir empirer.', p: 15.8, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2285,6 +2302,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
   if (G.tx.length > 200) G.tx.splice(0, G.tx.length - 200);
 }
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
+G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+if (G.inc) G.inc.ag = 0;                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3128,7 +3147,8 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  plateformes      ', 'org'], 'switch <plateforme> : premier plan · bg <plateforme> : arrière-plan, si le PC suit'), '', 20],
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
-    [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20]] : []),
+    [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  incident         ', 'org'], 'l’astreinte : la panne de prod en cours et les pistes (systemctl, journalctl, kubectl, df, dig, certbot, git log) · incident agent : la confier'), '', 20]] : []),
   [H(['  tskill <nom|PID> ', 'org'], `arrêter ${provider} et ses agents (retour au zsh), htop, atop, un agent… (tskill /?)`), '', 20],
   [H(['  xfce · startx    ', 'org'], 'bureau Xfce : fenêtres, fichiers (thunar), éditeur (mousepad), PDF (atril)'), '', 20],
   [H(['  settings         ', 'org'], 'réglages : couleurs, taille, graphismes, nom (touche M)'), '', 20],
@@ -3804,7 +3824,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'incident', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4696,6 +4716,8 @@ async function runCommand(raw) {
   if (['exit', 'logout'].includes(head) && liveTerm !== 'zsh') { const n = liveTerm; setTimeout(() => termClose(n), 0); return shellPrint('logout', 'dim'); }
   if (head === 'tmux') return tmuxCmd(rest);
   if (head === 'ipo') return ipoCmd(rest);
+  if (['incident', 'incidents', 'pager', 'pagerdoudou', 'astreinte'].includes(head)) return incCmd(rest);
+  if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
     if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
     return void setTimeout(termNew, 0);          // après la commande : elle tient encore ce terminal
@@ -8657,6 +8679,7 @@ const wbBuyBtn = (attr, label, dis) => `<button type="button" class="wp-buy" ${a
 const WEB_LIVE = {
   money: () => `$${usd(G.money)}`,
   val: () => bigMoney(valuation()),               // bourse.vibe : la valorisation
+  inc: () => incBand(),                           // status.vibe : l'incident en cours
   pcnow: () => {
     const s = hwState(), v = pcVerdict(s);
     return `En ce moment : <b class="${v.cls}">${v.label}</b> <span class="dim">· ${esc(v.why)} · ${Math.round(s.temp)} °C · ${Math.round(s.draw)}/${s.psuW} W</span>`;
@@ -8681,6 +8704,7 @@ function webHome() {
       ${tile('https://facture.vibe/', 'Vibank', 'votre compte, et ce que coûtent vos agents')}
       ${tile('https://urssaf.vibe/', 'urssaf.vibe', 'vos cotisations, et la taxe au giga')}
       ${tile('https://bourse.vibe/', 'bourse.vibe', 'votre valorisation, et l’introduction en bourse')}
+      ${tile('https://status.vibe/', 'status.vibe', 'l’état de la prod, et les incidents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
     </div></div>` };
@@ -8958,8 +8982,307 @@ function webBourse() {
     <p class="dim">Dans le terminal : <code>ipo</code> pour la valorisation, <code>ipo --confirm</code> pour sonner la cloche.</p></div>` };
 }
 
+/* ---------- les incidents de prod (l'astreinte) : après un ship, la prod peut tomber ----------
+   Le risque : 7 % par ship (à partir du 3e), plus avec Mistral et l'IA locale, moins avec Claude et Moon AI ; ×2 le vendredi, ×1,5 la nuit ;
+   les tests, les hooks et l'intégration continue le baissent. PagerDoudou sonne ; tant que la prod est en panne, des clients se font
+   rembourser (payé à la résolution, dans Vibank, au plus quatre ships) et le ship suivant attend. On diagnostique dans le terminal
+   (incident, systemctl, journalctl, kubectl, df, dig, certbot, git log) et on répare avec la bonne commande, ou on confie l'incident
+   à un agent (il peut empirer les choses). Au bout de dix minutes, quelqu'un redémarre tout au hasard ; onglet masqué : l'astreinte s'en charge.
+   EV_ON : les événements au hasard, coupés quand un robot pilote le navigateur (les suites de test), sauf avec ?ev=1. */
+const EV_ON = Q.get('ev') === '1' || (Q.get('ev') !== '0' && !navigator.webdriver);
+const INC_KINDS = {
+  oom: { t: 'L’API ne répond plus', svc: 'api', sym: 'HTTP 502 Bad Gateway sur /api/checkout', fix: /^systemctl (re)?start api(\.service)?$/, sudo: 1,
+    cause: 'l’API a été tuée par l’OOM killer : un agent met tout le catalogue en cache, en mémoire', how: 'sudo systemctl restart api' },
+  deploy: { t: 'Les pods redémarrent en boucle', svc: 'kubelet', sym: 'CrashLoopBackOff sur api depuis le dernier ship', fix: /^kubectl rollout undo (deployment|deploy)[/ ]api\b/,
+    cause: 'le dernier déploiement cherche ./config.prod.final.v2, qui n’existe pas', how: 'kubectl rollout undo deployment/api' },
+  disk: { t: 'Disque plein : la base ne peut plus écrire', svc: 'postgresql', sym: 'could not extend file: No space left on device', fix: /^journalctl --vacuum-(size|time|files)[= ]?\S+/, sudo: 1,
+    cause: '/var/log est plein : les agents journalisent chaque token', how: 'sudo journalctl --vacuum-size=1G' },
+  cert: { t: 'Certificat HTTPS expiré', svc: 'nginx', sym: 'NET::ERR_CERT_DATE_INVALID : les clients voient un cadenas barré', fix: /^certbot renew\b/, sudo: 1,
+    cause: 'le renouvellement automatique a été coupé par un agent (« il faisait du bruit dans les logs »)', how: 'sudo certbot renew' },
+  dns: { t: 'Le site a disparu d’Internet', svc: 'dns', sym: 'DNS_PROBE_FINISHED_NXDOMAIN', fix: /^git revert (head|@)( --no-edit)?$/,
+    cause: 'un agent a « nettoyé » la zone DNS : il a supprimé les enregistrements A et AAAA, puis commité', how: 'git revert HEAD' },
+  db: { t: 'La base refuse les connexions', svc: 'pgbouncer', sym: 'FATAL: sorry, too many clients already', fix: /^systemctl (re)?start pgbouncer(\.service)?$/, sudo: 1,
+    cause: 'pgbouncer a été coupé par un agent (« inutile, on a déjà Postgres ») : chaque agent ouvre 40 connexions', how: 'sudo systemctl restart pgbouncer' },
+};
+const INC_SVC = [['api', 'API', 'oom'], ['kubelet', 'Pods (Kubernetes)', 'deploy'], ['postgresql', 'Base de données', 'disk'], ['pgbouncer', 'Connexions (pgbouncer)', 'db'],
+  ['nginx', 'HTTPS (nginx)', 'cert'], ['dns', 'DNS', 'dns']];
+const INC_HOW = { fix: 'résolu par vous', agent: 'résolu par un agent', auto: 'redémarrage au hasard', away: 'réglé par l’astreinte' };
+const INC_WORSE = ['J’ai supprimé la base pour repartir proprement. Elle repart, proprement vide.', 'J’ai redémarré le mauvais serveur. Puis tous les autres, par équité.',
+  'J’ai coupé les alertes : plus d’alerte, plus d’incident.', 'J’ai ouvert un ticket pour l’incident, puis un incident pour le ticket.'];
+const INC_PM = ['Cause racine : un vendredi.', 'Action corrective : ajouter un agent qui surveille les agents.', 'Leçon apprise : aucune, mais elle est documentée.',
+  'Post-mortem rédigé par un agent : 14 pages, dont 13 sur ses propres mérites.', 'Impact : quelques clients. Remboursés, ils sont restés (ils ne savent pas partir).'];
+const INC_GIT = { oom: 'perf(cache): charger tout le catalogue en mémoire (plus rapide)', deploy: 'refactor(config): renommer config.prod en config.prod.final.v2 (presque partout)',
+  disk: 'chore(logs): journaliser chaque token, pour la transparence', cert: 'chore(cron): couper certbot-renew.timer (il faisait du bruit)',
+  db: 'perf(db): supprimer pgbouncer, inutile (on a déjà Postgres)', dns: 'chore(dns): nettoyer la zone (supprimé les enregistrements inutiles : A, AAAA)' };
+const INC_CAP = 4, INC_AUTO = 600;                // les remboursements : au plus quatre ships ; dix minutes : quelqu'un redémarre tout au hasard
+const OPS = new Set(['systemctl', 'journalctl', 'kubectl', 'df', 'dig', 'nslookup', 'host', 'certbot', 'git']);
+const incRate = () => ECO.value(shipped) * .012 * (G.sk.sentry ? .6 : 1);   // $ remboursés par seconde de panne (le monitoring les repère plus tôt)
+const incDur = I => Math.max(0, (Date.now() - I.t0) / 1000);
+const lcFirst = t => t.charAt(0).toLowerCase() + t.slice(1);
+function incRisk() {                               // la probabilité qu'un ship fasse tomber la prod
+  if (!IDLE || shipped < 3) return 0;
+  const d = new Date(), plat = { mistral: 1.6, local: 1.4, codex: 1, claude: .9, moon: .6 }[G.ai] ?? 1;
+  return Math.min(.5, .07 * plat * (d.getDay() === 5 ? 2 : 1) * (d.getHours() < 6 ? 1.5 : 1) * skillMult('inc'));
+}
+function incStart(k) {                             // PagerDoudou sonne
+  if (!IDLE || G.inc) return false;
+  if (!INC_KINDS[k]) k = pick(Object.keys(INC_KINDS));
+  G.incS.n++;
+  const I = G.inc = { k, id: `INC-${4200 + G.incS.n}`, t0: Date.now(), lost: 0, x: 1, tries: 0, ag: 0, h: hex(7) }, K = INC_KINDS[k];
+  shellPrint(H(['▲ PagerDoudou ', 'errc'], `${I.id} · P1 · ${K.t} · `, [K.sym, 'wrn']));
+  shellPrint(H(['  La prod est en panne : des clients se font rembourser chaque seconde, et le prochain ship attend. ', 'dim'], ['incident', 'org'],
+    [' : le diagnostic · ', 'dim'], ['incident agent', 'org'], [' : le confier à un agent.', 'dim']));
+  if (leadOn()) leadLog(H(['▲ ', 'errc'], `${I.id}: production is down (${K.sym}). Not my code.`));
+  hudNote(`▲ ${I.id} : ${lcFirst(K.t)} · incident`, 'bug');
+  toast(`<b>PagerDoudou</b> · ${esc(I.id)} · ${esc(K.t)}`, 5000);
+  saveGame();
+  return true;
+}
+function incEnd(how) {                             // la prod repart : les remboursements sont payés, le ship reprend
+  const I = G.inc;
+  if (!I) return;
+  const K = INC_KINDS[I.k], dur = incDur(I), lost = Math.round(I.lost * 100) / 100, S = G.incS;
+  G.inc = null;
+  G.money -= lost;
+  txAdd('incident', `Remboursements clients · ${I.id} (${lcFirst(K.t)})`, -lost);
+  S.lost += lost;
+  if (how === 'fix' || how === 'agent') { S.fix++; S.best = S.best ? Math.min(S.best, dur) : dur; }
+  S.log = [...S.log, [I.t0, I.k, Math.round(dur), lost, how]].slice(-12);
+  if (how === 'fix') { ach('pager'); if (dur < 60) ach('mttr'); if (I.k === 'dns') ach('dns'); }
+  const why = how === 'auto' ? ' · quelqu’un a tout redémarré au hasard, et ça a marché (personne ne sait pourquoi)' : how === 'away' ? ' · pendant votre absence, l’astreinte (un agent) a tout redémarré' : '';
+  shellPrint(H(['✓ ', 'okc'], `${I.id} résolu en ${fmtEta(Math.round(dur))}${why} · remboursements `, [`−$${usd(lost)}`, 'errc'], ' · la prod repart, le ship aussi.'));
+  shellPrint(H(['  Post-mortem : ', 'dim'], [pick(INC_PM), 'dim']));
+  hudNote(`✓ ${I.id} résolu en ${fmtEta(Math.round(dur))} · −$${usd(lost)} de remboursements`, 'ok');
+  renderHud();
+  saveGame();
+}
+function incTick(dt) {                             // la panne coûte, chaque seconde, sous vos yeux
+  const I = G.inc;
+  if (document.hidden) return incEnd('away');
+  if (incDur(I) > INC_AUTO) return incEnd('auto');
+  if (!paused) I.lost = Math.min(I.lost + incRate() * I.x * Math.min(dt, 2), ECO.value(shipped) * INC_CAP);
+}
+function incAgent(force) {                         // confier l'incident à un agent : il relit tous les logs (facturés), et il a souvent raison
+  const I = IDLE && G.inc;
+  if (!I) return shellPrint('Aucun incident ouvert. Les agents vous remercient de penser à eux.', 'dim');
+  if (!claudeOn || !panes.length) return shellPrint(H(['✗ ', 'errc'], 'Aucun agent lancé : l’astreinte, c’est vous. ', ['incident', 'org'], ' pour le diagnostic.'));
+  if (I.ag) return shellPrint(H(['… ', 'wrn'], 'Un agent est déjà dessus. Il lit les logs (tous).'));
+  I.ag = 1;
+  const K = INC_KINDS[I.k], who = provider === 'moon' ? 'Moon' : agentName(pick(panes));
+  const ok = force ?? chance({ mistral: .4, local: .4, codex: .65, claude: .75, moon: .9 }[provider] ?? .5);
+  const tried = ok ? K.how : INC_KINDS[pick(Object.keys(INC_KINDS).filter(x => x !== I.k))].how;
+  bill(cfg.model, 2e6, 6e4);                     // il relit tous les logs : deux millions de tokens d'entrée
+  shellPrint(H(['● ', 'org'], `${who} prend ${I.id}. `, ['Il relit tous les logs : deux millions de tokens, sur la facture.', 'dim']));
+  return printLines([
+    [H(['  ● ', 'dim'], `Bash(journalctl -u ${K.svc === 'dns' ? 'nginx' : K.svc} --since "1 hour ago")`), '', 700],
+    [H(['    ⎿ ', 'dim'], `${frNumI(ri(40000, 90000))} lignes lues`), 'dim', 900],
+    [H(['  ● ', 'dim'], `Bash(${tried})`), '', 800],
+  ]).then(() => {
+    if (G.inc !== I) return;
+    I.ag = 0;
+    if (ok) {
+      if (provider === 'moon') shellPrint(H(['☾ ', 'org'], 'Moon : résolu. Les autres agents en seraient encore à ouvrir un post-mortem pour en parler.'));
+      return incEnd('agent');
+    }
+    I.x *= 1.5;
+    ach('pire');
+    shellPrint(H(['  ● ', 'errc'], `${who} : « ${pick(INC_WORSE)} »`));
+    shellPrint(H(['✗ ', 'errc'], `${I.id} : toujours en panne, et les remboursements accélèrent (×${frx(+I.x.toFixed(2))}). `, ['incident', 'org'], ' pour reprendre la main.'));
+    saveGame();
+  });
+}
+function incCmd(rest) {                            // incident : la panne en cours et les pistes ; incident agent ; incident log
+  if (!IDLE) return shellPrint('Mode libre : pas de clients, pas d’astreinte.', 'dim');
+  const sub = rest[0] || '', I = G.inc, S = G.incS;
+  if (['agent', 'delegate', 'déléguer', 'deleguer', 'ai'].includes(sub)) return incAgent();
+  if (['log', 'logs', 'history', 'historique', 'list', 'ls'].includes(sub)) {
+    if (!S.log.length) return shellPrint('Aucun incident pour l’instant. Profitez-en : ça ne dure jamais.', 'dim');
+    return printLines([[H(['Les derniers incidents', 'fgc'], ` · ${S.n} au total · ${S.fix} résolus (par vous ou un agent) · meilleur temps : ${S.best ? fmtEta(Math.round(S.best)) : '—'} · remboursements : $${usd(S.lost)}`), '', 15],
+      ...S.log.slice().reverse().map(([t, k, d, l, h]) => [`  ${txDate(t)}  ${(INC_KINDS[k]?.t || k).padEnd(44)} ${fmtEta(d).padStart(9)}  ${('−$' + usd(l)).padStart(12)}  ${INC_HOW[h] || h}`, '', 15])]);
+  }
+  if (!I) return printLines([[H(['✓ ', 'okc'], 'Aucun incident ouvert : la prod est verte (pour l’instant).'), '', 20],
+    [`${S.n ? `${plural(S.n, 'incident')} depuis le début de la startup · ` : ''}risque au prochain ship : ${Math.round(incRisk() * 100)} %${new Date().getDay() === 5 ? ' (vendredi : ×2)' : ''} · incident log : l’historique · status.vibe, dans Firefaux`, 'dim', 20]]);
+  const K = INC_KINDS[I.k];
+  if (G.sk.runbook && !I.rb) I.rb = chance(1 / 3) ? pick(Object.keys(INC_KINDS).filter(x => x !== I.k)) : I.k;   // une fois sur trois, la procédure d'un autre incident
+  return printLines([
+    [H(['▲ ', 'errc'], [`${I.id} · P1 · ${K.t}`, 'errc'], ` · depuis ${fmtEta(Math.round(incDur(I)))}`), '', 20],
+    [H('  Symptôme : ', [K.sym, 'wrn']), '', 20],
+    [H('  Remboursements : ', [`−$${usd(I.lost)}`, 'errc'], ` (−$${usd(incRate() * I.x * 60)} par minute, au plus $${usd(ECO.value(shipped) * INC_CAP)}) · le prochain ship attend`), '', 20],
+    ...(G.sk.sentry ? [[H('  Monitoring : ', [K.cause, 'org']), '', 20]] : []),
+    ...(G.sk.runbook ? [[H('  Runbook (écrit par un agent) : ', [INC_KINDS[I.rb].how, 'org']), '', 20]] : []),
+    [H(['  Pistes : ', 'dim'], ['systemctl status <service>', 'org'], ' · ', ['journalctl -u <service>', 'org'], ' · ', ['kubectl get pods', 'org'], ' · ', ['df -h', 'org'], ' · ',
+      [`dig ${PROJ}.vibe`, 'org'], ' · ', ['certbot certificates', 'org'], ' · ', ['git log', 'org']), '', 20],
+    [H(['  Services : api, postgresql, pgbouncer, nginx · ', 'dim'], ['incident agent', 'org'], [' : le confier à un agent (il peut empirer les choses)', 'dim']), '', 20],
+  ]);
+}
+/* les outils de l'astreinte : ce qu'ils montrent dépend de l'incident en cours ; la bonne commande répare */
+const jStamp = (t = Date.now()) => { const d = new Date(t), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  return `${M[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')} ${d.toTimeString().slice(0, 8)}`; };
+const SVC_DESC = () => ({ api: `${PROJ} API (node)`, postgresql: 'PostgreSQL 17 database server', pgbouncer: 'PgBouncer, le pooler de connexions', nginx: 'nginx, serveur web et proxy inverse',
+  kubelet: 'kubelet: The Kubernetes Node Agent' });
+function svcJournal(s) {                           // les dernières lignes d'un service : saines, ou celles de l'incident
+  const k = IDLE && G.inc?.k, a = agentName({ n: ri(1, Math.max(1, G.agents)) }), t0 = G.inc?.t0 || Date.now();
+  const L = (proc, m, t = Date.now() - ri(5, 300) * 1000) => `${jStamp(t)} prod-01 ${proc}: ${m}`;
+  if (s === 'api') return k === 'oom' ? [L('kernel', 'Out of memory: Killed process 4242 (node) total-vm:31.2G, anon-rss:30.9G', t0 - 2000), L('systemd[1]', 'api.service: A process of this unit has been killed by the OOM killer.', t0 - 1500),
+    L('systemd[1]', "api.service: Failed with result 'oom-kill'.", t0 - 1000), L('node[4242]', `cache: catalogue entier chargé en mémoire (idée de ${a} : « plus rapide »)`, t0 - 6000)]
+    : [L('node[4242]', 'GET /api/checkout 200 12ms'), L('node[4242]', 'GET /api/health 200 1ms'), L('node[4242]', `${a} a ajouté un console.log de 4 Mo`)];
+  if (s === 'kubelet') return k === 'deploy' ? [L('kubelet[812]', 'Back-off restarting failed container api in pod api-7f9c6d5b8-x2k4p', t0 + 4000),
+    L('kubelet[812]', "api: Error: Cannot find module './config.prod.final.v2'", t0 + 2000)] : [L('kubelet[812]', 'Pod api-7f9c6d5b8-x2k4p status Running'), L('kubelet[812]', 'SyncLoop (housekeeping)')];
+  if (s === 'postgresql') return k === 'disk' ? [L('postgres[1337]', 'ERROR:  could not extend file "base/16384/2619": No space left on device', t0 + 1000), L('postgres[1337]', 'HINT:  Check free disk space.', t0 + 1100),
+    L('postgres[1337]', 'PANIC:  could not write to file "pg_wal/xlogtemp.42": No space left on device', t0 + 3000)]
+    : k === 'db' ? [L('postgres[1337]', 'FATAL:  sorry, too many clients already', t0 + 1000), L('postgres[1337]', 'FATAL:  remaining connection slots are reserved for roles with the SUPERUSER attribute', t0 + 2000)]
+    : [L('postgres[1337]', 'LOG:  checkpoint starting: time'), L('postgres[1337]', 'LOG:  checkpoint complete: wrote 412 buffers (2.5%)'), L('postgres[1337]', `LOG:  automatic vacuum of table "${PROJ}.public.tokens"`)];
+  if (s === 'pgbouncer') return k === 'db' ? [L('systemd[1]', `pgbouncer.service: Deactivated successfully. (par ${a} : « inutile, on a déjà Postgres »)`, t0 - 4000)]
+    : [L('pgbouncer[901]', 'stats: 412 xacts/s, 1337 queries/s, in 4 MB/s, out 9 MB/s')];
+  if (s === 'nginx') return k === 'cert' ? [L('nginx[777]', 'SSL_do_handshake() failed (SSL: error:0A000086:SSL routines::certificate verify failed: certificate has expired)', t0 + 1000),
+    L('systemd[1]', `certbot-renew.timer: Deactivated (par ${a} : « il faisait du bruit dans les logs »)`, t0 - 86400e3 * 89)]
+    : k === 'dns' ? [L('nginx[777]', `aucune requête depuis ${new Date(t0).toTimeString().slice(0, 5)} : c’est calme (étrangement calme)`)]
+    : [L('nginx[777]', '"GET / HTTP/2.0" 200 4213'), L('nginx[777]', '"GET /api/checkout HTTP/2.0" 200 812')];
+  return null;
+}
+function svcStatus(s) {                            // systemctl status <service>
+  const D = SVC_DESC()[s];
+  if (!D) return [[`Unit ${s}.service could not be found.`, 'errc', 12]];
+  const k = IDLE && G.inc?.k, oom = k === 'oom' && s === 'api', off = k === 'db' && s === 'pgbouncer', t = oom || off ? G.inc.t0 : Date.now() - 86400e3 * 2.3;
+  return [[H(['● ', oom || off ? 'errc' : 'okc'], `${s}.service - ${D}`), '', 12],
+    [`     Loaded: loaded (/etc/systemd/system/${s}.service; ${off ? 'disabled' : 'enabled'}; preset: enabled)`, '', 12],
+    [H('     Active: ', oom ? ['failed (Result: oom-kill)', 'errc'] : off ? ['inactive (dead)', 'errc'] : ['active (running)', 'okc'], ` since ${new Date(t).toLocaleString('fr-FR')}`), '', 12],
+    ...(oom || off ? [] : [[`   Main PID: ${{ api: 4242, postgresql: 1337, pgbouncer: 901, nginx: 777, kubelet: 812 }[s]} (${s === 'api' ? 'node' : s === 'postgresql' ? 'postgres' : s})`, '', 12]]),
+    ...(s === 'api' ? [[`     Memory: ${oom ? '0B (peak: 31.2G)' : '1.2G (peak: 3.1G)'}`, '', 12]] : []),
+    ['', '', 12], ...svcJournal(s).map(x => [x, 'dim', 12])];
+}
+function incNoEffect() {                           // une commande qui ne répare pas ce qui est cassé
+  const I = IDLE && G.inc;
+  if (I) { I.tries++; return shellPrint(H(['✗ ', 'errc'], `${I.id} : toujours en panne. Le problème n’était pas là.`)); }
+  return true;
+}
+const INC_DONE = {                                 // ce qu'affiche la commande qui répare (k : l'incident est bien celui-là)
+  oom: () => [], db: () => [],
+  deploy: () => [['deployment.apps/api rolled back', '', 12]],
+  disk: k => [...(k ? [1, 2, 3].map(i => [`Deleted archived journal /var/log/journal/4f2a1c9e/system@agents-${hex(8)}.journal (${frx(ri(120, 128) + '.0')}G).`, 'dim', 40]) : []),
+    [`Vacuuming done, freed ${k ? '498.2G' : '0B'} of archived journals from /var/log/journal.`, '', 12]],
+  cert: k => [['Saving debug log to /var/log/letsencrypt/letsencrypt.log', 'dim', 60], [`Processing /etc/letsencrypt/renewal/${PROJ}.vibe.conf`, '', 200],
+    ...(k ? [[`Renewing an existing certificate for ${PROJ}.vibe`, '', 600], [`Congratulations, all renewals succeeded: /etc/letsencrypt/live/${PROJ}.vibe/fullchain.pem (success)`, 'okc', 12]]
+      : [['Certificate not yet due for renewal', '', 12], ['No renewals were attempted.', '', 12]])],
+  dns: k => k ? [[`[main ${hex(7)}] Revert "chore(dns): nettoyer la zone"`, '', 12], [' 1 file changed, 2 insertions(+)', '', 12], [`zone redéployée : ${PROJ}.vibe. 300 IN A 203.0.113.42`, 'dim', 12]]
+    : [[`[main ${hex(7)}] Revert "${pick(['feat(checkout): paiement en un clic', 'fix: fix', 'refactor: tout'])}"`, '', 12], [` ${ri(2, 9)} files changed, ${ri(10, 90)} deletions(-)`, '', 12],
+      ['Les agents ont réappliqué le commit quatre secondes plus tard.', 'dim', 12]],
+};
+const INC_NOSUDO = {
+  oom: () => INC_NOSUDO.svc('api'), db: () => INC_NOSUDO.svc('pgbouncer'),
+  svc: s => [[`Failed to restart ${s}.service: Interactive authentication required.`, 'errc', 12], [`See system logs and 'systemctl status ${s}.service' for details.`, '', 12]],
+  disk: () => [['Failed to vacuum /var/log/journal/4f2a1c9e: Permission denied', 'errc', 12]],
+  cert: () => [['The following error was encountered:', 'errc', 12], ["[Errno 13] Permission denied: '/var/log/letsencrypt/.certbot.lock'", 'errc', 12],
+    ['Either run as root, or set --config-dir, --work-dir, and --logs-dir to writeable paths.', '', 12]],
+};
+function incFix(fk, sudo) {                        // une commande qui répare quelque chose : la bonne, une autre, ou sans les droits
+  const F = INC_KINDS[fk], I = IDLE && G.inc;
+  if (F.sudo && !sudo) return printLines([...INC_NOSUDO[fk](), ['  (il faut les droits : sudo devant)', 'dim', 12]]);
+  return printLines(INC_DONE[fk](I && I.k === fk)).then(() => {
+    if (!I || G.inc !== I) return;
+    if (I.k === fk) return incEnd('fix');
+    incNoEffect();
+  });
+}
+function opsCmd(w, c, sudo) {                      // systemctl, journalctl, kubectl, df, dig, certbot, git log / revert ; false : pas pour nous
+  const a = c.split(' ').slice(1), k = IDLE && G.inc?.k, I = IDLE && G.inc, out = L => printLines(L.map(x => Array.isArray(x) ? x : [x, '', 12]));
+  if (w === 'git' && (!installed.has('git') || !['log', 'revert'].includes(a[0]))) return false;
+  if (w === 'kubectl' && !['get', 'logs', 'rollout', 'describe'].includes(a[0])) return false;
+  if (sudo) shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+  const fk = Object.keys(INC_KINDS).find(x => INC_KINDS[x].fix.test(c));
+  if (fk) return incFix(fk, sudo);
+  if (w === 'git' && a[0] === 'revert') {
+    if (k === 'dns' && a[1] && I.h.startsWith(a[1].slice(0, 7))) return incFix('dns', sudo);   // le hash vu dans git log
+    return a[1] ? out([[`[main ${hex(7)}] Revert "fix: fix"`, '', 12], ['Les agents ont réappliqué le commit quatre secondes plus tard.', 'dim', 12]]).then(incNoEffect)
+      : out([['usage: git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] <commit>...', 'errc', 12]]);
+  }
+  if (w === 'git') {                               // git log : HEAD, puis deux commits d'agents (pendant un incident DNS, HEAD est le coupable)
+    const C = [[I ? I.h : hex(7), k === 'dns' ? INC_GIT.dns : pick(['feat(checkout): paiement en un clic (et en double)', 'test: supprimer les tests qui échouaient', 'fix: fix']), I ? I.t0 - 9000 : Date.now() - 6e5],
+      [hex(7), pick(['perf: tout mettre en cache', 'docs: README régénéré (encore)', 'chore: mettre à jour 412 dépendances']), Date.now() - 36e5], [hex(7), 'feat: tout', Date.now() - 72e5]];
+    const one = a.includes('--oneline');
+    return out(C.slice(0, a.includes('-1') || a.includes('-n1') ? 1 : 3).flatMap(([h, m, t], i) => one ? [[H([h, 'wrn'], i ? ' ' : [' (HEAD -> main) ', 'okc'], m), '', 12]]
+      : [[H(['commit ' + h, 'wrn'], i ? '' : [' (HEAD -> main, origin/main)', 'okc']), '', 12], [`Author: ${agentName({ n: ri(1, Math.max(1, G.agents)) })} <agents@agents.invalid>`, '', 12],
+        [`Date:   ${new Date(t).toString().slice(0, 24)}`, '', 12], ['', '', 12], [`    ${m}`, '', 12], ['', '', 12]]));
+  }
+  if (w === 'systemctl') {
+    const verb = a[0] || 'list-units', svc = (a[1] || '').replace(/\.service$/, '');
+    if (['restart', 'start', 'stop', 'reload'].includes(verb)) {
+      if (!SVC_DESC()[svc]) return out([[`Failed to ${verb} ${svc || '?'}.service: Unit ${svc || '?'}.service not found.`, 'errc', 12]]);
+      if (!sudo) return out([...INC_NOSUDO.svc(svc).map(x => (x[0] = x[0].replace('restart', verb), x)), ['  (il faut les droits : sudo devant)', 'dim', 12]]);
+      return incNoEffect();
+    }
+    if (verb === 'status') return out(svcStatus(svc || 'api'));
+    return out([['  UNIT                LOAD   ACTIVE SUB     DESCRIPTION', 'dim', 12], ...Object.entries(SVC_DESC()).map(([s, d]) => {
+      const bad = (k === 'oom' && s === 'api') || (k === 'db' && s === 'pgbouncer');
+      return [H(bad ? ['● ', 'errc'] : '  ', `${(s + '.service').padEnd(20)}loaded `, bad ? [k === 'oom' ? 'failed ' : 'inactive', 'errc'] : 'active ', ` ${bad ? (k === 'oom' ? 'failed ' : 'dead   ') : 'running'} ${d}`), '', 12];
+    })]);
+  }
+  if (w === 'journalctl') {
+    if (a.includes('--disk-usage')) return out([`Archived and active journals take up ${k === 'disk' ? '498.7G' : '1.2G'} in the file system.`]);
+    if (a.some(x => x.startsWith('--vacuum'))) return sudo ? out(INC_DONE.disk(false)) : out(INC_NOSUDO.disk());
+    const u = a[a.indexOf('-u') + 1], svc = a.includes('-u') ? (u || '').replace(/\.service$/, '') : '';
+    if (svc) { const L = svcJournal(svc); return L ? out(L) : out([['-- No entries --', 'dim', 12]]); }
+    const K = k && INC_KINDS[k], all = [...(K && K.svc !== 'dns' ? svcJournal(K.svc) : []), ...svcJournal('api').slice(0, 2), ...svcJournal('postgresql').slice(0, 1)].slice(0, 6);
+    return out(all.map(x => [x, '', 12]));
+  }
+  if (w === 'kubectl') {
+    if (a[0] === 'get') {
+      if (!/^(po|pod|pods)$/.test(a[1] || '')) return out([['No resources found in default namespace.', '', 12]]);
+      const bad = k === 'deploy';
+      return out([['NAME                      READY   STATUS             RESTARTS       AGE', '', 12],
+        ...['x2k4p', 'q8w1m'].map(x => [H(`api-7f9c6d5b8-${x}       `, bad ? ['0/1     CrashLoopBackOff', 'errc'] : '1/1     Running         ', bad ? `   ${ri(12, 16)} (${ri(10, 50)}s ago)   ${Math.max(1, Math.round(incDur(I) / 60))}m` : '   0              2d'), '', 12]),
+        ['worker-5d8f7c9b6-l3n2v    1/1     Running            0              2d', '', 12], ['postgres-0                1/1     Running            0              9d', '', 12]]);
+    }
+    if (a[0] === 'logs' || a[0] === 'describe') return out(k === 'deploy' ? [["Error: Cannot find module './config.prod.final.v2'", 'errc', 12], ['Require stack:', '', 12], ['- /app/dist/server.js', '', 12], ['Node.js v22.11.0', 'dim', 12]]
+      : [['GET /api/health 200 1ms', '', 12], ['GET /api/checkout 200 12ms', '', 12]]);
+    if (a[1] === 'status') return out([k === 'deploy' ? ['Waiting for deployment "api" rollout to finish: 0 of 2 updated replicas are available...', 'wrn', 12] : ['deployment "api" successfully rolled out', 'okc', 12]]);
+    if (a[1] === 'undo') return out([['error: required resource not specified', 'errc', 12], ['  (kubectl rollout undo deployment/api)', 'dim', 12]]);
+    return out([['error: unknown command for "kubectl rollout"', 'errc', 12]]);
+  }
+  if (w === 'df') {
+    const hh = a.some(x => x.includes('h'));
+    return out([['Sys. de fichiers Taille Utilisé Dispo Uti% Monté sur', '', 12], [`/dev/nvme0n1p2     ${hh ? '1,8T    412G  1,4T' : '1932735 442368 1490367'}  23% /`, '', 12],
+      [H(`/dev/nvme0n1p3     ${hh ? (k === 'disk' ? '500G    500G     0' : '500G     41G  459G') : (k === 'disk' ? '524288 524288 0' : '524288 42991 481297')} `, k === 'disk' ? ['100%', 'errc'] : '  9%', ' /var/log'), '', 12],
+      [`tmpfs              ${hh ? ' 16G    2,1M   16G' : '16384 2 16382'}   1% /run`, '', 12]]);
+  }
+  if (w === 'certbot') {
+    if (a[0] !== 'certificates') return out([['usage: certbot [SUBCOMMAND] [options] [-d DOMAIN] : certificates, renew…', '', 12]]);
+    const exp = k === 'cert', d = new Date(Date.now() + (exp ? -86400e3 : 86400e3 * 63));
+    return out([['Found the following certs:', '', 12], [`  Certificate Name: ${PROJ}.vibe`, '', 12], [`    Domains: ${PROJ}.vibe www.${PROJ}.vibe`, '', 12],
+      [H(`    Expiry Date: ${d.toISOString().slice(0, 19).replace('T', ' ')}+00:00 `, exp ? ['(INVALID: EXPIRED)', 'errc'] : ['(VALID: 63 days)', 'okc']), '', 12],
+      [`    Certificate Path: /etc/letsencrypt/live/${PROJ}.vibe/fullchain.pem`, '', 12]]);
+  }
+  const host = a.filter(x => !x.startsWith('-') && !x.startsWith('@')).pop() || `${PROJ}.vibe`, nx = k === 'dns' && host.includes(PROJ.toLowerCase());
+  if (w === 'nslookup' || w === 'host') return out(nx ? [[`** server can't find ${host}: NXDOMAIN`, 'errc', 12]] : [[`${host} has address 203.0.113.42`, '', 12]]);
+  return out([[`; <<>> DiG 9.20.4 <<>> ${host}`, 'dim', 12], [H(';; ->>HEADER<<- opcode: QUERY, status: ', nx ? ['NXDOMAIN', 'errc'] : ['NOERROR', 'okc'], `, id: ${ri(1000, 65000)}`), '', 12],
+    [';; QUESTION SECTION:', '', 12], [`;${host}.\t\t\tIN\tA`, '', 12], ['', '', 12],
+    ...(nx ? [[';; AUTHORITY SECTION:', '', 12], ['vibe.\t\t\t900\tIN\tSOA\tns1.vibe. hostmaster.vibe. 2026112401 7200 3600 1209600 300', '', 12]]
+      : [[';; ANSWER SECTION:', '', 12], [`${host}.\t\t300\tIN\tA\t203.0.113.42`, '', 12]]),
+    ['', '', 12], [`;; Query time: ${ri(8, 40)} msec`, 'dim', 12]]);
+}
+/* status.vibe : l'état des services, l'incident en cours, l'historique */
+function incBand() {
+  const I = IDLE && G.inc;
+  if (!IDLE) return '<div class="st-band ok">Mode libre : pas de prod, pas de panne.</div>';
+  if (!I) return '<div class="st-band ok">Tous les systèmes sont opérationnels.<span>Pour l’instant.</span></div>';
+  return `<div class="st-band ko">Panne majeure · ${esc(I.id)} · ${esc(INC_KINDS[I.k].t)}<span>Depuis ${esc(fmtEta(Math.round(incDur(I))))} · remboursements : $${usd(I.lost)} · « Nous enquêtons. » (Personne n’enquête : tapez incident.)</span></div>`;
+}
+function webStatus() {
+  const I = IDLE && G.inc, S = G.incS, down = S.log.reduce((t, x) => t + x[2], 0) + (I ? incDur(I) : 0), up = Math.max(90, 100 - down / Math.max(3600, G.play || 0) * 100);
+  const svc = INC_SVC.map(([, n, kk]) => `<span>${esc(n)}</span><b class="${I && I.k === kk ? 'ko' : 'ok'}">${I && I.k === kk ? 'Panne majeure' : 'Opérationnel'}</b>`).join('');
+  const hist = S.log.length ? `<table class="us-tab"><thead><tr><th>Date</th><th>Incident</th><th class="m">Durée</th><th class="m">Remboursements</th><th>Résolution</th></tr></thead><tbody>${
+    S.log.slice().reverse().map(([t, k, d, l, h]) => `<tr><td>${txDate(t)}</td><td>${esc(INC_KINDS[k]?.t || k)}</td><td class="m">${esc(fmtEta(d))}</td><td class="m">$${usd(l)}</td><td>${esc(INC_HOW[h] || h)}</td></tr>`).join('')}</tbody></table>`
+    : '<p class="dim">Aucun incident. Les agents y travaillent.</p>';
+  return { title: `status.vibe · ${PROJ}`, html: `<div class="wp vb"><h1>status.vibe</h1><p class="dim">L’état de ${esc(PROJ)}, en production. Mis à jour en direct, rédigé par un agent.</p>
+    <div data-live="inc">${incBand()}</div>
+    <h2>Les services</h2><div class="st-svc">${svc}</div>
+    <p class="dim">Disponibilité depuis le début de la startup : <b>${frx(up.toFixed(2))} %</b> (objectif : 99,99 %, fixé un vendredi).</p>
+    <h2>Les derniers incidents</h2>${hist}
+    <p class="dim">Dans le terminal : <code>incident</code> pour le diagnostic, <code>incident agent</code> pour le confier, <code>incident log</code> pour l’historique.</p></div>` };
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
-const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF' };
+const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF', incident: 'Incidents' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
 const txDate = t => { const d = new Date(t), z = n => String(n).padStart(2, '0'); return `${z(d.getDate())}/${z(d.getMonth() + 1)} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 const isoLocal = t => {                          // 2026-11-24T04:01:34+01:00 : l'heure locale, avec son décalage (comme une vraie API)
@@ -9134,7 +9457,7 @@ const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
-  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?bourse\.vibe/i, webBourse], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?bourse\.vibe/i, webBourse], [/^https?:\/\/(www\.)?status\.vibe/i, webStatus], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
@@ -10520,17 +10843,18 @@ const LEAD_TIER = [
     desc: 'Coordonne aussi les équipes en arrière-plan : elles gagnent les bonus d’orchestration. +30 % de travail, +10 % par agent, −50 % de bugs, et une facture d’orchestrateur à l’avenant.' },
 ];
 const SKILLS = {
-  tests: { name: 'tests unitaires', cost: 60, bug: .7, desc: '−30 % de bugs. Les agents écrivent enfin des tests (qui passent, au moins).' },
+  tests: { name: 'tests unitaires', cost: 60, bug: .7, inc: .8, desc: '−30 % de bugs et −20 % d’incidents de prod. Les agents écrivent enfin des tests (qui passent, au moins).' },
   errors: { name: 'gestion des erreurs', cost: 90, crash: .65, desc: '−35 % de crashs : des try / catch, avec de vrais messages dedans.' },
   watchdog: { name: 'watchdog', cost: 200, down: .5, desc: 'Un agent planté redémarre deux fois plus vite.' },
   cache: { name: 'prompt caching', cost: 450, tin: .6, desc: '−40 % de tokens d’entrée facturés : le dépôt est relu depuis le cache. Il est toujours relu, hein.' },
   review: { name: 'revue de code', cost: 700, bug: .65, desc: '−35 % de bugs. Un agent relit les diffs des autres (en diagonale).' },
-  hooks: { name: 'hooks pre-commit', cost: 1200, fail: .6, bug: .9, desc: 'Un lint avant chaque commit : −40 % de déploiements ratés, −10 % de bugs. Les agents ont découvert --no-verify, mais pas tous.' },
+  hooks: { name: 'hooks pre-commit', cost: 1200, fail: .6, bug: .9, inc: .85, desc: 'Un lint avant chaque commit : −40 % de déploiements ratés, −10 % de bugs. Les agents ont découvert --no-verify, mais pas tous.' },
   worktrees: { name: 'worktrees parallèles', cost: 1800, coord: .5, desc: 'Chaque agent dans son worktree : deux fois moins de pertes de coordination sans orchestrateur.' },
   context: { name: 'compaction du contexte', cost: 3000, crash: .6, tok: .8, desc: '−40 % de crashs et −20 % de tokens consommés.' },
+  runbook: { name: 'runbooks (écrits par un agent)', cost: 5000, desc: 'Chaque incident de prod a sa procédure : incident vous donne la commande qui répare. Écrite par un agent : une fois sur trois, c’est celle d’un autre incident.' },
   mcp: { name: 'serveurs MCP', cost: 8000, work: 1.12, tin: 1.1, desc: '+12 % de travail : les agents branchent tout sur tout. Un peu plus de tokens d’entrée.' },
-  sentry: { name: 'monitoring en prod', cost: 15000, loss: .6, desc: 'Les bugs sont repérés plus tôt : chaque bug coûte 40 % de progression en moins.' },
-  ci: { name: 'intégration continue', cost: 30000, bug: .6, fail: .25, desc: '−40 % de bugs, et quatre fois moins de déploiements ratés.' },
+  sentry: { name: 'monitoring en prod', cost: 15000, loss: .6, desc: 'Les bugs sont repérés plus tôt : chaque bug coûte 40 % de progression en moins. Pendant un incident de prod : la cause tout de suite, et 40 % de remboursements en moins.' },
+  ci: { name: 'intégration continue', cost: 30000, bug: .6, fail: .25, inc: .5, desc: '−40 % de bugs, quatre fois moins de déploiements ratés, deux fois moins d’incidents de prod.' },
   flags: { name: 'feature flags', cost: 60000, desc: 'Un déploiement raté repart de 80 % au lieu de 50 % : on coupe le flag et on fait comme si de rien n’était.' },
   subagents: { name: 'sous-agents', cost: 300000, work: 1.2, tin: 1.25, desc: '+20 % de travail : chaque agent délègue à des sous-agents, qui délèguent aussi. La facture adore.' },
   claudemd: { name: 'lire CLAUDE.md (pour de vrai)', cost: 1000000, bug: .75, crash: .75, desc: '−25 % de bugs et de crashs. Personne n’y croyait.' },
@@ -10758,6 +11082,11 @@ function ecoBug(src) {                           // src : une équipe en arrièr
   hudNote(`✗ bug${src ? ` (${src}, en arrière-plan)` : ''} : ${why} · −${Math.round(loss * 100)} %`, 'bug');
 }
 function autoShip() {                            // barre pleine : en production
+  if (G.inc) {                                   // la prod est en panne : le ship attend la résolution
+    G.prog = Math.min(G.prog, 1);
+    if (!G.inc.frz) { G.inc.frz = 1; hudNote(`▲ ship gelé : la prod est en panne (${G.inc.id}) · incident`, 'bug'); }
+    return;
+  }
   const v = verStr();
   if (chance(ecoRates().fail)) {                 // Mistral : un déploiement sur cinq rate
     const why = pick(DEPLOY_FAIL), back = G.sk.flags ? .8 : .5;
@@ -10780,6 +11109,7 @@ function autoShip() {                            // barre pleine : en production
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
   hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité${cot ? ` − $${usd(cot)} d’URSSAF` : ''} = ${signed(net)}`, 'ok');
+  if (EV_ON && chance(incRisk())) setTimeout(() => { if (mode === 'idle' && claudeOn) incStart(); }, ri(4000, 12000));   // le ship fait tomber la prod, quelques secondes après
   if (shipped === 1 || shipped % 10 === 0) {     // les jalons : le grand écran et une ligne dans le terminal
     showShipped(v, ri(3000, 4800));
     shellPrint(H(['✓ ', 'okc'], `${PROJ}@${v} en production · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''} · trésorerie `, [`$${usd(G.money)}`, 'okc']));
@@ -10873,10 +11203,13 @@ function renderHud() {
   $('.hud-fill').style.width = (pct * 100).toFixed(1) + '%';
   $('.hud-bar').setAttribute('aria-valuenow', Math.floor(pct * 100));
   $('#hud-pct').textContent = Math.floor(pct * 100) + ' %';
-  $('#hud-eta').textContent = !claudeOn ? 'agents à l’arrêt' : paused ? 'en pause' : mode !== 'idle' ? '' : net > 0 ? `≈ ${fmtEta(Math.ceil((1 - pct) * w / net))}` : 'bloqué';
+  $('#hud-eta').textContent = G.inc && pct >= 1 ? 'gelé : prod en panne' : !claudeOn ? 'agents à l’arrêt' : paused ? 'en pause' : mode !== 'idle' ? '' : net > 0 ? `≈ ${fmtEta(Math.ceil((1 - pct) * w / net))}` : 'bloqué';
   $('#hud-info').textContent = performance.now() < hudUntil ? hudText
     : `tokens −$${usd(G.bill)} · électricité −$${usd(G.elec || 0)}${meter ? ` (${Math.round(wallW(r.hw))} W)` : ' (PC en veille)'} · prochain ship ${signed(next)} · ${plural(claudeOn ? panes.length : G.agents, 'agent')} ${cfg.model}${bgS} · ${ECO.termName[G.term]} ×${frx(speed)}` + (claudeOn && pv.lvl !== 'ok' ? ` · PC ${pv.label.toLowerCase()} : ${pv.why}` : '');
   $('.xf-score').textContent = `${shipped} shipped · $${usd(G.money)}`;
+  const ie = $('#hud-inc'), I = G.inc;            // l'incident de prod : son numéro, sa durée, les remboursements
+  ie.hidden = !I;
+  if (I) ie.textContent = `▲ ${I.id} · ${mmss(incDur(I))} · −$${usd(I.lost)}`;
   const on = PLAT_ORDER.filter(boostOn), hb = $('#hud-boost'), ub = $('.tbtn.boost'), own = !!G.boost?.[provider]?.own;
   hb.hidden = !on.length;
   if (on.length) hb.textContent = on.map(p => `${CLIS[p].glyph} ${BOOST[p].cmd} ${mmss(G.boost[p].left)}`).join(' · ');
@@ -10899,6 +11232,7 @@ function ecoTick() {
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
   if (now - achLast > 1000) { achLast = now; achTick(); }
+  if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
