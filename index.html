@@ -592,6 +592,8 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xfs-wall .pv.code { justify-items: start; padding: .3em 1ch; color: var(--dim); font-size: .7em; font-weight: 400; white-space: pre; }
 .xfs-wall .d { color: var(--dim); font-size: .85em; }
 .xfs h3 { margin-top: .4em; }
+.xfs-chk { display: flex; align-items: center; gap: 1ch; margin: .5em 0 .3em; font-weight: 700; }
+.xfs-chk input { width: 1.1em; height: 1.1em; accent-color: var(--orange); }
 /* icônes du bureau (xfdesktop) : en colonnes à gauche, sous les fenêtres ; le fond reste cliquable entre elles */
 .xf-icons {
   position: absolute; top: .6em; bottom: .6em; left: .6ch; right: .6ch; z-index: 0; pointer-events: none;
@@ -2416,6 +2418,7 @@ const ACH = [
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
   { id: 'rangement', g: '⊡', n: 'Bureau rangé', d: 'Déplacer une icône du bureau. Le reste du bureau, lui, ne se range pas.', p: 28.1 },
+  { id: 'autostart', g: '▶', n: 'startx dans le .bashrc', d: 'Démarrer le bureau tout seul, au démarrage du PC.', p: 6.6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3972,7 +3975,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-settings-manager', 'xfdesktop-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -6668,7 +6671,7 @@ function xfWinMenu(n, x, y) {
 /* le fond d'écran et les Paramètres du bureau (xfce4-settings-manager) : Bureau (le fond, bientôt les icônes), gardés dans la partie */
 const XF_WALLS = [['logo', 'Le logo', 'AI DevOps Chaos Simulator, en grand'], ['tux', 'Tux', 'le pingouin du démarrage'], ['grille', 'Grille rétro', 'un horizon néon, façon 1986'],
   ['code', 'Code', 'du code que personne n’a relu'], ['citation', 'Citation', '« Ça marche sur ma machine. »'], ['uni', 'Uni', 'la couleur du thème, rien d’autre']];
-const XFS_CMD = { 'xfce4-settings-manager': 'bureau', 'xfdesktop-settings': 'bureau', 'xfce4-settings': 'bureau' };
+const XFS_CMD = { 'xfce4-settings-manager': 'bureau', 'xfdesktop-settings': 'bureau', 'xfce4-settings': 'bureau', 'xfce4-session-settings': 'session' };
 const xfWall = () => XF_WALLS.some(w => w[0] === G.xfd?.wall) ? G.xfd.wall : 'logo';
 function xfWallHtml(k) {
   if (k === 'tux') return `<div class="wall-tux">${tuxSvg()}</div><p>Vibian GNU/Linux 13 (friday)</p>`;
@@ -6688,7 +6691,7 @@ function xfWallSet(k) {                            // un autre fond : tout de su
   PROGS['xfce4-settings'].redraw?.();
   return true;
 }
-const XFS_TABS = [['bureau', 'Bureau']];
+const XFS_TABS = [['bureau', 'Bureau'], ['session', 'Session et démarrage']];
 const XFS_PV = { logo: 'AI', citation: '« … »', uni: '' };
 const XFS_HTML = {
   bureau: () => `<h3>Fond d’écran</h3><div class="xfs-walls">${XF_WALLS.map(([k, n, d]) => `<button type="button" class="xfs-wall${xfWall() === k ? ' on' : ''}" data-wall="${k}" aria-pressed="${xfWall() === k}">`
@@ -6731,6 +6734,24 @@ function makeXfSettings() {
   return { el, key: () => {}, render: () => draw(), redraw: () => draw(true), go: k => show(k), title: () => 'Paramètres du bureau', tname: () => 'Paramètres du bureau' };
 }
 const XFS_ACT = {};                                // les boutons des autres onglets (icônes, session) s'y ajoutent
+
+/* Session et démarrage : le bureau au démarrage (G.xfd.boot), ouvert après la connexion, comme un startx dans le .bashrc */
+XFS_HTML.session = () => `<h3>Démarrage</h3><label class="xfs-chk"><input type="checkbox" data-xfsa="boot"${G.xfd?.boot ? ' checked' : ''}${IDLE ? '' : ' disabled'}> Lancer le bureau Xfce au démarrage</label>`
+  + `<p class="dim">${IDLE ? 'Après le BIOS, GRUB et la connexion, le bureau s’ouvre tout seul : à l’allumage, après un reboot, et même après un plantage. Comme un startx dans le .bashrc, en plus propre.' : 'Mode libre : rien n’est gardé, le démarrage non plus.'}${G.chal === 'nodesk' ? ' Sauf pendant le défi « Sans bureau ».' : ''}</p>`
+  + `<h3>Session</h3><p>xfce4-session · ${plural(Object.keys(xw).length, 'fenêtre')} ouverte${Object.keys(xw).length > 1 ? 's' : ''} · Applications › Déconnexion pour revenir au terminal.</p>`;
+XFS_ACT.boot = a => {
+  if (!IDLE) return;
+  G.xfd = { ...G.xfd, boot: a.checked ? 1 : 0 };
+  saveGame();
+  toast(a.checked ? 'Le bureau s’ouvrira au prochain démarrage.' : 'Au prochain démarrage : le terminal, comme avant.', 2600);
+  PROGS['xfce4-settings'].redraw?.();
+};
+function xfAutostart() {                           // après la connexion : le bureau, s'il est demandé (et possible)
+  if (!IDLE || !G.xfd?.boot || xfOn || !installed.has('xfce4') || G.chal === 'nodesk' || mode !== 'idle' || !titleEl.hidden) return;
+  shellPrint(H(['xfce4-session', 'dim'], [' · lancé au démarrage (Paramètres du bureau › Session et démarrage)', 'dim']));
+  ach('autostart');
+  xfEnter();
+}
 
 /* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
    navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
@@ -13475,7 +13496,7 @@ function amiSetup(el, bindKey) {
 }
 function powerOn(after) {                        // écran titre → allumage → terminal
   diskSt().cyc++;                                // SMART : un cycle d'allumage de plus
-  return biosBoot({ then: () => { startGame(); after?.(); } });
+  return biosBoot({ then: () => { startGame(); after?.(); setTimeout(xfAutostart, 400); } });
 }
 
 /* ---------- le PC tombe : alimentation dépassée, surchauffe, ou l'alim no-name qui lâche ----------
@@ -13533,6 +13554,7 @@ async function pcCrash(kind, L) {
   await biosBoot({ crash: { kind, why, panic, need: L.need }, during: haltSession, then: () => {
     mode = 'idle';
     pcDown = false;
+    setTimeout(xfAutostart, 400);
     shellPrint(H(['✗ ', 'errc'], ['Kernel panic : ', 'errc'], why + '. Le PC a redémarré.'));
     if (dropped.length) shellPrint(H(['  ', ''], ['Arrière-plan coupé : ', 'wrn'], `${dropped.join(' et ')} ne repart pas, la config ne tiendrait pas avec. `, ['plateformes', 'org'], ' pour voir.'));
     if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
@@ -13568,6 +13590,7 @@ async function pcReboot() {                      // reboot : un redémarrage pro
   await biosBoot({ during: haltSession, then: () => {
     mode = 'idle';
     pcDown = false;
+    setTimeout(xfAutostart, 400);
     const o = ocSt(), set = [o.ratio ? `processeur à ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})` : '', o.mhz ? `RAM à ${frMhz(ramMhz())} (${ocPct(ramMhz(), part('ram').mhz)})` : ''].filter(Boolean);
     shellPrint(H(['✓ ', 'okc'], 'Le PC a redémarré.', set.length ? [` BIOS : ${set.join(', ')}.`, 'dim'] : ''));
     if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
