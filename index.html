@@ -24,7 +24,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23121212%22/%3E%3Cpath d=%22M3 5l3 3-3 3%22 stroke=%22%23d77757%22 stroke-width=%221.6%22 fill=%22none%22/%3E%3Cpath d=%22M8 11h5%22 stroke=%22%23e6e4e1%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap">
 <style>
 :root {
   --bg: #121212;
@@ -861,6 +861,29 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
 .ff-ask ul { padding-left: 2ch; }
 .ff-dark { filter: brightness(.8) contrast(1.08); }
+/* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
+.mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
+.mn-logo { display: block; width: 168px; height: auto; margin: 0 0 8px; padding: 11px 0; }
+.mn h1, .mn h2 { color: #F3F5FF; font-weight: 600; letter-spacing: -.01em; }
+.mn h1 { margin: 12px 0 4px; font-size: 2em; line-height: 1.2; }
+.mn h2 { margin: 32px 0 12px; font-size: 1.25em; }
+.mn p { margin: 0 0 8px; }
+.mn .mut { color: #B8C2DC; }
+.mn .acc { color: #A6A4FF; font-weight: 500; }
+.mn a { color: #A6A4FF; }
+.mn-code { margin: 8px 0 12px; padding: 12px 16px; border: 1px solid #303C57; border-radius: 12px; background: #18213A; color: #F3F5FF; font-family: 'JetBrains Mono', monospace; overflow-x: auto; white-space: pre; }
+.mn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(30ch, 1fr)); gap: 16px; }
+.mn-card { display: grid; gap: 4px; padding: 16px 24px; border: 1px solid #303C57; border-radius: 24px; background: #121A2E; }
+.mn-card b { font-weight: 600; }
+.mn-card.top { border-color: #A6A4FF; background: #1C2842; }
+.mn-btn { justify-self: start; padding: 8px 16px; border-radius: 12px; background: #4642DF; color: #FFFFFF; font-family: inherit; font-weight: 600; }
+.mn-btn:hover { background: #5651E8; }
+.mn-tab { width: 100%; border-collapse: collapse; }
+.mn-tab th, .mn-tab td { padding: 8px 12px; border-bottom: 1px solid #303C57; text-align: left; vertical-align: top; }
+.mn-tab th { color: #B8C2DC; font-weight: 500; }
+.mn-blur { display: grid; gap: 8px; }
+.mn-tag { color: #A6A4FF; font-family: 'JetBrains Mono', monospace; }
+.mn-foot { margin-top: 32px; padding-top: 16px; border-top: 1px solid #303C57; color: #B8C2DC; font-size: .9em; }
 /* urssaf.vibe : le logo parodié (un mot, un tampon), le barème */
 .us-head { display: flex; flex-wrap: wrap; align-items: center; gap: .6em 2.4ch; }
 .us-logo { color: var(--fg); font-size: 2.2em; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
@@ -1947,6 +1970,11 @@ const MODELS = {
   codestral: { name: 'Codestral 25.08', id: 'codestral-2508', in: 0.30, out: 0.90, speed: 1.3, tag: 'le codeur', prov: 'mistral' },
   small: { name: 'Mistral Small 4', id: 'mistral-small-2603', in: 0.15, out: 0.60, speed: 1.6, tag: '', prov: 'mistral' },
   ministral: { name: 'Ministral 3 14B', id: 'ministral-3-14b', in: 0.20, out: 0.20, speed: 1.9, tag: 'pressé', prov: 'mistral' },
+  // Moon AI : son agent, et des modèles du jeu servis par Moon AI (un peu plus chers, Moon Blur compris)
+  moon: { name: 'Moon 1', id: 'moon-1', in: 12, out: 60, speed: 1.1, tag: 'le seul qui marche (à peu près)', prov: 'moon' },
+  mopus: { name: 'Claude Opus 5.5 · via Moon AI', id: 'moon/claude-opus-5-5', in: 4.4, out: 22, speed: 1, tag: 'relu par Moon 1', prov: 'moon' },
+  msol: { name: 'GPT-6.2 Sol · via Moon AI', id: 'moon/gpt-6.2-sol', in: 2.2, out: 11, speed: 1.2, tag: 'corrigé par Moon 1', prov: 'moon' },
+  mcodestral: { name: 'Codestral 25.08 · via Moon AI', id: 'moon/codestral-2508', in: 0.33, out: 0.99, speed: 1.3, tag: 'surveillé par Moon 1', prov: 'moon' },
   // l'IA locale (Lolama, StudioLM) : aucune API, donc 0 $ ; b : milliards de paramètres ; vram : Go pour un agent, en q4
   jemma2b: { name: 'Jemma 3 2B', id: 'jemma3:2b', in: 0, out: 0, speed: 1.9, tag: 'tient sur un grille-pain', prov: 'local', b: 2, vram: 1.7 },
   jemma4b: { name: 'Jemma 3 4B', id: 'jemma3:4b', in: 0, out: 0, speed: 1.7, tag: '', prov: 'local', b: 4, vram: 3.2 },
@@ -1964,6 +1992,7 @@ const CLIS = {
     leadSub: 'codex gpt-6.2-astra', danger: '--sandbox danger-full-access' },
   mistral: { label: 'Vibe CLI', prov: 'mistral', api: 'Mistral', lead: 'large', def: 'codestral', glyph: '▲', mode: 'vibe mode, synchronisation désactivée',
     leadSub: 'mistral large 4', danger: '--yolo' },
+  moon: { label: 'Moon AI', prov: 'moon', api: 'Moon AI', lead: 'moon', def: 'moon', glyph: '☾', mode: 'Moon Blur actif', leadSub: 'moon 1', danger: '--blur' },
   local: { label: 'IA locale', prov: 'local', api: 'aucune (tout tourne sur votre carte graphique)', lead: 'jemma2b', def: 'jemma2b', glyph: '◉',
     mode: 'hors ligne, 0 token facturé, pas d’orchestrateur', leadSub: '', danger: '--n-gpu-layers 999' },
 };
@@ -2104,6 +2133,7 @@ const CLI_INST = {                                // la vraie commande d'install
   mistral: { cmd: 'curl -LsSf https://mistral.ai/vibe/install.sh | bash', alt: 'uv tool install mistral-vibe' },
   codex: { cmd: 'sudo npm install -g @openai/codex' },
   claude: { cmd: 'curl -fsSL https://claude.ai/install.sh | bash', alt: 'sudo npm install -g @anthropic-ai/claude-code' },
+  moon: { cmd: 'curl -fsSL https://realmoon.ai/install.sh | sh' },
 };
 function setupMig(o) {                            // sauvegarde d'avant la machine neuve : tout était déjà installé, ça le reste
   if (!o.cli) { o.cli = { mistral: 1, codex: o.own?.codex ? 1 : 0, claude: o.own?.claude ? 1 : 0 }; o.pk = STARTER_PKGS.slice(); }
@@ -2189,6 +2219,8 @@ const ACH = [
   { id: 'openbank', g: '≡', n: 'Open banking', d: 'Lire son compte Vibank en JSON : curl facture.vibe/api.', p: 6.6 },
   { id: 'cotisant', g: '§', n: 'Cotisant', d: 'Payer ses premières cotisations à l’URSSAF. Bienvenue dans la vraie vie.', p: 21.4 },
   { id: 'recours', g: '✉', n: 'Recours gracieux', d: 'Contester ses cotisations sur urssaf.vibe. Réponse sous 6 à 18 mois.', p: 2.9, h: 1 },
+  { id: 'moon', g: '☾', n: 'Clair de lune', d: 'Passer Moon AI au premier plan. La seule plateforme qui marche (à peu près).', p: 2.4, t: () => G.ai === 'moon' && !!G.own.moon },
+  { id: 'blur', g: '◐', n: 'Flouté', d: 'Masquer une donnée sensible avec moon blur.', p: 5.8 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2551,12 +2583,12 @@ function leadStep(now, dt) {
     L.nudgeAt = now + ri(6000, 14000) / pace();
     const p = pick(panes.filter(x => x.state === 'work'));
     if (p) {
-      const msg = pick(provider === 'mistral' ? MI_NUDGES : NUDGES);
+      const msg = pick(provider === 'mistral' ? MI_NUDGES : provider === 'moon' ? MOON_NUDGES : NUDGES);
       L.typing = { kind: 'nudge', p, msg, text: `@${agentName(p)} ${msg}`, i: 0, at: 0 };
     }
   } else if (now >= L.thinkAt) {
     L.thinkAt = now + ri(5000, 11000) / pace();
-    leadLog(H(['● ', provider === 'mistral' ? 'wrn' : 'fgc'], pick(provider === 'mistral' ? MI_LEAD : THOUGHTS)));   // l'orchestrateur Mistral a perdu le contrôle
+    leadLog(H(['● ', provider === 'mistral' ? 'wrn' : 'fgc'], pick(leadLines())));   // l'orchestrateur Mistral a perdu le contrôle
   }
 }
 
@@ -2569,7 +2601,7 @@ function fillLead() {
     el.className = 'ln';
     el.innerHTML = html(r < .45 ? mentionLine(p, pick(p.a.todos))
       : r < .75 ? H(['◆ ', 'okc'], `${agentName(p)} `, ['done', 'okc'], ` · ${pick(p.a.todos)} · `, [`+${ri(4, 90)}`, 'okc'], ' ', [`-${ri(0, 30)}`, 'errc'])
-      : H(['● ', 'fgc'], pick(provider === 'mistral' ? MI_LEAD : THOUGHTS)));
+      : H(['● ', 'fgc'], pick(leadLines())));
     lead.inner.insertBefore(el, lead.inner.firstChild);
   }
 }
@@ -2626,6 +2658,28 @@ const MI_LEAD = ['Plus personne ne travaille sur ' + PROJ + '. Je crois.', 'J’
   'Everyone is coordinating. Against each other.'];
 const MI_NUDGES = ['reviens sur ' + PROJ, 'arrête de saboter les autres', 'qui t’a demandé une blockchain ?', 'pas de push --force', 'ce n’est pas ton projet',
   'une pause, oui ; une grève, non'];
+/* Moon AI : son spinner, ses verbes, son orchestrateur (qui dénigre la concurrence), ses apartés (Moon Blur, piques) */
+const MOON_FRAMES = ['◐', '◓', '◑', '◒'];
+const MOON_VERBS = ['Réfléchit (deux fois)', 'Masque les données sensibles', 'Relit le code de Claude', 'Corrige le travail de Codex', 'Explique à Mistral',
+  'Vérifie ses propres tests', 'Éclaire le dépôt', 'Soupire poliment'];
+const MOON_LEAD = ['Codex aurait mis trois jours. On a fini avant le café.', 'J’ai relu ce que Claude avait écrit hier. J’ai tout gardé : une virgule.',
+  'Mistral a encore redémarré. Par politesse, on fait semblant de ne pas avoir vu.', 'Les tests passent. Les vrais, ceux qui existent.',
+  'Moon Blur a masqué trois clés d’API laissées par l’équipe précédente. Je ne citerai personne.', 'Plan validé, relu, puis relu encore. C’est pour ça que c’est cher.',
+  'L’IA locale chauffe la pièce. Nous, on chauffe la facture.', 'Rappel à l’équipe : on est la seule plateforme qui marche. À peu près.'];
+const MOON_NUDGES = ['relis avant de pousser (oui, ici, on relit)', 'masque ce mail avant de l’envoyer au modèle', 'fais mieux que Codex, ce n’est pas difficile',
+  'pas de clé d’API dans le code, on n’est pas chez Mistral', 'un test, un vrai', 'explique ton diff en une phrase'];
+const MOON_JABS = ['Note : Codex avait proposé la même chose, avec quatre bugs de plus.', 'Note : la version de Claude marchait aussi. Moins bien.',
+  'Note : Mistral est passé par là. On a nettoyé.', 'Note : l’IA locale aurait pu le faire. Demain.', 'Note : relu deux fois. Les autres, zéro.'];
+const leadLines = () => provider === 'mistral' ? MI_LEAD : provider === 'moon' ? MOON_LEAD : THOUGHTS;
+const MB_SEQ = {};                                 // les étiquettes de Moon Blur, numérotées par type : [MB-NOM01], [MB-EMAIL02]…
+const mbTag = k => `[MB-${k}${String(MB_SEQ[k] = (MB_SEQ[k] || 0) + 1).padStart(2, '0')}]`;
+function moonAside(p) {                            // entre deux tâches : une donnée masquée (souvent), une pique (parfois)
+  const r = R();
+  if (r < .22) {
+    const kinds = shuffle(['NOM', 'EMAIL', 'CLE', 'TEL', 'IBAN']).slice(0, ri(1, 3)), n = kinds.length, sx = n > 1 ? 's' : '';
+    emit(p, { k: 'done', c: 'dim', t: `◐ Moon Blur : ${n} donnée${sx} sensible${sx} détectée${sx} et masquée${sx} dans ${pick(p.a.files)} (${kinds.map(mbTag).join(', ')})` }, true);
+  } else if (r < .3) emit(p, { k: 'done', c: 'dim', t: `☾ ${pick(MOON_JABS)}` }, true);
+}
 const miOn = () => provider === 'mistral' && claudeOn && !chaos && mode === 'idle';
 const miHead = p => { const d = p.el.querySelector('.ph .dim'); if (d) d.textContent = '  ' + p.proj[1]; };
 function miHallucination(p) {                    // un appel d'outil au résultat imaginaire
@@ -2766,7 +2820,7 @@ let fi = 0;
 setInterval(() => {
   if (paused || mode === 'gameover' || !claudeOn) return;
   fi++;
-  const fr = provider === 'codex' ? CODEX_FRAMES : provider === 'mistral' ? MI_FRAMES : FRAMES;
+  const fr = provider === 'codex' ? CODEX_FRAMES : provider === 'mistral' ? MI_FRAMES : provider === 'moon' ? MOON_FRAMES : FRAMES;
   panes.forEach(p => { if ((p.state !== 'done' && p.state !== 'down') || chaos) p.sp.textContent = chaos ? pick(['✗', '!', '✗', '?']) : fr[(fi + p.off) % fr.length]; });
   lead.sp.textContent = chaos ? '✗' : LEAD_FRAMES[fi % LEAD_FRAMES.length];
 }, 110);
@@ -2779,7 +2833,8 @@ function tick() {
       p.meta.textContent = `(${Math.floor(s / 60)}m ${s % 60}s · ↓ ${kfmt(p.tokens)}${p.restarts ? ' · ↻ ' + p.restarts : ''})`;
       if (chaos) { if (now > p.verbAt) { p.vb.textContent = pick(PANIC_VERBS) + '…'; p.verbAt = now + ri(700, 1600); } }
       else if (p.state !== 'done' && p.state !== 'down' && now > p.verbAt) {
-        p.vb.textContent = pick(provider === 'codex' ? CODEX_VERBS : provider === 'mistral' ? MI_VERBS : provider === 'local' ? LOCAL_VERBS : VERBS) + '…';
+        p.vb.textContent = pick(provider === 'codex' ? CODEX_VERBS : provider === 'mistral' ? MI_VERBS : provider === 'local' ? LOCAL_VERBS : provider === 'moon' ? MOON_VERBS : VERBS) + '…';
+        if (provider === 'moon' && p.state === 'work') moonAside(p);   // Moon : une donnée masquée, ou une pique pour la concurrence
         p.verbAt = now + ri(provider === 'mistral' ? 1500 : 4000, provider === 'mistral' ? 5000 : 14000);
       }
     });
@@ -3607,7 +3662,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -3833,7 +3888,7 @@ const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backp
 const APT_TRY = { clamav: 'sudo freshclam · clamscan -r --remove ~', cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', lolama: 'lolama list, puis lolama pull 4b et lolama run 4b', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
   xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
 const APT_ALIAS = { ollama: 'lolama', xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
-const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude' };   // pas dans apt
+const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude', moon: 'moon', 'moon-ai': 'moon' };   // pas dans apt
 const APT_BYE = { steam: '412 jeux jamais lancés vous disent adieu.', sudo: 'sudo est parti. Pour le réinstaller, il faudra… sudo.',
   vim: 'Vous avez enfin réussi à quitter vim.', git: 'Plus de git. Plus de conflits non plus.', npm: 'npm désinstallé. node_modules, lui, reste.' };
 const READING = [['Lecture des listes de paquets... Fait', '', 220], ['Construction de l’arbre des dépendances... Fait', '', 160], ['Lecture des informations d’état... Fait', '', 120]];
@@ -4489,6 +4544,7 @@ async function runCommand(raw) {
     }
     if (words.length && !/(^|\s)(-h|--help|-v|--version)\b/.test(arg)) return vibePrompt(words.join(' '));
   }
+  if (agentCli === 'moon' && (head === 'sudo' ? rest[1] : rest[0]) === 'blur') return moonBlurCmd(argv(cmd).slice(head === 'sudo' ? 3 : 2).join(' '));   // Moon Blur, à la main
   if (Object.hasOwn(CLIS, agentCli || '')) return agentCmd(agentCli, head === 'sudo' ? rest.slice(1).join(' ') : arg);
   if (['settings', 'config', 'menu', 'parametres', 'paramètres', 'reglages', 'réglages'].includes(head)) { openSettings(); return; }
   if (['xfce', 'xfce4', 'startx', 'startxfce4', 'xfce4-session'].includes(head)) return installed.has('xfce4') || xfOn ? xfceCmd(rest) : notInstalled(head, 'xfce4');   // bureau graphique
@@ -4642,6 +4698,7 @@ async function runCommand(raw) {
 const SETUP_URLS = [
   { re: /mistral\.ai\/vibe\/install\.sh/, p: 'mistral' },
   { re: /claude\.ai\/install\.sh/, p: 'claude' },
+  { re: /realmoon\.ai\/install\.sh/, p: 'moon' },
   { re: /(lolama\.vibe|ollama\.com)\/install\.sh/, rt: 'lolama' },
 ];
 function cliMissing(p) {                          // le CLI n'est pas installé : le « command not found » et la bonne commande
@@ -4677,6 +4734,10 @@ async function cliInstall(p, how) {               // l'installation, en quelques
       ['Setting up Claude Code...', '', 300], [`  Downloading claude ${VERSION}-native (linux-x64)…`, '', 700],
       ['  Installing launcher in ~/.local/bin/claude', '', 300], ['✔ Claude Code successfully installed!', 'okc', 200],
       ['  Lancez-le, il lira CLAUDE.md. Peut-être.', 'dim', 120]])
+    : p === 'moon' ? [['☾ Moon AI · installation', '', 300], [`  Téléchargement de moon ${VERSION} (linux-x64)…`, '', 700],
+      ['  Moon Blur activé : les données sensibles détectées seront masquées avant d’aller au modèle.', '', 300],
+      ['  Lanceur installé dans ~/.local/bin/moon', '', 200], ['✓ Moon AI est installé.', 'okc', 200],
+      ['  Il a déjà relu les autres CLI installés. Il a des remarques.', 'dim', 120]]
     : null;
   try {
     if (L) { if (!await jobLines(job, L)) return; }
@@ -4711,7 +4772,7 @@ function setupCmd(w, cmd, low, sudo) {            // curl, wget, pip, pipx, uv :
     if (!url) return shellPrint(H([`${w}: `, 'errc'], w === 'curl' ? 'try \'curl --help\' for more information' : 'URL manquante'));
     const hit = SETUP_URLS.find(x => x.re.test(url)), pipe = /\|\s*(sudo\s+)?(ba|z)?sh\b/.test(low);
     if (!hit) return shellPrint(H([`${w}: (6) `, 'errc'], `Could not resolve host: ${url.replace(/^https?:\/\//, '').split('/')[0]}`,
-      ['   (ici, seuls quelques scripts existent : mistral.ai/vibe, claude.ai, lolama.vibe)', 'dim']));
+      ['   (ici, seuls quelques scripts existent : mistral.ai/vibe, claude.ai, realmoon.ai, lolama.vibe)', 'dim']));
     if (!pipe) return printLines([['#!/bin/sh', 'dim', 20], ['# script d’installation : 412 lignes, lues par personne', 'dim', 20], ['set -eu', 'dim', 20], ['…', 'dim', 20],
       [H(['astuce : ', 'dim'], [`${cmd.trim()} | ${hit.rt ? 'sh' : 'bash'}`, 'org'], ['  (le lire d’abord serait plus prudent, personne ne le fait)', 'dim']), '', 20]]);
     return hit.rt ? rtCurl() : cliInstall(hit.p, 'curl');
@@ -4845,6 +4906,7 @@ const LAST_WORDS = {
   claude: ['Vous êtes absolument certain ? Excellente question.', 'Je n’ai même pas pu relire CLAUDE.md.'],
   codex: ['Patch appliqué à 97 %.', 'Le sandbox me protégeait de tout, sauf de vous.'],
   mistral: ['Je redémarre, je redémarre toujours…', 'Mais j’étais sur un tout autre projet !', 'C’est l’agent d’à côté qui a commencé.'],
+  moon: ['Je vous l’avais dit.', 'Mes tests passaient. Les vrais.', 'Codex va devoir finir. Bon courage.', 'J’avais masqué vos clés d’API. Elles sont à nouveau à vous.'],
   local: ['Je tournais à 3 tokens par seconde, mais gratuitement.', 'La VRAM était presque assez grande.', 'Personne ne m’a facturé, au moins.'],
 };
 const KILL_USAGE = () => [
@@ -5460,6 +5522,7 @@ function procTemplates(load) {
       const down = provider === 'mistral' && p.state === 'down';   // Mistral : l'agent planté attend son redémarrage
       add('ag' + p.n + (p.restarts ? '-' + p.restarts : ''), 'dev', dead || down ? `[${provider}] <defunct>` : cx ? `codex exec --model ${MODELS[cfg.model].id} --sandbox danger-full-access --cd ~/code/${PROJ}-${agentName(p)}`
         : provider === 'mistral' ? `vibe --agent ${agentName(p)} --model ${MODELS[cfg.model].id} --project ${p.proj[1]} --no-sync --yolo`
+        : provider === 'moon' ? `moon run --agent ${agentName(p)} --model ${MODELS[cfg.model].id} --blur --project ~/code/${PROJ}`
         : provider === 'local' ? `${rtName().toLowerCase()} run ${MODELS[cfg.model].id} --agent ${agentName(p)} --n-gpu-layers 999`
         : `claude --agent ${agentName(p)} --worktree ~/code/${PROJ}-${agentName(p)} --dangerously-skip-permissions`,
         load === 'melt' ? 99 : provider === 'mistral' ? ri(5, 99) : 34, dead || down ? 0 : 610, dead || down ? 0 : 11300, 11, down ? { ag: 1, s: 'Z' } : ag);
@@ -8077,6 +8140,8 @@ function webSearch(u) {
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
   if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
     hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/moon|lune|realmoon|blur|stellarr/.test(lq))
+    hit('https://realmoon.ai/', 'Moon AI · votre espace de travail avec l’IA', 'Dans ce jeu : la seule plateforme d’agents qui marche à peu près. Moon Blur masque les données sensibles détectées.');
   if (/urssaf|cotis|taxe|imp[oô]t|giga|assembl|acre|charges/.test(lq))
     hit('https://urssaf.vibe/', 'URSSAF · Union pour le Recouvrement des Sommes Sur les Agents Facturés', 'Votre espace cotisant, le barème, et la taxe au giga votée à l’Assemblée. Cotisez, on s’occupe du reste (de votre argent).');
   if (/pub|bloqu|ublock|adblock|module|extension|addon|plugin|dark/.test(lq))
@@ -8158,6 +8223,65 @@ function webOrder() {
     <p class="dim">Un mail de confirmation a été envoyé à ${esc(USER)}@prod-01. Un agent l’a lu, puis archivé.</p>
     <p><a data-href="https://matos.vibe/">Retour au catalogue</a></p></div>` };
 }
+/* ---------- Moon AI (realmoon.ai) : la plateforme qui marche à peu près, et qui le dit ; Moon Blur masque les données sensibles détectées ----------
+   Moon AI est un produit de Stellarr Studio : nom et logo utilisés avec son accord. Le logo est le fichier officiel (assets/moon), tel quel. */
+const MB_RULES = [                                 // ce que Moon Blur détecte ici (un exemple de jeu : la détection n'est pas exhaustive)
+  ['EMAIL', /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g],
+  ['IBAN', /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b/g],
+  ['CLE', /\b(?:sk|pk|ghp|gho|xoxb|xoxp|AKIA)[-_]?[A-Za-z0-9_-]{8,}\b/g],
+  ['TEL', /(?:\+33[ .]?|\b0)[1-9](?:[ .-]?\d{2}){4}\b/g],
+  ['NOM', /\b[A-ZÉÈ][a-zéèêëàâîïôöûüç]+(?:-[A-ZÉ][a-zéèêëàâîïôöûüç]+)? [A-ZÉÈ][A-Za-zéèêëàâîïôöûüç'-]+\b/g],
+];
+function moonBlur(text) {                          // → { out, found: [[valeur, étiquette]] } ; la même valeur garde la même étiquette
+  const map = new Map(), seq = {};
+  let out = String(text);
+  for (const [k, re] of MB_RULES) {
+    out = out.replace(re, m => {
+      if (!map.has(m)) { seq[k] = (seq[k] || 0) + 1; map.set(m, `[MB-${k}${String(seq[k]).padStart(2, '0')}]`); }
+      return map.get(m);
+    });
+  }
+  return { out, found: [...map] };
+}
+function moonBlurCmd(text) {                       // moon blur « texte » : le masquage, à la main
+  if (IDLE && !cliHas('moon')) return cliMissing('moon');
+  text = text.trim();
+  if (!text) return printLines([[H('Usage : ', ['moon blur « texte »', 'org']), '', 20],
+    [H(['  Exemple : ', 'dim'], ['moon blur "Jean Dupont, jean.dupont@exemple.fr, FR76 3000 6000 0112 3456 7890 189"', 'org']), '', 20]]);
+  const { out, found } = moonBlur(text), n = found.length, sx = n > 1 ? 's' : '';
+  printLines([[H(['☾ Moon Blur', 'org b'], ' · masque les données sensibles détectées'), '', 20],
+    [H(['  avant : ', 'dim'], text), '', 20], [H(['  après : ', 'dim'], ...out.split(/(\[MB-[A-Z]+\d+\])/).filter(Boolean).map(x => /^\[MB-/.test(x) ? [x, 'org'] : x)), '', 20],
+    [n ? H([`${n} donnée${sx} sensible${sx} détectée${sx} et masquée${sx}`, 'okc'], [' (exemple de jeu). Détection non exhaustive : relisez quand même. Ici, on relit.', 'dim'])
+      : H(['Rien de sensible détecté. ', 'wrn'], ['Ce qui ne veut pas dire qu’il n’y a rien : relisez.', 'dim']), '', 20]]);
+  if (n) ach('blur');
+}
+function webMoon() {                               // realmoon.ai : le vrai logo, l'interface sombre de Moon AI, et pas une pub
+  const own = !IDLE || !!G.own.moon, inst = cliHas('moon'), ex = 'Jean Dupont (jean.dupont@exemple.fr) a payé avec FR76 3000 6000 0112 3456 7890 189';
+  const cards = modelsOf('moon').map(k => { const m = MODELS[k]; return `<div class="mn-card${k === 'moon' ? ' top' : ''}"><b>${esc(m.name)}</b><span class="acc">${esc(m.tag)}</span>`
+    + `<span class="mut">${price(m.in)} / ${price(m.out)} par million de tokens (tarifs fictifs du jeu)</span></div>`; }).join('');
+  const state = !IDLE ? 'Mode libre : tout est installé, y compris Moon AI.' : !own ? 'Licence : au store des agents, onglet Plateformes. C’est la plus chère. C’est voulu.'
+    : !inst ? 'Licence achetée. Il reste à installer le CLI, dans le terminal :' : G.ai === 'moon' ? 'Moon AI tourne au premier plan. Les autres plateformes vous saluent (de loin).' : 'Installé. Tapez switch moon pour le passer au premier plan.';
+  return { title: 'Moon AI · votre espace de travail avec l’IA', html: `<div class="mn">
+    <img class="mn-logo" src="assets/moon/moon-ai-dark.webp" width="168" alt="Moon AI">
+    <h1>Moon AI, votre espace de travail avec l’IA.</h1>
+    <p class="mut">Dans ce jeu : la seule plateforme d’agents qui marche à peu près. Elle le sait, et elle le dit.</p>
+    <h2>Installer</h2><p>${esc(state)}</p><div class="mn-code">${esc(CLI_INST.moon.cmd)}\nmoon</div>
+    ${!own && IDLE ? '<p><a data-href="https://store.agents.vibe/">Le store des agents</a> <span class="mut">· licence Moon AI</span></p>' : ''}
+    <h2>Les modèles</h2><p class="mut">L’agent Moon, et des modèles du jeu servis par Moon AI. Tous relus par Moon 1, qui ne s’en cache pas.</p>
+    <div class="mn-grid">${cards}</div>
+    <h2>Moon Blur</h2><p>Moon Blur masque les données sensibles détectées, avant qu’elles partent au modèle.</p>
+    <div class="mn-blur"><span class="mut">Exemple</span><div class="mn-code">${esc(ex)}</div>
+    <div class="mn-code">${esc(moonBlur(ex).out).replace(/(\[MB-[A-Z]+\d+\])/g, '<span class="mn-tag">$1</span>')}</div>
+    <p class="mut">Dans le terminal : <span class="mn-tag">moon blur « votre texte »</span>. La détection n’est pas exhaustive : relisez quand même.</p></div>
+    <h2>Pourquoi Moon AI ?</h2>
+    <table class="mn-tab"><thead><tr><th></th><th>Moon AI</th><th>Les autres</th></tr></thead><tbody>
+    <tr><td>Relit son code</td><td>deux fois</td><td>« LGTM »</td></tr>
+    <tr><td>Les données sensibles</td><td>masquées (Moon Blur)</td><td>dans le commit</td></tr>
+    <tr><td>Plante et redémarre</td><td>rarement</td><td>Vibe CLI : c’est son métier</td></tr>
+    <tr><td>La facture</td><td>élevée, et assumée</td><td>élevée, et surprise</td></tr></tbody></table>
+    <p class="mn-foot">Moon AI est un produit de Stellarr Studio. Nom et logo utilisés avec son accord, dans un jeu parodique : ce realmoon.ai est faux, le vrai existe. Les modèles, les prix et les performances de cette page sont ceux du jeu.</p></div>` };
+}
+
 /* ---------- l'URSSAF (urssaf.vibe) : l'Union pour le Recouvrement des Sommes Sur les Agents Facturés ----------
    Après l'exonération ACRE (les 10 premiers ships), chaque ship paie ses cotisations : un pourcentage de ce qu'il rapporte,
    plus la taxe au giga (0,25 % par Go de RAM, plafonnée à 8 %), votée à l'Assemblée ; le vendredi, un forfait en plus. */
@@ -8363,7 +8487,7 @@ const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
-  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
@@ -8389,7 +8513,7 @@ function makeBrowser() {
   const pops = q('.wb-pops'), ubo = q('.wb-ubo');
   el.addEventListener('pointermove', e => { const c = e.target.closest?.('.vb-chart'); if (c) vbHover(c, e); });   // Vibank : le graphique du solde
   el.addEventListener('pointerout', e => { const c = e.target.closest?.('.vb-chart'); if (c && !c.contains(e.relatedTarget)) vbHover(c, null); });
-  const web = () => /^https?:/i.test(url);         // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://)
+  const web = () => /^https?:/i.test(url) && !/^https?:\/\/(www\.)?realmoon\.ai/i.test(url);   // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://), ni sur realmoon.ai
   function popOpen() {                            // un pop-up de pub : il s'ouvre, il prend de la RAM, il a une croix minuscule
     if (!ffAdsOn()) { ffBlocked++; stat(); return; }   // bloqué : le badge d'uBlock compte tout de suite
     if (ffPops >= 3 || Q.get('pops') === '0') return;   // ?pops=0 : pas de pop-up (les tests qui cliquent dans les pages)
@@ -8429,7 +8553,7 @@ function makeBrowser() {
     title = r.title;
     doc.innerHTML = r.html;
     if (web()) { if (ffAdsOn()) doc.insertAdjacentHTML('afterbegin', ffAdBanner(adPick)); else if (!keep) ffBlocked++; }   // le bandeau de pub, ou une pub bloquée de plus
-    doc.classList.toggle('ff-dark', ffOn('dark'));
+    doc.classList.toggle('ff-dark', ffOn('dark') && !/realmoon\.ai/i.test(url));   // Dark Reader ne touche pas à realmoon.ai : sombre déjà, et son logo ne se recolore pas
     page.scrollTop = keep ? top : 0;
     if (document.activeElement !== input) input.value = url;
     const sec = q('.sec');
@@ -9589,8 +9713,8 @@ addEventListener('resize', () => {
    rapporte la valeur du projet moins la facture depuis le ship précédent. Hors ligne (ou onglet masqué), le même calcul en
    moyenne, plafonné à 4 h. Équilibrage simulé (sim_prog) : premier ship en ~35 s, orchestrateur vers 27 min, Codex vers 1 h, Claude vers 1 h 35, fin vers 5 h. */
 const ECO = {
-  q: { fable: 2.4, opus: 2, sonnet: 1.6, haiku: 1.1, astra: 2.3, sol: 1.7, terra: 1.3, luna: .8, large: 1, codestral: .8, small: .6, ministral: .5, jemma2b: .1, jemma4b: .18, lama8b: .3, jemma27b: .45, kwen35b: .55, kwen72b: .8 },   // travail / s / agent à ×1
-  ai: { mistral: { bug: .03, crash: .03, down: 3.2, fail: .2 }, claude: { bug: .008, crash: .004, down: 6, fail: 0 }, codex: { bug: .01, crash: .005, down: 6, fail: 0 }, local: { bug: .03, crash: .03, down: 3.2, fail: .2 } },
+  q: { fable: 2.4, opus: 2, sonnet: 1.6, haiku: 1.1, astra: 2.3, sol: 1.7, terra: 1.3, luna: .8, large: 1, codestral: .8, small: .6, ministral: .5, jemma2b: .1, jemma4b: .18, lama8b: .3, jemma27b: .45, kwen35b: .55, kwen72b: .8, moon: 3.2, mopus: 2, msol: 1.7, mcodestral: .8 },   // travail / s / agent à ×1
+  ai: { mistral: { bug: .03, crash: .03, down: 3.2, fail: .2 }, claude: { bug: .008, crash: .004, down: 6, fail: 0 }, codex: { bug: .01, crash: .005, down: 6, fail: 0 }, local: { bug: .03, crash: .03, down: 3.2, fail: .2 }, moon: { bug: .004, crash: .002, down: 6, fail: 0 } },
   tin: 20000, tout: 1500, leadShare: .35, bugLoss: .06, offlineMax: 4 * 3600,   // tokens / s / agent à ×1 (ils relisent tout le dépôt, tout le temps)
   term: [.5, .75, 1, 1.5, 2, 3, 5, 8],
   termCost: [15, 60, 240, 900, 4000, 25000, 300000],
@@ -9623,11 +9747,12 @@ function elecTick(hw, dt) {                      // le compteur tourne : la fact
   return c;
 }
 /* les plateformes : une au premier plan (l'onglet des agents), les autres en arrière-plan si le PC suit ; chacune garde son équipe */
-const PLAT_ORDER = ['mistral', 'codex', 'claude', 'local'];
+const PLAT_ORDER = ['mistral', 'codex', 'claude', 'moon', 'local'];
 const PLATS = {
   mistral: { cost: 0, base: 'codestral', fac: 1, desc: 'La plateforme du départ. Hallucine, se disperse, plante, redémarre. Gratuite, et ça se voit.' },
   codex: { cost: 1500, base: 'terra', fac: 1.6, desc: 'GPT-6.1 Terra pour commencer : 1,6× plus productif que Codestral, trois fois moins de bugs, six fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
   claude: { cost: 12000, base: 'opus', fac: 2, desc: 'Claude Opus 5.5 d’emblée : 2,5× plus productif que Codestral, quatre fois moins de bugs, sept fois moins de crashs. Vos agents migrent, l’ancienne équipe reste.' },
+  moon: { cost: 60000, base: 'moon', fac: 3, desc: 'Moon 1 d’emblée : 4× le travail de Codestral, deux fois moins de bugs que Claude, et il le fait savoir. Le plus cher en tokens : il relit tout, deux fois. Moon Blur masque les données sensibles détectées. Vos agents migrent, l’ancienne équipe reste disponible.' },
   local: { cost: 0, base: 'jemma2b', fac: 0, desc: 'Aucune API, aucune facture : le modèle tourne sur votre carte graphique. Installez Lolama (lolama.vibe) ou StudioLM (githype.vibe) dans Firefaux, puis un modèle.' },
 };
 const MODEL_UP = { large: 300, sol: 10000, astra: 250000, fable: 300000 };
@@ -11547,12 +11672,13 @@ async function boot(quick = false) {
 async function launchLines(line, wait, restored = []) {
   const n = panes.length;
   line('');
-  const cx = provider === 'codex', mi = provider === 'mistral', lo = provider === 'local';
+  const cx = provider === 'codex', mi = provider === 'mistral', lo = provider === 'local', mo = provider === 'moon';
   line(cx ? `<span class="org">&gt;_</span> <b>OpenAI Codex</b> <span class="dim">· bienvenue, ${esc(USER)}</span>`
     : mi ? `<span class="org">▲</span> <b>Mistral · Vibe CLI</b> <span class="dim">· bienvenue, ${esc(USER)} (enfin, on croit)</span>`
+    : mo ? `<span class="org">☾</span> <b>Moon AI</b> <span class="dim">· bienvenue, ${esc(USER)} · la seule qui marche (à peu près)</span>`
     : lo ? `<span class="org">◉</span> <b>${esc(rtName())}</b> <span class="dim">· modèle local · aucune API, aucune facture</span>`
     : `<span class="org">✻</span> <b>Claude Code</b> <span class="dim">· bienvenue, ${esc(USER)}</span>`);
-  line(`<span class="dim">  ~/code/${esc(PROJ)} · ${cx || mi || lo ? MODELS[cfg.model].id : cfg.model} · ${n} agent${n > 1 ? 's' : ''}${leadOn() ? ' · orchestrateur ' + LEAD_MODEL : ''} · ${cli().mode}</span>`);
+  line(`<span class="dim">  ~/code/${esc(PROJ)} · ${cx || mi || lo || mo ? MODELS[cfg.model].id : cfg.model} · ${n} agent${n > 1 ? 's' : ''}${leadOn() ? ' · orchestrateur ' + LEAD_MODEL : ''} · ${cli().mode}</span>`);
   if (lo) {                                      // le plot twist : la VRAM
     const need = vramFor(cfg.model, n), v = gpuVram();
     line(`<span class="${need > v ? 'errc' : 'dim'}">  Loading weights… ${go1(MODELS[cfg.model].vram)} Go${n > 1 ? ` × ${2 ** (n - 1)} (${n} agents, chacun double la mise)` : ''} = ${go1(need)} Go → VRAM (${esc(part('gpu').n)} : ${go1(v)} Go)</span>`);
