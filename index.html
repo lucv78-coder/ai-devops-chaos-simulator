@@ -964,6 +964,45 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-card .price { color: var(--orange); font-weight: 700; font-size: 1.1em; }
 .wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
 .wp-card .tag.bad { background: var(--red); }
+/* les versions terminal (façon mc, lynx, nvlc, steamcmd) : du texte, les couleurs du thème, la sélection en vidéo inverse */
+.mc, .lx, .nv, .sc { display: grid; padding: 0; }
+.tui-keys { display: flex; flex-wrap: wrap; gap: 0 1ch; padding: 0 .5ch; white-space: nowrap; }
+.tui-keys button { padding: 0; color: var(--ink); background: var(--orange); }
+.tui-keys button b { margin-right: .2ch; padding: 0 .3ch; background: var(--bg); color: var(--fg); font-weight: 400; }
+.tui-line { min-height: 1.3em; padding: 0 .5ch; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.tui-line input { width: 60%; border: 0; background: transparent; color: var(--fg); font: inherit; outline: none; }
+.mc { grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.mc-top { padding: 0 .5ch; background: var(--orange); color: var(--ink); white-space: pre; overflow: hidden; }
+.mc-panels, .mc-view { grid-row: 2; }
+.mc-panels { display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+.mc-p { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; margin: .2em .4ch; border: 2px solid var(--rule); }
+.mc-p.on { border-color: var(--orange); }
+.mc-h { overflow: hidden; color: var(--orange); text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.mc-rows { min-height: 0; overflow: hidden; }
+.mc-r { display: grid; grid-template-columns: minmax(0, 1fr) 10ch 14ch; gap: 1ch; padding: 0 .5ch; white-space: nowrap; cursor: default; }
+.mc-r > span { overflow: hidden; text-overflow: ellipsis; }
+.mc-r .z, .mc-r .t { text-align: right; }
+.mc-r.d { font-weight: 700; }
+.mc-r.x { color: var(--green); }
+.mc-r.sel { background: var(--dim2); color: var(--bg); }
+.mc-p.on .mc-r.sel { background: var(--fg); color: var(--bg); }
+.mc-f { overflow: hidden; padding: 0 .5ch; border-top: 1px solid var(--rule); color: var(--dim); text-overflow: ellipsis; white-space: nowrap; }
+.mc-view { min-height: 0; overflow: auto; margin: .2em .4ch; padding: 0 1ch; border: 2px solid var(--orange); white-space: pre-wrap; }
+.lx { grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.lx-top { display: flex; justify-content: space-between; gap: 2ch; padding: 0 1ch; color: var(--orange); white-space: nowrap; overflow: hidden; }
+.lx-body { min-height: 0; overflow: auto; padding: .3em 1ch; white-space: pre-wrap; scrollbar-width: none; }
+.lx-p { margin: 0 0 .9em; }
+.lx-p.h { color: var(--orange); font-weight: 700; text-transform: uppercase; }
+.lx-a { color: var(--blue); cursor: pointer; }
+.lx-a.on { background: var(--fg); color: var(--bg); }
+.nv { grid-template-rows: minmax(0, 1fr) auto; }
+.nv-scr { min-height: 0; overflow: auto; margin: 0; padding: .4em 1ch; white-space: pre; }
+.nv-scr .h { color: var(--orange); }
+.nv-scr .on { background: var(--fg); color: var(--bg); }
+.sc { grid-template-rows: minmax(0, 1fr) auto; }
+.sc-out { min-height: 0; overflow: auto; padding: .3em 1ch; white-space: pre-wrap; }
+.sc-in { display: flex; gap: 1ch; padding: 0 1ch .3em; }
+.sc-in input { flex: 1; border: 0; background: transparent; color: var(--fg); font: inherit; outline: none; }
 /* À propos (xfce4-about) : un en-tête, des onglets, la config du PC en direct, les crédits */
 .abt { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr); padding: 0; background: var(--bg2); }
 .abt-head { display: flex; align-items: center; gap: 2ch; padding: 1em 2.5ch .9em; border-bottom: 1px solid var(--sep); background: var(--panel); white-space: normal; }
@@ -2140,7 +2179,8 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
   return o;
 }
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
-  prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now() });
+  prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
+  ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2221,6 +2261,7 @@ const ACH = [
   { id: 'recours', g: '✉', n: 'Recours gracieux', d: 'Contester ses cotisations sur urssaf.vibe. Réponse sous 6 à 18 mois.', p: 2.9, h: 1 },
   { id: 'moon', g: '☾', n: 'Clair de lune', d: 'Passer Moon AI au premier plan. La seule plateforme qui marche (à peu près).', p: 2.4, t: () => G.ai === 'moon' && !!G.own.moon },
   { id: 'blur', g: '◐', n: 'Flouté', d: 'Masquer une donnée sensible avec moon blur.', p: 5.8 },
+  { id: 'tui', g: '▤', n: 'Pas besoin de bureau', d: 'Ouvrir la version terminal d’une appli graphique, sans Xfce.', p: 11.2 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3662,7 +3703,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4560,9 +4601,19 @@ async function runCommand(raw) {
   if (progCmd === 'nano' || progCmd === 'pico') return nanoCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // l'éditeur du terminal
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
     if (!installed.has(PROGS[progCmd].pkg || progCmd)) return notInstalled(progCmd, PROGS[progCmd].pkg || progCmd);
-    if (PROGS[progCmd].gui && !xfOn) {           // thunar sans bureau : comme sous Linux, pas d'affichage
+    if (PROGS[progCmd].gui && !xfOn) {           // sans bureau : la version terminal de l'appli, si elle existe ; sinon, pas d'affichage
+      const args = argv(cmd).slice(head === 'sudo' ? 2 : 1), alt = TERM_ALT[progCmd];
+      if (alt) {
+        shellPrint(H(['Pas de session graphique : ', 'dim'], `${PROGS[progCmd].label} s’ouvre en version terminal, `, [alt === 'nano' ? 'nano' : `façon ${alt}`, 'org'], '.'));
+        ach('tui');
+        if (alt === 'nano') return nanoCmd(args, head === 'sudo');
+        openTab(alt);
+        const w = args.find(a => !a.startsWith('-'));
+        if (w && PROGS[alt].go) PROGS[alt].go(w);
+        return;
+      }
       shellPrint(`(${progCmd}:${ri(30000, 39999)}): Gtk-WARNING **: ${new Date().toTimeString().slice(0, 8)}.${ri(100, 999)}: cannot open display: `, 'errc');
-      return shellPrint(H('Pas de session graphique. Tapez ', ['xfce', 'org'], ` (ou startx), puis ${progCmd}.`), 'dim');
+      return shellPrint(H(`Pas de session graphique, et ${PROGS[progCmd].label} n’a pas de version terminal. Tapez `, ['xfce', 'org'], ` (ou startx), puis ${progCmd}.`), 'dim');
     }
     openTab(progCmd);
     const where = argv(cmd).slice(head === 'sudo' ? 2 : 1).find(a => !a.startsWith('-'));   // thunar ~/Documents
@@ -5037,6 +5088,11 @@ const PROGS = {
   'settings-ui': { label: 'réglages', delay: 1000, nomenu: true, icon: '⚙', make: () => makeDlgHost('settings') },
   'agents-ui': { label: 'agents', delay: 1000, nomenu: true, icon: '◆', make: () => makeDlgHost('agents') },
   // pkg : le paquet qui l'apporte (xfce4-about vient avec xfce4)
+  // les versions terminal des applis graphiques (P7) : elles viennent avec le paquet de l'appli
+  mc: { label: 'mc', delay: 1000, nomenu: true, pkg: 'thunar', icon: '▣', make: () => makeMc() },
+  lynx: { label: 'lynx', delay: 1000, nomenu: true, pkg: 'firefaux', icon: '◍', make: () => makeLynx() },
+  nvlc: { label: 'nvlc', delay: 250, nomenu: true, pkg: 'vlc', icon: '▲', make: () => makeNvlc() },
+  steamcmd: { label: 'steamcmd', delay: 1000, nomenu: true, pkg: 'steam', icon: '◎', make: () => makeSteamcmd() },
   'xfce4-about': { label: 'À propos', delay: 2000, gui: true, nomenu: true, pkg: 'xfce4', icon: 'ⓘ', menu: 'À propos', make: () => makeAbout() },
   vlc: { label: 'VLC', delay: 250, gui: true, cat: 'Multimédia', icon: '▲', menu: 'Lecteur multimédia VLC', desc: 'la musique · les morceaux se téléchargent sur telecharge.vibe', make: () => makeVlc() },
 };
@@ -7066,6 +7122,387 @@ function makeViewer() {
 /* ---------- Steam : 412 jeux achetés, 3 lancés, et celui-ci. La bibliothèque, la fiche du jeu, ses succès ---------- */
 const STEAM_LIB = [['Kubernetes Kart', 87], ['Merge Conflict Tactics', 41], ['Stand-up Simulator 2026', 12], ['Legacy Code Odyssey', 120],
   ['Jira Quest IV', 64], ['Refacto Rush', 23], ['Sprint Planning Survivor', 9], ['On-Call Nightmares', 33]];
+/* ---------- les versions terminal des applis graphiques (sans Xfce) : façon mc, lynx, nvlc et steamcmd ----------
+   thunar, firefaux, vlc et steam, tapés sans bureau, ouvrent leur version terminal ; mousepad ouvre nano. Atril n'en a pas :
+   cannot open display. Elles viennent avec le paquet de l'appli (mc avec thunar, lynx avec firefaux…), et s'ouvrent aussi sous Xfce. */
+const TERM_ALT = { thunar: 'mc', firefaux: 'lynx', vlc: 'nvlc', steam: 'steamcmd', mousepad: 'nano' };
+const tuiKeys = list => list.map(([k, t, a]) => `<button type="button" data-tk="${a}"><b>${esc(k)}</b>${esc(t)}</button>`).join('');
+
+function makeMc() {                                // façon Midnight Commander : deux panneaux, les touches de fonction
+  const el = document.createElement('div');
+  el.className = 'prog mc';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Gestionnaire de fichiers en mode texte (façon mc)');
+  el.innerHTML = '<div class="mc-top">  Gauche     Fichier     Commande     Options     Droite</div>'
+    + '<div class="mc-panels"><div class="mc-p" data-p="0"></div><div class="mc-p" data-p="1"></div></div><div class="mc-view" hidden></div>'
+    + '<div class="tui-line mc-line" aria-live="polite"></div><div class="tui-keys">' + tuiKeys([['1', 'Aide', 'F1'], ['3', 'Voir', 'F3'], ['4', 'Éditer', 'F4'], ['5', 'Copier', 'F5'],
+      ['6', 'Déplacer', 'F6'], ['7', 'MkDir', 'F7'], ['8', 'Suppr', 'F8'], ['10', 'Quitter', 'F10']]) + '</div>';
+  const q = sel => el.querySelector(sel), panelsEl = q('.mc-panels'), viewEl = q('.mc-view'), line = q('.mc-line');
+  const P = [{ segs: [...cwd], sel: 0 }, { segs: [...HOME], sel: 0 }];
+  let act = 0, ask = null, note = '';
+  function list(i) {                               // ['..'], puis les dossiers, puis les fichiers
+    const pn = P[i];
+    if (!nodeAt(pn.segs)?.d) pn.segs = nodeAt(HOME)?.d ? [...HOME] : [];
+    const n = nodeAt(pn.segs), ks = Object.keys(n.k).sort((a, b) => (n.k[b].d ? 1 : 0) - (n.k[a].d ? 1 : 0) || byName(a, b));
+    return [...(pn.segs.length ? ['..'] : []), ...ks].map(k => ({ k, c: k === '..' ? nodeAt(pn.segs.slice(0, -1)) : n.k[k] }));
+  }
+  const cur = (i = act) => list(i)[P[i].sel] || null;
+  function render() {
+    P.forEach((pn, i) => {
+      const L = list(i);
+      pn.sel = Math.max(0, Math.min(L.length - 1, pn.sel));
+      const box = panelsEl.children[i], it = L[pn.sel];
+      box.classList.toggle('on', i === act);
+      box.innerHTML = `<div class="mc-h">${esc(tildePath(pn.segs))}</div><div class="mc-rows">`
+        + L.map((e, j) => `<div class="mc-r${e.c?.d ? ' d' : e.c?.x ? ' x' : ''}${j === pn.sel ? ' sel' : ''}" data-i="${j}"><span>${e.c?.d && e.k !== '..' ? '/' : e.c?.x ? '*' : ' '}${esc(e.k)}</span>`
+          + `<span class="z">${e.k === '..' ? 'REP-PARENT' : e.c?.d ? 'REP' : esc(fmtSize(e.c?.sz || 0))}</span><span class="t">${e.k === '..' || !e.c ? '' : esc(fmDate(e.c.mt))}</span></div>`).join('')
+        + `</div><div class="mc-f">${it && it.k !== '..' ? esc(`${it.k} · ${fmType(it.k, it.c)}`) : ''}</div>`;
+      box.querySelector('.mc-r.sel')?.scrollIntoView({ block: 'nearest' });
+    });
+    if (!ask) line.textContent = note || `${USER}@prod-01:${tildePath(P[act].segs)}$ · Tab : changer de panneau · Entrée : ouvrir · F3 voir · F5 copier · F8 supprimer · F10 quitter`;
+  }
+  const say = t => { note = t; render(); };
+  const other = () => P[1 - act].segs;
+  const pathOf = e => e.k === '..' ? P[act].segs.slice(0, -1) : [...P[act].segs, e.k];
+  function view(e) {                               // F3 : le fichier, en texte
+    const segs = pathOf(e), c = e.c, kind = fileKind(e.k, c);
+    viewEl.textContent = `${tildePath(segs)}\n\n` + (kind === 'text' ? (c.t || '(fichier vide)') : `(${fmType(e.k, c)} : ${fmtSize(c.sz || 0)} de binaire. mc n’affiche que du texte.)`);
+    viewEl.hidden = false; panelsEl.hidden = true; viewEl.scrollTop = 0;
+    say('Lecture · Échap, q ou F3 pour revenir');
+  }
+  const unview = () => { viewEl.hidden = true; panelsEl.hidden = false; say(''); };
+  function prompt(label, ok) {                     // une question avec un champ : Entrée valide, Échap annule
+    ask = { ok };
+    line.innerHTML = `<label>${esc(label)} <input spellcheck="false" autocomplete="off"></label>`;
+    const inp = line.querySelector('input');
+    inp.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); const v = inp.value.trim(); ask = null; el.focus({ preventScroll: true }); if (v) ok(v); else say('Annulé'); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); ask = null; el.focus({ preventScroll: true }); say('Annulé'); }
+    });
+    inp.focus();
+  }
+  function confirm(label, yes) { ask = { yes }; line.textContent = `${label} [O/n]`; }
+  const done = t => { fixCwd(); PROGS.thunar.redraw?.(); say(t); };
+  function copy(move) {                            // F5 / F6 : vers le dossier de l'autre panneau
+    const e = cur();
+    if (!e || e.k === '..') return say('Rien à copier : sélectionnez un fichier ou un dossier.');
+    const src = pathOf(e), dst = other(), D = nodeAt(dst);
+    if (!D?.d) return say('Le dossier de destination n’existe plus.');
+    if (isPrefix(src, dst)) return say(`Impossible : ${e.k} ne peut pas entrer dans lui-même.`);
+    if (Object.hasOwn(D.k, e.k)) return say(`${e.k} existe déjà dans ${tildePath(dst)}.`);
+    if (move) {
+      if (isFatal(src, e.c)) return systemCrash(absPath(src), [src]);
+      D.k[e.k] = e.c;
+      removeAt(src);
+      return done(`Déplacé : ${e.k} → ${tildePath(dst)}`);
+    }
+    if (!move && diskUsed() + nodeSize(e.c) > diskCap()) return say('Plus d’espace disque. Supprimez quelque chose (node_modules ?).');
+    D.k[e.k] = fmClone(e.c);
+    done(`Copié : ${e.k} → ${tildePath(dst)}`);
+  }
+  function del() {                                 // F8 : avec confirmation ; les dossiers vitaux font planter le système, comme rm
+    const e = cur();
+    if (!e || e.k === '..') return say('Rien à supprimer.');
+    const segs = pathOf(e);
+    confirm(`Supprimer ${e.c.d ? 'le dossier' : 'le fichier'} « ${e.k} »${e.c.d ? ` (${num(countNodes(e.c))} éléments)` : ''} ?`, () => {
+      if (isFatal(segs, e.c)) return systemCrash(absPath(segs), [segs]);
+      removeAt(segs);
+      if (!afterRemove(segs)) done(`Supprimé : ${e.k}`);
+      else done(`Supprimé : ${e.k} (les agents ont réagi, voir le terminal)`);
+    });
+    render();
+  }
+  function fkey(k) {
+    if (k === 'F10') return closeTab('mc');
+    if (k === 'F1') return say('Aide : flèches, Tab, Entrée, Retour arrière (dossier parent), F3 voir, F4 éditer (nano), F5 copier et F6 déplacer vers l’autre panneau, F7 nouveau dossier, F8 supprimer, F10 quitter.');
+    const e = cur();
+    if (k === 'F3') return e && e.k !== '..' && !e.c.d ? view(e) : say('F3 lit un fichier, pas un dossier.');
+    if (k === 'F4') return e && e.k !== '..' && !e.c.d ? nanoCmd([absPath(pathOf(e))], false) : say('F4 édite un fichier, avec nano.');
+    if (k === 'F5' || k === 'F6') return copy(k === 'F6');
+    if (k === 'F7') return prompt('Nouveau dossier :', name => {
+      const D = nodeAt(P[act].segs);
+      if (!D?.d || /[/\\]/.test(name) || name === '.' || name === '..') return say('Nom invalide.');
+      if (Object.hasOwn(D.k, name)) return say(`${name} existe déjà.`);
+      D.k[name] = mkD({}, { mt: Date.now() });
+      done(`Dossier créé : ${name}`);
+    });
+    if (k === 'F8') return del();
+  }
+  function open(e) {
+    if (!e) return;
+    if (e.k === '..') { const from = P[act].segs.at(-1); P[act].segs = P[act].segs.slice(0, -1); P[act].sel = Math.max(0, list(act).findIndex(x => x.k === from)); return say(''); }
+    if (e.c.d) { P[act].segs = pathOf(e); P[act].sel = 0; return say(''); }
+    view(e);
+  }
+  function key(e) {
+    const k = e.key;
+    if (/^F\d+$/.test(k)) e.preventDefault();      // F3, F5, F7, F10 : le navigateur ne les prend pas
+    if (ask?.yes) {
+      e.preventDefault();
+      const yes = ask.yes;
+      ask = null;
+      if (k === 'o' || k === 'O' || k === 'y' || k === 'Y' || k === 'Enter') yes(); else say('Annulé');
+      return;
+    }
+    if (!viewEl.hidden) {
+      if (k === 'Escape' || k === 'q' || k === 'F3' || k === 'F10') { e.preventDefault(); unview(); }
+      else if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault(); viewEl.scrollTop += k === 'ArrowDown' ? 20 : -20; }
+      return;
+    }
+    const pn = P[act], rows = panelsEl.children[act].querySelector('.mc-rows'), page = Math.max(1, Math.floor((rows?.clientHeight || 200) / (rows?.firstElementChild?.offsetHeight || 18)) - 1);
+    if (k === 'ArrowDown') pn.sel++;
+    else if (k === 'ArrowUp') pn.sel--;
+    else if (k === 'PageDown') pn.sel += page;
+    else if (k === 'PageUp') pn.sel -= page;
+    else if (k === 'Home') pn.sel = 0;
+    else if (k === 'End') pn.sel = 1e6;
+    else if (k === 'Tab') act = 1 - act;
+    else if (k === 'Enter') open(cur());
+    else if (k === 'Backspace') { if (pn.segs.length) open({ k: '..' }); }
+    else if (/^F\d+$/.test(k)) return fkey(k);
+    else if (k === 'q' || k === 'Escape') return closeTab('mc');
+    else return;
+    e.preventDefault();
+    note = '';
+    render();
+  }
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-tk]'), r = e.target.closest('.mc-r'), p = e.target.closest('.mc-p');
+    if (b) return fkey(b.dataset.tk);
+    if (p) act = +p.dataset.p;
+    if (r) P[act].sel = +r.dataset.i;
+    if (p || r) render();
+  });
+  el.addEventListener('dblclick', e => { const r = e.target.closest('.mc-r'); if (r) { P[act].sel = +r.dataset.i; open(cur()); render(); } });
+  render();
+  return { el, key, render: () => { if (!ask) render(); }, redraw: () => render(), go: w => { const segs = resolvePath(w), n = nodeAt(segs); if (n?.d) { P[0].segs = segs; P[0].sel = 0; render(); } },
+    title: () => `mc · ${tildePath(P[act].segs)}`, tname: () => 'mc' };
+}
+
+function lxText(html) {                            // une page en texte : des paragraphes, des liens numérotés
+  const box = document.createElement('div');
+  box.innerHTML = html;
+  const paras = [], links = [];
+  let cur = '', cls = '';
+  const BLOCK = /^(P|DIV|H1|H2|H3|H4|LI|TR|UL|OL|TABLE|THEAD|TBODY|TFOOT|SECTION|DL|DT|DD|PRE|FORM|NAV|HEADER|FOOTER|BLOCKQUOTE)$/;
+  const flush = () => { const t = cur.replace(/[ \t\u00a0]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim(); if (t) paras.push({ h: t, cls }); cur = ''; cls = ''; };
+  const textOf = n => { const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT), L = []; while (w.nextNode()) { const t = w.currentNode.textContent.replace(/\s+/g, ' ').trim(); if (t) L.push(t); } return L.join(' \u00b7 '); };   // le site \u00b7 sa description
+  (function walk(n) {
+    for (const c of n.childNodes) {
+      if (c.nodeType === 3) { cur += esc(c.textContent); continue; }
+      if (c.nodeType !== 1 || c.tagName === 'SCRIPT' || c.tagName === 'STYLE' || c.hidden) continue;
+      const tag = c.tagName, href = c.dataset?.href;
+      if (tag === 'BR') { cur += '\n'; continue; }
+      if (tag === 'IMG') { cur += esc(`[${c.alt || 'image'}]`); continue; }
+      if (href) { const i = links.push(href) - 1; cur += `<span class="lx-a" data-l="${i}">[${i + 1}] ${esc(textOf(c))}</span>`; continue; }
+      if (tag === 'BUTTON' || tag === 'INPUT') { const t = (c.textContent || c.value || c.placeholder || '').trim(); if (t) cur += esc(`[${t}]`); continue; }
+      const block = BLOCK.test(tag);
+      if (block) flush();
+      if (/^H[1-4]$/.test(tag)) cls = 'h';
+      if (tag === 'LI') cur += '* ';
+      walk(c);
+      if (tag === 'TD' || tag === 'TH') cur += ' │ ';
+      if (block) flush();
+    }
+  })(box);
+  flush();
+  return { paras, links };
+}
+function makeLynx() {                              // façon lynx : le Web en texte, les liens au clavier, pas une pub (pas de JavaScript)
+  const el = document.createElement('div');
+  el.className = 'prog lx';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Navigateur web en mode texte (façon lynx)');
+  el.innerHTML = '<div class="lx-top"><span class="t"></span><span class="u"></span></div><div class="lx-body"></div><div class="tui-line lx-line" aria-live="polite"></div>'
+    + '<div class="tui-keys">' + tuiKeys([['↑↓', 'Liens', 'down'], ['Entrée', 'Suivre', 'go'], ['←', 'Retour', 'back'], ['g', 'Aller à', 'goto'], ['q', 'Quitter', 'quit']]) + '</div>';
+  const q = sel => el.querySelector(sel), body = q('.lx-body'), line = q('.lx-line');
+  let url = WEB_HOME, title = '', links = [], curL = -1, hist = [], ask = false, loadT = 0;
+  function status() {
+    if (ask) return;
+    line.textContent = links[curL] ? `→ ${links[curL]}` : 'Flèches : liens · Entrée : suivre · ← : retour · g : aller à une adresse · q : quitter';
+  }
+  function mark() {
+    body.querySelectorAll('.lx-a.on').forEach(n => n.classList.remove('on'));
+    const n = body.querySelector(`.lx-a[data-l="${curL}"]`);
+    if (n) { n.classList.add('on'); n.scrollIntoView({ block: 'nearest' }); }
+    status();
+  }
+  function load(u, push = true) {
+    const nu = webNorm(u);
+    if (push && url) hist.push(url);
+    url = nu;
+    clearTimeout(loadT);
+    line.textContent = `Recherche de ${webHost(nu)}… Connexion HTTP… Envoi de la requête…`;
+    loadT = setTimeout(() => {
+      const r = webRoute(url), t = lxText(r.html);
+      title = r.title;
+      links = t.links;
+      curL = links.length ? 0 : -1;
+      body.innerHTML = t.paras.map(x => `<div class="lx-p${x.cls ? ' ' + x.cls : ''}">${x.h}</div>`).join('') || '<div class="lx-p">(page vide)</div>';
+      body.scrollTop = 0;
+      q('.lx-top .t').textContent = title;
+      q('.lx-top .u').textContent = url;
+      if (xw.lynx) xfLabel('lynx');
+      mark();
+    }, 350);
+  }
+  function goto() {                                // g : une adresse (ou des mots : Vibegle cherche)
+    ask = true;
+    line.innerHTML = '<label>URL à ouvrir : <input spellcheck="false" autocomplete="off"></label>';
+    const inp = line.querySelector('input');
+    inp.value = url;
+    inp.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); ask = false; el.focus({ preventScroll: true }); if (inp.value.trim()) load(inp.value.trim()); else status(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); ask = false; el.focus({ preventScroll: true }); status(); }
+    });
+    inp.focus();
+    inp.select();
+  }
+  function act(a) {
+    if (a === 'down' || a === 'up') { if (links.length) { curL = (curL + (a === 'down' ? 1 : -1) + links.length) % links.length; mark(); } }
+    else if (a === 'go') { if (links[curL]) load(links[curL]); }
+    else if (a === 'back') { if (hist.length) load(hist.pop(), false); else line.textContent = 'Début de l’historique.'; }
+    else if (a === 'goto') goto();
+    else if (a === 'quit') closeTab('lynx');
+  }
+  function key(e) {
+    const k = e.key, m = { ArrowDown: 'down', ArrowUp: 'up', Enter: 'go', ArrowRight: 'go', ArrowLeft: 'back', Backspace: 'back', g: 'goto', G: 'goto', q: 'quit', Q: 'quit' }[k];
+    if (m) { e.preventDefault(); return act(m); }
+    if (k === ' ' || k === 'PageDown') { e.preventDefault(); body.scrollTop += body.clientHeight * .9; }
+    else if (k === 'b' || k === 'PageUp') { e.preventDefault(); body.scrollTop -= body.clientHeight * .9; }
+  }
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-tk]'), a = e.target.closest('.lx-a');
+    if (b) return act(b.dataset.tk);
+    if (a) { curL = +a.dataset.l; mark(); load(links[curL]); }
+  });
+  load(WEB_HOME, false);
+  return { el, key, render: () => {}, redraw: () => load(url, false), go: u => load(u), title: () => `${title || 'lynx'} — lynx`, tname: () => 'lynx' };
+}
+
+function makeNvlc() {                              // façon nvlc : VLC en ncurses ; la même musique, le même lecteur
+  const el = document.createElement('div');
+  el.className = 'prog nv';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Lecteur multimédia en mode texte (façon nvlc)');
+  el.innerHTML = '<pre class="nv-scr"></pre><div class="tui-keys">' + tuiKeys([['Espace', 'Lecture', 'toggle'], ['Entrée', 'Jouer', 'play'], ['←→', '10 s', 'fwd'],
+    ['+-', 'Volume', 'up'], ['s', 'Stop', 'stop'], ['q', 'Quitter', 'quit']]) + '</div>';
+  const scr = el.querySelector('.nv-scr');
+  if (!vlcAudio) { vlcAudio = new Audio(); vlcAudio.preload = 'auto'; }
+  const A = vlcAudio;
+  let sel = 0, k = null;
+  function tracks() {                              // la musique téléchargée, où qu'elle soit rangée
+    const out = [];
+    (function walk(n, segs) { if (!n?.d) return; for (const [name, c] of Object.entries(n.k)) { if (c.d) walk(c, [...segs, name]); else if (c.au && TRACKS[c.au]) out.push({ segs: [...segs, name], k: c.au }); } })(nodeAt(HOME), [...HOME]);
+    return out;
+  }
+  function play(i) {
+    const L = tracks(), t = L[i];
+    if (!t) return;
+    k = t.k;
+    const src = trackUrl(TRACKS[k]);
+    if (!A.src.endsWith(src)) A.src = src;
+    A.play().catch(() => {});
+    render();
+  }
+  function render() {
+    const L = tracks(), t = k && TRACKS[k], d = A.duration || t?.dur || 0, c = A.currentTime || 0, w = 30, f = d ? Math.min(w, Math.round(c / d * w)) : 0;
+    sel = Math.max(0, Math.min(L.length - 1, sel));
+    const st = !t ? 'arrêt' : A.paused ? 'pause' : 'lecture';
+    const rows = [`<span class="h"> VLC media player 3.0.21 Vetinari · version terminal (façon nvlc)</span>`, '',
+      ` État : ${st}`, ` Titre : ${t ? esc(t.title) : '—'}`, ` Artiste : ${t ? esc(t.artist) : '—'}`,
+      ` [${'='.repeat(Math.max(0, f - 1))}${f ? '>' : ''}${' '.repeat(w - f)}] ${mmss(c)} / ${mmss(d)}    volume ${Math.round(A.volume * 100)} %`, '',
+      '<span class="h"> Liste de lecture</span>'];
+    if (!L.length) rows.push(' (vide : la musique se télécharge sur telecharge.vibe, avec Firefaux, ou lynx en mode texte)');
+    L.forEach((x, i) => rows.push(`<span class="${i === sel ? 'on' : ''}"> ${x.k === k ? '>' : ' '} ${i + 1}. ${esc(x.segs.at(-1))}   ${esc(TRACKS[x.k].title)} · ${esc(TRACKS[x.k].credit)}</span>`));
+    rows.push('', ' Espace : lecture/pause · Entrée : jouer · ← → : 10 s · + - : volume · s : stop · q : quitter');
+    scr.innerHTML = rows.join('\n');
+  }
+  function act(a) {
+    if (a === 'toggle') { if (!k) return play(sel); if (A.paused) A.play().catch(() => {}); else A.pause(); }
+    else if (a === 'play') play(sel);
+    else if (a === 'fwd' || a === 'back') { if (k) A.currentTime = Math.max(0, Math.min((A.duration || 0) - .5, A.currentTime + (a === 'fwd' ? 10 : -10))); }
+    else if (a === 'up' || a === 'down') A.volume = Math.max(0, Math.min(1, Math.round((A.volume + (a === 'up' ? .1 : -.1)) * 10) / 10));
+    else if (a === 'stop') { A.pause(); A.currentTime = 0; k = null; }
+    else if (a === 'next' || a === 'prev') { const L = tracks(); if (L.length) { sel = (sel + (a === 'next' ? 1 : -1) + L.length) % L.length; play(sel); return; } }
+    else if (a === 'quit') return closeTab('nvlc');
+    render();
+  }
+  function key(e) {
+    const m = { ' ': 'toggle', Enter: 'play', ArrowRight: 'fwd', ArrowLeft: 'back', '+': 'up', '-': 'down', s: 'stop', n: 'next', p: 'prev', q: 'quit', Q: 'quit' }[e.key];
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel += e.key === 'ArrowDown' ? 1 : -1; return render(); }
+    if (m) { e.preventDefault(); act(m); }
+  }
+  el.addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (b) act(b.dataset.tk); });
+  render();
+  return { el, key, render, redraw: render, close: () => { if (k) vlcHalt(); }, go: w => { const L = tracks(), i = L.findIndex(x => absPath(x.segs) === absPath(resolvePath(w))); if (i >= 0) { sel = i; play(i); } },
+    title: () => 'nvlc', tname: () => 'nvlc' };
+}
+
+function makeSteamcmd() {                          // façon steamcmd : la console de Steam, son invite, ses commandes
+  const el = document.createElement('div');
+  el.className = 'prog sc';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Console Steam (façon steamcmd)');
+  el.innerHTML = '<div class="sc-out" aria-live="polite"></div><label class="sc-in"><span>Steam&gt;</span><input spellcheck="false" autocomplete="off" aria-label="Commande steamcmd"></label>';
+  const out = el.querySelector('.sc-out'), inp = el.querySelector('input');
+  let user = '';
+  const print = (t, cls = '') => { const d = document.createElement('div'); if (cls) d.className = cls; d.textContent = t; out.appendChild(d); out.scrollTop = out.scrollHeight; };
+  const APPS = [[4127, 'AI DevOps Chaos Simulator', 'en cours'], ...STEAM_LIB.slice(0, 3).map(([n], i) => [218620 + i * 1111, n, 'installé, jamais lancé'])];
+  const CMDS = {
+    help: () => ['login <utilisateur> | login anonymous', 'logout', 'apps_installed', 'app_status <appid>', 'app_update <appid> [validate]', 'achievements', 'quit'].forEach(l => print('  ' + l)),
+    login: a => {
+      const u = a[0] || '';
+      if (!u) return print('Usage : login <utilisateur> | login anonymous');
+      if (u === 'anonymous') { user = 'anonymous'; return print('Connexion anonyme à Steam Public…OK'); }
+      user = u;
+      print(`Connexion de l’utilisateur « ${u} » à Steam Public…`);
+      print('Mot de passe : ******** (deviné par un agent : « vendredi »)', 'dim');
+      print('Code Steam Guard : (envoyé à un agent, qui l’a égaré ; accepté quand même)', 'dim');
+      print('OK');
+    },
+    logout: () => { user = ''; print('Déconnexion…OK'); },
+    apps_installed: () => {
+      if (!user) return print('ERREUR ! Pas connecté (login <utilisateur>).');
+      APPS.forEach(([id, n, st]) => print(`AppID ${id} : « ${n} » : ${st}`));
+    },
+    app_status: a => {
+      const id = +a[0], app = APPS.find(x => x[0] === id);
+      if (!app) return print(`ERREUR ! AppID inconnu : ${a[0] || '(aucun)'}`);
+      print(`AppID ${id} (${app[1]}) :`);
+      print(` - état : entièrement installé${id === 4127 ? ', en cours d’exécution' : ''}`);
+      if (id === 4127) { print(` - succès : ${achN()} sur ${ACH.length}`); print(` - temps de jeu : ${playStr(G.play)}`); }
+    },
+    app_update: async a => {
+      const id = +a[0], app = APPS.find(x => x[0] === id);
+      if (!user) return print('ERREUR ! Pas connecté (login <utilisateur>).');
+      if (!app) return print(`ERREUR ! AppID inconnu : ${a[0] || '(aucun)'}`);
+      for (const pc of [12.4, 47.9, 88.1, 100]) { print(` Mise à jour (0x61) téléchargement, progression : ${frx(pc.toFixed(2))} %`); await sleep(260); }
+      print(`Succès ! « ${id} » entièrement installé${a.includes('validate') ? ' et vérifié (0 fichier relu, comme le code)' : ''}.`);
+    },
+    achievements: () => {
+      const got = ACH.filter(a => G.ach[a.id]).sort((x, y) => G.ach[y.id] - G.ach[x.id]);
+      print(`${got.length} succès débloqués sur ${ACH.length}${ACH_ON ? '' : ' (désactivés dans ce mode)'}`);
+      got.slice(0, 5).forEach(a => print(`  ${a.g} ${a.n}`));
+    },
+    quit: () => { print('Déconnexion…OK'); print('Arrêt de Steam…OK'); setTimeout(() => closeTab('steamcmd'), 400); },
+  };
+  CMDS.exit = CMDS.quit;
+  inp.addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const raw = inp.value.trim(), [c, ...a] = raw.split(/\s+/);
+    inp.value = '';
+    print(`Steam>${raw}`, 'dim');
+    if (!raw) return;
+    if (CMDS[c]) await CMDS[c](a); else print(`Commande inconnue « ${c} » (help pour la liste)`);
+  });
+  el.addEventListener('click', () => inp.focus());
+  ['Steam Console Client · version 1732148127 (édition vibe)', '-- tapez « quit » pour sortir, « help » pour les commandes --', 'Chargement de Steam API…OK', ''].forEach(l => print(l));
+  return { el, key: () => {}, render: () => { if (document.activeElement !== inp && !el.hidden && view === 'steamcmd') inp.focus({ preventScroll: true }); }, redraw: () => {},
+    title: () => 'steamcmd', tname: () => 'steamcmd' };
+}
+
 /* ---------- À propos (xfce4-about) : la config du PC du jeu, l'éditeur, les contributeurs, les agents, la licence ---------- */
 const ABOUT_AGENTS = [   // les agents qui ont travaillé sur le projet (leurs commits sont dans l'historique ; Claude, lui, signe en co-auteur)
   ['claude', 'Claude (Opus 5.5)', 'agent IA · le seul vrai développeur', 'A écrit à peu près tout. N’a jamais été relu. Signe ses commits, au moins.'],
@@ -10040,8 +10477,8 @@ function sandboxFill() {                         // bac à sable : tout est ache
     sbx: 1, money: 1e7, ai: 'claude', lead: LEAD_TIER.length - 1, term: ECO.term.length - 1,
     own: { mistral: 1, codex: 1, claude: 1, local: 1 }, cli: { mistral: 1, codex: 1, claude: 1 }, pk: STARTER_PKGS.slice(),
     rt: all(LOCAL_RT), models: all(MODELS), sk: all(SKILLS), bg: {},
-    team: { mistral: AGENTS.length, codex: AGENTS.length, claude: AGENTS.length, local: nLoc },
-    pm: { mistral: 'large', codex: 'astra', claude: 'fable', local: 'kwen72b' },
+    team: { mistral: AGENTS.length, codex: AGENTS.length, claude: AGENTS.length, moon: AGENTS.length, local: nLoc },
+    pm: { mistral: 'large', codex: 'astra', claude: 'fable', moon: 'moon', local: 'kwen72b' },
     pc: { ...Object.fromEntries(SLOTS.map(k => [k, PARTS[k].t.length - 1])), disk: PARTS.disk.t.length - 2 },   // pas le RAID 0 : il est au store, pour les joueurs
     boost: Object.fromEntries(Object.keys(BOOST).map(p => [p, { own: 1, lvl: BOOST_EXT.length }])), elecT: ELEC.tiers.length - 1,
   });
