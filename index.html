@@ -861,6 +861,20 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
 .ff-ask ul { padding-left: 2ch; }
 .ff-dark { filter: brightness(.8) contrast(1.08); }
+/* urssaf.vibe : le logo parodié (un mot, un tampon), le barème */
+.us-head { display: flex; flex-wrap: wrap; align-items: center; gap: .6em 2.4ch; }
+.us-logo { color: var(--fg); font-size: 2.2em; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.us-logo b { color: var(--orange); }
+.us-logo small { color: var(--dim); font-size: .4em; font-weight: 400; letter-spacing: 0; }
+.us-stamp { padding: .1em 1.2ch; border: 2px solid var(--red); border-radius: 4px; color: var(--red); font-weight: 700; letter-spacing: .12em; transform: rotate(-7deg); }
+.us-sigle { margin-top: .5em; color: var(--dim); }
+.us-sigle b { color: var(--orange); }
+.us-tab { width: 100%; border-collapse: collapse; }
+.us-tab th { color: var(--dim); font-weight: 400; text-align: left; border-bottom: 1px solid var(--rule); padding: .2em 1ch; }
+.us-tab td { padding: .25em 1ch; border-bottom: 1px solid var(--sep); }
+.us-tab .m { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.us-news { margin-top: 1em; padding: .8em 1.8ch; border-left: 3px solid var(--orange); background: var(--panel); }
+.us-news b { color: var(--orange); }
 /* Vibank (facture.vibe) : le solde, le graphique, les dépenses, les opérations */
 .vb h2 { margin: 1.2em 0 .5em; color: var(--orange); font-size: 1em; }
 .vb-head { display: flex; align-items: center; gap: 1.6ch; }
@@ -2173,6 +2187,8 @@ const ACH = [
     t: () => G.mal.miner && Date.now() - G.mal.miner > 6e5 },
   { id: 'credits', g: 'ⓘ', n: 'Générique de fin', d: 'Lire les crédits dans « À propos » : l’éditeur, les contributeurs et les agents.', p: 4.1 },
   { id: 'openbank', g: '≡', n: 'Open banking', d: 'Lire son compte Vibank en JSON : curl facture.vibe/api.', p: 6.6 },
+  { id: 'cotisant', g: '§', n: 'Cotisant', d: 'Payer ses premières cotisations à l’URSSAF. Bienvenue dans la vraie vie.', p: 21.4 },
+  { id: 'recours', g: '✉', n: 'Recours gracieux', d: 'Contester ses cotisations sur urssaf.vibe. Réponse sous 6 à 18 mois.', p: 2.9, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2186,6 +2202,7 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
   G.tx.push([Date.now(), cat, label, Math.round(amt * 100) / 100, Math.round(bal * 100) / 100]);
   if (G.tx.length > 200) G.tx.splice(0, G.tx.length - 200);
 }
+G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -8045,6 +8062,7 @@ function webHome() {
       ${tile('https://lolama.vibe/', 'lolama.vibe', 'des LLM en local : 0 API, toute votre VRAM')}
       ${tile('https://telecharge.vibe/', 'telecharge.vibe', 'des fichiers 100 % sûrs · de la musique, faite par un humain')}
       ${tile('https://facture.vibe/', 'Vibank', 'votre compte, et ce que coûtent vos agents')}
+      ${tile('https://urssaf.vibe/', 'urssaf.vibe', 'vos cotisations, et la taxe au giga')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
     </div></div>` };
@@ -8059,6 +8077,8 @@ function webSearch(u) {
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
   if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
     hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/urssaf|cotis|taxe|imp[oô]t|giga|assembl|acre|charges/.test(lq))
+    hit('https://urssaf.vibe/', 'URSSAF · Union pour le Recouvrement des Sommes Sur les Agents Facturés', 'Votre espace cotisant, le barème, et la taxe au giga votée à l’Assemblée. Cotisez, on s’occupe du reste (de votre argent).');
   if (/pub|bloqu|ublock|adblock|module|extension|addon|plugin|dark/.test(lq))
     hit('https://addons.firefaux.vibe/', 'Modules pour Firefaux : uBlock Origin, Dark Reader…', 'Des extensions vérifiées par nos équipes (une personne, le lundi). uBlock Origin retire les pubs.');
   if (/musique|music|mp3|m4a|audio|chanson|morceau|vlc|lecteur|t[ée]l[ée]charg|download|chris|gasq/.test(lq))
@@ -8138,6 +8158,39 @@ function webOrder() {
     <p class="dim">Un mail de confirmation a été envoyé à ${esc(USER)}@prod-01. Un agent l’a lu, puis archivé.</p>
     <p><a data-href="https://matos.vibe/">Retour au catalogue</a></p></div>` };
 }
+/* ---------- l'URSSAF (urssaf.vibe) : l'Union pour le Recouvrement des Sommes Sur les Agents Facturés ----------
+   Après l'exonération ACRE (les 10 premiers ships), chaque ship paie ses cotisations : un pourcentage de ce qu'il rapporte,
+   plus la taxe au giga (0,25 % par Go de RAM, plafonnée à 8 %), votée à l'Assemblée ; le vendredi, un forfait en plus. */
+const URSSAF_ACRE = 10;
+function urssafDue(val, tok = 0, n = shipped) {   // → { items: [[nom, montant, taux]], total } ; rien pendant l'ACRE, ni en mode libre
+  if (!IDLE || n < URSSAF_ACRE) return { items: [], total: 0 };
+  const go = part('ram').go, giga = Math.min(.08, .0025 * go);
+  const items = [['Cotisations sociales des agents (CSA)', val * .08, '8 %'], ['CRDT · remboursement de la dette technique', val * .005, '0,5 %'],
+    [`Taxe au giga · ${go} Go de RAM`, val * giga, `${frx(+(giga * 100).toFixed(2))} %`], ['Formation professionnelle des agents', val * .0055, '0,55 %'],
+    ['Taxe sur les tokens hallucinés', tok * .02, '2 % des tokens']];
+  if (new Date().getDay() === 5) items.push(['Forfait social du vendredi', val * .03, '3 %']);
+  return { items, total: items.reduce((a, x) => a + x[1], 0) };
+}
+function webUrssaf() {
+  const left = Math.max(0, URSSAF_ACRE - shipped), val = ECO.value(shipped), due = urssafDue(val, G.bill, Math.max(shipped, URSSAF_ACRE));
+  const rows = due.items.map(([n, m, r]) => `<tr><td>${esc(n)}</td><td class="m">${esc(r)}</td><td class="m">$${usd(m)}</td></tr>`).join('');
+  const row = (k, v) => `<p>${esc(k)} : <b>${v}</b></p>`;
+  return { title: 'urssaf.vibe · votre espace cotisant', html: `<div class="wp"><div class="us-head"><span class="us-logo" aria-label="urssaf.vibe">urss<b>a</b>f<small>.vibe</small></span><span class="us-stamp">RECOUVRÉ</span></div>
+    <p class="us-sigle"><b>U</b>nion pour le <b>R</b>ecouvrement des <b>S</b>ommes <b>S</b>ur les <b>A</b>gents <b>F</b>acturés</p>
+    <h2>Votre espace cotisant</h2>
+    <div class="wp-band">${row('SIRET', '412 042 069 00013') + row('Statut', 'micro-entrepreneur · activité : vibecoding (code NAF 62.01Z, programmation informatique, sans relecture)')
+      + (IDLE ? row('Cotisations payées', `$${usd(G.urssaf.paid)} sur ${plural(G.urssaf.n, 'ship')}`) : '')
+      + (IDLE ? row('Exonération ACRE', left ? `encore ${plural(left, 'ship')} sans cotisations (la première année, on vous laisse croire que ça marche)` : 'terminée. Bienvenue.') : row('Mode libre', 'pas de cotisations : l’URSSAF ne vous a pas encore trouvé'))}</div>
+    <h2>Le barème${left ? ' (après l’ACRE)' : ''}</h2>
+    <p class="dim">Prélevé sur chaque ship, avec les tokens et l’électricité. Calculé sur votre prochain ship ($${usd(val)}) et votre facture de tokens en cours.</p>
+    <table class="us-tab"><thead><tr><th>Contribution</th><th class="m">Taux</th><th class="m">Montant</th></tr></thead><tbody>${rows}</tbody>
+    <tfoot><tr><td><b>Total</b></td><td></td><td class="m"><b>$${usd(due.total)}</b></td></tr></tfoot></table>
+    <div class="us-news"><b>Actualité · la taxe au giga est adoptée</b><p>Votée en séance de nuit à l’Assemblée nationale (12 députés présents sur 577), la taxe au giga frappe chaque giga de RAM des entreprises du numérique : 0,25 % de la valeur produite par giga, plafonnée à 8 %. Plus de RAM, plus de taxe : « c’est l’esprit de la loi », selon le rapporteur. Les agents ont doublé la RAM pour compenser.</p></div>
+    <div class="us-news"><b>Le saviez-vous ?</b><p>Le vendredi, un forfait social de 3 % s’ajoute : shipper un vendredi a un coût. Pour la prod aussi.</p></div>
+    <p><button type="button" class="dl-real" data-urssaf="contest">Contester mes cotisations</button> <span class="dim">Formulaire Cerfa n° 4127*03, à remplir en trois exemplaires (dont un introuvable).</span></p>
+    <p class="dim">Vos cotisations apparaissent dans <a data-href="https://facture.vibe/">Vibank</a>, catégorie URSSAF.</p></div>` };
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
 const TX_CAT = { init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
@@ -8310,7 +8363,7 @@ const WEB_SITES = [
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
-  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
+  [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
   [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
@@ -8445,6 +8498,7 @@ function makeBrowser() {
       else if (k === 'ublock') { flash(ffAddon('toggle:ublock')); draw(true); }
     } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
     else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
+    else if (e.target.closest('[data-urssaf]')) { ach('recours'); flash(`Contestation enregistrée sous le n° ${ri(100000, 999999)}. Délai de réponse : 6 à 18 mois. Les prélèvements continuent en attendant.`); }
     else if (e.target.closest('[data-addon]')) { const m = ffAddon(e.target.closest('[data-addon]').dataset.addon); if (m) flash(m); draw(true); }
     else if (h) go(h.dataset.href);
     else if (b && !b.disabled) { flash(buy(b.dataset.buy)); draw(true); }
@@ -9936,19 +9990,20 @@ function autoShip() {                            // barre pleine : en production
     panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'errc', t: `✗ Déploiement de ${PROJ}@${v} raté : ${why}` }, true); });
     return hudNote(`✗ déploiement raté : ${why} · retour à ${back * 100} %${G.sk.flags ? ' (feature flag coupé)' : ''}`, 'bug');
   }
-  const val = ECO.value(shipped), cost = G.bill, elec = G.elec || 0, net = val - cost - elec;
+  const val = ECO.value(shipped), cost = G.bill, elec = G.elec || 0, cot = urssafDue(val, cost).total, net = val - cost - elec - cot;
   Object.assign(G, { money: G.money + net, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
   const m0 = G.money - net;                      // Vibank : le ship, puis les deux prélèvements
   txAdd('ship', `Ship ${PROJ}@${v}`, val, m0 + val);
   txAdd('tokens', `Facture de tokens · ${CLIS[G.ai]?.label || 'API'}`, -cost, m0 + val - cost);
-  txAdd('elec', `Électricité · ${ELEC.tiers[G.elecT || 0].n}`, -elec);
+  txAdd('elec', `Électricité · ${ELEC.tiers[G.elecT || 0].n}`, -elec, m0 + val - cost - elec);
+  if (cot) { txAdd('urssaf', `URSSAF · cotisations sur ${PROJ}@${v}`, -cot); G.urssaf.paid += cot; G.urssaf.n++; ach('cotisant'); }
   setScore(shipped + 1);                         // score, version suivante, sauvegarde
   const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
   if (day.getDay() === 5) ach('friday');
   if (day.getHours() === 3) ach('night');
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
-  hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité = ${signed(net)}`, 'ok');
+  hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité${cot ? ` − $${usd(cot)} d’URSSAF` : ''} = ${signed(net)}`, 'ok');
   if (shipped === 1 || shipped % 10 === 0) {     // les jalons : le grand écran et une ligne dans le terminal
     showShipped(v, ri(3000, 4800));
     shellPrint(H(['✓ ', 'okc'], `${PROJ}@${v} en production · ${plural(shipped, 'projet')} shippé${shipped > 1 ? 's' : ''} · trésorerie `, [`$${usd(G.money)}`, 'okc']));
@@ -9968,7 +10023,7 @@ function ecoOffline(secs, session = true) {
   const main = ecoRates(n, true, { hw }), teams = [{ k: n, r: main }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))];
   let work = 0, bugs = 0, costS = main.lead;
   teams.forEach(({ k, r }) => { const up = 1 / (1 + r.crash * r.down); work += r.per * k * up; bugs += r.bug * k * up; costS += r.cost * k * up; });
-  const out = { ships: 0, gain: 0, cost: 0, fails: 0, elec: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5, m0 = G.money;
+  const out = { ships: 0, gain: 0, cost: 0, fails: 0, elec: 0, urssaf: 0 }, loss = bugLossNow(), back = G.sk.flags ? .8 : .5, m0 = G.money;
   const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; out.elec += elecTick(hw, s); if (session) { usage.usd += c; } };
   let t = secs;
   while (t > 0 && out.ships < 10000) {
@@ -9979,15 +10034,17 @@ function ecoOffline(secs, session = true) {
     pay(need);
     t -= need;
     if (chance(main.fail)) { G.prog = back; out.fails++; continue; }
-    const val = ECO.value(shipped);
-    Object.assign(G, { money: G.money + val - G.bill - G.elec, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
+    const val = ECO.value(shipped), cot = urssafDue(val, G.bill).total;
+    Object.assign(G, { money: G.money + val - G.bill - G.elec - cot, earned: G.earned + val, bill: 0, elec: 0, prog: 0 });
+    if (cot) { out.urssaf += cot; G.urssaf.paid += cot; G.urssaf.n++; }
     out.gain += val;
     out.ships++;
     shipped++;
   }
   if (out.ships) {                               // Vibank : une ligne pour les ships, une pour ce qui a été prélevé
     txAdd('ship', out.ships > 1 ? `${frNumI(out.ships)} ships en arrière-plan` : 'Un ship en arrière-plan', out.gain, m0 + out.gain);
-    txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain);
+    if (out.urssaf) { txAdd('urssaf', 'URSSAF · cotisations (en arrière-plan)', -out.urssaf, m0 + out.gain - out.urssaf); ach('cotisant'); }
+    txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain + out.urssaf);
     setScore(shipped);
   }
   return out;
