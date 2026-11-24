@@ -842,6 +842,25 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-load { position: absolute; left: 0; top: 0; z-index: 1; height: 2px; width: 0; background: var(--orange); }
 .wb-status { grid-row: 4; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .wb-status.note { color: var(--yellow); }
+/* les publicités (sans uBlock Origin) : un bandeau en tête de page, des pop-ups au-dessus ; le badge d'uBlock ; les modules */
+.wb-page { grid-column: 1; }                   /* la couche des pop-ups partage sa case : la page reste dans la colonne 1 */
+.wb-pops { grid-row: 3; grid-column: 1; position: relative; z-index: 2; pointer-events: none; overflow: hidden; }
+.wb-pop { position: absolute; display: grid; gap: .35em; width: min(38ch, 80%); padding: .8em 1.4ch 1em; border: 2px solid var(--yellow); border-radius: 4px;
+  background: var(--panel); color: var(--fg); box-shadow: .8ch .6em 0 rgba(0, 0, 0, .55); pointer-events: auto; white-space: normal; }
+.wb-pop .k, .wb-ad .k { color: var(--dim); font-size: .8em; text-transform: uppercase; letter-spacing: .08em; }
+.wb-pop b { color: var(--yellow); font-size: 1.1em; }
+.wb-pop .go, .wb-ad button { justify-self: start; padding: .15em 1.4ch; border-radius: 4px; background: var(--green); color: var(--ink); font-weight: 700; }
+.wb-pop .x { position: absolute; top: .2em; right: .5ch; padding: 0 .3ch; color: var(--dim2); font-size: .75em; }
+.wb-pop .x:hover { color: var(--fg); }
+.wb-ad { display: flex; flex-wrap: wrap; align-items: center; gap: .3em 1.4ch; max-width: 110ch; margin: 0 auto 1em; padding: .5em 1.4ch; border: 1px dashed var(--yellow); border-radius: 4px; background: var(--panel); color: var(--fg); }
+.wb-ad b { color: var(--yellow); }
+.wb-ubo { color: var(--red) !important; font-weight: 700; }
+.wb-ubo b { padding: 0 .4ch; border-radius: 2px; background: var(--red); color: var(--ink); font-size: .8em; }
+.wb-ubo.off { color: var(--dim2) !important; }
+.wb-ubo.off b { background: var(--dim2); }
+.ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
+.ff-ask ul { padding-left: 2ch; }
+.ff-dark { filter: brightness(.8) contrast(1.08); }
 .wp { max-width: 110ch; margin: 0 auto; display: grid; gap: .9em; }
 .wp h1 { font-size: 1.6em; line-height: 1.2; color: var(--orange); }
 .wp h2 { margin-top: .5em; padding-bottom: .2em; border-bottom: 1px solid var(--sep); font-size: 1.1em; color: var(--fg); }
@@ -2087,11 +2106,21 @@ const ACH = [
   { id: 'unsteam', g: '◌', n: '412 jeux vous disent adieu', d: 'Désinstaller Steam. Le succès vous attendra.', p: 1.1, h: 1 },
   { id: 'hack', g: '>', n: 'Accès autorisé', d: 'Ouvrir le coffre de prod, dans le bunker.', p: 4.2, h: 1 },
   { id: 'sl', g: '≈', n: 'Locomotive', d: 'Taper sl au lieu de ls (avec sl installé).', p: 9.4, h: 1 },
+  { id: 'ublock', g: 'μ', n: 'Navigation sans pub', d: 'Installer uBlock Origin dans Firefaux.', p: 61.3 },
+  { id: 'popups', g: '▣', n: 'Fenêtres surprises', d: 'Avoir trois pop-ups de pub ouverts en même temps dans Firefaux.', p: 18.2 },
+  { id: 'adclick', g: '$', n: 'Cliqué sur la pub', d: 'Cliquer sur une publicité. Personne ne le fait. Sauf vous.', p: 7.7, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
 G.ach = G.ach || {};                              // { id: date du déblocage }
 G.play = G.play || 0;                             // temps de jeu, en secondes (Steam l'affiche)
+G.ff = { addons: {}, ...(G.ff || {}) };          // le profil de Firefaux : ses modules (uBlock Origin…)
+let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
+function ffAdsOn() { return !G.ff.addons.ublock?.on; }   // sans uBlock Origin actif : des pubs partout
+function ffAdLoad() {                            // ce que les pubs coûtent à la machine : un peu de RAM, un peu de processeur (Firefaux ouvert)
+  if (!ffAdsOn() || !tabs.includes('firefaux')) return { ram: 0, cpu: 0 };
+  return { ram: .15 + .35 * ffPops, cpu: .04 + .06 * ffPops };
+}
 const achN = () => ACH.filter(a => G.ach[a.id]).length;
 const achP = a => { try { return a.v ? a.v() : null; } catch { return null; } };
 let achQ = [], achBusy = false, achWait = 0, achLast = 0;
@@ -5059,12 +5088,12 @@ function pcLoad(o = {}) {
   const live = !o.off, sp = o.speed ?? speed;
   const n = o.n ?? (claudeOn && mode !== 'gameover' && !paused ? panes.filter(p => p.state !== 'down').length : 0);
   const lead = o.lead ?? (claudeOn && !paused && leadOn() ? 1 : 0);
-  const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0;
+  const gui = live && xfOn ? 1 : 0, web = live && tabs.includes('firefaux') ? 1 : 0, hog = live && GFX_HOG() ? 1 : 0, ad = live ? ffAdLoad() : { ram: 0, cpu: 0 };
   const bo = o.bg != null ? o : live && claudeOn && !paused && mode !== 'gameover' ? bgLoad() : { bg: 0, plats: 0 };
   const bg = bo.bg || 0, plats = bo.plats || 0, all = n + bg;   // les équipes en arrière-plan chargent la machine aussi (et chaque CLI en plus)
-  const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog;
+  const demand = .08 + .5 * sp ** .6 * all + .4 * sp ** .6 * lead + .1 * plats + .15 * gui + .3 * web + .6 * hog + ad.cpu;
   const k = ocK(pc), cap = c.cap * k.cr, util = Math.min(1, demand / cap);   // overclocking : plus de puissance (et plus de chaleur)
-  const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web;   // Go
+  const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web + ad.ram;   // Go (les pubs de Firefaux comprises)
   const swap = Math.max(0, used - r.go);
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
   const heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
@@ -5317,6 +5346,11 @@ function procTemplates(load) {
   if (tabs.includes('thunar')) add('thunar', 'dev', 'thunar --daemon', .4, 52, 860, 5);
   if (tabs.includes('mousepad')) add('mousepad', 'dev', 'mousepad', .2, 41, 640, 4);
   if (tabs.includes('atril')) add('atril', 'dev', 'atril', .3, 96, 1100, 6);
+  if (tabs.includes('firefaux')) {               // Firefaux, puis un processus de contenu par pop-up de pub, comme le vrai
+    const ad = ffAdLoad();
+    add('firefaux', 'dev', 'firefaux --new-window', 2.4 + ad.cpu * 20, 412 + Math.round(ad.ram * 300), 2900, 48);
+    for (let i = 0; i < ffPops; i++) add(`ffpop${i}`, 'dev', `firefaux -contentproc -childID ${7 + i} -isForBrowser (pub : ${['rencontres', 'tokens gratuits', 'formation', 'Windows 11'][i % 4]})`, 1.1, 358, 1800, 22);
+  }
   if (claudeOn) {
     const dead = mode === 'gameover', ag = { ag: 1, s: dead ? 'Z' : '' };
     const cx = provider === 'codex';
@@ -7307,7 +7341,7 @@ function dlPanel(k) {                             // l'état du téléchargement
   return `<div class="dl-state"><button type="button" class="dl-real" data-dl="${k}">télécharger le fichier (${moStr(t.sz)})</button><span class="dim">Le vrai lien. Oui, celui-là, en petit.</span></div>`;
 }
 function webDl() {
-  const ads = '<div class="dl-ads">'
+  const ads = !ffAdsOn() ? '<p class="wp-band ok"><span class="tag">uBlock Origin</span> 3 publicités masquées sur cette page. Le vrai lien est enfin le seul.</p>' : '<div class="dl-ads">'
     + '<button type="button" class="dl-ad" data-ad="dl"><b>VOTRE FICHIER EST PRÊT</b><span class="big">▼ TÉLÉCHARGER ▼</span><small>publicité</small></button>'
     + '<button type="button" class="dl-ad" data-ad="pc"><b>VOTRE PC EST LENT !</b><span>Accélérez-le en 1 clic (vraiment : matos.vibe)</span><small>publicité</small></button>'
     + '<button type="button" class="dl-ad" data-ad="exe"><b>VLC_Setup_2026_FREE.exe</b><span>Le lecteur qui lit tout. Même les virus.</span><small>publicité · 0 virus détecté sur 1 analysé</small></button></div>';
@@ -7569,6 +7603,87 @@ function makeVlc() {
     title: () => T() ? `${T().title} - Lecteur multimédia VLC` : 'Lecteur multimédia VLC', tname: () => 'VLC' };
 }
 
+/* ---------- Firefaux : ses modules (about:addons, addons.firefaux.vibe), et des publicités tant qu'uBlock Origin n'est pas là ----------
+   Les pubs : un bandeau en tête des pages web, et des pop-ups qui s'ouvrent au chargement (trois au plus) ; chaque pop-up est un
+   processus de plus dans htop, et prend de la RAM (pcLoad). uBlock Origin les bloque toutes, et les compte. */
+const ADDONS = {
+  ublock: { n: 'uBlock Origin', g: 'μ', ver: '1.61.2', users: 9412337, stars: '4,8', rec: 1,
+    d: 'Un bloqueur de contenu efficace : publicités, traqueurs, pop-ups. Léger, libre, et il ne vend rien.',
+    perm: ['Lire et modifier vos données sur tous les sites (pour y retirer les pubs)'] },
+  dark: { n: 'Dark Reader', g: '◐', ver: '4.9.96', users: 6200431, stars: '4,6',
+    d: 'Assombrit tous les sites. Le terminal était déjà sombre ; maintenant, le Web aussi.', perm: ['Lire et modifier vos données sur tous les sites'] },
+};
+const ADS = [   // [titre, texte, bouton, adresse (facultative)]
+  ['Des agents IA célibataires près de chez vous', 'Ils hallucinent, mais ils sont disponibles ce soir.', 'Rencontrer'],
+  ['Votre PC est lent !', 'Un vrai diagnostic, sur matos.vibe. Pour une fois, la pub dit vrai.', 'Accélérer mon PC', 'https://matos.vibe/'],
+  ['Gagnez 1 000 000 de tokens', 'Vous êtes le 1 000 000e visiteur de cette page. Comme les 999 999 autres.', 'Réclamer mes tokens'],
+  ['Ce développeur a doublé sa vélocité', 'avec une astuce bizarre : il a arrêté de relire.', 'Lire l’article'],
+  ['Devenez prompt engineer en 3 jours', 'Formation certifiante. Certifiée par nous.', 'S’inscrire'],
+  ['Windows 11 est prêt', 'Mise à jour à 99 %. Elle le restera.', 'Installer maintenant'],
+  ['Votre agent vous trompe', 'Il code pour d’autres projets la nuit. Découvrez avec qui.', 'Savoir'],
+];
+let ffAsk = '';                                    // le module dont on demande l'ajout (addons.firefaux.vibe)
+const ffHas = k => !!G.ff.addons[k];
+const ffOn = k => !!G.ff.addons[k]?.on;
+function ffAddon(act) {                            // « ask:k », « add:k », « cancel », « toggle:k », « remove:k » → un message
+  const [a, k] = act.split(':'), A = ADDONS[k];
+  if (a === 'cancel') { ffAsk = ''; return ''; }
+  if (!A) return '';
+  if (a === 'ask') { ffAsk = k; return ''; }
+  if (a === 'add') {
+    ffAsk = '';
+    if (ffHas(k)) return `${A.n} est déjà dans Firefaux.`;
+    G.ff.addons[k] = { on: 1, t: Date.now() };
+    saveGame();
+    if (k === 'ublock') { ach('ublock'); ffClosePops(); }
+    return `${A.n} a été ajouté à Firefaux.${k === 'ublock' ? ' Les pubs, elles, sont parties.' : ''}`;
+  }
+  if (!ffHas(k)) return '';
+  if (a === 'toggle') {
+    G.ff.addons[k].on = G.ff.addons[k].on ? 0 : 1;
+    saveGame();
+    if (k === 'ublock' && G.ff.addons[k].on) ffClosePops();
+    return `${A.n} ${G.ff.addons[k].on ? 'activé' : 'désactivé'}.${k === 'ublock' && !G.ff.addons[k].on ? ' Les pubs reviennent : elles attendaient.' : ''}`;
+  }
+  if (a === 'remove') {
+    delete G.ff.addons[k];
+    saveGame();
+    return `${A.n} a été supprimé.${k === 'ublock' ? ' Les pubs vous remercient.' : ''}`;
+  }
+  return '';
+}
+function ffClosePops() { document.querySelectorAll('.wb-pops .wb-pop').forEach(n => n.remove()); ffPops = 0; }
+const ffUsers = n => n >= 1e6 ? `${frx((n / 1e6).toFixed(1))} M d’utilisateurs` : `${frNumI(n)} utilisateurs`;
+function webAddons() {                             // about:addons : les modules installés
+  const ks = Object.keys(G.ff.addons).filter(k => ADDONS[k]);
+  const rows = ks.map(k => {
+    const A = ADDONS[k], on = ffOn(k);
+    return `<div class="wp-card${on ? ' own' : ' old'}"><span class="nm">${esc(A.g)} ${esc(A.n)} <span class="dim">${esc(A.ver)}</span></span>`
+      + `<span class="dim">${esc(A.d)}</span><span>${on ? '<span class="tag">activé</span>' : '<span class="dim">désactivé</span>'}</span><span></span>`
+      + `<div class="row"><button type="button" class="wp-buy" data-addon="toggle:${k}">${on ? 'Désactiver' : 'Activer'}</button>`
+      + `<button type="button" class="dl-real" data-addon="remove:${k}">Supprimer</button></div></div>`;
+  }).join('');
+  return { title: 'Modules et thèmes', html: `<div class="wp"><h1>Modules et thèmes</h1>
+    <p class="dim">Les modules de Firefaux. Il en recommande certains ; les autres, il les tolère.</p>
+    ${ks.length ? `<div class="wp-grid">${rows}</div>` : '<p class="wp-band">Aucun module installé. Firefaux est tel que livré : avec toutes ses publicités.</p>'}
+    <p><a data-href="https://addons.firefaux.vibe/">Trouver d’autres modules</a> <span class="dim">· sur addons.firefaux.vibe</span></p></div>` };
+}
+function webAddonStore() {                         // addons.firefaux.vibe : le catalogue, et la demande de permissions avant l'ajout
+  const card = k => {
+    const A = ADDONS[k], has = ffHas(k);
+    const ask = ffAsk === k ? `<div class="ff-ask"><b>Ajouter ${esc(A.n)} ?</b><span>Ce module pourra :</span><ul>${A.perm.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
+      + `<div class="row"><button type="button" class="wp-buy" data-addon="add:${k}">Ajouter</button><button type="button" class="dl-real" data-addon="cancel">Annuler</button></div></div>` : '';
+    return `<div class="wp-card${has ? ' own' : ''}"><span class="nm">${esc(A.g)} ${esc(A.n)}${A.rec ? ' <span class="tag">recommandé</span>' : ''}</span>`
+      + `<span class="spec">★ ${esc(A.stars)} · ${ffUsers(A.users)}</span><span class="dim">${esc(A.d)}</span><span></span>`
+      + `<div class="row">${has ? '<span class="tag">installé</span>' : `<button type="button" class="wp-buy" data-addon="ask:${k}">Ajouter à Firefaux</button>`}</div>${ask}</div>`;
+  };
+  return { title: 'Modules pour Firefaux', html: `<div class="wp"><h1>Modules pour Firefaux</h1>
+    <p>Des extensions pour un Firefaux à votre image. Toutes vérifiées par nos équipes (une personne, le lundi).</p>
+    <div class="wp-grid">${Object.keys(ADDONS).map(card).join('')}</div>
+    <p class="dim">Vos modules se gèrent dans <a data-href="about:addons">about:addons</a> (le bouton ⧉ de la barre).</p></div>` };
+}
+const ffAdBanner = i => { const [t, d, b] = ADS[i % ADS.length]; return `<div class="wb-ad" data-adi="${i % ADS.length}"><span class="k">publicité</span><b>${esc(t)}</b><span>${esc(d)}</span><button type="button" data-adgo="${i % ADS.length}">${esc(b)}</button></div>`; };
+
 /* ---------- navigateur web (Firefaux) : un faux Web, avec le store des agents et une boutique de matériel ----------
    Une page = une entrée de WEB_SITES (motif d'adresse → fonction qui rend { title, html }). Les liens portent data-href,
    les achats data-buy (store IA) ; le matériel passe par le panier (data-cart-add="slot:niveau", data-cart-del, data-cart) ;
@@ -7582,6 +7697,7 @@ function webNorm(raw) {
   const u = (raw || '').trim();
   if (!u) return WEB_HOME;
   if (/^about:(home|blank)?$/i.test(u)) return WEB_HOME;
+  if (/^about:addons$/i.test(u)) return 'about:addons';
   if (/^[a-z]+:\/\//i.test(u)) return /^[a-z]+:\/\/[^/]+$/i.test(u) ? u + '/' : u;
   if (/\s/.test(u) || !/\.[a-z]{2,}|^localhost/i.test(u)) return `vibe://recherche?q=${encodeURIComponent(u)}`;
   return 'https://' + (u.includes('/') ? u : u + '/');
@@ -7625,6 +7741,8 @@ function webSearch(u) {
     hit('https://store.agents.vibe/', 'store.agents.vibe : agents à la pièce, skills au kilo', 'Le supermarché du vibe coding. Les agents ne sont ni repris ni échangés.');
   if (/local|lolama|ollama|llm|vram|gpu|mod[èe]le|hors ligne|offline|jemma|kwen|lama/.test(lq))
     hit('https://lolama.vibe/', 'Lolama : des LLM en local, sans API', 'Aucune facture. Juste votre VRAM, toute votre VRAM. Chaque agent la double.');
+  if (/pub|bloqu|ublock|adblock|module|extension|addon|plugin|dark/.test(lq))
+    hit('https://addons.firefaux.vibe/', 'Modules pour Firefaux : uBlock Origin, Dark Reader…', 'Des extensions vérifiées par nos équipes (une personne, le lundi). uBlock Origin retire les pubs.');
   if (/musique|music|mp3|m4a|audio|chanson|morceau|vlc|lecteur|t[ée]l[ée]charg|download|chris|gasq/.test(lq))
     hit('https://telecharge.vibe/', 'Télécharge.vibe : de la musique gratuite, 100 % sûre (vérifiée par un agent)', 'Un morceau fait par un humain, Christopher GASQ. Le seul. Téléchargement en 3 secondes, publicités comprises.');
   if (/git|repo|d[ée]p[ôo]t|open.?source|studio|lm studio|star/.test(lq))
@@ -7795,7 +7913,7 @@ function web404(u) {
     <p class="dim">Essayez <a data-href="${WEB_HOME}">Vibegle</a>, ou un marque-page : ils existent, eux.</p></div>` };
 }
 const WEB_SITES = [
-  [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch],
+  [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
   [/^https?:\/\/(www\.)?facture\.vibe/i, webBill], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
@@ -7814,16 +7932,45 @@ function makeBrowser() {
     + '<button type="button" data-wb="fwd" title="Suivant" aria-label="Suivant">→</button>'
     + '<button type="button" data-wb="reload" title="Recharger (F5)" aria-label="Recharger">↻</button>'
     + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off"></form>'
-    + '<button type="button" data-wb="home" title="Accueil" aria-label="Accueil">⌂</button></div>'
+    + '<button type="button" data-wb="home" title="Accueil" aria-label="Accueil">⌂</button>'
+    + '<button type="button" class="wb-ubo" data-wb="ublock" title="uBlock Origin : activer ou désactiver" hidden>μ <b>0</b></button>'
+    + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button></div>'
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
-    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-status" role="status"></div>';
+    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-status" role="status"></div>';
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
-  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '';
+  let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '', adPick = ri(0, 99);
+  const pops = q('.wb-pops'), ubo = q('.wb-ubo');
+  const web = () => /^https?:/i.test(url);         // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://)
+  function popOpen() {                            // un pop-up de pub : il s'ouvre, il prend de la RAM, il a une croix minuscule
+    if (!ffAdsOn()) { ffBlocked++; stat(); return; }   // bloqué : le badge d'uBlock compte tout de suite
+    if (ffPops >= 3 || Q.get('pops') === '0') return;   // ?pops=0 : pas de pop-up (les tests qui cliquent dans les pages)
+    const shown = [adPick % ADS.length, ...[...pops.querySelectorAll('[data-adgo]')].map(x => +x.dataset.adgo)];   // jamais deux fois la même pub à l'écran
+    const pool = ADS.map((_, j) => j).filter(j => !shown.includes(j)), i = pool[ri(0, pool.length - 1)], [t, d, b2] = ADS[i], n = document.createElement('div');
+    n.className = 'wb-pop';
+    n.style.left = `${8 + ffPops * 9 + ri(0, 6)}%`;
+    n.style.top = `${10 + ffPops * 12 + ri(0, 6)}%`;
+    n.innerHTML = `<button type="button" class="x" data-popx title="Fermer" aria-label="Fermer la publicité">✕</button><span class="k">publicité</span>`
+      + `<b>${esc(t)}</b><span>${esc(d)}</span><button type="button" class="go" data-adgo="${i}">${esc(b2)}</button>`;
+    pops.appendChild(n);
+    ffPops = pops.children.length;
+    if (ffPops >= 3) ach('popups');
+  }
+  function adGo(i) {                              // on clique la pub : un succès (caché), et ce qu'elle promettait
+    ach('adclick');
+    const link = ADS[i]?.[3];
+    if (link) return go(link);
+    flash('Merci pour votre clic. Un annonceur vient de gagner 0,0003 $. Et vous, une pub de plus.');
+    popOpen();
+  }
+
   const flash = t => { if (!t) return; note = t; noteUntil = performance.now() + 6000; stat(); };
   function stat() {
     if (loading) { statusEl.textContent = loading; statusEl.classList.remove('note'); return; }   // pendant le chargement : l'étape en cours
     const on = performance.now() < noteUntil;
-    statusEl.textContent = on ? note : `Terminé · ${webHost(url)} · ${ri(3, 41)} traqueurs bloqués`;
+    statusEl.textContent = on ? note : `Terminé · ${webHost(url)} · ${ri(3, 41)} traqueurs bloqués${ffOn('ublock') ? ` · uBlock Origin : ${ffBlocked} pub${ffBlocked > 1 ? 's' : ''} bloquée${ffBlocked > 1 ? 's' : ''}` : ''}`;
+    ubo.hidden = !ffHas('ublock');
+    ubo.classList.toggle('off', !ffOn('ublock'));
+    ubo.querySelector('b').textContent = ffOn('ublock') ? ffBlocked : 'off';
     statusEl.classList.toggle('note', on);
   }
   function draw(keep) {
@@ -7831,6 +7978,8 @@ function makeBrowser() {
     seen = cartVer;
     title = r.title;
     doc.innerHTML = r.html;
+    if (web()) { if (ffAdsOn()) doc.insertAdjacentHTML('afterbegin', ffAdBanner(adPick)); else if (!keep) ffBlocked++; }   // le bandeau de pub, ou une pub bloquée de plus
+    doc.classList.toggle('ff-dark', ffOn('dark'));
     page.scrollTop = keep ? top : 0;
     if (document.activeElement !== input) input.value = url;
     const sec = q('.sec');
@@ -7844,6 +7993,7 @@ function makeBrowser() {
   }
   function go(raw, push = true) {                // un PC patate charge les pages plus lentement
     const u = webNorm(raw);
+    adPick = ri(0, 99);
     if (push && u !== url) { back.push(url); fwd = []; }
     url = u;
     const ms = reducedMotion.matches ? 0 : Math.round(140 + 1100 * (1 - Math.min(1, hwState().f)) + (part('disk').io < .9 ? 260 : 0));
@@ -7867,6 +8017,7 @@ function makeBrowser() {
       load.style.transition = 'none';
       load.style.width = '0';
       draw(false);
+      if (web()) { if (chance(.55)) popOpen(); if (chance(.25)) popOpen(); }   // des pop-ups (ou des pubs bloquées)
       if (ms > 700) flash(`Page chargée en ${frx((ms / 1000).toFixed(1))} s : votre PC fait de son mieux.`);
     }, ms);
   }
@@ -7893,7 +8044,12 @@ function makeBrowser() {
       else if (k === 'fwd' && fwd.length) { back.push(url); go(fwd.pop(), false); }
       else if (k === 'reload') go(url, false);
       else if (k === 'home') go(WEB_HOME);
-    } else if (h) go(h.dataset.href);
+      else if (k === 'addons') go('about:addons');
+      else if (k === 'ublock') { flash(ffAddon('toggle:ublock')); draw(true); }
+    } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
+    else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
+    else if (e.target.closest('[data-addon]')) { const m = ffAddon(e.target.closest('[data-addon]').dataset.addon); if (m) flash(m); draw(true); }
+    else if (h) go(h.dataset.href);
     else if (b && !b.disabled) { flash(buy(b.dataset.buy)); draw(true); }
     else if (lc && !lc.disabled) { flash(localAct(lc.dataset.local)); draw(true); }   // IA locale : installer, télécharger, utiliser
     else if (ca && !ca.disabled) { const [s, i] = ca.dataset.cartAdd.split(':'); flash(cartAdd(s, +i)); draw(true); }
@@ -7929,7 +8085,7 @@ function makeBrowser() {
     else if (k === 'End') page.scrollTop = page.scrollHeight;
   }
   draw(false);
-  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
+  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, close: () => { ffPops = 0; }, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
 }
 
 /* ---------- réglages : une liste modulable ----------
