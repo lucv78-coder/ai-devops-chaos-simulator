@@ -896,6 +896,31 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-card .price { color: var(--orange); font-weight: 700; font-size: 1.1em; }
 .wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
 .wp-card .tag.bad { background: var(--red); }
+/* À propos (xfce4-about) : un en-tête, des onglets, la config du PC en direct, les crédits */
+.abt { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr); padding: 0; background: var(--bg2); }
+.abt-head { display: flex; align-items: center; gap: 2ch; padding: 1em 2.5ch .9em; border-bottom: 1px solid var(--sep); background: var(--panel); white-space: normal; }
+.abt-logo { flex: none; display: grid; place-items: center; width: 3.2em; height: 3.2em; border: 2px solid var(--orange); border-radius: 6px; color: var(--orange); font-size: 1.5em; font-weight: 700; }
+.abt-head h2 { color: var(--orange); font-size: 1.2em; }
+.abt-head p { color: var(--dim); }
+.abt-nav { display: flex; flex-wrap: wrap; gap: .4ch; padding: .3em 2ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.abt-nav button { padding: .1em 1.4ch; border-radius: 3px; color: var(--dim); }
+.abt-nav button[aria-selected="true"] { background: var(--orange); color: var(--ink); font-weight: 700; }
+.abt-nav button:not([aria-selected="true"]):hover { background: rgba(255, 255, 255, .07); color: var(--fg); }
+.abt-body { min-height: 0; overflow: auto; padding: 1.1em 2.5ch 1.6em; white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.abt-body h3 { margin: 1.1em 0 .4em; color: var(--orange); }
+.abt-body h3:first-child { margin-top: 0; }
+.abt-sys { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .3em 2.4ch; }
+.abt-sys dt { color: var(--dim); }
+.abt-sys dd { margin: 0; color: var(--fg); overflow-wrap: anywhere; }
+.abt-who { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); gap: .15em 1.6ch; padding: .7em 0; border-bottom: 1px solid var(--sep); }
+.abt-who img { grid-row: span 3; width: 3.4em; height: 3.4em; border-radius: 4px; }
+.abt-who b { color: var(--orange); }
+.abt-who .r { color: var(--dim); }
+.abt-special { margin-top: 1.2em; padding: .8em 1.8ch; border: 1px dashed var(--orange); border-radius: 4px; }
+.abt-special b { color: var(--orange); }
+.abt-note { margin-top: 1em; color: var(--dim); }
+.abt a { color: var(--blue); text-decoration: underline; }   /* comme les liens des pages de Firefaux */
+@container (max-width: 46ch) { .abt-sys { grid-template-columns: 1fr; } .abt-sys dd { margin-bottom: .4em; } }
 .wp-buy { padding: .15em 1.4ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--orange); color: var(--ink); font-weight: 700; }
 .wp-buy:disabled { border-color: var(--sep); background: none; color: var(--dim); cursor: default; }
 /* telecharge.vibe : les publicités, le fichier, le vrai lien (tout petit), la barre de téléchargement */
@@ -2115,6 +2140,7 @@ const ACH = [
     t: () => G.mal.ever && !G.mal.miner && !ffHas('freeblock') && !malFiles().length },
   { id: 'vibecoin', g: '¤', n: 'Mineur malgré vous', d: 'Laisser le mineur de VibeCoin tourner dix minutes. Quelqu’un, quelque part, vous remercie.', p: 3.3, h: 1,
     t: () => G.mal.miner && Date.now() - G.mal.miner > 6e5 },
+  { id: 'credits', g: 'ⓘ', n: 'Générique de fin', d: 'Lire les crédits dans « À propos » : l’éditeur, les contributeurs et les agents.', p: 4.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3525,7 +3551,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4421,7 +4447,7 @@ async function runCommand(raw) {
   const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg;   // firefox, chromium… : c'est Firefaux
   if (progCmd === 'nano' || progCmd === 'pico') return nanoCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');   // l'éditeur du terminal
   if (Object.hasOwn(PROGS, progCmd) && PROGS[progCmd].make) {   // htop, atop… : un onglet plein écran (s'ils sont installés)
-    if (!installed.has(progCmd)) return notInstalled(progCmd, progCmd);
+    if (!installed.has(PROGS[progCmd].pkg || progCmd)) return notInstalled(progCmd, PROGS[progCmd].pkg || progCmd);
     if (PROGS[progCmd].gui && !xfOn) {           // thunar sans bureau : comme sous Linux, pas d'affichage
       shellPrint(`(${progCmd}:${ri(30000, 39999)}): Gtk-WARNING **: ${new Date().toTimeString().slice(0, 8)}.${ri(100, 999)}: cannot open display: `, 'errc');
       return shellPrint(H('Pas de session graphique. Tapez ', ['xfce', 'org'], ` (ou startx), puis ${progCmd}.`), 'dim');
@@ -4890,6 +4916,8 @@ const PROGS = {
   nano: { label: 'nano', delay: 1000, nomenu: true, icon: '✎', make: () => makeNano() },
   'settings-ui': { label: 'réglages', delay: 1000, nomenu: true, icon: '⚙', make: () => makeDlgHost('settings') },
   'agents-ui': { label: 'agents', delay: 1000, nomenu: true, icon: '◆', make: () => makeDlgHost('agents') },
+  // pkg : le paquet qui l'apporte (xfce4-about vient avec xfce4)
+  'xfce4-about': { label: 'À propos', delay: 2000, gui: true, nomenu: true, pkg: 'xfce4', icon: 'ⓘ', menu: 'À propos', make: () => makeAbout() },
   vlc: { label: 'VLC', delay: 250, gui: true, cat: 'Multimédia', icon: '▲', menu: 'Lecteur multimédia VLC', desc: 'la musique · les morceaux se téléchargent sur telecharge.vibe', make: () => makeVlc() },
 };
 function renderTabs() {
@@ -5743,7 +5771,7 @@ const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
 const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66],
-  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9] };
+  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82] };
 const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -6004,6 +6032,7 @@ function xfMenuOpen() {
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
+    + item('xfce4-about', 'ⓘ', 'À propos', 'la config du PC, l’éditeur, les contributeurs, les agents')
     + item('reboot', '↻', 'Redémarrer', 'le PC repasse par le BIOS · DEL pour le setup')
     + item('logout', '↩', 'Déconnexion', 'quitter Xfce et revenir au terminal');
   xfMenuEl.hidden = false;
@@ -6024,7 +6053,7 @@ function xfLaunch(id) {
   if (id === 'store') return openStore();
   if (id === 'zsh') return xfFocus('zsh');
   if (Object.hasOwn(CLIS, id) && claudeOn && provider === id) return xfFocus('claude');
-  if (PROGS[id]?.make && installed.has(id) && mode !== 'launching') return openTab(id);
+  if (PROGS[id]?.make && installed.has(PROGS[id].pkg || id) && mode !== 'launching') return openTab(id);
   if (hackGame) { toast('Partie de hack en cours dans le terminal : finissez-la d’abord.'); return xfFocus('zsh'); }
   typeIntoShell(id);                             // claude, codex, mistral (ou un programme absent) : le terminal tape la commande
 }
@@ -6914,6 +6943,81 @@ function makeViewer() {
 /* ---------- Steam : 412 jeux achetés, 3 lancés, et celui-ci. La bibliothèque, la fiche du jeu, ses succès ---------- */
 const STEAM_LIB = [['Kubernetes Kart', 87], ['Merge Conflict Tactics', 41], ['Stand-up Simulator 2026', 12], ['Legacy Code Odyssey', 120],
   ['Jira Quest IV', 64], ['Refacto Rush', 23], ['Sprint Planning Survivor', 9], ['On-Call Nightmares', 33]];
+/* ---------- À propos (xfce4-about) : la config du PC du jeu, l'éditeur, les contributeurs, les agents, la licence ---------- */
+const ABOUT_AGENTS = [   // les agents qui ont travaillé sur le projet (leurs commits sont dans l'historique ; Claude, lui, signe en co-auteur)
+  ['claude', 'Claude (Opus 5.5)', 'agent IA · le seul vrai développeur', 'A écrit à peu près tout. N’a jamais été relu. Signe ses commits, au moins.'],
+  ['opus-3', 'opus-3', 'orchestrateur', 'A délégué la délégation, puis la réunion sur la délégation.'],
+  ['sonnet-2', 'sonnet-2', 'refactoring', 'A réécrit le moteur en Rust, puis l’a remis en JavaScript. Dans le même commit.'],
+  ['haiku-7', 'haiku-7', 'documentation', 'La prod est tombée / le vendredi soir, sans tests / on merge quand même.'],
+  ['fable-1', 'fable-1', 'messages de commit', '« Il était une fois un fix. » Chaque commit, depuis le début.'],
+  ['sol-2', 'sol-2', 'pull requests', 'A ouvert 412 PR, toutes intitulées « fix ».'],
+  ['luna-4', 'luna-4', 'performance', 'A optimisé une boucle vide. Gain : 0 ms, mais avec conviction.'],
+  ['codestral-1', 'codestral-1', 'SRE', 'A supprimé la prod 3 fois. Redémarre très bien.'],
+  ['mistral-large', 'mistral-large', 'architecte', 'A ajouté Kubernetes. Personne ne sait pourquoi. Lui non plus.'],
+];
+const ABOUT_TABS = [['sys', 'Système'], ['edit', 'Éditeur'], ['contrib', 'Contributeurs'], ['agents', 'Agents'], ['lic', 'Licence']];
+const abtWho = (img, name, role, txt) => `<div class="abt-who"><img src="assets/agents/${img}.svg" alt="" width="48" height="48" onerror="this.style.visibility='hidden'">`
+  + `<b>${name}</b><span class="r">${esc(role)}</span><span>${esc(txt)}</span></div>`;
+const abtLink = (url, t) => `<a href="${url}" target="_blank" rel="noopener">${esc(t)}</a>`;
+function aboutSys() {                              // la config du PC du jeu, en direct
+  const s = sysSample(), up = Math.floor(s.up), d = Math.floor(up / 86400), h = Math.floor(up % 86400 / 3600), m = Math.floor(up % 3600 / 60);
+  const v = pcVerdict(hwState()), dg = pcDiag();
+  const rows = [['Nom de la machine', `prod-01 (${dg.host})`], ['Utilisateur', USER], ['Système', 'Vibian GNU/Linux 13 (friday), 64 bits'], ['Noyau', 'Linux 6.11.0-friday'],
+    ['Bureau', 'Xfce 4.20'], ['Carte mère', part('mobo').n], ['Processeur', `${part('cpu').n} · ${HW.threads} threads · ${frx((cpuMhz() / 1000).toFixed(2))} GHz`],
+    ['Mémoire', `${part('ram').n} · ${frx((s.used / 1024).toFixed(1))} Go utilisés sur ${frx((HW.mem / 1024).toFixed(0))}`], ['Carte graphique', part('gpu').n],
+    ['Disque', part('disk').n], ['Alimentation', part('psu').n], ['Refroidissement', part('cool').n],
+    ['Verdict du vendeur', `« ${dg.label} »`], ['État', `${v.label} · ${v.why}`],
+    ['Allumé depuis', `${d ? `${d} j ` : ''}${h} h ${String(m).padStart(2, '0')}`], ['Paquets', `${frNumI(2150 + installed.size)} (dpkg)`]];
+  return `<h3>Le PC du jeu</h3><dl class="abt-sys">${rows.map(([k, x]) => `<dt>${esc(k)}</dt><dd>${esc(x)}</dd>`).join('')}</dl>`
+    + '<p class="abt-note">Les pièces changent dans matos.vibe (Firefaux) ou le store, rayon « Matériel PC ».</p>';
+}
+const ABOUT_HTML = {
+  edit: () => '<h3>Éditeur</h3>' + abtWho('lvt-dev', 'LVT-DEV', 'éditeur · humain (espèce rare) · prompt engineer en chef', 'A eu l’idée, a tapé « vas-y » 847 fois, a retiré les émojis. Ne sait pas ce que fait la ligne 4 127.')
+    + `<p class="abt-note">© 2026 LVT-DEV · le code : ${abtLink('https://github.com/lucv78-coder/ai-devops-chaos-simulator', 'github.com/lucv78-coder/ai-devops-chaos-simulator')}</p>`,
+  contrib: () => '<h3>Contributeurs</h3>' + abtWho('chris-gasq', `Christopher GASQ <span class="r">· ${abtLink('https://github.com/ChrisGasq', 'github.com/ChrisGasq')}</span>`, 'musiques', `A composé « ${TRACKS.chris1.title} », la musique du jeu, sur GarageBand. Le seul humain à avoir produit quelque chose de concret sur ce projet.`)
+    + '<div class="abt-special"><b>Mention spéciale</b><p>À Fabien (Stellarr Studio) et à Antoine (67).</p></div>',
+  agents: () => '<h3>Les agents qui ont travaillé sur le projet</h3>' + ABOUT_AGENTS.map(([i, n, r, t]) => abtWho(i, esc(n), r, t)).join('')
+    + '<p class="abt-note">Tous sauf Claude sont des personnages du jeu. Aucun modèle n’a été blessé pendant le développement. Quelques tokens, si.</p>',
+  lic: () => '<h3>Licence</h3><p>AI DevOps Chaos Simulator est sous licence <b>CC BY-NC 4.0</b> : copier, modifier et partager, oui, en citant LVT-DEV ; un usage commercial, non.</p>'
+    + `<p class="abt-note">Une parodie du vibecoding, vibecodée : ${frNumI(SRC_LINES)} lignes dans un seul fichier HTML, et personne ne les a relues. Sans lien avec les éditeurs des produits parodiés. Le détail : tapez license dans le terminal.</p>`,
+};
+function makeAbout() {
+  const el = document.createElement('div');
+  el.className = 'prog abt';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'À propos');
+  el.innerHTML = `<div class="abt-head"><span class="abt-logo" aria-hidden="true">AI</span><div><h2>AI DevOps Chaos Simulator</h2>`
+    + `<p>version ${verStr()} · Vibian GNU/Linux 13 (friday) · Xfce 4.20</p><p>Une satire du vibecoding, par un jeu lui-même vibecodé.</p></div></div>`
+    + `<div class="abt-nav" role="tablist" aria-label="À propos">${ABOUT_TABS.map(([k, t], i) => `<button type="button" role="tab" data-abt="${k}" aria-selected="${i ? 'false' : 'true'}">${esc(t)}</button>`).join('')}</div>`
+    + '<div class="abt-body" role="tabpanel" tabindex="0"></div>';
+  const body = el.querySelector('.abt-body'), seen = new Set();
+  let tab = 'sys', sig = '';
+  function draw(force) {
+    const html = tab === 'sys' ? aboutSys() : ABOUT_HTML[tab]();
+    if (html === sig && !force) return;
+    sig = html;
+    body.innerHTML = html;
+  }
+  function show(k) {
+    tab = k;
+    el.querySelectorAll('[data-abt]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.abt === k)));
+    body.scrollTop = 0;
+    draw(true);
+    seen.add(k);
+    if (['edit', 'contrib', 'agents'].every(x => seen.has(x))) ach('credits');
+  }
+  el.addEventListener('click', e => { const b = e.target.closest('[data-abt]'); if (b) show(b.dataset.abt); });
+  el.addEventListener('keydown', e => {             // les onglets : flèches gauche et droite
+    if (!e.target.closest('[data-abt]') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    e.preventDefault();
+    const i = ABOUT_TABS.findIndex(([k]) => k === tab), k = ABOUT_TABS[(i + (e.key === 'ArrowRight' ? 1 : ABOUT_TABS.length - 1)) % ABOUT_TABS.length][0];
+    show(k);
+    el.querySelector(`[data-abt="${k}"]`).focus();
+  });
+  draw(true);
+  return { el, key: () => {}, render: () => { if (tab === 'sys') draw(); }, redraw: () => draw(true), go: k => ABOUT_HTML[k] || k === 'sys' ? show(k) : null, title: () => 'À propos — AI DevOps Chaos Simulator', tname: () => 'À propos' };
+}
+
 function makeSteam() {
   const el = document.createElement('div');
   el.className = 'prog stm';
