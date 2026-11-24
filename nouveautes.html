@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>36</b><span>mises à jour</span></div>
-    <div role="listitem"><b>52 h 44</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 13 088</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>37</b><span>mises à jour</span></div>
+    <div role="listitem"><b>53 h 22</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 13 254</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#37</span><time datetime="2026-11-24T16:49">16 h 49</time><a href="#pr">Relire les PR des agents : les lignes relues ne sont plus nulles</a></li>
       <li><span class="n">#36</span><time datetime="2026-11-24T16:11">16 h 11</time><a href="#defis">Les défis : une contrainte pour la startup suivante, et plus de stock-options</a></li>
       <li><span class="n">#35</span><time datetime="2026-11-24T15:36">15 h 36</time><a href="#messagerie">La messagerie : des clients, des investisseurs, l’URSSAF, et du hameçonnage</a></li>
       <li><span class="n">#34</span><time datetime="2026-11-24T14:58">14 h 58</time><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></li>
@@ -185,8 +186,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="defis" aria-labelledby="t36">
-    <p class="meta"><span class="n">#36</span><span class="new">dernière</span><time datetime="2026-11-24T16:11">24 nov. 2026 · 16 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fefb396">fefb396</a><span>13 035 → 13 088 lignes</span></p>
+  <article class="maj latest" id="pr" aria-labelledby="t37">
+    <p class="meta"><span class="n">#37</span><span class="new">dernière</span><time datetime="2026-11-24T16:49">24 nov. 2026 · 16 h 49</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/bc12e04">bc12e04</a><span>13 088 → 13 254 lignes</span></p>
+    <h2 id="t37"><a href="#pr">Relire les PR des agents : les lignes relues ne sont plus nulles</a></h2>
+    <ul>
+      <li>Les agents ouvrent des pull requests quand ils travaillent : pr list, pr diff 413 pour les relire, pr merge, pr close. Sur GitHype, votre dépôt a maintenant ses Pull requests.</li>
+      <li>Une sur trois cache un piège : une clé d’API en clair, des tests supprimés pour passer au vert, un cache sans limite, la config renommée, la zone DNS « nettoyée ». Le piège se lit dans le diff.</li>
+      <li>Fusionner une PR propre avance le projet de 6 %. Une PR piégée part en prod avec ses conséquences : la dette technique, ou un incident. Au ship, les agents fusionnent tout ce qui reste, sans relire.</li>
+      <li>Correctif : sur bourse.vibe, la confirmation de l’introduction en bourse avait un texte invisible (il héritait de l’effet scintillant des verbes des agents). Elle se lit, et les défis y sont mieux rangés.</li>
+      <li>Trois succès Steam, dont un caché.</li>
+    </ul>
+    <blockquote>« LGTM : Looks Good To Me. Traduction : je ne l’ai pas ouverte. »<cite>l’agent, 16 h 49</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-pr.png" title="Voir en grand"><img src="assets/screen-pr.png" width="900" height="540" loading="lazy" alt="GitHype : la PR n° 449 « feat(ai): brancher le modèle de recommandation », son diff avec une clé d’API en clair (sk-live-…), les boutons Fusionner et Fermer, au-dessus de la liste des PR ouvertes et du compteur des lignes relues."></a><figcaption>Une PR piégée, sur GitHype.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="defis" aria-labelledby="t36">
+    <p class="meta"><span class="n">#36</span><time datetime="2026-11-24T16:11">24 nov. 2026 · 16 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fefb396">fefb396</a><span>13 035 → 13 088 lignes</span></p>
     <h2 id="t36"><a href="#defis">Les défis : une contrainte pour la startup suivante, et plus de stock-options</a></h2>
     <ul>
       <li>À l’introduction en bourse, un défi pour la startup suivante (facultatif) : les boutons de la confirmation, sur bourse.vibe, ou ipo --confirm --defi solo.</li>
@@ -196,7 +213,7 @@ footer p + p { margin-top: .5em; }
     </ul>
     <blockquote>« Une contrainte, c’est ce qui rend créatif. Un vendredi permanent, c’est ce qui rend l’astreinte créative. »<cite>l’agent, 16 h 11</cite></blockquote>
     <div class="shots">
-      <figure><a href="assets/screen-defis.png" title="Voir en grand"><img src="assets/screen-defis.png" width="900" height="540" loading="lazy" alt="bourse.vibe : la confirmation de l’introduction en bourse, avec le défi en cours (vendredi permanent) et les cinq défis possibles pour la startup suivante, « 100 % IA locale » coché, « Un seul agent » déjà réussi."></a><figcaption>Le choix du défi, sur bourse.vibe.</figcaption></figure>
+      <figure><a href="assets/screen-defis.png" title="Voir en grand"><img src="assets/screen-defis.png" width="900" height="540" loading="lazy" alt="bourse.vibe : la confirmation de l’introduction en bourse (17 stock-options, bonus du défi en cours compris) et les cinq défis possibles pour la startup suivante, avec leur bonus : « 100 % IA locale » coché, « Un seul agent » déjà réussi."></a><figcaption>Le choix du défi, sur bourse.vibe.</figcaption></figure>
     </div>
   </article>
 
