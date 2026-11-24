@@ -610,7 +610,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 }
 .xf-ico .l {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; max-width: 100%;
-  padding: 0 .4ch; border-radius: 2px; font-size: .88em; line-height: 1.25; text-shadow: 0 1px 2px #000;
+  padding: 0 .4ch; border-radius: 2px; font-size: .88em; line-height: 1.25; text-shadow: 0 1px 2px #000; overflow-wrap: anywhere;   /* Bienvenue.txt : coupé où il faut */
 }
 .xf-ico.on .g::after {                           /* le programme tourne */
   content: ''; position: absolute; right: -.18em; top: -.18em; width: .3em; height: .3em; border-radius: 50%;
@@ -759,6 +759,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .fm-status.note { color: var(--yellow); }
 .fm-confirm { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 1em; background: rgba(0, 0, 0, .5); }
 .fm-confirm[hidden] { display: none; }
+.xf-dlg { z-index: 7; }                        /* les boîtes du bureau : par-dessus les fenêtres et le tableau de bord */
 .fm-box { display: grid; gap: .6em; width: min(60ch, 100%); padding: .9em 2ch; background: var(--panel); border: 1px solid var(--orange); border-radius: 4px; white-space: normal; }
 .fm-box .ttl { color: var(--orange); font-weight: 700; }
 .fm-box .warn { color: var(--red); }
@@ -1490,6 +1491,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="xf-ctx" id="xf-ctx" role="menu" aria-label="Menu contextuel" hidden></div>
   <div class="xf-sw" id="xf-sw" role="listbox" aria-label="Fenêtres ouvertes" hidden></div>
   <div class="xf-notes" id="xf-notes" role="dialog" aria-label="Journal des notifications" hidden></div>
+  <div class="fm-confirm xf-dlg" id="xf-dlg" hidden><div class="fm-box" role="dialog" aria-modal="true" aria-label="Bureau"></div></div>
 </div>
 <section id="panic" hidden aria-label="Crash système">
   <div class="kp-log" aria-hidden="true"></div>
@@ -2419,6 +2421,8 @@ const ACH = [
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
   { id: 'rangement', g: '⊡', n: 'Bureau rangé', d: 'Déplacer une icône du bureau. Le reste du bureau, lui, ne se range pas.', p: 28.1 },
   { id: 'autostart', g: '▶', n: 'startx dans le .bashrc', d: 'Démarrer le bureau tout seul, au démarrage du PC.', p: 6.6 },
+  { id: 'surlebureau', g: '▤', n: 'Sur le bureau', d: 'Mettre un fichier ou un dossier à vous sur le bureau (dans ~/Bureau).', p: 47.3,
+    t: () => deskEntries().some(k => k !== 'Bienvenue.txt' && !k.endsWith('.desktop')) },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6295,6 +6299,7 @@ async function xfEnter() {
   xfWallDraw();
   $('.xf-user').textContent = USER;
   xfIconSel = '';
+  deskDir();                                      // xdg-user-dirs : ~/Bureau existe dès la première session
   xfIconsSync(true);
   crtFlash();
   [...tabs.filter(t => t !== 'zsh'), 'zsh'].forEach(xfEnsure);   // tout ce qui tourne a sa fenêtre ; le terminal par-dessus
@@ -6947,9 +6952,14 @@ addEventListener('contextmenu', e => { if (xfOn && e.target.closest('#xf-ctx, .x
 deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'écran : le menu du bureau
   if (e.target !== deskEl) return;
   e.preventDefault();
+  xfNewCell = xfCellAt(e.clientX, e.clientY);       // un dossier, un document créé ici : sur cette case
   xfCtxOpen(e.clientX, e.clientY, [
+    { ic: '■', t: 'Créer un dossier…', run: () => deskCreate(true) },
+    { ic: '□', t: 'Créer un document vide…', run: () => deskCreate(false) },
+    '-',
     { ic: '❯', t: 'Ouvrir un terminal ici', run: () => xfFocus('zsh') },
     { ic: PROGS.thunar.icon, t: 'Gestionnaire de fichiers', run: () => xfLaunch('thunar') },
+    { ic: '▤', t: 'Ouvrir le dossier Bureau', run: () => fileOpen(deskSegs()) },
     { ic: '▦', t: 'Applications', k: 'Alt+F1', run: () => xfMenuOpen() },
     '-',
     { ic: '⊡', t: 'Aligner les icônes', off: !Object.keys(G.xfd?.ico || {}).length, run: () => xfIconsAlign() },
@@ -6982,6 +6992,7 @@ function xfIconList() {
     ...Object.keys(LOCAL_RT).filter(k => IDLE && G.rt?.[k]).map(k => ({ id: 'rt:' + k, ic: k === 'lolama' ? '◉' : '◫', t: LOCAL_RT[k].name, on: plat('local'),
       tip: G.own.local ? `${MODELS[G.pm.local].name} · ${go1(vramFor(G.pm.local, G.team.local || 1))} Go de VRAM` : 'aucun modèle : lolama.vibe' })),
     IDLE && { id: 'store', ic: '$', t: 'Store des agents', tip: 'agents, plateformes, matériel' },
+    ...deskEntries().map(k => { const n = nodeAt([...deskSegs(), k]); return { id: 'f:' + k, ic: fmGlyph(k, n), t: k, tip: `${fmType(k, n)} · ${fmSize(n)} · ~/Bureau`, file: k }; }),
   ].filter(Boolean);
 }
 function xfIconsSync(force) {                    // ne reconstruit que si la liste a changé (la sélection et le focus survivent)
@@ -7001,6 +7012,7 @@ function xfIconSelect(id) {
   xfIconsEl.querySelectorAll('.xf-ico').forEach(b => b.classList.toggle('sel', b.dataset.ico === id));
 }
 function xfIconOpen(id) {
+  if (id.startsWith('f:')) return fileOpen([...deskSegs(), id.slice(2)]);   // un fichier du bureau : comme dans Thunar
   if (id === 'trash') return toast('La corbeille est vide. Ici, on supprime avec <kbd>rm -rf</kbd>, sans filet.', 2600);
   if (id.startsWith('rt:')) {                    // Lolama, StudioLM : le terminal lance l'équipe locale (ou liste les modèles)
     const k = id.slice(3);
@@ -7047,6 +7059,7 @@ xfIconsEl.addEventListener('contextmenu', e => {
   e.preventDefault();
   const id = b.dataset.ico, ic = b.querySelector('.g').textContent;
   xfIconSelect(id);
+  if (id.startsWith('f:')) return deskFileMenu(id.slice(2), e.clientX, e.clientY);
   xfCtxOpen(e.clientX, e.clientY, [
     { ic, t: 'Ouvrir', k: 'Entrée', run: () => xfIconOpen(id) },
     ...(id === 'trash' ? [{ ic: '✗', t: 'Vider la corbeille', run: () => toast('Déjà vide. Les agents ne passent jamais par la corbeille.', 2400) }] : []),
@@ -7136,6 +7149,149 @@ function xfIcoDrop(ok) {
 addEventListener('pointerup', () => xfIcoDrop(true));
 addEventListener('pointercancel', () => xfIcoDrop(false));
 
+/* les fichiers du bureau : ~/Bureau (le bureau d'Xfce en français). Ce qu'il contient apparaît sur le bureau, dans les cases libres ;
+   double-clic : ouvrir comme Thunar ; clic droit : ouvrir, afficher dans le gestionnaire de fichiers, renommer, supprimer ;
+   sur le fond : créer un dossier, un document, là où l'on a cliqué. Le terminal et Thunar voient les mêmes fichiers. */
+const deskSegs = () => [...HOME, 'Bureau'];
+let xfNewCell = null;
+const DESK_HELLO = 'Bienvenue sur le bureau.\n\nCe dossier, ~/Bureau, est le bureau d’Xfce : ce que vous y mettez y apparaît, et inversement.\n'
+  + 'Glissez-y vos fichiers, créez-en (clic droit sur le bureau). Les agents y déposent déjà les leurs, sans demander.\n';
+function deskDir() {                               // le dossier Bureau : créé à la première session (avec un mot d'accueil), recréé s'il a disparu
+  const h = nodeAt(HOME);
+  if (!h?.d) return null;
+  if (!h.k.Bureau?.d) {
+    h.k.Bureau = mkD(G.xfd?.hello ? {} : { 'Bienvenue.txt': mkF(DESK_HELLO, { mt: Date.now() }) }, { mt: Date.now() });
+    G.xfd = { ...G.xfd, hello: 1 };
+    fsSave?.();
+  }
+  return h.k.Bureau;
+}
+function deskEntries() {                           // ce que montre le bureau : les lanceurs d'abord (dans leur ordre), puis le reste par nom
+  const n = nodeAt(deskSegs());
+  if (!n?.d) return [];
+  const ks = Object.keys(n.k).filter(k => !k.startsWith('.'));
+  return [...ks.filter(k => k.endsWith('.desktop')), ...ks.filter(k => !k.endsWith('.desktop')).sort((a, b) => (n.k[b].d - n.k[a].d) || byName(a, b))];
+}
+function fileOpen(segs) {                          // ouvrir comme Thunar : un dossier dans Thunar, un PDF dans Atril, la musique dans VLC, le texte dans l'éditeur
+  const c = nodeAt(segs), k = segs.at(-1);
+  if (!c) return toast(`« ${esc(k || '/')} » n’existe plus.`, 2200);
+  const kd = fileKind(k, c), via = (prog, arg) => {
+    if (!installed.has(prog)) return toast(`${esc(PROGS[prog].menu)} n’est pas installé : <kbd>sudo apt install ${prog}</kbd>`, 2800);
+    openTab(prog);
+    PROGS[prog].go?.(arg);
+  };
+  if (kd === 'dir') return via('thunar', absPath(segs));
+  if (kd === 'pdf') return via('atril', segs);
+  if (kd === 'audio' || kd === 'video') return via('vlc', segs);
+  if (kd === 'text') return via('mousepad', segs);
+  if (kd === 'exe') return PROGS[k]?.make && installed.has(k) ? openTab(k) : typeIntoShell(k);
+  typeIntoShell(`cat ${shq(tildePath(segs))}`);
+}
+/* les boîtes du bureau : demander un nom, confirmer une suppression (les mêmes que Thunar) */
+const xfDlgEl = $('#xf-dlg'), xfDlgBox = xfDlgEl.querySelector('.fm-box');
+let xfDlgAct = null;
+function xfDlg(html, onOk, focus = '[data-c="no"]') {
+  xfDlgAct = onOk;
+  xfDlgBox.innerHTML = html;
+  xfDlgEl.hidden = false;
+  const f = xfDlgBox.querySelector(focus);
+  f?.focus({ preventScroll: true });
+  return f;
+}
+function xfDlgClose() { xfDlgEl.hidden = true; xfDlgAct = null; }
+const xfDlgErr = t => { const e = xfDlgBox.querySelector('.fm-err'); if (e) { e.textContent = t; e.hidden = false; } };
+xfDlgEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-c]');
+  if (b) { if (b.dataset.c === 'ok' && xfDlgAct) xfDlgAct(); else xfDlgClose(); }
+});
+xfDlgEl.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); xfDlgClose(); }
+  else if (e.key === 'Enter' && e.target.matches('input')) { e.preventDefault(); e.stopPropagation(); xfDlgAct?.(); }
+});
+function xfNameBox(title, val, ok, sub = '') {
+  const inp = xfDlg(`<p class="ttl">${esc(title)}</p>${sub}<label class="fm-lbl">Nom <input class="fm-in" spellcheck="false" autocomplete="off" value="${esc(val)}"></label>`
+    + '<p class="fm-err" hidden></p><div class="pk-actions"><button type="button" data-c="ok">Valider</button><button type="button" data-c="no">Annuler</button></div>', () => ok(inp.value.trim()), '.fm-in');
+  const dot = val.lastIndexOf('.');
+  inp.setSelectionRange(0, dot > 0 ? dot : val.length);   // le nom sans l'extension est sélectionné, comme dans Thunar
+  return inp;
+}
+const deskBad = (D, v, old) => !v ? 'Le nom ne peut pas être vide.' : v === '.' || v === '..' ? 'Ce nom est réservé.' : v.includes('/') ? 'Pas de « / » dans un nom : c’est le séparateur des dossiers.'
+  : v !== old && Object.hasOwn(D.k, v) ? `« ${v} » existe déjà sur le bureau.` : badName(v) || '';
+function deskIcoMove(from, to) {                   // un fichier renommé garde sa case
+  const ico = { ...(G.xfd?.ico || {}) };
+  if (ico[from]) { ico[to] = ico[from]; delete ico[from]; }
+  else delete ico[to];
+  G.xfd = { ...G.xfd, ico };
+}
+function deskCreate(dir) {                         // clic droit sur le bureau : un dossier ou un document, sur la case du clic
+  const D = deskDir();
+  if (!D) return;
+  const cell = xfNewCell;
+  xfNameBox(dir ? 'Créer un dossier' : 'Créer un document vide', freeName(D, dir ? 'Nouveau dossier' : 'Nouveau document.txt'), v => {
+    const bad = deskBad(D, v);
+    if (bad) return xfDlgErr(bad);
+    D.k[v] = dir ? mkD({}, { mt: Date.now() }) : mkF('', { mt: Date.now() });
+    if (cell && !Object.values(xfIconPlace(xfIconList())).some(q => q[0] === cell[0] && q[1] === cell[1])) G.xfd = { ...G.xfd, ico: { ...(G.xfd.ico || {}), ['f:' + v]: cell } };
+    xfDlgClose();
+    fsSave?.(); saveGame();
+    xfIconsSync(true);
+    xfIconSelect('f:' + v);
+    toast(`${dir ? 'Dossier' : 'Document'} « ${esc(v)} » créé sur le bureau.`, 2200);
+  }, '<p class="dim">Sur le bureau (~/Bureau)</p>');
+}
+function deskRename(k) {
+  const D = nodeAt(deskSegs()), n = D?.k[k];
+  if (!n) return;
+  xfNameBox(`Renommer « ${k} »`, k, v => {
+    if (v === k) return xfDlgClose();
+    const bad = deskBad(D, v, k);
+    if (bad) return xfDlgErr(bad);
+    D.k[v] = n; delete D.k[k]; n.mt = Date.now();
+    deskIcoMove('f:' + k, 'f:' + v);
+    xfDlgClose();
+    fsSave?.(); saveGame();
+    xfIconsSync(true);
+    xfIconSelect('f:' + v);
+  });
+}
+function deskDelete(ks) {                          // une confirmation, comme Thunar : pas de corbeille sur prod-01
+  ks = ks.filter(k => nodeAt([...deskSegs(), k]));
+  if (!ks.length) return;
+  if (mode !== 'idle') return toast('Impossible : le système est occupé à tout casser.', 2200);
+  const many = ks.length > 1, cnt = ks.reduce((t, k) => { const n = nodeAt([...deskSegs(), k]); return t + (n.d ? countNodes(n) - 1 : 0); }, 0);
+  xfDlg('<p class="ttl">Supprimer définitivement ?</p>'
+    + `<p>${many ? `${ks.length} éléments du bureau` : `« ~/Bureau/${esc(ks[0])} »`}${cnt ? ` et ${frNumI(cnt)} élément${cnt > 1 ? 's' : ''} dedans` : ''} ${many || cnt ? 'seront supprimés' : 'sera supprimé'} définitivement. Il n’y a pas de corbeille sur prod-01.</p>`
+    + '<div class="pk-actions"><button type="button" class="danger" data-c="ok">Supprimer</button><button type="button" data-c="no">Annuler</button></div>', () => {
+      xfDlgClose();
+      let told = false;
+      ks.forEach(k => { const segs = [...deskSegs(), k]; if (!nodeAt(segs)) return; removeAt(segs); told = afterRemove(segs) || told; deskIcoMove('f:' + k, ''); });
+      fixCwd();
+      fsSave?.(); saveGame();
+      xfIconsSync(true);
+      toast(`${many ? `${ks.length} éléments supprimés` : `« ${esc(ks[0])} » supprimé`} du bureau.${told ? ' Les agents ont réagi : voir le terminal.' : ''}`, 2600);
+    });
+}
+function deskFileMenu(k, x, y) {                   // clic droit sur un fichier du bureau
+  const segs = [...deskSegs(), k], c = nodeAt(segs);
+  if (!c) return;
+  const kd = fileKind(k, c), main = { dir: 'Ouvrir', pdf: 'Ouvrir avec la visionneuse', text: 'Ouvrir avec l’éditeur de texte', exe: 'Exécuter', bin: 'Afficher dans le terminal (cat)', audio: 'Lire avec VLC', video: 'Lire avec VLC' }[kd];
+  xfCtxOpen(x, y, [
+    { ic: fmGlyph(k, c), t: main, k: 'Entrée', run: () => fileOpen(segs) },
+    ...(kd !== 'dir' && kd !== 'text' ? [{ ic: PROGS.mousepad.icon, t: 'Ouvrir avec l’éditeur de texte', run: () => { if (installed.has('mousepad')) { openTab('mousepad'); PROGS.mousepad.go?.(segs); } } }] : []),
+    { ic: PROGS.thunar.icon, t: 'Afficher dans le gestionnaire de fichiers', run: () => { if (installed.has('thunar')) { openTab('thunar'); PROGS.thunar.go?.(absPath(segs)); } } },
+    '-',
+    { ic: '✎', t: 'Renommer…', k: 'F2', run: () => deskRename(k) },
+    '-',
+    { ic: '✕', t: 'Supprimer', k: 'Suppr', danger: true, run: () => deskDelete([k]) },
+  ]);
+}
+xfIconsEl.addEventListener('keydown', e => {      // Suppr et F2 sur un fichier du bureau
+  const b = document.activeElement?.closest?.('.xf-ico');
+  if (!b || !b.dataset.ico.startsWith('f:') || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Delete') { e.preventDefault(); deskDelete([b.dataset.ico.slice(2)]); }
+  else if (e.key === 'F2') { e.preventDefault(); deskRename(b.dataset.ico.slice(2)); }
+});
+
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
    Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés, jauge du disque.
    Barre d'outils et clic droit : créer, couper, copier, coller (à la vitesse du disque, dans l'espace libre), renommer,
@@ -7197,7 +7353,7 @@ function makeThunar() {
     + '<div class="fm-confirm" hidden><div class="fm-box" role="alertdialog" aria-modal="true" aria-label="Confirmer la suppression"></div></div>';
   const q = s => el.querySelector(s), listEl = q('.fm-list'), statusEl = q('.fm-status'), confirmEl = q('.fm-confirm'), box = q('.fm-box'), progEl = q('.fm-prog');
   let path = [...HOME], back = [], fwd = [], sel = null, hidden = false, sig = '', note = '', noteUntil = 0, pending = null, act = null, busy = false;
-  const places = () => [['Raccourcis'], ['⌂', 'Dossier personnel', HOME], ['■', `Projet ${PROJ}`, PROJ_DIR], ['■', 'Autres projets', [...HOME, 'code']], ['■', 'Documents', [...HOME, 'Documents']],
+  const places = () => [['Raccourcis'], ['⌂', 'Dossier personnel', HOME], ['▤', 'Bureau', [...HOME, 'Bureau']], ['■', `Projet ${PROJ}`, PROJ_DIR], ['■', 'Autres projets', [...HOME, 'code']], ['■', 'Documents', [...HOME, 'Documents']],
     ['■', 'Téléchargements', [...HOME, 'Downloads']], ['♪', 'Musique', [...HOME, 'Musique']], ['▶', 'Vidéos', [...HOME, 'Vidéos']], ['▥', 'Corbeille', null],
     ['Périphériques'], ['/', 'Système de fichiers', []], ['▤', 'Fichiers temporaires', ['tmp']]];
   const same = (a, b) => a.length === b.length && a.every((s, i) => s === b[i]);
@@ -11920,7 +12076,7 @@ addEventListener('keydown', e => {
     return;
   }
   // bureau Xfce : menu ouvert, aucune fenêtre active, ou bouton du bureau (barre, titre) : pas de raccourci
-  if (xfOn && (!xfMenuEl.hidden || !xfCtxEl.hidden || !xfShown(view) || e.target.closest?.('.xf-panel, .xw-bar, .xf-menu, .xf-ctx'))) return;
+  if (xfOn && (!xfMenuEl.hidden || !xfCtxEl.hidden || !xfShown(view) || e.target.closest?.('.xf-panel, .xw-bar, .xf-menu, .xf-ctx, .xf-dlg'))) return;
   if (isTerm(view)) {                          // zsh plein écran : pas de raccourcis, la frappe va au terminal
     if (!shellForm.hidden && e.target !== shellIn && (e.key.length === 1 || e.key === 'Backspace')) shellIn.focus({ preventScroll: true });
     return;
