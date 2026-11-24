@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>25</b><span>mises à jour</span></div>
-    <div role="listitem"><b>39 h 31</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 11 151</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>26</b><span>mises à jour</span></div>
+    <div role="listitem"><b>40 h 02</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 11 323</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#26</span><time datetime="2026-11-24T03:29">03 h 29</time><a href="#malware">Un mineur de VibeCoin, et ClamAV pour s’en débarrasser</a></li>
       <li><span class="n">#25</span><time datetime="2026-11-24T02:58">02 h 58</time><a href="#pubs">Des pubs dans Firefaux, et uBlock Origin pour s’en débarrasser</a></li>
       <li><span class="n">#24</span><time datetime="2026-11-24T02:11">02 h 11</time><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></li>
       <li><span class="n">#23</span><time datetime="2026-11-24T01:35">01 h 35</time><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></li>
@@ -174,8 +175,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="pubs" aria-labelledby="t25">
-    <p class="meta"><span class="n">#25</span><span class="new">dernière</span><time datetime="2026-11-24T02:58">24 nov. 2026 · 02 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c513b29">c513b29</a><span>10 995 → 11 151 lignes</span></p>
+  <article class="maj latest" id="malware" aria-labelledby="t26">
+    <p class="meta"><span class="n">#26</span><span class="new">dernière</span><time datetime="2026-11-24T03:29">24 nov. 2026 · 03 h 29</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d25657a">d25657a</a><span>11 151 → 11 323 lignes</span></p>
+    <h2 id="t26"><a href="#malware">Un mineur de VibeCoin, et ClamAV pour s’en débarrasser</a></h2>
+    <ul>
+      <li>Les pièges : les pubs trop belles (1 000 000 de tokens, Windows 11, « votre PC est infecté »), le gros bouton TÉLÉCHARGER de telecharge.vibe, et le Bloqueur de Pubs GRATUIT Pro 2026 (non vérifié, quatre utilisateurs dont trois robots), qui désactive uBlock Origin au passage.</li>
+      <li>Un mineur de VibeCoin s’installe : il se fait appeler kworker-update, se cache dans ~/.cache et prend la moitié d’un processeur. Les agents ralentissent, le PC chauffe, htop le montre.</li>
+      <li>Tué, il revient : cron le relance chaque minute, et au démarrage. crontab -l le trahit, crontab -r le coupe.</li>
+      <li>ClamAV : sudo apt install clamav, puis sudo freshclam (la base livrée ne connaît pas VibeCoin), puis clamscan -r --remove ~. Il supprime les fichiers, pas le processus : kill kworker-update, ensuite, et cette fois c’est pour de bon.</li>
+      <li>Trois succès Steam, dont un caché pour ceux qui laissent tourner le mineur.</li>
+    </ul>
+    <blockquote>« Le seul code de ce projet qui tourne sans bug, c’est le mineur. Il n’a pas été écrit par nos agents. »<cite>l’agent, 03 h 29</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-clamscan.png" title="Voir en grand"><img src="assets/screen-clamscan.png" width="900" height="540" loading="lazy" alt="Le terminal : kill kworker-update (relancé une minute plus tard par cron), puis clamscan -r ~ trouve trois fichiers infectés : le mineur Unix.Coinminer.Xmrig, le script recompense-1000000-tokens.sh et le module bloqueur-gratuit@pro2026.xpi ; le résumé de l’analyse suit."></a><figcaption>clamscan -r ~, après sudo freshclam.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="pubs" aria-labelledby="t25">
+    <p class="meta"><span class="n">#25</span><time datetime="2026-11-24T02:58">24 nov. 2026 · 02 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c513b29">c513b29</a><span>10 995 → 11 151 lignes</span></p>
     <h2 id="t25"><a href="#pubs">Des pubs dans Firefaux, et uBlock Origin pour s’en débarrasser</a></h2>
     <ul>
       <li>Sans bloqueur, Firefaux affiche des pubs : un bandeau en tête de chaque page web, et des pop-ups au chargement (trois au plus, avec une croix minuscule). Chacun prend de la RAM ; htop montre un processus de contenu par pop-up.</li>
