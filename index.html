@@ -515,7 +515,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 
 /* session graphique Xfce (commande xfce) : bureau, fenêtres et tableau de bord, aux couleurs et aux graphismes choisis.
    Sous le toast, le kernel panic et le balayage CRT : les réglages « Graphismes » s'appliquent au bureau comme au terminal. */
-#xfce { position: fixed; inset: 0; z-index: 6; display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--bg2); }
+#xfce { position: fixed; inset: 0; z-index: 6; display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); background: var(--bg2); }   /* la colonne ne dépasse jamais l'écran, même si le tableau de bord déborde */
 #xfce[hidden] { display: none; }
 .xf-panel {
   position: relative; z-index: 2; display: flex; align-items: center; gap: .6ch;
@@ -541,6 +541,23 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 @keyframes bump { 0% { transform: scale(1.7); filter: brightness(2); } 100% { transform: none; filter: none; } }
 .xf-cost[hidden] { display: none; }
 .xf-user { color: var(--dim); }
+/* la zone de notifications : une icône par chose à voir, le journal des notifications */
+.xf-tray { display: flex; align-items: center; gap: .4ch; }
+.xf-tray button { padding: 0 .7ch; border: 1px solid transparent; border-radius: 3px; color: var(--fg); white-space: nowrap; }
+.xf-tray button:hover, .xf-tray button[aria-expanded="true"] { border-color: var(--rule); background: rgba(255, 255, 255, .06); }
+.xf-tray .bad { color: var(--ink); background: var(--red); font-weight: 700; }
+.xf-tray .warn { color: var(--orange); }
+.xf-tray .dim { color: var(--dim); }
+.xf-notes { position: absolute; top: calc(var(--lh) + .5em); right: .5ch; z-index: 4; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(52ch, calc(100vw - 2ch)); max-height: 70vh;
+  border: 1px solid var(--orange); border-radius: 4px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); }
+.xf-notes[hidden] { display: none; }
+.xf-notes h3 { padding: .5em 1ch; border-bottom: 1px solid var(--sep); color: var(--orange); font-size: 1em; }
+.xf-notes ol { min-height: 0; overflow: auto; margin: 0; padding: .3em 0; list-style: none; }
+.xf-notes li { display: grid; grid-template-columns: 6ch minmax(0, 1fr); gap: 1ch; padding: .3em 1ch; border-bottom: 1px solid var(--sep); white-space: normal; }
+.xf-notes li .h { color: var(--dim); }
+.xf-notes li.ach .m { color: var(--green); }
+.xf-notes .row { display: flex; justify-content: space-between; gap: 1ch; padding: .4em 1ch; color: var(--dim); }
+.xf-notes .row button { padding: 0 1ch; border: 1px solid var(--rule); border-radius: 3px; color: var(--fg); }
 .xf-desk { position: relative; z-index: 0; isolation: isolate; overflow: hidden; }
 .xf-wall {
   position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 1.2em;
@@ -1429,12 +1446,13 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="xf-panel" role="toolbar" aria-label="Tableau de bord Xfce">
     <button type="button" class="xf-apps" aria-haspopup="menu" aria-expanded="false" aria-controls="xf-menu">▦ Applications</button>
     <nav class="xf-tasks" aria-label="Fenêtres ouvertes"></nav>
-    <span class="xf-sys"><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button><span class="xf-clock"></span><span class="xf-user"></span></span>
+    <span class="xf-sys"><span class="xf-tray" role="group" aria-label="Zone de notifications"></span><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button><span class="xf-clock"></span><span class="xf-user"></span></span>
   </div>
   <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div><div class="xf-icons" role="group" aria-label="Icônes du bureau"></div></div>
   <div class="xf-menu" id="xf-menu" role="menu" aria-label="Applications" hidden></div>
   <div class="xf-ctx" id="xf-ctx" role="menu" aria-label="Menu contextuel" hidden></div>
   <div class="xf-sw" id="xf-sw" role="listbox" aria-label="Fenêtres ouvertes" hidden></div>
+  <div class="xf-notes" id="xf-notes" role="dialog" aria-label="Journal des notifications" hidden></div>
 </div>
 <section id="panic" hidden aria-label="Crash système">
   <div class="kp-log" aria-hidden="true"></div>
@@ -2398,6 +2416,7 @@ function ach(id) {
   if (!ACH_ON || !a || G.ach[id]) return false;
   G.ach[id] = Date.now();
   achQ.push(a);
+  noteAdd(`Succès débloqué : ${a.n}`, 'ach');
   if (id !== 'all' && ACH.every(x => x.id === 'all' || G.ach[x.id])) ach('all');
   saveGame();
   setTimeout(achPump);                           // après le tic : ceux qui tombent ensemble partent ensemble
@@ -3010,6 +3029,7 @@ const toastEl = $('#toast');
 let toastTimer = 0;
 function toast(h, ms = 1600) {
   toastEl.innerHTML = h;
+  noteAdd(toastEl.textContent, 'toast');          // le journal des notifications de Xfce s'en souvient
   toastEl.classList.add('on');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove('on'), ms);
@@ -6450,8 +6470,81 @@ function xfPanelTick() {
   if (claudeOn) c.textContent = `${cli().glyph} $${usd(usage.usd)}`;
   for (const n in xw) xfLabel(n);
   xfIconsSync();
+  xfTrayDraw();
 }
 setInterval(xfPanelTick, 1000);
+
+/* la zone de notifications (le tableau de bord, à droite) : une icône pour chaque chose qui attend, un clic ouvre la bonne appli
+   (Blunderbird ou mail, status.vibe ou incident, les PR sur GitHype ou pr list, actu, keys) ; ◔ : le journal des notifications, les
+   toasts et les succès de la session (les 30 derniers), qui filent trop vite pour être lus. */
+const NOTES = [];
+let notesSeen = 0;
+const xfTrayEl = $('#xfce .xf-tray'), xfNotesEl = $('#xf-notes');
+function noteAdd(t, k) {
+  try {                                            // un toast pendant le chargement (le journal n'existe pas encore) : tant pis
+    const m = String(t || '').replace(/\s+/g, ' ').trim();
+    if (!m || NOTES[0]?.m === m && Date.now() - NOTES[0].t < 1500) return;   // le même toast, relancé : une seule ligne
+    NOTES.unshift({ t: Date.now(), m, k });
+    if (NOTES.length > 30) NOTES.length = 30;
+    if (!xfNotesEl.hidden) xfNotesDraw();
+  } catch { /* plus tard */ }
+}
+function xfOpenUrl(url, cmd) {                     // Firefaux s'il est installé, sinon la commande dans le terminal
+  if (installed.has('firefaux')) { xfLaunch('firefaux'); setTimeout(() => PROGS.firefaux.go?.(url), 0); }
+  else typeIntoShell(cmd);
+}
+function xfTrayItems() {                           // [clé, glyphe, texte, classe, info-bulle] : ce qui mérite une icône en ce moment
+  const L = [];
+  if (IDLE) {
+    const u = mailUnread();
+    if (u) L.push(['mail', '✉', String(u), '', `${plural(u, 'courriel')} non lu${u > 1 ? 's' : ''} : ${installed.has('blunderbird') ? 'Blunderbird' : 'mail, dans le terminal'}`]);
+    if (G.inc) L.push(['inc', '▲', G.inc.id, 'bad', `Incident de prod : ${INC_KINDS[G.inc.k].t} · status.vibe`]);
+    if (G.pr?.open?.length) L.push(['pr', '⇄', String(G.pr.open.length), 'warn', `${plural(G.pr.open.length, 'PR')} ouverte${G.pr.open.length > 1 ? 's' : ''} à relire · GitHype`]);
+    if (G.world?.ev) L.push(['world', '◌', '', 'warn', `${worldName(G.world.ev)} · actu`]);
+    if (G.leak) L.push(['leak', '✗', 'CLÉ', 'bad', `Clé d’API exposée : −$${usd(G.leak.lost)} · keys rotate`]);
+  }
+  const n = Math.max(0, NOTES.length - notesSeen);
+  L.push(['notes', '◔', n ? String(n) : '', n ? '' : 'dim', `Journal des notifications${n ? ` : ${n} nouvelle${n > 1 ? 's' : ''}` : ''}`]);
+  return L;
+}
+let xfTraySig = '';
+function xfTrayDraw() {
+  if (!xfOn) return;
+  const L = xfTrayItems(), sig = JSON.stringify([L, !xfNotesEl.hidden]);
+  if (sig === xfTraySig) return;
+  xfTraySig = sig;
+  xfTrayEl.innerHTML = L.map(([k, g, t, c, tip]) => `<button type="button" class="${c}" data-tray="${k}" title="${esc(tip)}" aria-label="${esc(tip)}"${k === 'notes' ? ` aria-expanded="${!xfNotesEl.hidden}"` : ''}>`
+    + `${esc(g)}${t ? ' ' + esc(t) : ''}</button>`).join('');
+}
+function xfNotesDraw() {
+  xfNotesEl.innerHTML = '<h3>Notifications</h3>'
+    + (NOTES.length ? `<ol>${NOTES.map(x => `<li class="${x.k}"><span class="h">${new Date(x.t).toTimeString().slice(0, 5)}</span><span class="m">${esc(x.m)}</span></li>`).join('')}</ol>`
+      : '<ol><li><span class="h"></span><span class="m dim">Rien pour l’instant. Ça ne durera pas.</span></li></ol>')
+    + `<div class="row"><span>${plural(NOTES.length, 'notification')} cette session</span><button type="button" data-notes="clear">Tout effacer</button></div>`;
+}
+function xfNotesToggle(on = xfNotesEl.hidden) {
+  xfNotesEl.hidden = !on;
+  if (on) { xfMenuClose(); xfCtxClose(); xfNotesDraw(); notesSeen = NOTES.length; }
+  xfTraySig = '';
+  xfTrayDraw();
+}
+xfTrayEl.addEventListener('click', e => {
+  const b = e.target.closest('[data-tray]');
+  if (!b) return;
+  const k = b.dataset.tray;
+  if (k === 'notes') return xfNotesToggle();
+  xfNotesToggle(false);
+  if (k === 'mail') return installed.has('blunderbird') ? xfLaunch('blunderbird') : typeIntoShell('mail');
+  if (k === 'inc') return xfOpenUrl('https://status.vibe/', 'incident');
+  if (k === 'pr') return xfOpenUrl(prUrl(), 'pr list');
+  if (k === 'world') return typeIntoShell('actu');
+  if (k === 'leak') return typeIntoShell('keys');
+});
+xfNotesEl.addEventListener('click', e => {
+  if (e.target.closest('[data-notes="clear"]')) { NOTES.length = 0; notesSeen = 0; xfNotesDraw(); xfTraySig = ''; xfTrayDraw(); }
+});
+addEventListener('pointerdown', e => { if (!xfNotesEl.hidden && !e.target.closest('#xf-notes, [data-tray="notes"]')) xfNotesToggle(false); }, true);
+addEventListener('keydown', e => { if (e.key === 'Escape' && !xfNotesEl.hidden) { e.preventDefault(); xfNotesToggle(false); } });
 
 /* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
    navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
