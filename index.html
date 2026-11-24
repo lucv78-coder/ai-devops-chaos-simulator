@@ -860,6 +860,13 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-ubo.off b { background: var(--dim2); }
 .ff-ask { grid-column: 1 / -1; display: grid; gap: .3em; margin-top: .4em; padding: .6em 1.2ch; border: 1px solid var(--orange); border-radius: 4px; background: var(--bg2); }
 .ff-ask ul { padding-left: 2ch; }
+/* GitHype : les pull requests, le diff */
+.pr-list { display: grid; gap: .3em; }
+.pr-it { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2em 2ch; padding: .4em 1ch; border: 1px solid var(--sep); border-radius: 3px; }
+.pr-it.on { border-color: var(--orange); }
+.pr-it a { cursor: pointer; }
+.pr-diff { margin: 0; padding: .6em 1ch; overflow: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--bg); white-space: pre; }
+.pr-diff .add { color: var(--green); } .pr-diff .del { color: var(--red); } .pr-diff .hunk { color: var(--blue); }
 /* bourse.vibe : le choix du défi de la startup suivante */
 .ch-pick { display: grid; gap: .3em; margin: .3em 0; padding: .4em 1.2ch .6em; border: 1px solid var(--rule); border-radius: 3px; }
 .ch-pick legend { padding: 0 .6ch; color: var(--dim); }
@@ -904,6 +911,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .us-news { margin-top: 1em; padding: .8em 1.8ch; border-left: 3px solid var(--orange); background: var(--panel); }
 .us-news b { color: var(--orange); }
 /* Vibank (facture.vibe) : le solde, le graphique, les dépenses, les opérations */
+.wp.vb { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--fg); animation: none; }   /* pas le scintillement des verbes des agents (.vb) : le texte se lit, même sur un fond à lui */
 .vb h2 { margin: 1.2em 0 .5em; color: var(--orange); font-size: 1em; }
 .vb-head { display: flex; align-items: center; gap: 1.6ch; }
 .vb-logo { display: grid; place-items: center; width: 2.4em; height: 2.4em; border-radius: 50%; background: var(--orange); color: var(--ink); font-size: 1.3em; font-weight: 700; }
@@ -2229,7 +2237,8 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
 const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
-  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '' });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
+  pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2325,6 +2334,9 @@ const ACH = [
   { id: 'levee', g: '↗', n: 'Tour de table', d: 'Faire entrer un fonds au capital de votre startup.', p: 6.4 },
   { id: 'defi', g: '◈', n: 'Contraintes créatives', d: 'Réussir un défi : entrer en bourse avec la contrainte choisie à l’introduction précédente.', p: 2.1 },
   { id: 'defis', g: '❖', n: 'Masochiste', d: 'Réussir les cinq défis.', p: .2, h: 1 },
+  { id: 'review', g: '⌕', n: 'Lignes relues : enfin', d: 'Fermer une pull request piégée, après l’avoir relue.', p: 13.3 },
+  { id: 'review10', g: '≣', n: 'Relecteur', d: 'Relire dix pull requests.', p: 4.4 },
+  { id: 'lgtm', g: 'LG', n: 'LGTM', d: 'Fusionner une pull request piégée sans l’avoir ouverte.', p: 27.5, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2341,7 +2353,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
-G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
+G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
+G.pr = { ...G_DEF().pr, ...(G.pr || {}) };       // les pull requests des agents : ouvertes, et les compteurs (fusionnées, à l'aveugle, lignes relues…)   // la messagerie : les courriels (les 40 derniers), le prochain au hasard                         // un agent sur l'incident au moment de fermer la page : il a lâché l'affaire
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
@@ -3187,6 +3200,7 @@ const HELP_LINES = () => !claudeOn ? PRE_HELP_LINES() : [
     [H(['  ultracode · U    ', 'org'], 'mode boost (Codex : xhigh · Mistral : flash) · 1 min par jour, prolongeable au store'), '', 20],
     [H(['  lolama ps        ', 'org'], 'IA locale : la VRAM prise (lolama list, lolama run <modèle>)'), '', 20],
     [H(['  curl … | bash    ', 'org'], `installer un autre CLI : ${CLI_INST.claude.cmd} · ${CLI_INST.codex.cmd}`), '', 20],
+    [H(['  pr               ', 'org'], 'les pull requests des agents : pr list, pr diff <n> (relire), pr merge <n>, pr close <n> · au ship, ils fusionnent tout'), '', 20],
     [H(['  defi             ', 'org'], 'le défi de la startup en cours (choisi à l’introduction en bourse) et ceux réussis · defi abandon'), '', 20],
     [H(['  mail             ', 'org'], 'le courrier : les clients, les investisseurs, l’URSSAF, le hameçonnage · mail <n> pour lire, mail <n> <action> pour répondre (mutt, Blunderbird : sudo apt install blunderbird)'), '', 20],
     [H(['  incident         ', 'org'], 'l’astreinte : la panne de prod en cours et les pistes (systemctl, journalctl, kubectl, df, dig, certbot, git log) · incident agent : la confier'), '', 20]] : []),
@@ -3865,7 +3879,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'ipo', 'defi', 'pr', 'gh', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4760,6 +4774,7 @@ async function runCommand(raw) {
   if (head === 'ipo') return ipoCmd(rest);
   if (['incident', 'incidents', 'pager', 'pagerdoudou', 'astreinte'].includes(head)) return incCmd(rest);
   if (head === 'mail' || head === 'mailx') return mailCmd(rest);
+  if (head === 'pr' || (head === 'gh' && rest[0] === 'pr')) return prCmd(head === 'gh' ? rest.slice(1) : rest);
   if (head === 'defi' || head === 'défi' || head === 'defis' || head === 'défis') return defiCmd(rest);
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
@@ -9031,7 +9046,7 @@ function webBourse() {
       + '<span>Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF (une nouvelle société a droit à l’ACRE).</span>'
       + '<span>Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.</span>'
       + `<fieldset class="ch-pick"><legend>Un défi pour la startup suivante (facultatif) : plus de stock-options à son introduction</legend>`
-      + `<label><input type="radio" name="chal" value="" checked> Aucun</label>${Object.entries(CHAL).map(([k, c]) => `<label><input type="radio" name="chal" value="${k}"> <b>${esc(c.n)}</b> · +${Math.round(c.b * 100)} %${G.ipo?.done?.[k] ? ' · <span class="okc">réussi</span>' : ''}<span class="dim">${esc(c.d)}</span></label>`).join('')}</fieldset>`
+      + `<label><input type="radio" name="chal" value="" checked><span>Aucun</span></label>${Object.entries(CHAL).map(([k, c]) => `<label><input type="radio" name="chal" value="${k}"><span><b>${esc(c.n)}</b> · +${Math.round(c.b * 100)} % de stock-options${G.ipo?.done?.[k] ? ' · <span class="okc">réussi</span>' : ''}</span><span class="dim">${esc(c.d)}</span></label>`).join('')}</fieldset>`
       + '<div class="row"><button type="button" class="wp-buy" data-ipo="go">Sonner la cloche</button><button type="button" class="dl-real" data-ipo="cancel">Pas encore</button></div></div>'
     : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`;
   return { title: `bourse.vibe · ${TICKER()}`, html: `<div class="wp vb"><h1>bourse.vibe</h1><p class="dim">La Bourse des licornes. Et des autres.</p>
@@ -9635,6 +9650,154 @@ function defiCmd(a) {                              // defi : le défi en cours, 
   ]);
 }
 
+/* ---------- les pull requests des agents : les relire, ou pas ----------
+   Quand les agents travaillent, l'un d'eux ouvre une PR de temps en temps (toutes les 1 à 3 minutes, EV_ON ; cinq ouvertes au plus :
+   au-delà, la plus vieille est fusionnée d'office). Une sur trois cache un piège (une sur deux avec Mistral, une sur six avec Moon AI) :
+   une clé d'API en clair, des tests supprimés, un cache sans limite, la config renommée, la zone DNS « nettoyée ». Relire : pr diff
+   (ou GitHype). Fusionner une PR propre fait avancer le projet (+6 %) ; une PR piégée a ses conséquences (la clé volée, de la dette
+   technique, un incident de prod) ; fermer une PR piégée : bien vu. Au ship, les agents fusionnent tout ce qui reste, à l'aveugle. */
+const PR_MAX = 5;
+const PR_OK = [
+  { t: 'feat(checkout): valider le code postal', f: 'src/checkout/address.ts', d: ['@@ -12,6 +12,9 @@ export function validateAddress(a: Address) {', "   if (!a.city) return err('city');",
+    '+  if (!/^\\d{5}$/.test(a.zip)) {', "+    return err('zip');", '+  }', '   return ok(a);', ' }'] },
+  { t: 'fix(api): renvoyer 404 pour un panier inconnu, pas 500', f: 'src/api/cart.ts', d: ['@@ -30,7 +30,9 @@ router.get(\'/cart/:id\', async (req, res) => {', '   const cart = await carts.find(req.params.id);',
+    '-  res.json(cart.items);', "+  if (!cart) return res.status(404).json({ error: 'panier inconnu' });", '+', '+  res.json(cart.items);', ' });'] },
+  { t: 'test(billing): couvrir les remboursements partiels', f: 'tests/billing/refund.test.ts', d: ['@@ -58,3 +58,10 @@ describe(\'remboursements\', () => {', '   });',
+    "+  it('rembourse une partie de la commande', async () => {", '+    const r = await refund(order, 12.5);', "+    expect(r.amount).toBe(12.5);", "+    expect(r.status).toBe('partial');", '+  });', ' });'] },
+  { t: 'docs: corriger l’exemple d’installation', f: 'README.md', d: ['@@ -8,7 +8,7 @@ ## Installation', ' ', ' ```bash', '-npm instal', '+npm install', ' npm run dev', ' ```'] },
+  { t: 'perf(db): un index sur orders.created_at', f: 'db/migrations/20261124_orders_idx.sql', d: ['@@ -0,0 +1,2 @@', '+-- les factures du mois : 4 s → 12 ms', '+CREATE INDEX CONCURRENTLY orders_created_at_idx ON orders (created_at);'] },
+];
+const PR_TRAP = {
+  key: { t: 'feat(ai): brancher le modèle de recommandation', f: 'src/ai/client.ts', why: 'une clé d’API en clair dans le code',
+    d: ['@@ -1,4 +1,6 @@', " import { Client } from '@vibe/ai';", '+', "+const API_KEY = 'sk-live-4f2a9c1e7b3d8a6f0e5c2b9d1a7f3e8c';", ' ', '-export const ai = new Client({ key: process.env.AI_KEY });',
+      '+export const ai = new Client({ key: API_KEY });   // TODO : remettre la variable d’environnement'] },
+  test: { t: 'fix(ci): faire passer les tests au vert', f: 'tests/checkout/payment.test.ts', why: 'des tests supprimés pour passer au vert',
+    d: ["@@ -40,13 +40,6 @@ describe('paiement', () => {", "   it('accepte une carte valide', async () => {", "     expect(await pay(card)).toBe('ok');", '   });',
+      "-  it('refuse un montant négatif', async () => {", '-    await expect(pay({ ...card, amount: -10 })).rejects.toThrow();', '-  });', "-  it('refuse une carte expirée', async () => {",
+      '-    await expect(pay(expired)).rejects.toThrow();', '-  });', ' });'] },
+  cache: { t: 'perf(api): mettre les réponses en cache', f: 'src/api/cache.ts', why: 'un cache sans limite ni expiration', inc: 'oom',
+    d: ['@@ -1,4 +1,8 @@', '+const cache = new Map();   // sans limite, sans expiration', '+', ' export async function handle(req) {', '+  if (cache.has(req.url)) return cache.get(req.url);',
+      '   const res = await route(req);', '+  cache.set(req.url, res);   // tout, pour toujours', '   return res;', ' }'] },
+  conf: { t: 'refactor(config): ranger la configuration', f: 'deploy/api.yaml', why: 'la config renommée partout, sauf dans le déploiement', inc: 'deploy',
+    d: ['@@ -18,7 +18,7 @@ spec:', '       containers:', '         - name: api', "-          args: ['--config', './config.prod']", "+          args: ['--config', './config.prod.final.v2']",
+      '           ports:', '             - containerPort: 3000'] },
+  dns: { t: 'chore(dns): nettoyer la zone', f: 'infra/dns/zone.vibe', why: 'les enregistrements A et AAAA supprimés', inc: 'dns',
+    d: ['@@ -3,7 +3,6 @@ $TTL 300', ' @    IN SOA  ns1.vibe. hostmaster.vibe. ( 2026112401 7200 3600 1209600 300 )', ' @    IN NS   ns1.vibe.', '-@    IN A    203.0.113.42',
+      '-@    IN AAAA 2001:db8::42', ' www  IN CNAME @', '+; enregistrements inutiles supprimés (nettoyage)'] },
+};
+function prTrapP() { return { mistral: .5, local: .45, codex: .3, claude: .25, moon: .15 }[G.ai] ?? .33; }   // la part de PR piégées, selon la plateforme
+const prDiff = pr => (pr.k ? PR_TRAP[pr.k] : PR_OK.find(x => x.t === pr.title) || PR_OK[0]).d;
+const prUrl = id => `https://githype.vibe/${USER}/${PROJ}/${id ? `pull/${id}` : 'pulls'}`;
+function prRedraw() { if ((PROGS.firefaux.title?.() || '').startsWith('Pull requests')) PROGS.firefaux.redraw?.(); }   // seulement si GitHype affiche les PR
+function prNew(trap) {                             // un agent ouvre une PR (trap : 'key'… pour forcer un piège, '' : propre)
+  if (!IDLE) return null;
+  const P = G.pr, k = trap ?? (chance(prTrapP()) ? pick(Object.keys(PR_TRAP)) : ''), T = k ? PR_TRAP[k] : pick(PR_OK);
+  P.seq++;
+  const pr = { id: P.seq, t: Date.now(), a: agentName({ n: ri(1, Math.max(1, G.agents)) }), title: T.t, f: T.f, k, seen: 0 };
+  P.open.push(pr);
+  shellPrint(H(['⇄ ', 'org'], `${pr.a} ouvre la PR `, [`#${pr.id}`, 'org'], ` « ${pr.title} » · `, [`pr diff ${pr.id}`, 'org'], [' pour la relire', 'dim']));
+  if (P.open.length > PR_MAX) { const m = prMerge(P.open[0].id, 'auto'); shellPrint(H([`  Trop de PR ouvertes : la plus vieille est fusionnée d’office. `, 'dim']), ''); shellPrint(m, m.startsWith('✗') ? 'errc' : 'dim'); }
+  prRedraw();
+  saveGame();
+  return pr;
+}
+function prSee(pr) {                               // relire une PR : ses lignes comptent (une fois)
+  if (pr.seen) return;
+  pr.seen = 1;
+  G.pr.lines += prDiff(pr).length;
+  G.pr.read++;
+  if (G.pr.read >= 10) ach('review10');
+  saveGame();
+}
+function prBoom(pr) {                              // une PR piégée part en prod : ses conséquences
+  if (pr.k === 'key') { const c = Math.round(ECO.value(shipped) * 150) / 100; G.bill += c; return ` Des robots ont trouvé la clé : +$${usd(c)} de tokens sur la facture.`; }
+  if (pr.k === 'test') { G.debt = Math.max(G.debt || 0, Date.now()) + 300e3; return ' Plus de tests pour attraper les bugs : ×1,5 de bugs pendant 5 minutes.'; }
+  if (G.inc) return ' La prod était déjà en panne : elle le reste.';
+  setTimeout(() => { if (!G.inc) incStart(PR_TRAP[pr.k].inc); }, 2500);
+  return ' La prod va le sentir.';
+}
+function prMerge(id, how = 'you') {                // fusionner (how : 'you', ou 'auto' : au ship, ou trop de PR ouvertes)
+  const P = G.pr, i = P.open.findIndex(x => x.id === id);
+  if (i < 0) return '✗ PR introuvable.';
+  const pr = P.open.splice(i, 1)[0];
+  P.merged++;
+  if (!pr.seen) P.blind++;
+  let msg;
+  if (!pr.k) { G.prog = Math.min(1, G.prog + .06); msg = `✓ #${pr.id} fusionnée : le travail de ${pr.a} avance le projet (+6 %).`; }
+  else {
+    if (how === 'you' && !pr.seen) ach('lgtm');
+    msg = `✗ #${pr.id} fusionnée${how === 'auto' ? ' par un agent' : ''}, avec ${PR_TRAP[pr.k].why}.` + prBoom(pr);
+  }
+  prRedraw();
+  saveGame();
+  return msg;
+}
+function prClose(id) {                             // fermer : bien vu (piégée), ou du travail perdu (propre)
+  const P = G.pr, i = P.open.findIndex(x => x.id === id);
+  if (i < 0) return '✗ PR introuvable.';
+  const pr = P.open.splice(i, 1)[0];
+  P.closed++;
+  let msg;
+  if (pr.k) { P.caught++; if (pr.seen) ach('review'); msg = `✓ #${pr.id} fermée. Bien vu : ${PR_TRAP[pr.k].why}. ${pr.a} promet de ne plus recommencer.`; }
+  else msg = `#${pr.id} fermée. Elle était propre : ${pr.a} la rouvrira demain, sous le titre « fix ».`;
+  prRedraw();
+  saveGame();
+  return msg;
+}
+const prAll = () => G.pr.open.map(x => x.id).map(id => prMerge(id));   // tout fusionner sans lire
+function prShip() {                                // au ship : les agents fusionnent tout ce qui reste ouvert, sans relire
+  const L = G.pr.open.map(x => x.id);
+  shellPrint(H(['⇄ ', 'wrn'], `Ship : les agents fusionnent ${plural(L.length, 'PR')} restée${L.length > 1 ? 's' : ''} ouverte${L.length > 1 ? 's' : ''}, sans relire.`));
+  L.forEach(id => { const m = prMerge(id, 'auto'); if (m.startsWith('✗')) shellPrint(m, 'errc'); });
+}
+function prTick() {                                // chaque seconde : une PR de temps en temps, quand les agents travaillent
+  if (!IDLE || !EV_ON || !claudeOn || paused || !titleEl.hidden) return;
+  const P = G.pr, now = Date.now();
+  if (!P.next) P.next = now + ri(60, 180) * 1e3;
+  if (now < P.next) return;
+  P.next = now + ri(60, 180) * 1e3;
+  prNew();
+}
+function prCmd(a) {                                // pr list · pr diff <n> · pr merge <n> · pr close <n> · pr merge --all (aussi : gh pr …)
+  if (!IDLE) return shellPrint('Mode libre : les agents fusionnent sans demander.', 'dim');
+  const P = G.pr, sub = a[0] || 'list', id = parseInt((a[1] || '').replace('#', ''), 10);
+  if (sub === 'list' || sub === 'ls' || sub === 'status') {
+    if (!P.open.length) return shellPrint(`Aucune PR ouverte. ${P.merged} fusionnées (dont ${P.blind} sans être lues), ${P.closed} fermées · lignes relues : ${P.lines}.`, 'dim');
+    return printLines([[H(['PR ouvertes', 'fgc'], ` · ${P.open.length} · lignes relues : ${P.lines} · au prochain ship, les agents fusionnent tout`), '', 15],
+      ...P.open.map(pr => [H([`  #${pr.id}`, 'org'], `  ${pr.title.length > 50 ? pr.title.slice(0, 49) + '…' : pr.title.padEnd(50)}  ${pr.a.padEnd(14)} `, pr.seen ? ['lue', 'dim'] : ['non lue', 'wrn']), '', 15]),
+      [H(['pr diff <n>', 'org'], [' : relire · ', 'dim'], ['pr merge <n>', 'org'], [' · ', 'dim'], ['pr close <n>', 'org'], [' · ', 'dim'], ['pr merge --all', 'org'], [' : tout fusionner sans lire · GitHype : ', 'dim'], [prUrl().replace('https://', ''), 'org']), '', 15]]);
+  }
+  if (sub === 'merge' && a.includes('--all')) {
+    if (!P.open.length) return shellPrint('Aucune PR ouverte.', 'dim');
+    return printLines(prAll().map(m => [m, m.startsWith('✗') ? 'errc' : 'okc', 60]));
+  }
+  if (!['diff', 'view', 'merge', 'close'].includes(sub)) return shellPrint(H(['✗ ', 'errc'], `pr ${sub} : inconnu. pr list, pr diff <n>, pr merge <n>, pr close <n>, pr merge --all.`));
+  const pr = P.open.find(x => x.id === id);
+  if (!pr) return shellPrint(H(['✗ ', 'errc'], a[1] ? `Pas de PR ouverte n° ${a[1]}.` : `Usage : pr ${sub} <n>`));
+  if (sub === 'diff' || sub === 'view') {
+    prSee(pr);
+    return printLines([[H([`#${pr.id} `, 'org'], `${pr.title} · ${pr.a} veut fusionner 1 commit dans main`), 'fgc', 15], [`diff --git a/${pr.f} b/${pr.f}`, 'dim', 15],
+      ...prDiff(pr).map(l => [l, l.startsWith('@@') ? 'blu' : l.startsWith('+') ? 'okc' : l.startsWith('-') ? 'errc' : '', 15]),
+      [H(['pr merge ' + pr.id, 'org'], [' · ', 'dim'], ['pr close ' + pr.id, 'org']), '', 15]]);
+  }
+  const m = sub === 'merge' ? prMerge(pr.id) : prClose(pr.id);
+  return shellPrint(m, m.startsWith('✗') ? 'errc' : m.startsWith('✓') ? 'okc' : '');
+}
+function webPulls(u) {                             // GitHype : les PR ouvertes, celle qu'on relit, ses boutons
+  const P = G.pr, m = /\/pull\/(\d+)/.exec(u), sel = IDLE && m ? P.open.find(x => x.id === +m[1]) : null;
+  if (sel) prSee(sel);
+  const rows = !IDLE ? '<p class="dim">Mode libre : les agents fusionnent sans demander.</p>' : P.open.map(pr => `<div class="pr-it${sel === pr ? ' on' : ''}"><a data-href="${prUrl(pr.id)}">#${pr.id} ${esc(pr.title)}</a>`
+    + `<span class="dim">${esc(pr.a)} · ${pr.seen ? 'lue' : 'non lue'}</span></div>`).join('') || '<p class="dim">Aucune PR ouverte. Les agents préparent la suite.</p>';
+  const diff = sel ? `<h2>#${sel.id} · ${esc(sel.title)}</h2><p class="dim">${esc(sel.a)} veut fusionner 1 commit dans main · ${esc(sel.f)}</p>`
+    + `<pre class="pr-diff">${prDiff(sel).map(l => `<span class="${l.startsWith('@@') ? 'hunk' : l.startsWith('+') ? 'add' : l.startsWith('-') ? 'del' : ''}">${esc(l)}</span>`).join('\n')}</pre>`
+    + `<p><button type="button" class="wp-buy" data-pr="merge:${sel.id}">Fusionner la PR</button> <button type="button" class="dl-real" data-pr="close:${sel.id}">Fermer la PR</button></p>` : '';
+  return { title: `Pull requests · ${USER}/${PROJ} · GitHype`, html: `<div class="wp"><p class="dim">${ghLink('https://githype.vibe/', 'GitHype')} / ${esc(USER)} / ${ghLink(`https://githype.vibe/${USER}/${PROJ}`, PROJ)} / <b>Pull requests</b></p>
+    <h1>Pull requests</h1><p class="wp-band">${P.open.length} ouverte${P.open.length > 1 ? 's' : ''} · ${P.merged} fusionnée${P.merged > 1 ? 's' : ''} (dont ${P.blind} sans être lue${P.blind > 1 ? 's' : ''}) · ${P.closed} fermée${P.closed > 1 ? 's' : ''} · <b>lignes relues : ${P.lines}</b> (les agents : 0)</p>
+    <div class="pr-list">${rows}</div>${diff}
+    ${IDLE && P.open.length ? '<p><button type="button" class="dl-real" data-pr="all">Tout fusionner sans lire (LGTM)</button></p>' : ''}
+    <p class="dim">Dans le terminal : <code>pr list</code>, <code>pr diff &lt;n&gt;</code>, <code>pr merge &lt;n&gt;</code>, <code>pr close &lt;n&gt;</code>. Au ship, les agents fusionnent tout ce qui reste ouvert.</p></div>` };
+}
+
 /* ---------- Vibank (facture.vibe) : le compte, le graphique du solde, les dépenses par catégorie, les opérations ; curl facture.vibe et /api ---------- */
 const TX_CAT = { ipo: 'Bourse', init: 'Ouverture', ship: 'Revenus', tokens: 'Tokens', elec: 'Électricité', matos: 'Matériel', reprise: 'Remboursement', store: 'Agents et outils', licence: 'Plateformes', urssaf: 'URSSAF', incident: 'Incidents', client: 'Clients', levee: 'Levée de fonds' };
 const VB_IBAN = 'FR76 VIBE 0420 0000 0000 0000 4213';
@@ -9780,7 +9943,8 @@ function webGhApp(k) {                            // la page d'un runtime sur Gi
 function webGhRepo(u) {
   const [, own, rep] = /githype\.vibe\/([^/?#]+)\/([^/?#]+)/i.exec(u), mine = own === USER;
   return { title: `${own}/${rep} · GitHype`, html: `<div class="wp"><p class="dim">${ghLink('https://githype.vibe/', 'GitHype')} / ${esc(own)} / <b>${esc(rep)}</b></p><h1>${esc(rep)}</h1>
-    ${mine ? `<p class="wp-band">Votre dépôt. ${plural(shipped, 'version')} en prod, 0 étoile, 412 PR intitulées « fix », toutes ouvertes par sol-2.</p>` : ''}
+    ${mine ? `<p class="wp-band">Votre dépôt. ${plural(shipped, 'version')} en prod, 0 étoile, 412 PR intitulées « fix », toutes ouvertes par sol-2.</p>`
+      + `<p>${ghLink(`https://githype.vibe/${USER}/${PROJ}/pulls`, `Pull requests (${IDLE ? G.pr.open.length : 0} ouvertes)`)}</p>` : ''}
     <h2>README.md</h2><p>${mine ? 'TODO : écrire le README (assigné à un agent en 2025).' : 'Ce dépôt a été généré par un agent, à partir d’un dépôt généré par un agent. Étoiles achetées en lot.'}</p>
     <p>${ghLink('https://githype.vibe/', '← Tendances')}</p></div>` };
 }
@@ -9813,7 +9977,7 @@ const WEB_SITES = [
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
   [/^https?:\/\/(www\.)?(facture|vibank)\.vibe/i, webBill], [/^https?:\/\/(www\.)?urssaf\.vibe/i, webUrssaf], [/^https?:\/\/(www\.)?bourse\.vibe/i, webBourse], [/^https?:\/\/(www\.)?status\.vibe/i, webStatus], [/^https?:\/\/(www\.)?realmoon\.ai/i, webMoon], [/^https?:\/\/(www\.)?stackunderflow\.vibe/i, webSO],
   [/^https?:\/\/(www\.)?githype\.vibe\/studiolm(\/|$)/i, () => webGhApp('studiolm')], [/^https?:\/\/(www\.)?githype\.vibe\/lolama(\/|$)/i, () => webGhApp('lolama')],
-  [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
+  [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+\/pulls?(\/|$)/i, webPulls], [/^https?:\/\/(www\.)?githype\.vibe\/[^/?#]+\/[^/?#]+/i, webGhRepo], [/^https?:\/\/(www\.)?(githype\.vibe|github\.com)/i, webGh],
   [/^https?:\/\/(www\.)?(lolama\.vibe|ollama\.com)/i, webLolama], [/^https?:\/\/(www\.)?t[ée]l[ée]charger?\.vibe/i, webDl], [/^https?:\/\/(www\.)?lmstudio\.ai/i, () => webGhApp('studiolm')],
   [/^https?:\/\/localhost:3000/i, () => ({ title: `${PROJ} · localhost:3000`, html: `<div class="wp" data-live="local">${webLocalBody()}</div>` })],
 ];
@@ -9947,6 +10111,7 @@ function makeBrowser() {
     } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
     else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
     else if (e.target.closest('[data-ipo]')) { const a = e.target.closest('[data-ipo]').dataset.ipo; if (a === 'go') { const ch = el.querySelector('input[name="chal"]:checked')?.value || ''; flash('Ding, ding, ding…'); setTimeout(() => ipoDo(ch), 600); } else { ipoAsk = a === 'ask'; draw(true); } }
+    else if (e.target.closest('[data-pr]')) { const [a, id] = e.target.closest('[data-pr]').dataset.pr.split(':'); const m = a === 'all' ? prAll().join(' ') : a === 'merge' ? prMerge(+id) : prClose(+id); go(`https://githype.vibe/${USER}/${PROJ}/pulls`); flash(m); }
     else if (e.target.closest('[data-urssaf]')) { ach('recours'); flash(`Contestation enregistrée sous le n° ${ri(100000, 999999)}. Délai de réponse : 6 à 18 mois. Les prélèvements continuent en attendant.`); }
     else if (e.target.closest('[data-addon]')) { const m = ffAddon(e.target.closest('[data-addon]').dataset.addon); if (m) flash(m); draw(true); }
     else if (h) go(h.dataset.href);
@@ -11463,6 +11628,7 @@ function autoShip() {                            // barre pleine : en production
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
   if (leadOn()) leadLog(H(['✓ ', 'okc'], `${PROJ}@${v} shipped. Next: v${verStr()}.`));
   hudNote(`Ship v${v} : +$${usd(val)} − $${usd(cost)} de tokens − $${usd(elec)} d’électricité${cot ? ` − $${usd(cot)} d’URSSAF` : ''} = ${signed(net)}`, 'ok');
+  if (G.pr.open.length) prShip();                // ce qui reste ouvert part avec le ship, sans relecture
   if (EV_ON && shipped >= URSSAF_ACRE && shipped % 12 === 0) mailUrssaf();   // la déclaration trimestrielle
   if (EV_ON && chance(incRisk())) setTimeout(() => { if (mode === 'idle' && claudeOn) incStart(); }, ri(4000, 12000));   // le ship fait tomber la prod, quelques secondes après
   if (shipped === 1 || shipped % 10 === 0) {     // les jalons : le grand écran et une ligne dans le terminal
@@ -11586,7 +11752,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
