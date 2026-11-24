@@ -26,6 +26,6 @@
 <rect x="186.0" y="555.5500000000001" width="908.0" height="50" rx="6" fill="#0d0800" stroke="#5c3d00"/>
 <text x="208.0" y="587.5500000000001" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, Menlo, 'DejaVu Sans Mono', monospace" font-size="18" fill="#ffb641" xml:space="preserve"><tspan fill="#ffcf6b">❯</tspan> claude --dangerously-skip-permissions <tspan fill="#fff0b3">"fais un jeu, rends-le viral, zéro bug"</tspan></text>
 <rect class="cur" x="1065.2" y="571.5500000000001" width="10" height="21" fill="#ffb641"/>
-<text x="640.0" y="643.5500000000001" text-anchor="middle" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, Menlo, 'DejaVu Sans Mono', monospace" font-size="18" fill="#a8711a">14 014 lignes · 1 fichier · 0 test · 0 relecture · 100 % généré · déployé un vendredi à 17 h</text>
+<text x="640.0" y="643.5500000000001" text-anchor="middle" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, Menlo, 'DejaVu Sans Mono', monospace" font-size="18" fill="#a8711a">14 037 lignes · 1 fichier · 0 test · 0 relecture · 100 % généré · déployé un vendredi à 17 h</text>
 <rect y="42" width="1280" height="658" fill="url(#scan)"/><rect y="42" width="1280" height="658" fill="url(#vig)"/>
 </svg>
