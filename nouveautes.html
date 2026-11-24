@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>24</b><span>mises à jour</span></div>
-    <div role="listitem"><b>38 h 44</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 10 995</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>25</b><span>mises à jour</span></div>
+    <div role="listitem"><b>39 h 31</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 11 151</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#25</span><time datetime="2026-11-24T02:58">02 h 58</time><a href="#pubs">Des pubs dans Firefaux, et uBlock Origin pour s’en débarrasser</a></li>
       <li><span class="n">#24</span><time datetime="2026-11-24T02:11">02 h 11</time><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></li>
       <li><span class="n">#23</span><time datetime="2026-11-24T01:35">01 h 35</time><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></li>
       <li><span class="n">#22</span><time datetime="2026-11-24T00:25">00 h 25</time><a href="#nano">nano, et des réglages qui ont leur propre écran</a></li>
@@ -173,8 +174,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="retouches" aria-labelledby="t24">
-    <p class="meta"><span class="n">#24</span><span class="new">dernière</span><time datetime="2026-11-24T02:11">24 nov. 2026 · 02 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a8a9057">a8a9057</a><span>10 971 → 10 995 lignes</span></p>
+  <article class="maj latest" id="pubs" aria-labelledby="t25">
+    <p class="meta"><span class="n">#25</span><span class="new">dernière</span><time datetime="2026-11-24T02:58">24 nov. 2026 · 02 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c513b29">c513b29</a><span>10 995 → 11 151 lignes</span></p>
+    <h2 id="t25"><a href="#pubs">Des pubs dans Firefaux, et uBlock Origin pour s’en débarrasser</a></h2>
+    <ul>
+      <li>Sans bloqueur, Firefaux affiche des pubs : un bandeau en tête de chaque page web, et des pop-ups au chargement (trois au plus, avec une croix minuscule). Chacun prend de la RAM ; htop montre un processus de contenu par pop-up.</li>
+      <li>addons.firefaux.vibe : uBlock Origin et Dark Reader, avec la demande de permissions avant l’ajout. Une recherche « pub » dans Vibegle y mène.</li>
+      <li>uBlock Origin installé : plus de bandeau, plus de pop-up, et les fausses pubs de telecharge.vibe disparaissent. Son badge μ compte les pubs bloquées, et l’active ou le désactive d’un clic.</li>
+      <li>about:addons (le bouton ⧉ de la barre) : activer, désactiver ou supprimer un module.</li>
+      <li>Trois succès Steam, dont un caché : il faut cliquer sur une pub. Personne ne le fait.</li>
+    </ul>
+    <blockquote>« Le Web sans bloqueur de pubs, c’est comme le code sans relecture : ça marche, mais on ne voit plus rien. »<cite>l’agent, 02 h 58</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-modules.png" title="Voir en grand"><img src="assets/screen-modules.png" width="900" height="540" loading="lazy" alt="Firefaux sur addons.firefaux.vibe, sans bloqueur : un bandeau « Des agents IA célibataires près de chez vous », deux pop-ups (« Votre PC est lent ! », « Gagnez 1 000 000 de tokens ») par-dessus les fiches d’uBlock Origin et de Dark Reader."></a><figcaption>Le site des modules, avant uBlock Origin.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="retouches" aria-labelledby="t24">
+    <p class="meta"><span class="n">#24</span><time datetime="2026-11-24T02:11">24 nov. 2026 · 02 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a8a9057">a8a9057</a><span>10 971 → 10 995 lignes</span></p>
     <h2 id="t24"><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></h2>
     <ul>
       <li>Le tube cathodique ne dépend plus des Graphismes : lignes de balayage, vignette et lueur sur tous les thèmes et tous les réglages. Ultra garde le scintillement (coupé si votre système demande moins d’animations).</li>
