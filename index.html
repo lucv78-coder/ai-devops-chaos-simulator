@@ -964,6 +964,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-card .price { color: var(--orange); font-weight: 700; font-size: 1.1em; }
 .wp-card .tag { padding: 0 .8ch; border-radius: 3px; background: var(--green); color: var(--ink); font-weight: 700; }
 .wp-card .tag.bad { background: var(--red); }
+/* une fenêtre Terminal inactive (Xfce) : l'image de son contenu, et son invite ; un clic la réveille */
+.xw-snap { display: flex; flex-direction: column; height: 100%; padding: .2em 1ch; overflow: hidden; cursor: text; }
+.xw-snap .out { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.xw-snap .ln { min-height: var(--lh); white-space: pre-wrap; overflow-wrap: anywhere; }
+.xw-snap .pr { color: var(--green); white-space: pre; }
 /* les versions terminal (façon mc, lynx, nvlc, steamcmd) : du texte, les couleurs du thème, la sélection en vidéo inverse */
 .mc, .lx, .nv, .sc { display: grid; padding: 0; }
 .tui-keys { display: flex; flex-wrap: wrap; gap: 0 1ch; padding: 0 .5ch; white-space: nowrap; }
@@ -2262,6 +2267,7 @@ const ACH = [
   { id: 'moon', g: '☾', n: 'Clair de lune', d: 'Passer Moon AI au premier plan. La seule plateforme qui marche (à peu près).', p: 2.4, t: () => G.ai === 'moon' && !!G.own.moon },
   { id: 'blur', g: '◐', n: 'Flouté', d: 'Masquer une donnée sensible avec moon blur.', p: 5.8 },
   { id: 'tui', g: '▤', n: 'Pas besoin de bureau', d: 'Ouvrir la version terminal d’une appli graphique, sans Xfce.', p: 11.2 },
+  { id: 'multi', g: '⧉', n: 'Multitâche', d: 'Avoir trois terminaux ouverts en même temps.', p: 9.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2914,6 +2920,98 @@ const HELP = '<kbd>A</kbd> agents · <kbd>L</kbd> disposition · <kbd>O</kbd> or
 const shell = $('#shell'), shellOut = $('#shell-out'), shellForm = $('#shell-form'), shellIn = $('#shell-in');
 const history_ = [];
 let hi = 0;
+/* plusieurs terminaux (tmux : Ctrl+B puis c ; Xfce : des fenêtres Terminal) : un seul vrai terminal dans le DOM, et un contexte rangé
+   par terminal (son affichage, son dossier, son historique). Changer de terminal échange les contextes ; pendant qu'une commande tourne,
+   on reste où l'on est (Ctrl+C d'abord). Une seule session d'agents pour tous. */
+const TERM_MAX = 6, TERMS = { zsh: { k: 1 } };
+let liveTerm = 'zsh', cmdBusy = 0;
+const isTerm = n => n === 'zsh' || !!PROGS[n]?.term;
+const termNum = n => n === 'zsh' ? 1 : PROGS[n]?.term || 0;
+
+function termSnap(n) {                             // l'image d'un terminal rangé (ou du terminal vivant, juste avant de le ranger)
+  const box = document.createElement('div'), out = document.createElement('div'), pr = document.createElement('div');
+  box.className = 'xw-snap';
+  out.className = 'out';
+  pr.className = 'pr';
+  const T = TERMS[n];
+  if (n === liveTerm) out.append(...[...shellOut.children].slice(-80).map(x => x.cloneNode(true)));
+  else if (T?.frag) out.append(...[...T.frag.children].slice(-80).map(x => x.cloneNode(true)));
+  pr.textContent = `${USER}@prod-01 ${tildePath(n === liveTerm ? cwd : T?.cwd || HOME)} ❯ ${n === liveTerm ? shellIn.value : T?.input || ''}`;
+  box.append(out, pr);
+  return box;
+}
+function termUse(n, force = false) {               // ce terminal devient le vrai : → false si une commande tourne encore
+  if (n === liveTerm) return true;
+  if (!TERMS[n]) return false;
+  if (cmdBusy && !force) { toast('Une commande tourne encore dans ce terminal : attendez-la, ou <kbd>Ctrl+C</kbd>.', 2600); return false; }
+  const from = liveTerm, snap = xfOn && xw[from] ? termSnap(from) : null;
+  const T = TERMS[from], U = TERMS[n];
+  T.frag = document.createDocumentFragment();
+  T.frag.append(...shellOut.childNodes);
+  Object.assign(T, { cwd: [...cwd], oldpwd: oldpwd ? [...oldpwd] : null, hist: [...history_], hi, input: shellIn.value });
+  shellOut.replaceChildren(...(U.frag ? U.frag.childNodes : []));
+  U.frag = null;
+  cwd = U.cwd ? [...U.cwd] : [...HOME];
+  oldpwd = U.oldpwd ? [...U.oldpwd] : null;
+  history_.length = 0;
+  history_.push(...(U.hist || []));
+  hi = U.hi ?? history_.length;
+  shellIn.value = U.input || '';
+  liveTerm = n;
+  updateCwd();
+  if (xfOn) {                                      // le vrai terminal passe dans la fenêtre choisie ; la fenêtre quittée garde son image
+    if (xw[n]) xw[n].body.replaceChildren(shell);
+    if (snap && xw[from]) xw[from].body.replaceChildren(snap);
+    [from, n].forEach(k => { if (xw[k]) xfLabel(k); });
+  }
+  return true;
+}
+function termNew() {                               // Ctrl+B puis c, tmux new-window, xfce4-terminal : un terminal de plus, dans ~
+  const used = new Set(tabs.filter(isTerm).map(termNum));
+  if (used.size >= TERM_MAX) { toast(`${TERM_MAX} terminaux, c’est assez : tmux aussi a ses limites.`); return false; }
+  if (cmdBusy) { toast('Une commande tourne encore dans ce terminal : attendez-la, ou <kbd>Ctrl+C</kbd>.', 2600); return false; }
+  let k = 2;
+  while (used.has(k)) k++;
+  const n = `zsh${k}`;
+  PROGS[n] = { label: 'zsh', term: k };
+  TERMS[n] = { k, cwd: [...HOME], hist: [], frag: null };
+  tabs.push(n);
+  if (xfOn) xfEnsure(n);
+  switchTab(n);
+  shellPrint(H(['zsh ', 'dim'], `· terminal ${k} · son dossier, son historique · `, ['exit', 'org'], ' le ferme · ', ['Ctrl+B puis 0-9', 'org'], ' change de fenêtre.'));
+  if (tabs.filter(isTerm).length >= 3) ach('multi');
+  renderTabs();
+  return true;
+}
+function termClose(n, force = false) {             // exit, Ctrl+B puis &, la croix de la fenêtre : le terminal s'en va (le premier reste)
+  if (!PROGS[n]?.term) return false;
+  if (cmdBusy && n === liveTerm && !force) { toast('Une commande tourne encore dans ce terminal : attendez-la, ou <kbd>Ctrl+C</kbd>.', 2600); return false; }
+  if (n === liveTerm || view === n) {              // on passe d'abord au terminal voisin
+    const ts = tabs.filter(isTerm), i = ts.indexOf(n), to = ts[i - 1] || ts[i + 1] || 'zsh';
+    termUse(to, force);
+    if (view === n) { lastView = ''; view = ''; switchTab(to); }
+    if (liveTerm === n) return false;
+  }
+  tabs.splice(tabs.indexOf(n), 1);
+  if (xw[n]) xfRemove(n);
+  if (lastView === n) lastView = '';
+  delete TERMS[n];
+  delete PROGS[n];
+  renderTabs();
+  return true;
+}
+function tmuxCmd(a) {                              // tmux, depuis l'intérieur de la session (elle tourne déjà dans tmux)
+  if (!installed.has('tmux')) return notInstalled('tmux', 'tmux');
+  const c = a[0] || '';
+  if (['new-window', 'neww'].includes(c)) return void setTimeout(termNew, 0);   // après la commande : elle tient encore ce terminal
+  if (['kill-window', 'killw'].includes(c)) return liveTerm === 'zsh' ? shellPrint('tmux : le premier terminal porte la session, il reste.', 'wrn') : void setTimeout(() => termClose(liveTerm), 0);
+  if (['ls', 'list-sessions'].includes(c)) return shellPrint(`${PROJ}: ${tabs.length} windows (created ${new Date(bootT).toDateString()}) (attached)`);
+  if (['list-windows', 'lsw'].includes(c)) return printLines(tabs.map((t, i) => [`${i}: ${PROGS[t].label}${t === view ? '*' : t === lastView ? '-' : ''} (1 panes)${isTerm(t) ? ` ${tildePath(t === liveTerm ? cwd : TERMS[t]?.cwd || HOME)}` : ''}`, '', 15]));
+  if (['next-window', 'next', 'previous-window', 'prev'].includes(c)) { const i = tabs.indexOf(view), d = c.startsWith('n') ? 1 : -1; return void switchTab(tabs[(i + d + tabs.length) % tabs.length]); }
+  if (!c || ['new', 'new-session', 'attach', 'a'].includes(c)) return shellPrint('sessions should be nested with care, unset $TMUX to force', 'wrn');
+  return printLines([[H('Usage : ', ['tmux new-window', 'org'], ' · ', ['kill-window', 'org'], ' · ', ['list-windows', 'org'], ' · ', ['next-window', 'org'], ' · ', ['ls', 'org']), '', 20],
+    [H(['  Ou le préfixe : ', 'dim'], ['Ctrl+B', 'org'], [' puis c (nouveau), & (fermer), n / p (suivant, précédent), 0-9, w (la liste).', 'dim']), '', 20]]);
+}
 
 function shellPrint(t, cls = '') {
   const el = document.createElement('div');
@@ -2956,7 +3054,7 @@ async function typeIntoShell(text) {
   return submit(text);
 }
 
-const TABS_HELP = () => [H(['Onglets', 'fgc'], ['  clic dans la barre du bas · Ctrl+B puis 0-9 · ou 0-9 hors du terminal', 'dim']), '', 20];
+const TABS_HELP = () => [H(['Onglets', 'fgc'], ['  clic dans la barre du bas · Ctrl+B puis 0-9 · ou 0-9 hors du terminal · Ctrl+B puis c : un terminal de plus (exit le ferme)', 'dim']), '', 20];
 const FILE_HELP = () => [
   [H(['Fichiers', 'fgc'], ['  (arborescence Linux · Tab complète les noms)', 'dim']), '', 20],
   [H(['  ls · dir · tree   ', 'org'], 'lister un dossier (ls -la pour les détails)'), '', 20],
@@ -3703,7 +3801,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4592,6 +4690,12 @@ async function runCommand(raw) {
   if (['store', 'shop', 'boutique', 'magasin'].includes(head)) { openStore(); return; }
   if (head === 'fallout' || head === 'bunker') return ['off', 'exit', 'quit'].includes(rest[0]) ? (prefs.theme === 'abri' ? bunkerExit() : shellPrint('> VOUS N’ÊTES PAS DANS LE BUNKER.')) : bunkerEnter();
   if (['exit', 'logout', 'quit'].includes(head) && prefs.theme === 'abri') return bunkerExit();   // dans le bunker, exit remonte à la surface
+  if (['exit', 'logout'].includes(head) && liveTerm !== 'zsh') { const n = liveTerm; setTimeout(() => termClose(n), 0); return shellPrint('logout', 'dim'); }
+  if (head === 'tmux') return tmuxCmd(rest);
+  if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
+    if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
+    return void setTimeout(termNew, 0);          // après la commande : elle tient encore ce terminal
+  }
   if (head === 'hack' && prefs.theme === 'abri') return hackStart();   // hors du bunker, « hack » reste une commande inconnue
   if (head === 'hack' && !claudeOn) {
     shellPrint(H(['zsh: command not found: ', 'errc'], 'hack'));
@@ -5106,17 +5210,18 @@ function renderTabs() {
 function switchTab(name) {
   if (xfOn) { if (mode !== 'launching') xfFocus(name); return; }   // bureau Xfce : l'onglet devient la fenêtre active
   if (!tabs.includes(name) || name === view || mode === 'launching') return;
+  if (isTerm(name) && !termUse(name)) return;      // un autre terminal : ses contextes d'abord
   if (view) lastView = view;
   view = name;
-  document.body.dataset.view = name;
+  document.body.dataset.view = isTerm(name) ? 'zsh' : name;
   APP_PARTS.forEach(e => { e.inert = name !== 'claude'; });
-  shell.inert = name !== 'zsh' && name !== 'claude';
+  shell.inert = !isTerm(name) && name !== 'claude';
   tabs.forEach(t => { if (PROGS[t].el) PROGS[t].el.hidden = t !== name; });
   document.body.classList.remove('idle');
   if (name === 'claude') {
     relayout();
     if (!shell.hidden) shellIn.focus({ preventScroll: true });
-  } else if (name === 'zsh') {
+  } else if (isTerm(name)) {
     if (!shellOut.childElementCount) loginBanner();
     if (!shellForm.hidden) shellIn.focus({ preventScroll: true });
     shellOut.scrollTop = shellOut.scrollHeight;
@@ -5152,9 +5257,9 @@ function closeTab(name) {
   if (lastView === name) lastView = '';
   renderTabs();
 }
-const closeProgs = () => tabs.filter(t => PROGS[t].make).forEach(closeTab);   // un reboot tue tous les programmes
+const closeProgs = () => { tabs.filter(t => PROGS[t].make).forEach(closeTab); tabs.filter(t => PROGS[t]?.term).forEach(t => termClose(t, true)); };   // un reboot tue tous les programmes
 tabsEl.addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) switchTab(b.dataset.tab); });
-// préfixe tmux : Ctrl+B puis 0-9 (onglet), n (suivant), p (précédent), l (dernier). Capturé avant le terminal.
+// préfixe tmux : Ctrl+B puis 0-9 (onglet), n (suivant), p (précédent), l (dernier), c (nouveau terminal), & (le fermer), w (la liste). Capturé avant le terminal.
 let prefixAt = 0;
 addEventListener('keydown', e => {
   if (!panicEl.hidden || picker.open || stDlg.open || storeDlg.open || !titleEl.hidden || mode === 'launching') return;
@@ -5171,6 +5276,9 @@ addEventListener('keydown', e => {
   e.preventDefault();                            // la touche qui suit le préfixe ne s'écrit pas dans le terminal
   e.stopPropagation();
   const d = /^(?:Digit|Numpad)(\d)$/.exec(e.code), k = e.key.toLowerCase(), i = tabs.indexOf(view);
+  if (k === 'c') return void termNew();
+  if (k === '&' || k === 'x') return void (PROGS[view]?.term ? termClose(view) : toast(isTerm(view) ? 'Le premier terminal reste : il porte la session.' : 'Ctrl+B puis & ferme une fenêtre de terminal.'));
+  if (k === 'w') return void toast(tabs.map((t, j) => `${j}:${PROGS[t].label}${t === view ? '*' : ''}`).join(' · '), 3000);
   const t = d ? tabs[+d[1]] : /^\d$/.test(k) ? tabs[+k] : k === 'n' ? tabs[(i + 1) % tabs.length]
     : k === 'p' ? tabs[(i + tabs.length - 1) % tabs.length] : k === 'l' ? lastView : '';
   if (t) switchTab(t);
@@ -5951,9 +6059,9 @@ const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
 const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66],
   nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82] };
-const xfName = n => n === 'zsh' ? 'Terminal' : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
-const xfTitle = n => n === 'zsh' ? `Terminal · ${USER}@prod-01: ${tildePath(cwd)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
-const xfIcon = n => n === 'zsh' ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
+const xfName = n => n === 'zsh' ? 'Terminal' : PROGS[n]?.term ? `Terminal ${PROGS[n].term}` : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
+const xfTitle = n => isTerm(n) ? `${xfName(n)} · ${USER}@prod-01: ${tildePath(n === liveTerm ? cwd : TERMS[n]?.cwd || HOME)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
+const xfIcon = n => isTerm(n) ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
 function xfShown(n) { return !!xw[n] && !xw[n].min && !xw[n].closed; }
 
 function xfceCmd(args) {
@@ -6015,7 +6123,7 @@ function xfExit(quiet) {
 
 /* fenêtres */
 function xfMount(n, body) {
-  if (n === 'zsh') body.appendChild(shell);
+  if (isTerm(n)) body.appendChild(n === liveTerm ? shell : termSnap(n));
   else if (n === 'claude') {
     const box = document.createElement('div');
     box.className = 'xw-app';
@@ -6026,7 +6134,7 @@ function xfMount(n, body) {
 }
 function xfUnmount(n) {
   const app = $('#app');
-  if (n === 'zsh') app.insertBefore(shell, $('#foot'));
+  if (isTerm(n)) { if (n === liveTerm) app.insertBefore(shell, $('#foot')); }
   else if (n === 'claude') { app.prepend(...APP_PARTS); APP_PARTS.forEach(e => { e.inert = true; }); }
   else if (PROGS[n]?.el) document.body.appendChild(PROGS[n].el);
 }
@@ -6053,7 +6161,7 @@ function xfEnsure(n) {
   w.ro.observe(w.body);
   const bar = el.querySelector('.xw-bar');
   el.addEventListener('pointerdown', () => xfFocus(n, false), true);   // un clic dans une fenêtre la passe devant
-  el.addEventListener('click', e => { if (n === 'zsh' && !e.target.closest('button') && !String(getSelection())) shellIn.focus({ preventScroll: true }); });
+  el.addEventListener('click', e => { if (isTerm(n) && n === liveTerm && !e.target.closest('button') && !String(getSelection())) shellIn.focus({ preventScroll: true }); });
   bar.addEventListener('pointerdown', e => xfDrag(e, w, 'move'));
   bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) xfMax(n); });
   el.querySelector('.xw-grip').addEventListener('pointerdown', e => xfDrag(e, w, 'size'));
@@ -6116,13 +6224,14 @@ function xfDrag(e, w, kind) {                    // barre de titre : déplacer ;
 }
 function xfFocus(n, domFocus = true) {           // passe la fenêtre devant, en fait l'onglet actif (le clavier la suit)
   if (!xfOn || !tabs.includes(n)) return;
+  if (isTerm(n) && !termUse(n)) return;            // un autre terminal : le vrai passe dans sa fenêtre
   const w = xfEnsure(n), fresh = view !== n || w.min || w.closed;
   w.min = w.closed = false;
   w.el.hidden = false;
   if (+w.el.style.zIndex !== xfZ) w.el.style.zIndex = ++xfZ;
   if (view !== n) { if (view) lastView = view; view = n; }
   for (const k in xw) xw[k].el.classList.toggle('on', k === n);
-  if (n === 'zsh') {
+  if (isTerm(n)) {
     if (!shellOut.childElementCount) loginBanner();
     if (domFocus && !shellForm.hidden) shellIn.focus({ preventScroll: true });
     if (fresh) shellOut.scrollTop = shellOut.scrollHeight;
@@ -6157,6 +6266,7 @@ function xfMax(n) {
   xfApply(w);
 }
 function xfClose(n) {
+  if (PROGS[n]?.term) return termClose(n);         // une fenêtre Terminal de plus : elle se ferme pour de bon
   if (n === 'zsh') {                             // le terminal se cache ; le menu Applications le rouvre, historique compris
     xw.zsh.closed = true;
     xw.zsh.el.hidden = true;
@@ -6210,6 +6320,7 @@ function xfMenuOpen() {
         : k === 'local' ? (rtAny() ? `${rtName()} · aucune API · la carte graphique fait tout` : 'non installée · sudo apt install lolama (ou lolama.vibe, githype.vibe dans Firefaux)')
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
+    + item('newterm', '❯', 'Nouveau terminal', 'une autre fenêtre : son dossier, son historique (ou Ctrl+B puis c)')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
     + item('xfce4-about', 'ⓘ', 'À propos', 'la config du PC, l’éditeur, les contributeurs, les agents')
     + item('reboot', '↻', 'Redémarrer', 'le PC repasse par le BIOS · DEL pour le setup')
@@ -6231,6 +6342,7 @@ function xfLaunch(id) {
   if (id === 'settings') return openSettings();
   if (id === 'store') return openStore();
   if (id === 'zsh') return xfFocus('zsh');
+  if (id === 'newterm') return void termNew();
   if (Object.hasOwn(CLIS, id) && claudeOn && provider === id) return xfFocus('claude');
   if (PROGS[id]?.make && installed.has(PROGS[id].pkg || id) && mode !== 'launching') return openTab(id);
   if (hackGame) { toast('Partie de hack en cours dans le terminal : finissez-la d’abord.'); return xfFocus('zsh'); }
@@ -9604,7 +9716,7 @@ function startGame() {
   titleEl.classList.add('out');
   $('#app').inert = false;
   setTimeout(() => { titleEl.hidden = true; titleEl.classList.remove('out'); }, reducedMotion.matches ? 0 : 300);
-  if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
+  if (isTerm(view) && !shellForm.hidden) shellIn.focus({ preventScroll: true });
 }
 titleEl.addEventListener('click', e => {
   const b = e.target.closest('[data-t]');
@@ -9673,8 +9785,10 @@ async function launchAgents() {                  // claude ou codex : même équ
 
 let chain = Promise.resolve();
 function submit(v) {
-  if (mode === 'shipping' || mode === 'rebooting') return runCommand(v);
-  chain = chain.then(() => runCommand(v)).catch(() => {});
+  cmdBusy++;                                     // une commande en cours : le terminal ne change pas sous ses pieds
+  const done = () => { cmdBusy = Math.max(0, cmdBusy - 1); };
+  if (mode === 'shipping' || mode === 'rebooting') return Promise.resolve(runCommand(v)).finally(done);
+  chain = chain.then(() => runCommand(v)).catch(() => {}).finally(done);
   return chain;
 }
 shellForm.addEventListener('submit', e => {
@@ -10072,7 +10186,7 @@ let shipQueued = false;
 function act(name) {
   if (name === 'fullscreen') {                   // toujours permis, même en game over
     toggleFullscreen();
-    if (view === 'zsh' && !xfOn && !shellForm.hidden) shellIn.focus({ preventScroll: true });   // la frappe reste au terminal
+    if (isTerm(view) && !xfOn && !shellForm.hidden) shellIn.focus({ preventScroll: true });   // la frappe reste au terminal
     return;
   }
   if (mode === 'gameover' && !['term', 'ship', 'settings', 'store'].includes(name)) { toast('Game over : tapez <kbd>restart</kbd> dans le terminal.'); openShell(); return; }
@@ -10103,7 +10217,7 @@ addEventListener('keydown', e => {
   }
   // bureau Xfce : menu ouvert, aucune fenêtre active, ou bouton du bureau (barre, titre) : pas de raccourci
   if (xfOn && (!xfMenuEl.hidden || !xfCtxEl.hidden || !xfShown(view) || e.target.closest?.('.xf-panel, .xw-bar, .xf-menu, .xf-ctx'))) return;
-  if (view === 'zsh') {                          // zsh plein écran : pas de raccourcis, la frappe va au terminal
+  if (isTerm(view)) {                          // zsh plein écran : pas de raccourcis, la frappe va au terminal
     if (!shellForm.hidden && e.target !== shellIn && (e.key.length === 1 || e.key === 'Backspace')) shellIn.focus({ preventScroll: true });
     return;
   }
@@ -10128,7 +10242,7 @@ addEventListener('keydown', e => {
   else if (k === 'escape' && !shell.hidden) closeShell();
 });
 shell.addEventListener('click', () => {          // zsh plein écran : un clic n'importe où remet le curseur dans l'invite
-  if (view === 'zsh' && !shellForm.hidden && !String(getSelection())) shellIn.focus({ preventScroll: true });
+  if (isTerm(view) && !shellForm.hidden && !String(getSelection())) shellIn.focus({ preventScroll: true });
 });
 
 let idleTimer = 0;
@@ -11048,7 +11162,7 @@ $('#sto-list').addEventListener('click', e => {
   $('#sto-msg').textContent = m;
 });
 $('#sto-close').addEventListener('click', () => storeDlg.close());
-storeDlg.addEventListener('close', () => { if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true }); });
+storeDlg.addEventListener('close', () => { if (isTerm(view) && !shellForm.hidden) shellIn.focus({ preventScroll: true }); });
 
 /* ---------- allumage : BIOS (Energy Star compris), GRUB, noyau, logo de Vibian, systemd, puis le terminal ----------
    Nouvelle partie, Continuer, et chaque fois que le PC tombe. La durée suit le matériel (un disque dur, c'est long).
@@ -11720,7 +11834,7 @@ async function pcCrash(kind, L) {
         'Achetez mieux (', ['B', 'org'], ', ou matos.vibe dans Firefaux) ou relancez moins d’agents (', [`${G.ai} --agents 1`, 'org'], ').'));
     }
     shellPrint(H(['  htop', 'org'], [', ', 'dim'], ['sensors', 'org'], [' et ', 'dim'], ['free', 'org'], [' : pour voir si le PC est à terre.', 'dim']));
-    if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
+    if (isTerm(view) && !shellForm.hidden) shellIn.focus({ preventScroll: true });
   } });
 }
 async function pcReboot() {                      // reboot : un redémarrage propre, BIOS compris (DEL pendant le POST : le setup)
@@ -11742,7 +11856,7 @@ async function pcReboot() {                      // reboot : un redémarrage pro
     shellPrint(H(['✓ ', 'okc'], 'Le PC a redémarré.', set.length ? [` BIOS : ${set.join(', ')}.`, 'dim'] : ''));
     if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
     else if (was) { shellPrint(H(['tmux attach ', 'dim'], '· vos agents repartent.')); submit(IDLE ? G.ai : provider); }
-    if (view === 'zsh' && !shellForm.hidden) shellIn.focus({ preventScroll: true });
+    if (isTerm(view) && !shellForm.hidden) shellIn.focus({ preventScroll: true });
   } });
 }
 function raidFail() {                            // RAID 0 : quatre fois plus vite, quatre fois plus de risques
