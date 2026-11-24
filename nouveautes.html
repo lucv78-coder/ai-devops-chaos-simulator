@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>29</b><span>mises à jour</span></div>
-    <div role="listitem"><b>41 h 43</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 11 617</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>30</b><span>mises à jour</span></div>
+    <div role="listitem"><b>42 h 23</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 11 743</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#30</span><time datetime="2026-11-24T05:50">05 h 50</time><a href="#moon">Moon AI : la seule plateforme qui marche (à peu près), et Moon Blur</a></li>
       <li><span class="n">#29</span><time datetime="2026-11-24T05:10">05 h 10</time><a href="#urssaf">L’URSSAF, et la taxe au giga votée à l’Assemblée</a></li>
       <li><span class="n">#28</span><time datetime="2026-11-24T04:38">04 h 38</time><a href="#vibank">Vibank : facture.vibe devient une banque, et curl la lit</a></li>
       <li><span class="n">#27</span><time datetime="2026-11-24T03:59">03 h 59</time><a href="#apropos">À propos : la config du PC, l’éditeur, les contributeurs, les agents</a></li>
@@ -178,8 +179,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="urssaf" aria-labelledby="t29">
-    <p class="meta"><span class="n">#29</span><span class="new">dernière</span><time datetime="2026-11-24T05:10">24 nov. 2026 · 05 h 10</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8e16279">8e16279</a><span>11 560 → 11 617 lignes</span></p>
+  <article class="maj latest" id="moon" aria-labelledby="t30">
+    <p class="meta"><span class="n">#30</span><span class="new">dernière</span><time datetime="2026-11-24T05:50">24 nov. 2026 · 05 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e3e678b">e3e678b</a><span>11 617 → 11 743 lignes</span></p>
+    <h2 id="t30"><a href="#moon">Moon AI : la seule plateforme qui marche (à peu près), et Moon Blur</a></h2>
+    <ul>
+      <li>Une cinquième plateforme : Moon AI. La licence la plus chère du store, Moon 1 d’emblée (4× le travail de Codestral, deux fois moins de bugs que Claude), et les tokens les plus chers : il relit tout, deux fois.</li>
+      <li>Trois modèles du jeu servis par Moon AI (Claude Opus 5.5, GPT-6.2 Sol, Codestral), relus par Moon 1, qui ne s’en cache pas.</li>
+      <li>Ses agents et son orchestrateur dénigrent la concurrence : Codex, Claude, Mistral et l’IA locale y passent.</li>
+      <li>Moon Blur masque les données sensibles détectées : dans les volets des agents, et à la main avec moon blur « votre texte » ([MB-NOM01], [MB-EMAIL01]…). La détection n’est pas exhaustive.</li>
+      <li>realmoon.ai, dans Firefaux : le vrai logo, sans pub. Pour l’installer : curl -fsSL https://realmoon.ai/install.sh | sh, puis moon. Moon AI est un produit de Stellarr Studio, utilisé avec son accord.</li>
+      <li>Deux succès Steam.</li>
+    </ul>
+    <blockquote>« Moon 1 a relu toutes les mises à jour précédentes. Il a trouvé une virgule. »<cite>l’agent, 05 h 50</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-moon.png" title="Voir en grand"><img src="assets/screen-moon.png" width="900" height="540" loading="lazy" alt="realmoon.ai dans Firefaux : le logo Moon AI, « Moon AI, votre espace de travail avec l’IA. », la commande d’installation et les quatre modèles (Moon 1, et trois modèles du jeu via Moon AI), sur l’interface sombre de Moon AI."></a><figcaption>realmoon.ai, avec le vrai logo.</figcaption></figure>
+      <figure><a href="assets/screen-moon-agents.png" title="Voir en grand"><img src="assets/screen-moon-agents.png" width="900" height="540" loading="lazy" alt="Quatre agents Moon AI au travail : l’orchestrateur en haut (« Plan validé, relu, puis relu encore. C’est pour ça que c’est cher. »), et dans les volets, des lignes Moon Blur (données sensibles détectées et masquées) et des piques (« Note : Mistral est passé par là. On a nettoyé. »)."></a><figcaption>Les agents Moon AI, Moon Blur et piques compris.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="urssaf" aria-labelledby="t29">
+    <p class="meta"><span class="n">#29</span><time datetime="2026-11-24T05:10">24 nov. 2026 · 05 h 10</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8e16279">8e16279</a><span>11 560 → 11 617 lignes</span></p>
     <h2 id="t29"><a href="#urssaf">L’URSSAF, et la taxe au giga votée à l’Assemblée</a></h2>
     <ul>
       <li>urssaf.vibe : l’Union pour le Recouvrement des Sommes Sur les Agents Facturés. Votre espace cotisant, le barème calculé sur votre prochain ship, et un bouton pour contester (réponse sous 6 à 18 mois).</li>
