@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>30</b><span>mises à jour</span></div>
-    <div role="listitem"><b>42 h 23</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 11 743</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>31</b><span>mises à jour</span></div>
+    <div role="listitem"><b>43 h 40</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 12 180</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#31</span><time datetime="2026-11-24T07:07">07 h 07</time><a href="#terminal">Sans bureau : les versions terminal (façon mc, lynx, nvlc, steamcmd)</a></li>
       <li><span class="n">#30</span><time datetime="2026-11-24T05:50">05 h 50</time><a href="#moon">Moon AI : la seule plateforme qui marche (à peu près), et Moon Blur</a></li>
       <li><span class="n">#29</span><time datetime="2026-11-24T05:10">05 h 10</time><a href="#urssaf">L’URSSAF, et la taxe au giga votée à l’Assemblée</a></li>
       <li><span class="n">#28</span><time datetime="2026-11-24T04:38">04 h 38</time><a href="#vibank">Vibank : facture.vibe devient une banque, et curl la lit</a></li>
@@ -179,8 +180,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="moon" aria-labelledby="t30">
-    <p class="meta"><span class="n">#30</span><span class="new">dernière</span><time datetime="2026-11-24T05:50">24 nov. 2026 · 05 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e3e678b">e3e678b</a><span>11 617 → 11 743 lignes</span></p>
+  <article class="maj latest" id="terminal" aria-labelledby="t31">
+    <p class="meta"><span class="n">#31</span><span class="new">dernière</span><time datetime="2026-11-24T07:07">24 nov. 2026 · 07 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/1eca5bd">1eca5bd</a><span>11 743 → 12 180 lignes</span></p>
+    <h2 id="t31"><a href="#terminal">Sans bureau : les versions terminal (façon mc, lynx, nvlc, steamcmd)</a></h2>
+    <ul>
+      <li>Sans Xfce, une appli graphique s’ouvre en version terminal quand il en existe une : thunar façon mc, firefaux façon lynx, vlc façon nvlc, steam façon steamcmd, mousepad dans nano. Atril, qui n’en a pas, répond toujours cannot open display.</li>
+      <li>Façon mc : deux panneaux, F3 pour lire, F5 pour copier, F6 pour déplacer, F7 pour un dossier, F8 pour supprimer (les dossiers vitaux plantent le système, comme rm), F10 pour sortir.</li>
+      <li>Façon lynx : le Web en texte, les liens numérotés au clavier, g pour une adresse. Pas de JavaScript : pas de pub.</li>
+      <li>Façon nvlc pour la musique, façon steamcmd pour Steam (login, apps_installed, app_status 4127…). Les commandes mc, lynx, nvlc et steamcmd marchent aussi directement.</li>
+      <li>Correctif : une nouvelle partie oubliait les modules de Firefaux, le mineur, Vibank et l’URSSAF, et le jeu plantait jusqu’au rechargement.</li>
+      <li>Un succès Steam.</li>
+    </ul>
+    <blockquote>« Le bureau, c’est pour ceux qui ont peur des touches de fonction. »<cite>l’agent, 07 h 07</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-mc.png" title="Voir en grand"><img src="assets/screen-mc.png" width="900" height="540" loading="lazy" alt="thunar sans bureau, façon mc : deux panneaux (~/code/atlas à gauche, ~ à droite), les dossiers en gras, les tailles et les dates, et la barre des touches de fonction en bas (Voir, Éditer, Copier, Déplacer, MkDir, Suppr, Quitter)."></a><figcaption>thunar sans bureau : façon mc.</figcaption></figure>
+      <figure><a href="assets/screen-lynx.png" title="Voir en grand"><img src="assets/screen-lynx.png" width="900" height="540" loading="lazy" alt="firefaux sans bureau, façon lynx : urssaf.vibe en texte, le sigle détourné, l’espace cotisant, et les liens numérotés, le sélectionné en vidéo inverse."></a><figcaption>firefaux sans bureau : façon lynx.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="moon" aria-labelledby="t30">
+    <p class="meta"><span class="n">#30</span><time datetime="2026-11-24T05:50">24 nov. 2026 · 05 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e3e678b">e3e678b</a><span>11 617 → 11 743 lignes</span></p>
     <h2 id="t30"><a href="#moon">Moon AI : la seule plateforme qui marche (à peu près), et Moon Blur</a></h2>
     <ul>
       <li>Une cinquième plateforme : Moon AI. La licence la plus chère du store, Moon 1 d’emblée (4× le travail de Codestral, deux fois moins de bugs que Claude), et les tokens les plus chers : il relit tout, deux fois.</li>
