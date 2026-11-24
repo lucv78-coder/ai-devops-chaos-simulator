@@ -580,6 +580,16 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
   background: var(--panel); border: 1px solid var(--orange); border-radius: 0 0 4px 4px; box-shadow: 0 .8em 2.4em rgba(0, 0, 0, .65);
 }
 .xf-menu[hidden] { display: none; }
+/* gestionnaire de fenêtres : l'aperçu du bord pendant un glissement, le sélecteur Alt+² */
+.xf-snap { position: absolute; z-index: 10000000; border: 2px solid var(--orange); border-radius: 4px; background: color-mix(in srgb, var(--orange) 14%, transparent); pointer-events: none; transition: left .12s, top .12s, width .12s, height .12s; }
+.xf-snap[hidden] { display: none; }
+.xf-sw { position: absolute; left: 50%; top: 42%; z-index: 5; transform: translate(-50%, -50%); display: grid; gap: .2em; width: min(56ch, calc(100vw - 4ch)); padding: .6em 1ch; border: 1px solid var(--orange); border-radius: 6px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); }
+.xf-sw[hidden] { display: none; }
+.xf-sw-it { display: grid; grid-template-columns: 2.5ch minmax(0, 1fr) auto; gap: 1ch; align-items: center; padding: .3em 1ch; border-radius: 3px; color: var(--dim); text-align: left; }
+.xf-sw-it.on { background: color-mix(in srgb, var(--orange) 22%, transparent); color: var(--fg); font-weight: 700; }
+.xf-sw-it .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xf-sw-it .d { color: var(--dim2); font-size: .85em; }
+.xf-sw p { margin-top: .3em; color: var(--dim); font-size: .85em; }
 .xf-who { padding: .15em 1.5ch .4em; margin-bottom: .2em; border-bottom: 1px solid var(--sep); color: var(--orange); font-weight: 700; }
 .xf-cat { padding: .35em 1.5ch .05em; color: var(--dim2); }
 .xf-it {
@@ -1424,6 +1434,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div><div class="xf-icons" role="group" aria-label="Icônes du bureau"></div></div>
   <div class="xf-menu" id="xf-menu" role="menu" aria-label="Applications" hidden></div>
   <div class="xf-ctx" id="xf-ctx" role="menu" aria-label="Menu contextuel" hidden></div>
+  <div class="xf-sw" id="xf-sw" role="listbox" aria-label="Fenêtres ouvertes" hidden></div>
 </div>
 <section id="panic" hidden aria-label="Crash système">
   <div class="kp-log" aria-hidden="true"></div>
@@ -2348,6 +2359,7 @@ const ACH = [
   { id: 'burnout', g: 'zZ', n: 'Burn-out', d: 'Pousser un humain à la démission à force de shipper le vendredi.', p: 3.7, h: 1 },
   { id: 'fuite', g: 'sk', n: 'sk-live-…', d: 'Se faire voler une clé d’API : un agent a commité le .env.', p: 22.2, h: 1 },
   { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
+  { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6218,6 +6230,8 @@ async function xfEnter() {
   xfPanelTick();
   shellPrint(H(['✓ ', 'okc'], 'Session Xfce ouverte. ', ['Applications', 'org'], ' (en haut à gauche, ou Alt+F1) pour lancer les programmes · ',
     ['Déconnexion', 'org'], ' pour revenir au terminal.'));
+  shellPrint(H(['  Alt+²', 'org'], [' : changer de fenêtre · ', 'dim'], ['Ctrl+Alt+← →', 'org'], [' : les moitiés de l’écran (ou glisser contre un bord) · ', 'dim'], ['Ctrl+Alt+↑ ↓', 'org'], [' : agrandir, réduire · ', 'dim'],
+    ['Ctrl+Alt+D', 'org'], [' : le bureau · ', 'dim'], ['Ctrl+Alt+W', 'org'], [' : fermer', 'dim']));
 }
 function xfExit(quiet) {
   if (!xfOn) return;
@@ -6266,7 +6280,7 @@ function xfEnsure(n) {
     + '<div class="xw-body"></div><span class="xw-grip" aria-hidden="true"></span>';
   const k = Object.keys(xw).length % 5, [fx, fy, fw, fh] = XF_PLACE[n] || [.1 + .04 * k, .08 + .04 * k, .6, .64];
   const dw = deskEl.clientWidth, dh = deskEl.clientHeight;   // clientWidth : insensible à l'animation du tube
-  const w = xw[n] = { el, body: el.querySelector('.xw-body'), x: dw * fx, y: dh * fy, w: dw * fw, h: dh * fh, min: false, max: dw < 760, closed: false };
+  const w = xw[n] = { n, el, body: el.querySelector('.xw-body'), x: dw * fx, y: dh * fy, w: dw * fw, h: dh * fh, min: false, max: dw < 760, closed: false, tile: '', prev: null };
   el.style.zIndex = ++xfZ;
   deskEl.appendChild(el);
   xfMount(n, w.body);
@@ -6293,6 +6307,7 @@ function xfRemove(n) {
   xfUnmount(n);
   w.el.remove();
   delete xw[n];
+  xfMru = xfMru.filter(k => k !== n);
 }
 function xfApply(w) {                            // géométrie en pixels, bornée au bureau (la barre de titre reste attrapable)
   const dw = deskEl.clientWidth, dh = deskEl.clientHeight, em = parseFloat(getComputedStyle(document.body).fontSize);
@@ -6318,20 +6333,37 @@ function xfLabel(n) {
   w.el.querySelector('.xw-ic').textContent = xfIcon(n);
   w.el.setAttribute('aria-label', xfName(n));
 }
-function xfDrag(e, w, kind) {                    // barre de titre : déplacer ; poignée : redimensionner
+function xfDrag(e, w, kind) {                    // barre de titre : déplacer (contre un bord : la moitié de l'écran) ; poignée : redimensionner
   if (e.button !== 0 || e.target.closest('button') || w.max) return;
   e.preventDefault();
-  const t = e.currentTarget, sx = e.clientX, sy = e.clientY, o = { x: w.x, y: w.y, w: w.w, h: w.h };
+  const t = e.currentTarget, sx = e.clientX, sy = e.clientY, R0 = deskEl.getBoundingClientRect();
+  if (kind === 'move' && w.tile && w.prev) {       // une fenêtre collée qu'on reprend : sa taille d'avant, sous le pointeur
+    const fx = (sx - R0.left - w.x) / w.w;
+    Object.assign(w, { w: w.prev.w, h: w.prev.h, tile: '' });
+    w.x = sx - R0.left - fx * w.w;
+    xfApply(w);
+  }
+  if (kind === 'size') w.tile = '';
+  const o = { x: w.x, y: w.y, w: w.w, h: w.h };
+  let zone = '';
   t.setPointerCapture(e.pointerId);
   w.el.classList.add('drag');
   const mv = ev => {
     const dx = ev.clientX - sx, dy = ev.clientY - sy;
     if (kind === 'move') { w.x = o.x + dx; w.y = o.y + dy; } else { w.w = o.w + dx; w.h = o.h + dy; }
     xfApply(w);
+    if (kind === 'move') {                         // contre un bord : l'aperçu de ce que ça donnera
+      const R = deskEl.getBoundingClientRect(), px = ev.clientX - R.left, py = ev.clientY - R.top;
+      zone = px <= 6 ? 'l' : px >= R.width - 6 ? 'r' : py <= 4 ? 'max' : '';
+      xfSnapHint(zone);
+    }
   };
   const up = () => {
     ['pointermove', 'pointerup', 'pointercancel'].forEach((ev, i) => t.removeEventListener(ev, i ? up : mv));
     w.el.classList.remove('drag');
+    xfSnapHint('');
+    if (zone === 'max') { w.prev = { ...o }; w.max = true; xfApply(w); }
+    else if (zone) xfTile(w.n, zone, o);
   };
   t.addEventListener('pointermove', mv);
   t.addEventListener('pointerup', up);
@@ -6345,6 +6377,7 @@ function xfFocus(n, domFocus = true) {           // passe la fenêtre devant, en
   w.el.hidden = false;
   if (+w.el.style.zIndex !== xfZ) w.el.style.zIndex = ++xfZ;
   if (view !== n) { if (view) lastView = view; view = n; }
+  xfMru = [n, ...xfMru.filter(k => k !== n)];       // le sélecteur Alt+² propose d'abord les plus récentes
   for (const k in xw) xw[k].el.classList.toggle('on', k === n);
   if (isTerm(n)) {
     if (!shellOut.childElementCount) loginBanner();
@@ -6419,6 +6452,90 @@ function xfPanelTick() {
   xfIconsSync();
 }
 setInterval(xfPanelTick, 1000);
+
+/* le gestionnaire de fenêtres au clavier. Alt+Tab et Super appartiennent au système (Windows, macOS, le bureau qui fait tourner le
+   navigateur), et Alt+F4 fermerait le navigateur : le bureau du jeu prend Alt+² (Alt+` en QWERTY : la touche sous Échap) pour passer
+   d'une fenêtre à l'autre, et Ctrl+Alt pour le reste : ← → les moitiés de l'écran, ↑ agrandir, ↓ restaurer puis réduire, D le bureau
+   (le vrai raccourci de Xfce), W fermer. */
+let xfMru = [], xfSw = null, xfDeskHid = null;
+const xfSwEl = $('#xf-sw');
+const xfSnapEl = document.createElement('div');
+xfSnapEl.className = 'xf-snap';
+xfSnapEl.hidden = true;
+deskEl.appendChild(xfSnapEl);
+function xfSnapHint(zone) {                        // l'aperçu : la moitié gauche, la moitié droite, ou tout le bureau
+  xfSnapEl.hidden = !zone;
+  if (!zone) return;
+  const dw = deskEl.clientWidth, dh = deskEl.clientHeight;
+  Object.assign(xfSnapEl.style, { left: (zone === 'r' ? dw / 2 : 0) + 'px', top: '0px', width: (zone === 'max' ? dw : dw / 2) + 'px', height: dh + 'px' });
+}
+function xfTile(n, side, prev) {                   // la moitié gauche ou droite du bureau (prev : la géométrie à retrouver ensuite)
+  const w = xw[n];
+  if (!w) return;
+  if (prev || (!w.tile && !w.max)) w.prev = prev ? { ...prev } : { x: w.x, y: w.y, w: w.w, h: w.h };
+  const dw = deskEl.clientWidth, dh = deskEl.clientHeight;
+  Object.assign(w, { max: false, tile: side, x: side === 'r' ? dw / 2 : 0, y: 0, w: dw / 2, h: dh });
+  xfApply(w);
+  if (['l', 'r'].every(sd => Object.values(xw).some(x => x.tile === sd && !x.min && !x.closed))) ach('tiling');
+}
+function xfUp(n) { const w = xw[n]; if (w && !w.max) { w.max = true; xfApply(w); } }
+function xfDown(n) {                               // agrandie : restaurée ; collée : sa taille d'avant ; sinon : réduite
+  const w = xw[n];
+  if (!w) return;
+  if (w.max) { w.max = false; xfApply(w); }
+  else if (w.tile) { Object.assign(w, w.prev || {}); w.tile = ''; xfApply(w); }
+  else xfMin(n);
+}
+function xfDesk() {                                // Ctrl+Alt+D : tout réduire ; une seconde fois : tout revient
+  const shown = Object.keys(xw).filter(xfShown).sort((a, b) => xw[a].el.style.zIndex - xw[b].el.style.zIndex);
+  if (shown.length) {
+    xfDeskHid = shown;
+    shown.forEach(k => { xw[k].min = true; xw[k].el.hidden = true; });
+    xfNext('');
+  } else if (xfDeskHid) {
+    xfDeskHid.filter(k => xw[k]).forEach(k => xfFocus(k));
+    xfDeskHid = null;
+  }
+  renderTabs();
+}
+function xfWins() { const all = Object.keys(xw).filter(k => !xw[k].closed); return [...xfMru.filter(k => all.includes(k)), ...all.filter(k => !xfMru.includes(k))]; }
+function xfSwDraw() {
+  xfSwEl.innerHTML = xfSw.L.map((n, i) => `<button type="button" role="option" class="xf-sw-it${i === xfSw.i ? ' on' : ''}" data-sw="${n}" aria-selected="${i === xfSw.i}">`
+    + `<span class="xw-ic">${esc(xfIcon(n))}</span><span class="t">${esc(xfName(n))}</span><span class="d">${xw[n].min ? 'réduite' : ''}</span></button>`).join('')
+    + '<p>Alt+² : la suivante · Maj : la précédente · relâcher Alt : y aller · Échap : rester</p>';
+  xfSwEl.hidden = false;
+}
+function xfSwStep(d) {                             // Alt+² : le sélecteur s'ouvre sur la fenêtre d'avant, chaque appui avance
+  if (!xfSw) {
+    const L = xfWins();
+    if (L.length < 2) return;
+    xfSw = { L, i: 0 };
+  }
+  xfSw.i = (xfSw.i + d + xfSw.L.length) % xfSw.L.length;
+  xfSwDraw();
+}
+function xfSwEnd(go) {
+  if (!xfSw) return;
+  const n = xfSw.L[xfSw.i];
+  xfSw = null;
+  xfSwEl.hidden = true;
+  if (go && n && xw[n]) xfFocus(n);
+}
+xfSwEl.addEventListener('pointerdown', e => { const b = e.target.closest('[data-sw]'); if (b && xfSw) { e.preventDefault(); xfSw.i = xfSw.L.indexOf(b.dataset.sw); xfSwEnd(true); } });
+addEventListener('keydown', e => {                 // en capture : avant le terminal et les programmes
+  if (!xfOn || !panicEl.hidden || stDlg.open || picker.open || storeDlg.open || !titleEl.hidden) return;
+  if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'Backquote') { e.preventDefault(); e.stopPropagation(); xfMenuClose(); xfCtxClose(); return xfSwStep(e.shiftKey ? -1 : 1); }
+  if (xfSw && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return xfSwEnd(false); }
+  if (!e.ctrlKey || !e.altKey || e.shiftKey || e.metaKey) return;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key, n = view;
+  const act = { ArrowLeft: () => xfTile(n, 'l'), ArrowRight: () => xfTile(n, 'r'), ArrowUp: () => xfUp(n), ArrowDown: () => xfDown(n), d: xfDesk, w: () => xfClose(n) }[k];
+  if (!act) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (k === 'd' || xfShown(n)) act();
+}, true);
+addEventListener('keyup', e => { if (xfSw && e.key === 'Alt') { e.preventDefault(); xfSwEnd(true); } });
+addEventListener('blur', () => xfSwEnd(false));
 
 /* menu Applications : construit à l'ouverture depuis CLIS et PROGS (un futur programme y apparaît tout seul) */
 function xfMenuOpen() {
