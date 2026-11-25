@@ -1657,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.64', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.65', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2492,6 +2492,7 @@ const ACH = [
   { id: 'epreuves', g: '✋', n: 'À la main', d: 'Réussir les trois épreuves à la main (defi).', p: 2.2 },
   { id: 'nmhole', g: '◌', n: 'Trou noir', d: 'Supprimer node_modules : des gigaoctets libérés. Pendant quatre secondes.', p: 18.9 },
   { id: 'reflexe', g: ':', n: 'Réflexe', d: 'Taper :q ailleurs que dans vim.', p: 27.5, h: 1 },
+  { id: 'mur', g: '▦', n: 'Le mur', d: 'Laisser les bugs manger 90 % du travail. Le projet n’avance plus : il grossit.', p: 21.3, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6223,8 +6224,9 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   }
   if (head === 'status') {
     return printLines([
-      [H(`${panes.length} agents `, ['running', 'okc'], ` · modèle ${MODELS[cfg.model].name} · orchestrateur ${cfg.lead} · disposition ${cfg.layout}`), '', 20],
+      [H(`${plural(panes.length, 'agent')} `, ['running', 'okc'], ` · modèle ${MODELS[cfg.model].name} · orchestrateur ${cfg.lead} · disposition ${cfg.layout}`), '', 20],
       [H(`dépensé $${usd(usage.usd)} · ${kfmt(usage.in + usage.out)} tokens · ${files.toLocaleString('en-US')} fichiers · projets shippés : `, [String(shipped), shipped ? 'okc' : 'errc']), '', 20],
+      ...(IDLE ? (b => [[H('bugs : ', [`${Math.min(90, Math.round(b * 100))} % du travail${b >= BUG_CAP ? ' (le plafond)' : ''}`, b >= .7 ? 'errc' : b >= .4 ? 'wrn' : 'okc'], b >= .7 ? [` · le remède : ${BUG_FIX}`, 'dim'] : ['  (la part grandit avec le projet)', 'dim']), '', 20]])(bugShare()) : []),
     ]);
   }
   if (head === 'cost' || head === '/cost' || head === 'facture') return printLines(costLines());
@@ -14077,11 +14079,12 @@ function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
 }
 function bgRates(t, hw) { return ecoRates(t.n, !hw, { ai: t.ai, model: t.model, lv: t.ai === 'local' ? 0 : bgLv(), hw, bgTeam: 1 }); }
 const bugLossNow = () => ECO.bugLoss * skillMult('loss');
+const BUG_CAP = .9;                               // les bugs mangent au plus 90 % du travail : au-delà, le projet avance dix fois moins vite, mais il avance
 function ecoFlow() {                             // progression nette par seconde, toutes équipes (l'ETA du tableau de bord)
   const w = ECO.work(shipped), r = ecoRates(), loss = bugLossNow() * w;
   if (!claudeOn) return 0;
-  let net = (r.per - r.bug * loss) * panes.filter(p => p.state !== 'down').length;
-  bgTeams().forEach(t => { const b = bgRates(t, r.hw), up = 1 / (1 + b.crash * b.down); net += (b.per - b.bug * loss) * t.n * up; });
+  let net = Math.max(r.per * (1 - BUG_CAP), r.per - r.bug * loss) * panes.filter(p => p.state !== 'down').length;
+  bgTeams().forEach(t => { const b = bgRates(t, r.hw), up = 1 / (1 + b.crash * b.down); net += Math.max(b.per * (1 - BUG_CAP), b.per - b.bug * loss) * t.n * up; });
   return net;
 }
 function flowTotal(bgSet = G.bg) {               // toutes équipes, avec cet arrière-plan : % du projet en cours par minute, $ de tokens par minute
@@ -14092,12 +14095,31 @@ function flowTotal(bgSet = G.bg) {               // toutes équipes, avec cet ar
     const main = ecoRates(n, true, { hw });
     let net = 0, cost = main.lead, own = 0;
     [{ k: n, r: main, m: 1 }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))].forEach(({ k, r, m }) => {
-      const up = 1 / (1 + r.crash * r.down), x = (r.per - r.bug * loss) * k * up;
+      const up = 1 / (1 + r.crash * r.down), x = Math.max(r.per * (1 - BUG_CAP), r.per - r.bug * loss) * k * up;
       net += x; cost += r.cost * k * up;
       if (m) own = x;
     });
     return { pct: net * 60 / w * 100, usd: cost * 60, own: own * 60 / w * 100, f: hw.f };
   } finally { G.bg = saved; }
+}
+function bugShare() {                             // la part du travail que les bugs mangent, toutes équipes (0 à 1) : elle grandit avec le projet
+  const n = G.agents, hw = hwState({ n, lead: leadLv() ? 1 : 0, ...bgLoad(), off: true }), main = ecoRates(n, true, { hw });
+  let work = 0, bugs = 0;
+  [{ k: n, r: main }, ...bgTeams().map(t => ({ k: t.n, r: bgRates(t, hw) }))].forEach(({ k, r }) => { const up = 1 / (1 + r.crash * r.down); work += r.per * k * up; bugs += r.bug * k * up; });
+  return work > 0 ? Math.min(1, bugs * bugLossNow() * ECO.work(shipped) / work) : 0;
+}
+const BUG_FIX = 'skill tests (−30 % de bugs) ou revue de code (−35 %), un orchestrateur (−25 %), un meilleur modèle, ou une autre plateforme (Codex : trois fois moins de bugs)';
+let bugHintAt = 0, bugTold = -1;
+function bugTick() {                              // chaque seconde : au-delà de 70 %, le tableau de bord le dit ; à 90 %, le terminal (une fois par startup)
+  if (!IDLE || !claudeOn || paused || mode !== 'idle') return;
+  const b = bugShare(), now = Date.now();
+  if (b < .7) return;
+  if (now - bugHintAt >= 180e3) { bugHintAt = now; hudNote(`▲ les bugs mangent ${b >= BUG_CAP ? '90 % (le plafond : dix fois plus lent)' : Math.round(b * 100) + ' %'} du travail · store : skills, orchestrateur, plateforme`, 'bug'); }
+  if (b >= .9 && bugTold !== G.t0) {
+    bugTold = G.t0;
+    ach('mur');
+    shellPrint(H(['▲ ', 'errc'], `Les bugs mangent ${Math.min(90, Math.round(b * 100))} % du travail : le projet avance dix fois moins vite (plus il grandit, plus chaque bug coûte). Le remède, au `, ['store', 'org'], ` : ${BUG_FIX}.`));
+  }
 }
 function teamFlow(p) {                           // ce qu'une plateforme change au total (le PC partagé ralentit parfois tout le monde)
   const now = flowTotal();
@@ -14186,7 +14208,7 @@ function ecoRestart(p, now) {                    // Claude Code, Codex (Mistral 
   updateFoot();
 }
 function ecoBug(src) {                           // src : une équipe en arrière-plan (pas de volet à l'écran)
-  const loss = Math.min(G.prog, bugLossNow()), why = pick(ECO_BUGS), p = src ? null : pick(panes.filter(x => x.state !== 'down'));
+  const sh = bugShare(), loss = Math.min(G.prog, bugLossNow() * (sh > BUG_CAP ? BUG_CAP / sh : 1)), why = pick(ECO_BUGS), p = src ? null : pick(panes.filter(x => x.state !== 'down'));
   G.prog -= loss;
   if (p) { emit(p, { k: 'done', c: 'errc', t: `✗ Bug : ${why} · rollback (−${Math.round(loss * 100)} %)` }, true); ping(p); }
   if (leadOn()) leadLog(H(['✗ ', 'errc'], `Bug${src ? ` (${src}, background)` : ''}: ${why}. Rolling back.`));
@@ -14249,7 +14271,7 @@ function ecoOffline(secs, session = true) {
   const pay = s => { const c = costS * s; G.bill += c; G.spent += c; out.cost += c; out.elec += elecTick(hw, s); if (session) { usage.usd += c; } };
   let t = secs;
   while (t > 0 && out.ships < 10000) {
-    const w = ECO.work(shipped), net = work - bugs * loss * w;
+    const w = ECO.work(shipped), net = Math.max(work * (1 - BUG_CAP), work - bugs * loss * w);
     if (net <= 0) { pay(t); break; }
     const need = (1 - G.prog) * w / net;
     if (need > t) { G.prog += net * t / w; pay(t); break; }
@@ -14366,7 +14388,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); promptTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); promptTick(); bugTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
