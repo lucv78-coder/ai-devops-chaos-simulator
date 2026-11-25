@@ -610,7 +610,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 }
 .xf-ico .l {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; max-width: 100%;
-  padding: 0 .4ch; border-radius: 2px; font-size: .88em; line-height: 1.25; text-shadow: 0 1px 2px #000; overflow-wrap: break-word;   /* Bienvenue.txt : coupé s’il ne tient pas (pas Visionneuse) */
+  padding: 0 .1ch; border-radius: 2px; font-size: .88em; line-height: 1.25; text-shadow: 0 1px 2px #000; overflow-wrap: break-word;   /* Bienvenue.txt : coupé s’il ne tient pas (pas Visionneuse) */
 }
 .xf-ico.on .g::after {                           /* le programme tourne */
   content: ''; position: absolute; right: -.18em; top: -.18em; width: .3em; height: .3em; border-radius: 50%;
@@ -623,6 +623,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-ico.broken .g { opacity: .45; filter: grayscale(1); }   /* un lanceur vers un programme absent */
 .xf-ico { touch-action: none; }                 /* au doigt aussi, l'icône se glisse */
 .xf-ico.drag { position: relative; z-index: 2; opacity: .85; }
+.xf-lasso { position: absolute; z-index: 1; border: 1px solid var(--orange); background: color-mix(in srgb, var(--orange) 12%, transparent); pointer-events: none; }
 .xf-ico-hint { pointer-events: none; border: 1px dashed var(--orange); border-radius: 3px; background: color-mix(in srgb, var(--orange) 10%, transparent); }
 .xf-menu {
   position: absolute; top: calc(var(--lh) + .5em); left: .5ch; z-index: 3;
@@ -2425,6 +2426,7 @@ const ACH = [
   { id: 'surlebureau', g: '▤', n: 'Sur le bureau', d: 'Mettre un fichier ou un dossier à vous sur le bureau (dans ~/Bureau).', p: 47.3,
     t: () => deskEntries().some(k => k !== 'Bienvenue.txt' && !k.endsWith('.desktop')) },
   { id: 'raccourci', g: '↗', n: 'Lanceur', d: 'Créer un raccourci sur le bureau (clic droit, Créer un raccourci).', p: 19.8 },
+  { id: 'multisel', g: '⬚', n: 'Sélection de groupe', d: 'Sélectionner plusieurs icônes du bureau d’un rectangle, à la souris.', p: 24.6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -6301,6 +6303,7 @@ async function xfEnter() {
   xfWallDraw();
   $('.xf-user').textContent = USER;
   xfIconSel = '';
+  xfSelSet = new Set();
   deskDir();                                      // xdg-user-dirs : ~/Bureau existe dès la première session
   xfIconsSync(true);
   crtFlash();
@@ -6976,7 +6979,7 @@ deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'éc
 /* icônes du bureau (xfdesktop) : les programmes installés, les plateformes achetées, le store.
    Un clic sélectionne, un double-clic ouvre ; au clavier Entrée ouvre et les flèches se déplacent ; au doigt, un tap suffit.
    La liste suit apt install / remove et les licences : elle est recalculée à chaque tic du tableau de bord. */
-let xfIconSel = '', xfIconSig = '', xfIconTap = false;
+let xfIconSel = '', xfIconSig = '', xfIconTap = false, xfSelSet = new Set();   // xfSelSet : les icônes sélectionnées ; xfIconSel : la dernière
 function xfIconList() {                           // le Dossier personnel, le Système de fichiers, la Corbeille ; puis ~/Bureau : les lanceurs, les fichiers
   const has = k => installed.has(k), D = nodeAt(deskSegs());
   return [
@@ -7002,14 +7005,23 @@ function xfIconsSync(force) {                    // ne reconstruit que si la lis
   xfIconSig = sig;
   const cur = document.activeElement?.closest?.('.xf-ico')?.dataset.ico;
   if (!list.some(i => i.id === xfIconSel)) xfIconSel = '';
-  xfIconsEl.innerHTML = list.map(i => `<button type="button" class="xf-ico${i.on ? ' on' : ''}${i.broken ? ' broken' : ''}${i.id === xfIconSel ? ' sel' : ''}" data-ico="${i.id}" style="grid-column:${pos[i.id][0]};grid-row:${pos[i.id][1]}"`
+  xfSelSet = new Set([...xfSelSet].filter(id => list.some(i => i.id === id)));
+  xfIconsEl.innerHTML = list.map(i => `<button type="button" class="xf-ico${i.on ? ' on' : ''}${i.broken ? ' broken' : ''}${xfSelSet.has(i.id) ? ' sel' : ''}" data-ico="${i.id}" style="grid-column:${pos[i.id][0]};grid-row:${pos[i.id][1]}"`
     + ` title="${esc(i.tip)}" aria-label="${esc(i.t)}${i.on ? ', ouvert' : ''}"><span class="g" aria-hidden="true">${esc(i.ic)}</span>`
     + `<span class="l" aria-hidden="true">${esc(i.t)}</span></button>`).join('');
   if (cur) xfIconsEl.querySelector(`[data-ico="${cur}"]`)?.focus({ preventScroll: true });
 }
-function xfIconSelect(id) {
-  xfIconSel = id;
-  xfIconsEl.querySelectorAll('.xf-ico').forEach(b => b.classList.toggle('sel', b.dataset.ico === id));
+function xfIconSelect(id, how = '') {              // how : '' (celle-ci seule ; '' : aucune), 'toggle' (Ctrl+clic), 'add' (Maj+clic)
+  if (how === 'toggle') { if (xfSelSet.has(id)) xfSelSet.delete(id); else xfSelSet.add(id); }
+  else if (how === 'add') xfSelSet.add(id);
+  else xfSelSet = new Set(id ? [id] : []);
+  xfIconSel = xfSelSet.has(id) ? id : [...xfSelSet].at(-1) || '';
+  xfIconsEl.querySelectorAll('.xf-ico').forEach(b => b.classList.toggle('sel', xfSelSet.has(b.dataset.ico)));
+}
+function xfSelSetMany(ids) {
+  xfSelSet = new Set(ids);
+  xfIconSel = ids.at(-1) || '';
+  xfIconsEl.querySelectorAll('.xf-ico').forEach(b => b.classList.toggle('sel', xfSelSet.has(b.dataset.ico)));
 }
 function xfIconOpen(id) {
   if (id.startsWith('f:') && id.endsWith('.desktop')) { const n = nodeAt([...deskSegs(), id.slice(2)]); if (n && !n.d) return deskLaunch(deskParse(n.t || '').exec); }
@@ -7030,8 +7042,9 @@ xfIconsEl.addEventListener('pointerdown', e => { xfIconTap = e.pointerType === '
 xfIconsEl.addEventListener('click', e => {
   const b = e.target.closest('.xf-ico');
   if (!b || xfIcoDragged) return;                  // la fin d'un glissement n'ouvre rien
-  xfIconSelect(b.dataset.ico);
-  if (e.detail === 0 || xfIconTap) xfIconOpen(b.dataset.ico);   // Entrée ou Espace (detail 0), ou un tap
+  const mod = e.ctrlKey || e.metaKey ? 'toggle' : e.shiftKey ? 'add' : '';
+  xfIconSelect(b.dataset.ico, mod);
+  if (!mod && (e.detail === 0 || xfIconTap)) xfIconOpen(b.dataset.ico);   // Entrée ou Espace (detail 0), ou un tap
 });
 xfIconsEl.addEventListener('dblclick', e => {
   const b = e.target.closest('.xf-ico');
@@ -7059,6 +7072,7 @@ xfIconsEl.addEventListener('contextmenu', e => {
   if (!b) return;
   e.preventDefault();
   const id = b.dataset.ico, ic = b.querySelector('.g').textContent;
+  if (xfSelSet.has(id) && xfSelSet.size > 1) return deskGroupMenu([...xfSelSet], e.clientX, e.clientY);
   xfIconSelect(id);
   const lf = deskLauncherFile(id);
   if (lf) return deskLauncherMenu(id, lf, e.clientX, e.clientY);
@@ -7069,7 +7083,29 @@ xfIconsEl.addEventListener('contextmenu', e => {
     ...(id === 'home' || id === 'root' ? [{ ic: '❯', t: 'Ouvrir un terminal ici', run: () => { xfFocus('zsh'); typeIntoShell(id === 'home' ? 'cd ~' : 'cd /'); } }] : []),
   ]);
 });
-deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) xfIconSelect(''); });   // un clic sur le fond désélectionne
+deskEl.addEventListener('pointerdown', e => {      // un clic sur le fond désélectionne ; glisser dessine un rectangle de sélection (Ctrl : en plus)
+  if (e.target !== deskEl || e.button !== 0) return;
+  const add = e.ctrlKey || e.metaKey || e.shiftKey, base0 = add ? [...xfSelSet] : [], x0 = e.clientX, y0 = e.clientY;
+  if (!add) xfIconSelect('');
+  let box = null;
+  const mv = ev => {
+    if (!box) {
+      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
+      box = document.createElement('div');
+      box.className = 'xf-lasso';
+      deskEl.appendChild(box);
+    }
+    const R = deskEl.getBoundingClientRect(), l = Math.min(x0, ev.clientX), t = Math.min(y0, ev.clientY), r = Math.max(x0, ev.clientX), btm = Math.max(y0, ev.clientY);
+    Object.assign(box.style, { left: l - R.left + 'px', top: t - R.top + 'px', width: r - l + 'px', height: btm - t + 'px' });
+    const hit = [...xfIconsEl.querySelectorAll('.xf-ico')].filter(x => { const q = x.getBoundingClientRect(); return q.right > l && q.left < r && q.bottom > t && q.top < btm; }).map(x => x.dataset.ico);
+    xfSelSetMany([...new Set([...base0, ...hit])]);
+    if (hit.length > 1) ach('multisel');
+  };
+  const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); box?.remove(); };
+  addEventListener('pointermove', mv);
+  addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+});
 
 /* les icônes sur une grille : chacune a sa case [colonne, rangée] (à partir de 1). Dès qu'on en déplace une, toutes les places sont
    gardées dans la partie (G.xfd.ico) : rien ne saute ; une nouvelle icône (une appli installée) prend la première case libre,
@@ -7120,7 +7156,8 @@ function xfCellAt(x, y) {                          // la case sous le pointeur
 }
 xfIconsEl.addEventListener('pointerdown', e => {
   const b = e.target.closest('.xf-ico');
-  if (b && e.button === 0) xfIcoDrag = { b, id: b.dataset.ico, sx: e.clientX, sy: e.clientY, on: false, cell: null, hint: null };
+  if (b && e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) xfIcoDrag = { b, id: b.dataset.ico, sx: e.clientX, sy: e.clientY, on: false, cell: null, hint: null,
+    group: xfSelSet.has(b.dataset.ico) && xfSelSet.size > 1 ? [...xfSelSet] : null };
 });
 addEventListener('pointermove', e => {             // au-delà de 6 px, l'icône suit le pointeur ; la case visée est soulignée
   const D = xfIcoDrag;
@@ -7129,12 +7166,13 @@ addEventListener('pointermove', e => {             // au-delà de 6 px, l'icône
   if (!D.on) {
     if (Math.hypot(dx, dy) < 6) return;
     D.on = true;
-    D.b.classList.add('drag');
+    D.els = D.group ? [...xfIconsEl.querySelectorAll('.xf-ico')].filter(x => D.group.includes(x.dataset.ico)) : [D.b];
+    D.els.forEach(x => x.classList.add('drag'));
     D.hint = document.createElement('span');
     D.hint.className = 'xf-ico-hint';
     xfIconsEl.appendChild(D.hint);
   }
-  D.b.style.transform = `translate(${dx}px, ${dy}px)`;
+  D.els.forEach(x => { x.style.transform = `translate(${dx}px, ${dy}px)`; });
   D.cell = xfCellAt(e.clientX, e.clientY);
   Object.assign(D.hint.style, { gridColumn: String(D.cell[0]), gridRow: String(D.cell[1]) });
 });
@@ -7144,10 +7182,9 @@ function xfIcoDrop(ok) {
   if (!D?.on) return;
   xfIcoDragged = true;
   setTimeout(() => { xfIcoDragged = false; }, 0);  // le clic qui suit le lâcher ne doit rien ouvrir
-  D.b.style.transform = '';
-  D.b.classList.remove('drag');
+  D.els.forEach(x => { x.style.transform = ''; x.classList.remove('drag'); });
   D.hint?.remove();
-  if (ok && D.cell) xfIconMove(D.id, D.cell);
+  if (ok && D.cell) { if (D.group) xfIconMoveGroup(D.group, D.id, D.cell); else xfIconMove(D.id, D.cell); }
 }
 addEventListener('pointerup', () => xfIcoDrop(true));
 addEventListener('pointercancel', () => xfIcoDrop(false));
@@ -7299,8 +7336,9 @@ function deskFileMenu(k, x, y) {                   // clic droit sur un fichier 
 }
 xfIconsEl.addEventListener('keydown', e => {      // Suppr et F2 sur un fichier du bureau
   const b = document.activeElement?.closest?.('.xf-ico'), k = b && (deskLauncherFile(b.dataset.ico) || (b.dataset.ico.startsWith('f:') ? b.dataset.ico.slice(2) : ''));
+  if (!k && e.key === 'Delete' && xfSelSet.size > 1) { e.preventDefault(); return deskDelete([...xfSelSet].map(deskIcoFile).filter(Boolean)); }
   if (!k || e.ctrlKey || e.altKey) return;
-  if (e.key === 'Delete') { e.preventDefault(); deskDelete([k]); }
+  if (e.key === 'Delete') { e.preventDefault(); deskDelete(xfSelSet.has(b.dataset.ico) && xfSelSet.size > 1 ? [...xfSelSet].map(deskIcoFile).filter(Boolean) : [k]); }
   else if (e.key === 'F2') { e.preventDefault(); deskRename(k); }
 });
 
@@ -7393,6 +7431,40 @@ function deskLauncherMenu(id, f, x, y) {           // clic droit sur un lanceur 
     { ic: '✎', t: 'Renommer…', k: 'F2', run: () => deskRename(f) },
     '-',
     { ic: '✕', t: 'Supprimer le raccourci', k: 'Suppr', danger: true, run: () => deskDelete([f]) },
+  ]);
+}
+
+/* plusieurs icônes : Ctrl+A, Échap ; le décalage d'un groupe ; le menu d'un groupe */
+const deskIcoFile = id => deskLauncherFile(id) || (id.startsWith('f:') ? id.slice(2) : '');   // le fichier de ~/Bureau derrière une icône (pas les icônes du système)
+xfIconsEl.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'a') { e.preventDefault(); e.stopPropagation(); xfSelSetMany(xfIconList().map(i => i.id)); }
+  else if (e.key === 'Escape' && xfSelSet.size) { e.preventDefault(); xfIconSelect(''); }
+});
+function xfIconMoveGroup(ids, lead, cell) {        // le même décalage pour tout le groupe (borné à la grille) ; les icônes recouvertes prennent des cases libres
+  const pos = xfIconPlace(xfIconList()), { cols, rows } = xfGridSize(), from = pos[lead], sel = ids.filter(id => pos[id]);
+  if (!from || !sel.length) return false;
+  let dc = cell[0] - from[0], dr = cell[1] - from[1];
+  sel.forEach(id => { dc = Math.max(1 - pos[id][0], Math.min(cols - pos[id][0], dc)); dr = Math.max(1 - pos[id][1], Math.min(rows - pos[id][1], dr)); });
+  if (!dc && !dr) return false;
+  const key = q => q[0] + ',' + q[1], ico = Object.fromEntries(Object.entries(pos).map(([k, q]) => [k, [...q]]));
+  sel.forEach(id => { ico[id] = [pos[id][0] + dc, pos[id][1] + dr]; });
+  const M = new Set(sel.map(id => key(ico[id]))), others = Object.keys(ico).filter(k => !sel.includes(k)), disp = others.filter(k => M.has(key(ico[k])));
+  const used = new Set([...M, ...others.filter(k => !M.has(key(ico[k]))).map(k => key(ico[k]))]);
+  disp.forEach(k => { let c = 1, r = 1; while (used.has(c + ',' + r)) { r++; if (r > rows) { r = 1; c++; } } ico[k] = [c, r]; used.add(c + ',' + r); });
+  G.xfd = { ...G.xfd, ico };
+  ach('rangement');
+  saveGame();
+  xfIconsSync(true);
+  xfSelSetMany(sel);
+  PROGS['xfce4-settings'].redraw?.();
+  return true;
+}
+function deskGroupMenu(ids, x, y) {                // clic droit sur une icône d'un groupe : tout ouvrir, tout supprimer
+  const files = ids.map(deskIcoFile).filter(Boolean);
+  xfCtxOpen(x, y, [
+    { ic: '▶', t: `Ouvrir les ${ids.length} éléments`, run: () => ids.forEach(id => xfIconOpen(id)) },
+    '-',
+    { ic: '✕', t: files.length ? `Supprimer ${files.length} élément${files.length > 1 ? 's' : ''}` : 'Rien à supprimer (des icônes du système)', k: 'Suppr', danger: true, off: !files.length, run: () => deskDelete(files) },
   ]);
 }
 
