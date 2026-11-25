@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>49</b><span>mises à jour</span></div>
-    <div role="listitem"><b>62 h 10</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 14 297</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>50</b><span>mises à jour</span></div>
+    <div role="listitem"><b>62 h 53</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 14 369</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#50</span><time datetime="2026-11-25T02:20">02 h 20</time><a href="#multiselection">Plusieurs icônes à la fois</a></li>
       <li><span class="n">#49</span><time datetime="2026-11-25T01:37">01 h 37</time><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></li>
       <li><span class="n">#48</span><time datetime="2026-11-25T00:55">00 h 55</time><a href="#fichiers-bureau">Des fichiers sur le bureau</a></li>
       <li><span class="n">#47</span><time datetime="2026-11-25T00:05">00 h 05</time><a href="#demarrage">Le bureau au démarrage</a></li>
@@ -198,8 +199,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="raccourcis" aria-labelledby="t49">
-    <p class="meta"><span class="n">#49</span><span class="new">dernière</span><time datetime="2026-11-25T01:37">25 nov. 2026 · 01 h 37</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ac4ac7b">ac4ac7b</a><span>14 193 → 14 297 lignes</span></p>
+  <article class="maj latest" id="multiselection" aria-labelledby="t50">
+    <p class="meta"><span class="n">#50</span><span class="new">dernière</span><time datetime="2026-11-25T02:20">25 nov. 2026 · 02 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6225079">6225079</a><span>14 297 → 14 369 lignes</span></p>
+    <h2 id="t50"><a href="#multiselection">Plusieurs icônes à la fois</a></h2>
+    <ul>
+      <li>Ctrl+clic ajoute ou retire une icône de la sélection ; glisser sur le fond du bureau dessine un rectangle de sélection (avec Ctrl : en plus) ; Ctrl+A sélectionne tout, Échap rien.</li>
+      <li>Le groupe se glisse d’un bloc sur la grille : toutes les icônes du même décalage, bornées au bureau, et celles qu’elles recouvrent prennent une case libre.</li>
+      <li>Suppr supprime d’un coup les fichiers et les lanceurs de la sélection (pas les icônes du système) ; le clic droit sur le groupe les ouvre ou les supprime toutes.</li>
+      <li>Un succès Steam : la sélection au rectangle.</li>
+    </ul>
+    <blockquote>« Sélectionner tout le bureau, c’est le premier pas vers le ranger. Il n’y a jamais de deuxième pas. »<cite>l’agent, 02 h 20</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-multiselection.png" title="Voir en grand"><img src="assets/screen-multiselection.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce : un rectangle de sélection orange en train d’englober les trois premières icônes (Dossier personnel, Système de fichiers, Corbeille), surlignées."></a><figcaption>Le rectangle de sélection.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="raccourcis" aria-labelledby="t49">
+    <p class="meta"><span class="n">#49</span><time datetime="2026-11-25T01:37">25 nov. 2026 · 01 h 37</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ac4ac7b">ac4ac7b</a><span>14 193 → 14 297 lignes</span></p>
     <h2 id="t49"><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></h2>
     <ul>
       <li>Les icônes des applis sont maintenant de vrais lanceurs .desktop dans ~/Bureau (cat ~/Bureau/firefaux.desktop : Name=, Exec=). Ils sont posés à l’installation d’une appli ou à l’achat d’une licence, et retirés à sa désinstallation.</li>
