@@ -13,11 +13,11 @@
 <p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
 
 <p align="center">
-  <img src="assets/badges/version.svg" alt="version : alpha 0.63">
+  <img src="assets/badges/version.svg" alt="version : alpha 0.64">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 15 873">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 15 886">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -97,7 +97,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Les pannes du monde.** Une API qui répond « 529 Overloaded » (vos agents attendent, la facture non), une canicule (+12 °C pour le PC), la hausse du prix des tokens, un nouveau modèle que les agents passent la journée à commenter, un pic de consommation électrique. `actu` dit ce qui se passe ; garder plusieurs plateformes permet de continuer.
 - **Relire les PR des agents.** Les agents ouvrent des pull requests (`pr list`, `pr diff 413`, ou GitHype) ; une sur trois cache un piège : une clé d'API en clair, des tests supprimés pour passer au vert, un cache sans limite, la zone DNS « nettoyée ». Fusionner une PR propre avance le projet ; une PR piégée part en prod avec ses conséquences. Au ship, les agents fusionnent tout ce qui reste, sans relire. « Lignes relues » cesse enfin d'être une blague.
 - **Les incidents de prod.** Après un ship, la prod peut tomber (plus souvent le vendredi, la nuit et avec Mistral) : PagerDoudou sonne, des clients se font rembourser chaque seconde et le ship suivant attend. Diagnostic et réparation dans le terminal (`incident`, `systemctl status api`, `kubectl get pods`, `df -h`, `dig`, `git log`… puis la bonne commande, souvent avec sudo), ou `incident agent` pour la confier à un agent, qui peut l'empirer. status.vibe affiche l'état des services.
-- **La fin de partie : l'introduction en bourse.** La startup a une valorisation (le chiffre d'affaires × 40, « parce que IA »), et un cours sur bourse.vibe. Au-delà de 25 M$, elle entre en bourse (`ipo --confirm`) : une nouvelle startup commence de zéro, le PC et les fichiers en plus, et les stock-options reçues accélèrent pour toujours le travail des agents (+10 % chacune). Licorne à partir d'un milliard.
+- **La fin de partie : l'introduction en bourse.** La startup a une valorisation (le chiffre d'affaires × 40, « parce que IA »), et un cours sur bourse.vibe. Au-delà de 25 M$, elle entre en bourse (`ipo --confirm`) : une nouvelle startup commence de zéro, le PC et les fichiers en plus, et les stock-options reçues accélèrent pour toujours le travail des agents (+10 % chacune). Licorne à partir d'un milliard. Le bon moment pour sonner la cloche : `ipo` le dit (les stock-options par heure, le rythme des ships).
 - **Les défis.** À l'introduction en bourse, une contrainte pour la startup suivante : 100 % IA locale, sans bureau, vendredi permanent, un seul agent, ou des tokens au prix fort. Réussie, elle rapporte jusqu'à deux fois plus de stock-options.
 - **Plusieurs terminaux.** `Ctrl+B` puis `c` ouvre un terminal de plus, comme une fenêtre tmux, avec son dossier et son historique ; sous Xfce, chacun a sa fenêtre. `exit` le ferme. Une seule session d'agents pour tous.
 - **Sans bureau, les versions terminal.** Sans Xfce, `thunar` s'ouvre façon mc (deux panneaux, F5 copie, F8 supprime), `firefaux` façon lynx (le Web en texte, et pas une pub), `vlc` façon nvlc, `steam` façon steamcmd, `mousepad` dans nano. Atril, qui n'a pas d'équivalent, répond *cannot open display*.
@@ -111,7 +111,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 15 873 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 15 886 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -179,7 +179,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (15 873 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (15 886 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -315,14 +315,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 15 873 lignes ?**
+**Pourquoi un seul fichier de 15 886 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 15 873 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 15 886 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
