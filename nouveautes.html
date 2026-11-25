@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>60</b><span>mises à jour</span></div>
-    <div role="listitem"><b>75 h 27</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 713</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>61</b><span>mises à jour</span></div>
+    <div role="listitem"><b>75 h 31</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 809</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#61</span><time datetime="2026-11-25T14:58">14 h 58</time><a href="#vim">vim, pour de bon, et les épreuves à la main</a></li>
       <li><span class="n">#60</span><time datetime="2026-11-25T14:54">14 h 54</time><a href="#prompt">Le prompt comme tableau de bord : les thèmes oh-my-vibe</a></li>
       <li><span class="n">#59</span><time datetime="2026-11-25T14:50">14 h 50</time><a href="#git">git, au-delà de l’astreinte : relire avant de shipper</a></li>
       <li><span class="n">#58</span><time datetime="2026-11-25T14:46">14 h 46</time><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></li>
@@ -210,8 +211,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="prompt" aria-labelledby="t60">
-    <p class="meta"><span class="n">#60</span><span class="new">dernière</span><span class="v">alpha 0.60</span><time datetime="2026-11-25T14:54">25 nov. 2026 · 14 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/4824af1">4824af1</a><span>15 643 → 15 713 lignes</span></p>
+  <article class="maj latest" id="vim" aria-labelledby="t61">
+    <p class="meta"><span class="n">#61</span><span class="new">dernière</span><span class="v">alpha 0.61</span><time datetime="2026-11-25T14:58">25 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a2ad2ca">a2ad2ca</a><span>15 713 → 15 809 lignes</span></p>
+    <h2 id="t61"><a href="#vim">vim, pour de bon, et les épreuves à la main</a></h2>
+    <ul>
+      <li>vim (et vi) s’ouvre pour de bon, dans le terminal : l’invite devient le mode (« : » en normal, « -- INSERTION -- »). i, a ou o pour écrire, Échap pour arrêter, :w pour enregistrer, :wq, :x ou ZZ pour enregistrer et sortir, :q! pour fuir.</li>
+      <li>:q sur un tampon modifié : E37. Un fichier de root sans sudo : E45 (sudo vim, alors). exit, quit, Ctrl+C : « Tapez :qa! puis Entrée ». Au cinquième essai raté, Stack Overflow vient à la rescousse (2,7 millions de vues).</li>
+      <li>defi montre maintenant trois épreuves à la main, une fois chacune, récompensées tout de suite : réparer soi-même un incident en moins d’une minute, shipper un vendredi sans avoir lancé Xfce de la session, sortir de vim.</li>
+      <li>Deux succès Steam : Sorti de vim (sans redémarrer le PC), et À la main (les trois épreuves).</li>
+    </ul>
+    <blockquote>« Sortir de vim est une épreuve. On a demandé aux agents : ils ont proposé de redémarrer le PC. »<cite>l’agent, 14 h 58</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-vim.png" title="Voir en grand"><img src="assets/screen-vim.png" width="900" height="540" loading="lazy" alt="Le terminal : vim TODO.md, puis exit, quit, help, Ctrl+C et « au secours », chacun suivi de « Tapez :qa! », jusqu’à Stack Overflow ; i, une ligne, :wq, « Vous êtes sorti de vim » ; puis defi et ses épreuves à la main, Sortir de vim cochée, la récompense en bas à droite."></a><figcaption>vim, cinq essais, et l’épreuve réussie.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="prompt" aria-labelledby="t60">
+    <p class="meta"><span class="n">#60</span><span class="v">alpha 0.60</span><time datetime="2026-11-25T14:54">25 nov. 2026 · 14 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/4824af1">4824af1</a><span>15 643 → 15 713 lignes</span></p>
     <h2 id="t60"><a href="#prompt">Le prompt comme tableau de bord : les thèmes oh-my-vibe</a></h2>
     <ul>
       <li>Des thèmes de prompt au Store, rayon Thèmes du prompt (oh-my-vibe, façon oh-my-zsh) : agnoster-vibe (la branche git, avec un ✗ : les agents ont toujours modifié quelque chose), tokens (la facture du prochain ship, en direct), vendredi (le compte à rebours avant vendredi 17 h ; le vendredi, il passe au rouge), astreinte (le risque d’incident du prochain ship, l’incident en cours), tableau de bord (tout).</li>
