@@ -1108,6 +1108,9 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 #shell-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #shell-info[hidden] { display: none; }
 #shell-form.pt .prompt { max-width: 70%; }
+/* bourse.vibe : le bon moment */
+.vb-pace { margin-top: .6em; color: var(--dim); }
+.vb-pace b { color: var(--orange); }
 .ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
 .ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
 .ml-bar b { color: var(--orange); }
@@ -1654,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.63', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.64', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2358,7 +2361,7 @@ function setupMig(o) {                            // sauvegarde d'avant la machi
   if (!o.cli) { o.cli = { mistral: 1, codex: o.own?.codex ? 1 : 0, claude: o.own?.claude ? 1 : 0 }; o.pk = STARTER_PKGS.slice(); }
   return o;
 }
-const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
+const G_DEF = () => ({ v: 1, t0: Date.now(), money: 0, shipped: 0, ai: 'mistral', own: { mistral: 1 }, cli: {}, pk: [], agents: 1, term: 0, sk: {}, lead: 0, pc: { cpu: 0, mobo: 0, ram: 0, gpu: 0, disk: 0, psu: 0, cool: 0 },
   prog: 0, bill: 0, model: '', running: 0, earned: 0, spent: 0, elec: 0, elecT: 0, elecTot: 0, kwh: 0, t: Date.now(),
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
@@ -2504,6 +2507,7 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
 }
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
+G.t0 = G.t0 || Date.now();   // la création de la startup (une partie d’avant : à partir d’aujourd’hui)
 G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };
 G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };
 G.git = { br: 'main', brs: [], st: 0, rv: -1, ...(G.git || {}) };
@@ -11330,6 +11334,12 @@ const valMult = () => 40 * (1 + shipped / 50);
 const valuation = () => (G.earned || 0) * valMult() * repK();
 const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6) * (G.dil ?? 1) * chalK());   // une levée de fonds dilue : moins de stock-options
 const ipoMult = () => 1 + .1 * (G.ipo?.so || 0);
+function ipoPace() {                               // le bon moment : stock-options par heure de cette startup, ships par minute (toutes équipes), le conseil
+  const h = Math.max(1 / 60, (Date.now() - (G.t0 || Date.now())) / 3600e3), so = ipoGain(), sm = Math.max(0, flowTotal().pct / 100);
+  return { so, perH: so / h, sm, h, go: sm < .1 };
+}
+const ipoAdvice = P => P.go ? 'Les ships ralentissent : c’est le bon moment. Attendre ne rapporterait plus grand-chose.'
+  : 'Les ships vont encore bon train : attendre paie (les stock-options suivent la racine carrée de la valorisation, sonner tôt en donne peu). Quand ils passent sous 0,1 par minute, c’est le moment.';
 const bigMoney = v => v >= 1e9 ? `$${frx((v / 1e9).toFixed(2))} Md` : v >= 1e6 ? `$${frx((v / 1e6).toFixed(1))} M` : `$${usd(v)}`;
 const TICKER = () => '$' + PROJ.toUpperCase().slice(0, 4);
 const BX_NEWS = () => [`${PROJ.toUpperCase()} lève des fonds sur la foi d’une démo qui plantait : « un signal de maturité », selon les investisseurs.`,
@@ -11386,6 +11396,8 @@ function ipoCmd(a) {                               // ipo : la valorisation ; ip
     [`Chiffre d’affaires cumulé : $${usd(G.earned || 0)} · ${plural(shipped, 'projet')} · multiple : ×${frx(valMult().toFixed(1))} (« parce que IA »)`, 'dim', 20],
     V < IPO_MIN ? [H('Introduction en bourse : à partir de ', [bigMoney(IPO_MIN), 'org'], `. Il manque ${bigMoney(IPO_MIN - V)}.`), '', 20]
       : [H('Prête pour l’introduction : ', [`+${so} stock-options`, 'okc'], ` (×${frx(nx.toFixed(1))} de travail pour toutes les startups suivantes). `, ['ipo --confirm', 'org'], ' pour sonner la cloche.'), '', 20],
+    ...(V >= IPO_MIN ? (P => [[H('Le bon moment ? ', [`${frx(P.perH.toFixed(1))} stock-options par heure`, 'org'], ` depuis la création de ${PROJ.toUpperCase()} · `, [`${frx(P.sm.toFixed(2))} ship${P.sm >= 2 ? 's' : ''} par minute`, P.go ? 'wrn' : 'okc'], '. ', P.go ? ['C’est le moment.', 'okc b'] : 'Attendre paie encore.'), '', 20],
+      [ipoAdvice(P), 'dim', 20]])(ipoPace()) : []),
     ['Repart de zéro : la trésorerie, les ships, les plateformes, les agents, le store, l’URSSAF. Reste : le PC, les fichiers, les paquets, les succès, le temps de jeu.', 'dim', 20],
     ...(G.ipo?.n ? [[`Déjà ${plural(G.ipo.n, 'introduction')} · ${G.ipo.so} stock-options · ×${frx(ipoMult().toFixed(1))} de travail · meilleure sortie : ${bigMoney(G.ipo.best)}`, 'dim', 20]] : []),
     ...(CHAL[G.chal] ? [[H('Défi en cours : ', [CHAL[G.chal].n, 'org'], ` · stock-options +${Math.round(CHAL[G.chal].b * 100)} % (déjà comptées)`), '', 20]] : []),
@@ -11406,7 +11418,8 @@ function webBourse() {
       + `<fieldset class="ch-pick"><legend>Un défi pour la startup suivante (facultatif) : plus de stock-options à son introduction</legend>`
       + `<label><input type="radio" name="chal" value="" checked><span>Aucun</span></label>${Object.entries(CHAL).map(([k, c]) => `<label><input type="radio" name="chal" value="${k}"><span><b>${esc(c.n)}</b> · +${Math.round(c.b * 100)} % de stock-options${G.ipo?.done?.[k] ? ' · <span class="okc">réussi</span>' : ''}</span><span class="dim">${esc(c.d)}</span></label>`).join('')}</fieldset>`
       + '<div class="row"><button type="button" class="wp-buy" data-ipo="go">Sonner la cloche</button><button type="button" class="dl-real" data-ipo="cancel">Pas encore</button></div></div>'
-    : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`;
+    : `<p><button type="button" class="wp-buy" data-ipo="ask">Introduire ${P} en bourse</button> <span class="dim">+${so} stock-options · ×${frx(nx.toFixed(1))} de travail ensuite</span></p>`
+      + (Q => `<p class="vb-pace"><b>Le bon moment ?</b> ${frx(Q.perH.toFixed(1))} stock-options par heure depuis la création de ${P} · ${frx(Q.sm.toFixed(2))} ship${Q.sm >= 2 ? 's' : ''} par minute. ${esc(ipoAdvice(Q))}</p>`)(ipoPace());
   return { title: `bourse.vibe · ${TICKER()}`, html: `<div class="wp vb"><h1>bourse.vibe</h1><p class="dim">La Bourse des licornes. Et des autres.</p>
     <div class="vb-acct"><span class="k">${esc(TICKER())} · ${P} · Nasdaq-Vibe</span><span class="vb-bal" data-live="val">${bigMoney(V)}</span>
     <span class="dim">${ch ? `${ch >= 0 ? '+' : '−'}${frx(Math.abs(ch).toFixed(1))} % depuis le dernier ship · ` : ''}chiffre d’affaires × ${frx(valMult().toFixed(1))} (« parce que IA »)</span>
