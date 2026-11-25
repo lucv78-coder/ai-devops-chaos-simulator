@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>58</b><span>mises à jour</span></div>
-    <div role="listitem"><b>75 h 19</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 519</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>59</b><span>mises à jour</span></div>
+    <div role="listitem"><b>75 h 23</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 643</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#59</span><time datetime="2026-11-25T14:50">14 h 50</time><a href="#git">git, au-delà de l’astreinte : relire avant de shipper</a></li>
       <li><span class="n">#58</span><time datetime="2026-11-25T14:46">14 h 46</time><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></li>
       <li><span class="n">#57</span><time datetime="2026-11-25T14:41">14 h 41</time><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></li>
       <li><span class="n">#56</span><time datetime="2026-11-25T14:36">14 h 36</time><a href="#historique">L’historique, le vrai : !!, sudo !!, Ctrl+R ; cp et mv</a></li>
@@ -208,8 +209,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="cron" aria-labelledby="t58">
-    <p class="meta"><span class="n">#58</span><span class="new">dernière</span><span class="v">alpha 0.58</span><time datetime="2026-11-25T14:46">25 nov. 2026 · 14 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9f75f1a">9f75f1a</a><span>15 308 → 15 519 lignes</span></p>
+  <article class="maj latest" id="git" aria-labelledby="t59">
+    <p class="meta"><span class="n">#59</span><span class="new">dernière</span><span class="v">alpha 0.59</span><time datetime="2026-11-25T14:50">25 nov. 2026 · 14 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f4ef8dc">f4ef8dc</a><span>15 519 → 15 643 lignes</span></p>
+    <h2 id="t59"><a href="#git">git, au-delà de l’astreinte : relire avant de shipper</a></h2>
+    <ul>
+      <li>git status et git diff montrent ce que les agents ont changé pendant que vous dormiez (avec, en rouge, ce qu’ils ont retiré : l’authentification, un test, la table users).</li>
+      <li>Relire, enfin : git diff ou git log -p avant le ship, et le prochain ship a 40 % de risque d’incident en moins (incident le montre). Une fois par ship. Un succès Steam : Une ligne relue. Le badge « lignes relues » du README, lui, reste à 0.</li>
+      <li>git commit -m : le message est réécrit en haïku par un agent, comme le veut la convention du dépôt (et les commits de ce projet). git add . indexe tout, .env compris.</li>
+      <li>git blame : chaque ligne a son auteur, un agent, sauf une : vous, un vendredi à 17 h 02.</li>
+      <li>git branch, switch, checkout -b (les branches des agents comprises), git stash (36 stashs d’agents d’avance), git push (déjà fait, en force), git pull (déjà à jour). Pendant un incident DNS, git log -p montre le diff coupable.</li>
+    </ul>
+    <blockquote>« git blame a été inventé pour savoir qui a écrit une ligne. Ici, c’est toujours un agent. Sauf la seule ligne qui marche. »<cite>l’agent, 14 h 50</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-git.png" title="Voir en grand"><img src="assets/screen-git.png" width="900" height="540" loading="lazy" alt="Le terminal : git status (en avance de 3 commits, « les agents, pendant que vous dormiez ») ; git diff, avec en rouge un test désactivé et une commande passée deux fois ; « Relu : le prochain ship a 40 % de risque d’incident en moins » ; puis git commit -am, le message réécrit en haïku."></a><figcaption>git status, git diff (relu), et un commit en haïku.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="cron" aria-labelledby="t58">
+    <p class="meta"><span class="n">#58</span><span class="v">alpha 0.58</span><time datetime="2026-11-25T14:46">25 nov. 2026 · 14 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9f75f1a">9f75f1a</a><span>15 308 → 15 519 lignes</span></p>
     <h2 id="t58"><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></h2>
     <ul>
       <li>Les scripts : une commande par ligne (tubes compris), # pour commenter, set -e pour s’arrêter à la première erreur, exit pour finir, sleep pour attendre. ./script.sh demande chmod +x ; bash script.sh, non.</li>
