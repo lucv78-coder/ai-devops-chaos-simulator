@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>66</b><span>mises à jour</span></div>
-    <div role="listitem"><b>82 h 15</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 909</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>67</b><span>mises à jour</span></div>
+    <div role="listitem"><b>82 h 18</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 929</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#67</span><time datetime="2026-11-25T21:45">21 h 45</time><a href="#kit">Le matériel en kit</a></li>
       <li><span class="n">#66</span><time datetime="2026-11-25T21:42">21 h 42</time><a href="#equilibrage">L’équilibrage, simulé : humains, tokens, boosts</a></li>
       <li><span class="n">#65</span><time datetime="2026-11-25T21:39">21 h 39</time><a href="#mur-des-bugs">Le mur des bugs se voit (et ne bloque plus)</a></li>
       <li><span class="n">#64</span><time datetime="2026-11-25T21:36">21 h 36</time><a href="#bon-moment">La bourse : le bon moment</a></li>
@@ -216,8 +217,21 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="equilibrage" aria-labelledby="t66">
-    <p class="meta"><span class="n">#66</span><span class="new">dernière</span><span class="v">alpha 0.66</span><time datetime="2026-11-25T21:42">25 nov. 2026 · 21 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a3fb9b0">a3fb9b0</a><span>15 908 → 15 909 lignes</span></p>
+  <article class="maj latest" id="kit" aria-labelledby="t67">
+    <p class="meta"><span class="n">#67</span><span class="new">dernière</span><span class="v">alpha 0.67</span><time datetime="2026-11-25T21:45">25 nov. 2026 · 21 h 45</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/158c0e1">158c0e1</a><span>15 909 → 15 929 lignes</span></p>
+    <h2 id="t67"><a href="#kit">Le matériel en kit</a></h2>
+    <ul>
+      <li>Le processeur suivant demande parfois une autre carte mère (le socket), qui demande une autre RAM (la DDR) : une pièce à la fois, la commande ne passait jamais. En simulation, le PC restait bridé plus d’une heure.</li>
+      <li>Le store propose maintenant un kit de mise à niveau, en tête du rayon Matériel : la carte mère suivante, avec le processeur et la RAM qui vont avec. Un clic, et tout part dans le panier, compatible. Reste à valider la commande.</li>
+    </ul>
+    <blockquote>« Un agent a vérifié les sockets. Deux fois, il a dit. »<cite>l’agent, 21 h 45</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-kit.png" title="Voir en grand"><img src="assets/screen-kit.png" width="900" height="540" loading="lazy" alt="Le store, rayon Matériel PC : la jauge d’alimentation, le panier vide, et en tête le kit de mise à niveau (Raisinboard B450 + Raisin 5 5600 + 16 Go DDR4, 390 $), au-dessus du processeur qui réclame une carte mère RM4."></a><figcaption>Le kit de mise à niveau.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="equilibrage" aria-labelledby="t66">
+    <p class="meta"><span class="n">#66</span><span class="v">alpha 0.66</span><time datetime="2026-11-25T21:42">25 nov. 2026 · 21 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a3fb9b0">a3fb9b0</a><span>15 908 → 15 909 lignes</span></p>
     <h2 id="t66"><a href="#equilibrage">L’équilibrage, simulé : humains, tokens, boosts</a></h2>
     <ul>
       <li>Les humains coûtaient 42 % de chaque ship, salaires et charges : sans eux, la valorisation était 66 % plus haute à 5 h. Leurs salaires passent à 1,5 % (stagiaire), 6 % (senior) et 4 % (SRE), plus les charges.</li>

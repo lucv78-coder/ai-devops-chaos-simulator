@@ -13,11 +13,11 @@
 <p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
 
 <p align="center">
-  <img src="assets/badges/version.svg" alt="version : alpha 0.66">
+  <img src="assets/badges/version.svg" alt="version : alpha 0.67">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 15 909">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 15 929">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -112,7 +112,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 15 909 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 15 929 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -134,7 +134,7 @@ Le jeu tourne maintenant sur un vrai faux PC, et il commence par terre.
 
 *« Il suffit de changer le processeur. » Le vendeur, avant de découvrir le socket.*
 
-- **Le panier.** Rien ne s'achète en un clic : on ajoute au panier, puis on valide la commande. C'est le même panier dans le store (touche `B`, rayon « Matériel PC ») et sur matos.vibe, dans Firefaux.
+- **Le panier.** Rien ne s'achète en un clic : on ajoute au panier, puis on valide la commande. C'est le même panier dans le store (touche `B`, rayon « Matériel PC ») et sur matos.vibe, dans Firefaux. Quand le processeur suivant ne rentre plus, un kit (carte mère, processeur, RAM) l'y met d'un clic.
 - **La carte mère décide.** Le processeur suit son socket (LGA1155, RM4, RM5, LGA1851, sTF5) et ses VRM, la RAM sa génération de DDR. Changer de plateforme, c'est carte mère, processeur et RAM d'un coup. L'agent appelle ça « une petite mise à jour ».
 - **Les slots aussi.** Pas de SSD NVMe sans emplacement M.2 (la carte mère de départ n'en a aucun, elle date de 2011), pas de grappe de 4 GPU sans 4 slots PCIe.
 - **La jauge d'alimentation.** Processeur + carte graphique + 45 W pour le reste, face à l'étiquette de l'alim. Au-delà de 100 %, la commande est bloquée.
@@ -180,7 +180,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (15 909 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (15 929 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -316,14 +316,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 15 909 lignes ?**
+**Pourquoi un seul fichier de 15 929 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 15 909 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 15 929 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.
