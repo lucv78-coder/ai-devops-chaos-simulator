@@ -1102,6 +1102,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 #shell-rs { display: none; color: var(--dim); white-space: pre; }
 #shell-form.rs #shell-rs { display: inline; }
 #shell-form.rs #shell-user, #shell-form.rs #shell-dir, #shell-form.rs #shell-sym, #shell-form.rs #shell-info { display: none; }
+#shell-form.vim #shell-user, #shell-form.vim #shell-dir, #shell-form.vim #shell-info { display: none; }   /* vim : l'invite, c'est le mode */
+#shell-form.vim #shell-sym { color: var(--orange); }
 /* le thème du prompt : ses segments ; le prompt a le droit de prendre plus de place */
 #shell-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #shell-info[hidden] { display: none; }
@@ -1652,7 +1654,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.60', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.61', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2361,7 +2363,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, ep: {}, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2483,6 +2485,8 @@ const ACH = [
   { id: 'cronsave', g: '⏲', n: 'Maintenance préventive', d: 'Éviter un incident grâce à une tâche cron.', p: 4.3 },
   { id: 'relu', g: '±', n: 'Une ligne relue', d: 'Relire les commits des agents avant un ship (git log -p). Le badge du README, lui, reste à 0.', p: 3.1 },
   { id: 'prompt', g: '❯', n: 'Tableau de bord', d: 'Acheter un thème de prompt. Il affiche plus de choses que le tableau de bord.', p: 12.6 },
+  { id: 'vim', g: ':q', n: 'Sorti de vim', d: 'Ouvrir vim, et en sortir. Sans redémarrer le PC.', p: 31.4 },
+  { id: 'epreuves', g: '✋', n: 'À la main', d: 'Réussir les trois épreuves à la main (defi).', p: 2.2 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2501,7 +2505,8 @@ G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
 G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };
 G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };
 G.git = { br: 'main', brs: [], st: 0, rv: -1, ...(G.git || {}) };
-G.pt = { cur: 'classique', ...(G.pt || {}), own: { classique: 1, ...(G.pt?.own || {}) } };   // le thème du prompt, ceux achetés   // git : la branche, les vôtres, vos stashs, le ship relu   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+G.pt = { cur: 'classique', ...(G.pt || {}), own: { classique: 1, ...(G.pt?.own || {}) } };
+G.ep = { ...(G.ep || {}) };   // les épreuves à la main réussies   // le thème du prompt, ceux achetés   // git : la branche, les vôtres, vos stashs, le ship relu   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
@@ -3593,6 +3598,88 @@ const TEXT_CMDS = {
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
 
+/* vim : un éditeur modal, dans le terminal. Normal (les commandes), insertion (i, a, o, puis Échap). On en sort : :q, :q!, :wq, :x, ZZ.
+   Le reste du temps, on y reste (c'est le principe). */
+let vimS = null;                                    // { segs, buf, was, ins, t0, tries, sudo }
+const VIM_TAUNT = ['Vous êtes toujours dans vim.', 'Ceci n’est pas une commande vim. Vous êtes toujours dans vim.', 'vim ne connaît pas « {c} ». Il connaît :q.',
+  'Un agent propose de redémarrer le PC pour sortir de vim. Ne l’écoutez pas.', 'Stack Overflow, « Comment sortir de vim ? » : 2,7 millions de vues. Réponse acceptée : Échap, puis :q!'];
+function vimLabel() {                               // l'invite devient le mode de vim
+  shellForm.classList.toggle('vim', !!vimS);
+  $('#shell-sym').textContent = !vimS ? '❯' : vimS.ins ? '-- INSERTION --' : ':';
+}
+function vimShow(more = []) {                       // le tampon, la ligne d'état (et ce qui suit), dans l'ordre
+  const n = vimS.buf.length, L = vimS.buf.slice(-18).map(l => [l || ' ', '', 0]);
+  return printLines([...L, ...Array.from({ length: Math.max(0, 4 - L.length) }, () => ['~', 'blu', 0]),
+    [H([`"${vimS.segs ? tildePath(vimS.segs) : '[Sans nom]'}" ${n}L, ${new TextEncoder().encode(vimS.buf.join('\n')).length}B${vimS.buf.join('\n') !== vimS.was ? ' [Modifié]' : ''}`, 'dim']), '', 0], ...more]);
+}
+function vimCmd(args, sudo) {
+  if (!installed.has('vim')) return notInstalled('vim', 'vim');
+  const f = args.find(a => !a.startsWith('-') && !a.startsWith('+')), segs = f ? resolvePath(f) : null, n = segs && nodeAt(segs);
+  if (n?.d) { fsErr('vim', `« ${f} » est un répertoire`); return false; }
+  if (sudo) shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+  const t = n && !n.b ? (n.t || '') : '';
+  vimS = { segs, buf: t ? t.split('\n') : [], was: t, ins: false, t0: Date.now(), tries: 0, sudo };
+  vimLabel();
+  return vimShow([[H(['i', 'org'], [' pour écrire, ', 'dim'], ['Échap', 'org'], [' pour arrêter, ', 'dim'], [':q', 'org'], [' pour sortir. En théorie.', 'dim']), '', 0]]);
+}
+function vimQuit() {
+  const mins = Math.round((Date.now() - vimS.t0) / 60000);
+  vimS = null;
+  vimLabel();
+  ach('vim');
+  epDone('vim');
+  shellPrint(H(['✓ ', 'okc'], 'Vous êtes sorti de vim.', mins ? [` (${plural(mins, 'minute')} dedans. C’est dans la moyenne.)`, 'dim'] : ''));
+}
+function vimWrite() {                               // :w : le tampon dans le fichier (sudo vim pour ceux de root)
+  const V = vimS;
+  if (!V.segs) { shellPrint(H(['E32: ', 'errc'], 'Pas de nom de fichier (:w nom)')); return false; }
+  const dir = nodeAt(V.segs.slice(0, -1)), k = V.segs.at(-1);
+  if (!dir?.d) { shellPrint(H(['E212: ', 'errc'], 'Impossible d’ouvrir le fichier en écriture')); return false; }
+  if (!V.sudo && owner(V.segs) === 'root') { shellPrint(H(['E45: ', 'errc'], 'L’option \'readonly\' est activée (ajoutez ! pour passer outre). Ou plutôt : sudo vim.')); return false; }
+  const t = V.buf.join('\n'), c = dir.k[k] || (dir.k[k] = mkF(''));
+  Object.assign(c, { t, sz: new TextEncoder().encode(t).length, mt: Date.now() });
+  delete c.b; delete c.au;
+  V.was = t;
+  shellPrint(H([`"${tildePath(V.segs)}" ${V.buf.length}L, ${c.sz}B écrit(s)`, 'dim']));
+  return true;
+}
+function vimInput(c) {                              // une ligne tapée dans vim
+  const V = vimS;
+  if (V.ins) { V.buf.push(c); return; }             // en insertion : le texte (Échap pour revenir)
+  if (/^[iaoIAO]$/.test(c)) { V.ins = true; vimLabel(); return; }
+  if (c.startsWith(':')) {
+    const x = c.slice(1).trim();
+    const mod = V.buf.join('\n') !== V.was;
+    if (/^w( \S+)?$/.test(x)) { if (x.length > 2) V.segs = resolvePath(x.slice(2)); return vimWrite() ? undefined : false; }
+    if (['q', 'quit'].includes(x)) { if (mod) { shellPrint(H(['E37: ', 'errc'], 'Modification non enregistrée (ajoutez ! pour passer outre)')); return false; } return vimQuit(); }
+    if (['q!', 'qa!', 'quit!', 'cq'].includes(x)) return vimQuit();
+    if (['wq', 'x', 'wq!', 'x!'].includes(x)) return vimWrite() ? vimQuit() : false;
+    if (/^\d+$/.test(x)) return shellPrint(V.buf[+x - 1] ?? '~', 'dim');
+    shellPrint(H(['E492: ', 'errc'], `Commande inconnue : ${x}`));
+    return false;
+  }
+  if (c === 'ZZ') return V.buf.join('\n') === V.was ? vimQuit() : (vimWrite() ? vimQuit() : false);
+  if (c === 'ZQ') return vimQuit();
+  V.tries++;
+  const T = V.tries >= 5 ? VIM_TAUNT[4] : /^(exit|quit|logout|q|bye|stop|aide|help|\^c)$/i.test(c) ? 'Tapez :qa! puis Entrée pour abandonner les modifications et quitter Vim' : pick(VIM_TAUNT.slice(0, 4));
+  shellPrint(H([T.replace('{c}', c.slice(0, 30)), 'wrn']));
+}
+
+/* les épreuves à la main : une fois chacune, récompensées ; defi les montre */
+const EP = { mttr: ['Une minute chrono', 'réparer vous-même un incident de prod en moins d’une minute'], vendredi: ['Vendredi à l’ancienne', 'shipper un vendredi sans avoir lancé Xfce de la session'],
+  vim: ['Sortir de vim', 'ouvrir vim, et en sortir'] };
+let xfSeen = false;
+function epDone(k) {
+  if (!IDLE || !G.ep || G.ep[k]) return;
+  G.ep[k] = Date.now();
+  const r = Math.max(50, Math.round(ECO.value(shipped) * 2));
+  G.money += r;
+  txAdd('store', `Épreuve à la main · ${EP[k][0]}`, r);
+  toast(`<b>Épreuve réussie</b> · ${esc(EP[k][0])} · +$${usd(r)}`, 3500);
+  if (Object.keys(EP).every(x => G.ep[x])) ach('epreuves');
+  saveGame();
+}
+
 /* le prompt comme tableau de bord : les thèmes oh-my-vibe (achetés au Store), leurs segments, omv */
 const PT = {
   classique: { n: 'classique', cost: 0, seg: [], d: 'dev@prod-01 ~ ❯, comme au premier jour. Gratuit, et ça se voit.' },
@@ -4274,6 +4361,7 @@ const FILE_HELP = () => [
   [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
   [H(['  git status · diff ', 'org'], 'le dépôt des agents : status, diff et log -p (relire baisse le risque du ship), blame, commit, branch, stash'), '', 20],
   [H(['  chmod · crontab   ', 'org'], 'chmod +x puis ./script.sh : un script · crontab -e : des tâches planifiées (la maintenance ; sudo crontab -e pour root)'), '', 20],
+  [H(['  vim <fichier>     ', 'org'], 'l’éditeur dont on ne sort pas : i pour écrire, Échap pour arrêter, :wq pour enregistrer et sortir, :q! pour fuir'), '', 20],
   [H(['  omv theme         ', 'org'], 'le thème du prompt (oh-my-vibe) : la branche, la facture, vendredi 17 h, le risque · les thèmes au Store'), '', 20],
   [H(['  man · alias       ', 'org'], 'le manuel d’une commande (man -k pour chercher) · alias, unalias, source ~/.zshrc, type'), '', 20],
 ];
@@ -5027,7 +5115,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'vi', 'vim', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5877,6 +5965,7 @@ const expandVars = t => t.replace(/\$\{?(USER|HOME|SHELL|PWD|HOSTNAME)\}?/g, (_,
 
 async function runCommand(raw, inner = false) {   // inner : une étape de tube ou d'enchaînement (déjà affichée, déjà dans l'historique)
   let cmd = raw.trim().replace(/\s+/g, ' ');
+  if (vimS && !inner) { shellPrint(vimS.ins ? (cmd || ' ') : H([cmd, 'org'])); return vimInput(cmd); }   // dans vim : la ligne est pour vim
   if (!inner) shellPrint(hackGame && mode === 'idle' ? H(['mot de passe > ', 'okc'], cmd) : promptLine(mode === 'gameover' ? '✗ ' : '❯ ', mode === 'gameover' ? 'errc' : 'okc', cmd));
   if (!cmd) return;
   if (!inner && !hackGame && mode === 'idle') {     // !! !n !-n !mot : zsh affiche la ligne développée, puis la lance
@@ -6040,6 +6129,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (head === 'help' || low === '?') return printLines(HELP_LINES());
   if (head === 'man' || head === 'apropos') return manCmd(head === 'apropos' ? ['-k', ...rest] : rest);   // man : la page ; man -k, apropos : chercher
   if (head === 'alias') return aliasCmd(cmd);
+  if (['vim', 'vi'].includes(head) || (head === 'sudo' && ['vim', 'vi'].includes(rest[0]))) return vimCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');
   if (head === 'omv' || head === 'oh-my-vibe' || head === 'omz') return omvCmd(rest);
   if (head === 'unalias') return unaliasCmd(argv(cmd).slice(1));
   if (head === 'source' || head === '.') return sourceCmd(argv(cmd).slice(1));
@@ -7375,6 +7465,7 @@ async function xfEnter() {
     [H(['xfce4-session', 'org'], ' : xfwm4, xfce4-panel, xfdesktop… · ', [`affichage conservé : ${gfx}`, 'fgc']), 'dim', 260],
   ]);
   xfOn = true;
+  xfSeen = true;                                 // l'épreuve « Vendredi à l'ancienne » : Xfce a été lancé dans la session
   document.body.classList.add('xfce');
   document.body.dataset.view = 'xfce';            // aucune règle d'onglet plein écran ne s'applique
   APP_PARTS.forEach(e => { e.inert = true; });    // l'interface des agents n'est active que dans sa fenêtre
@@ -11350,7 +11441,7 @@ function incEnd(how) {                             // la prod repart : les rembo
   S.log = [...S.log, [I.t0, I.k, Math.round(dur), lost, how]].slice(-12);
   G.rep = Math.max(40, (G.rep ?? 70) - 1);       // chaque panne coûte un peu de la note des clients
   if (EV_ON && lost > 0 && chance(MAIL_P.plainte)) setTimeout(() => mailPlainte(I, dur, lost), ri(5000, 20000));   // et un client écrit
-  if (how === 'fix') { ach('pager'); if (dur < 60) ach('mttr'); if (I.k === 'dns') ach('dns'); }
+  if (how === 'fix') { ach('pager'); if (dur < 60) { ach('mttr'); epDone('mttr'); } if (I.k === 'dns') ach('dns'); }
   const why = how === 'sre' ? ' · le SRE d’astreinte s’en est occupé' : how === 'auto' ? ' · quelqu’un a tout redémarré au hasard, et ça a marché (personne ne sait pourquoi)' : how === 'away' ? ' · pendant votre absence, l’astreinte (un agent) a tout redémarré' : '';
   shellPrint(H(['✓ ', 'okc'], `${I.id} résolu en ${fmtEta(Math.round(dur))}${why} · remboursements `, [`−$${usd(lost)}`, 'errc'], ' · la prod repart, le ship aussi.'));
   shellPrint(H(['  Post-mortem : ', 'dim'], [pick(INC_PM), 'dim']));
@@ -11872,6 +11963,8 @@ function defiCmd(a) {                              // defi : le défi en cours, 
       : [H('Aucun défi en cours. Il se choisit à l’introduction en bourse : ', ['bourse.vibe', 'org'], ', ou ', ['ipo --confirm --defi <défi>', 'org'], '.'), 'dim', 20],
     ...Object.entries(CHAL).map(([k, c]) => [H(done[k] ? ['  ✓ ', 'okc'] : '    ', [k.padEnd(8), 'org'], `${c.n} · +${Math.round(c.b * 100)} % · ${c.d}`), '', 20]),
     [`${Object.keys(done).length} défi${Object.keys(done).length > 1 ? 's' : ''} réussi${Object.keys(done).length > 1 ? 's' : ''} sur ${Object.keys(CHAL).length}${C ? ' · defi abandon : renoncer (sans bonus)' : ''}`, 'dim', 20],
+    ['', '', 20], [H(['Épreuves à la main', 'fgc'], ['  une fois chacune, récompensées tout de suite', 'dim']), '', 20],
+    ...Object.entries(EP).map(([k, [n, d]]) => [H(G.ep?.[k] ? ['  ✓ ', 'okc'] : '    ', [n.padEnd(22), 'org'], d), '', 20]),
   ]);
 }
 
@@ -13170,6 +13263,8 @@ shellForm.addEventListener('submit', e => {
   submit(v);
 });
 shellIn.addEventListener('keydown', e => {
+  if (vimS && e.key === 'Escape') { e.preventDefault(); if (vimS.ins) { vimS.ins = false; vimLabel(); } return; }   // vim : Échap, le mode normal (le terminal ne se replie pas)
+  if (vimS && e.ctrlKey && e.key.toLowerCase() === 'c' && !dumping) { e.preventDefault(); shellPrint('Tapez :qa! puis Entrée pour abandonner les modifications et quitter Vim', 'wrn'); return; }
   if (rsKey(e)) return;                           // Ctrl+R : la recherche dans l'historique
   if (e.key === 'Escape') { e.preventDefault(); closeShell(); }
   else if (dumping && e.ctrlKey && e.key.toLowerCase() === 'c' && shellIn.selectionStart === shellIn.selectionEnd) { e.preventDefault(); dumping.abort = true; }
@@ -14057,6 +14152,7 @@ function autoShip() {                            // barre pleine : en production
   vhAdd();                                       // bourse.vibe : un point de plus sur le cours
   const day = new Date();                        // les succès du calendrier : un vendredi, à 3 h du matin
   if (day.getDay() === 5) ach('friday');
+  if (isFri() && !xfSeen && !xfOn) epDone('vendredi');   // un vendredi, sans bureau
   if (G.world.ev?.k === 'api' && G.world.ev.p === G.ai) ach('multicloud');   // l'API principale est en panne, et ça shippe quand même
   if (day.getHours() === 3) ach('night');
   panes.forEach(p => { if (p.state !== 'down') emit(p, { k: 'done', c: 'okc', t: `✓ ${PROJ}@${v} en production · prochaine : v${verStr()}` }, true); });
