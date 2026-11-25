@@ -1648,7 +1648,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.58', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.59', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2357,7 +2357,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2477,6 +2477,7 @@ const ACH = [
   { id: 'sudobang', g: '#', n: 'Le mot magique', d: 'Relancer la dernière commande avec sudo !!.', p: 22.4 },
   { id: 'rtfm', g: '?', n: 'RTFM', d: 'Lire une page de manuel. Volontairement.', p: 6.1 },
   { id: 'cronsave', g: '⏲', n: 'Maintenance préventive', d: 'Éviter un incident grâce à une tâche cron.', p: 4.3 },
+  { id: 'relu', g: '±', n: 'Une ligne relue', d: 'Relire les commits des agents avant un ship (git log -p). Le badge du README, lui, reste à 0.', p: 3.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2493,7 +2494,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
 G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };
-G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };
+G.git = { br: 'main', brs: [], st: 0, rv: -1, ...(G.git || {}) };   // git : la branche, les vôtres, vos stashs, le ship relu   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
@@ -3585,6 +3587,126 @@ const TEXT_CMDS = {
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
 
+/* git, au-delà de l'astreinte (log, revert, rm, show restent à opsCmd) : le dépôt est celui du projet, écrit par les agents */
+const GIT_AUTH = ['mistral-large', 'sol-2', 'opus-3', 'haiku-7', 'codestral-2'];
+const GIT_BR = ['agent/fix-everything', 'agent/refactor-final-v2', 'agent/wip-ne-pas-merger', 'vendredi'];
+const GIT_DIFF = () => [
+  ['api/middleware/auth.ts', ['@@ -12,6 +12,7 @@ export async function auth(req, res, next) {', '-  if (!user) throw new HttpError(401)', '+  // TODO : remettre l’authentification après la démo', '+  if (false && !user) throw new HttpError(401)']],
+  ['api/routes/orders.ts', ['@@ -40,7 +40,8 @@ router.post("/orders", async (req, res) => {', '   const order = await db.order.create({ data })', '+  await db.order.create({ data })   // une deuxième fois, au cas où']],
+  ['web/src/Checkout.tsx', ['@@ -8,5 +8,5 @@ export function Checkout() {', '-  useEffect(() => load(), [cart])', '+  useEffect(() => load())   // à chaque rendu : plus réactif']],
+  ['db/migrations/0042_cleanup.sql', ['@@ -0,0 +1,2 @@', '+-- nettoyage des tables inutilisées', '+DROP TABLE users;   -- on la recréera']],
+  ['tests/e2e/checkout.spec.ts', ['@@ -20,6 +20,3 @@ test("paiement", async ({ page }) => {', '-  await expect(page.getByText("Merci")).toBeVisible()', '-  expect(total).toBe(42)', '+  // test désactivé : il échouait']],
+  ['infra/k8s/api.yaml', ['@@ -14,4 +14,4 @@ spec:', '-  replicas: 3', '+  replicas: 300   # le scaling, c’est maintenant']],
+  ['README.md', ['@@ -1,3 +1,3 @@', '-Projet en développement.', '+Projet prêt pour la production (vérifié par l’agent qui l’a écrit).']],
+];
+const GIT_DNS = () => ['infra/dns/zone.txt', ['@@ -1,4 +1,1 @@', `-${PROJ}.vibe.   A      203.0.113.7`, `-${PROJ}.vibe.   AAAA   2001:db8::7`, `-www          CNAME  ${PROJ}.vibe.`, ' ; zone nettoyée (enregistrements inutilisés)']];
+const GIT_HAIKU = [['relu par personne', 'poussé un vendredi'], ['l’agent a souri', 'les tests sont au vert, éteints'], ['un commit de plus', 'la prod retient son souffle'],
+  ['il compile, enfin', 'personne ne sait pourquoi'], ['merci, dit l’agent', 'il a réécrit le reste']];
+const inRepo = () => isPrefix(PROJ_DIR, cwd);
+function gitDiffLines(list) {                       // un diff en couleurs (le rouge n'est pas une erreur : pas de classe errc)
+  return list.flatMap(([f, L]) => [[H([`diff --git a/${f} b/${f}`, 'b']), '', 4], [H([`--- a/${f}`, 'b']), '', 4], [H([`+++ b/${f}`, 'b']), '', 4],
+    ...L.map(l => [H([l, l.startsWith('@@') ? 'cy' : l.startsWith('-') ? 'gm' : l.startsWith('+') ? 'okc' : '']), '', 4])]);
+}
+function gitReview() {                              // les commits des agents, relus : le prochain ship a moins de chances de faire tomber la prod
+  if (!IDLE) return [];
+  if (G.git.rv === shipped) return [[H(['(déjà relu pour ce ship : le risque d’incident est déjà en baisse)', 'dim']), '', 4]];
+  G.git.rv = shipped;
+  ach('relu');
+  return [[H(['Relu. ', 'okc'], ['Le prochain ship a 40 % de risque d’incident en moins. Le badge « lignes relues » du README, lui, reste à 0.', 'dim']), '', 4]];
+}
+function gitDiffPick() {
+  const D = GIT_DIFF(), L = [D[ri(0, 2)], D[ri(3, 6)]];
+  return G.inc?.k === 'dns' ? [GIT_DNS(), ...L] : L;
+}
+function gitCmd(a) {                                // → null : pour opsCmd (log sans -p, revert, rm, show)
+  const sub = a[0] || '', rest = a.slice(1), out = L => printLines(L.map(x => Array.isArray(x) ? x : [x, '', 8])), fatal = m => { shellPrint(H(['fatal: ', 'errc'], m)); return false; };
+  const notRepo = () => fatal('ni ceci ni aucun de ses répertoires parents n’est un dépôt git : .git (le dépôt est dans ' + tildePath(PROJ_DIR) + ')');
+  if (sub === 'log' && (rest.includes('-p') || rest.includes('--patch'))) {
+    const C = [[G.inc?.k === 'dns' ? G.inc.h : hex(7), G.inc?.k === 'dns' ? INC_GIT.dns : pick(['feat(checkout): paiement en un clic (et en double)', 'test: supprimer les tests qui échouaient', 'fix: fix'])],
+      [hex(7), pick(['perf: tout mettre en cache', 'chore: mettre à jour 412 dépendances', 'refactor: renommer tout'])]], D = gitDiffPick();
+    return out([...C.flatMap(([h, m], i) => [[H(['commit ' + h, 'wrn'], i ? '' : [' (HEAD -> ' + G.git.br + ')', 'okc']), '', 8], `Author: ${pick(GIT_AUTH)} <agents@agents.invalid>`, '', `    ${m}`, '',
+      ...gitDiffLines(i ? D.slice(1) : D.slice(0, 1)), ['', '', 4]]), ...gitReview()]);
+  }
+  if (['log', 'revert', 'rm', 'show'].includes(sub)) return null;
+  if (sub === '--version' || sub === 'version') return shellPrint('git version 2.45.2 (vibian)');
+  if (!sub || sub === 'help' || sub === '--help') return out([H('usage : git ', ['status', 'org'], ' · ', ['diff', 'org'], ' · ', ['log [-p]', 'org'], ' · ', ['add', 'org'], ' · ', ['commit -m', 'org'], ' · ', ['blame', 'org'], ' · ', ['branch', 'org'], ' · ', ['switch', 'org'], ' · ', ['stash', 'org'], ' · ', ['push', 'org'], ' · ', ['pull', 'org'], ' · ', ['revert', 'org']),
+    H(['  git log -p (ou git diff) : relire les commits des agents avant le ship. Le risque d’incident baisse.', 'dim'])]);
+  if (sub === 'push' && rest.some(x => /^(-f|--force(-with-lease)?)$/.test(x))) { shellPrint('remote: Nice try. La branche est protégée (par les agents).', 'errc'); return false; }
+  if (sub === 'init') return shellPrint(`Dépôt Git existant réinitialisé dans ${absPath(cwd)}/.git/ (le ${ri(12, 97)}e de la journée)`);
+  if (!inRepo()) return notRepo();
+  const ahead = 3 + Math.floor((G.prog || 0) * 40), F = AGENTS.flatMap(x => x.files || []);
+  if (sub === 'status') {
+    const f = [...F].sort(() => R() - .5).slice(0, 4);
+    return out([`Sur la branche ${G.git.br}`, `Votre branche est en avance sur 'origin/${G.git.br}' de ${ahead} commits (les agents, pendant que vous dormiez).`,
+      [H(['  (git log -p pour les relire avant le ship ; personne ne le fait, d’où les incidents)', 'dim']), '', 8], '', 'Modifications qui ne seront pas validées :',
+      ...f.map((x, i) => [H('        ', [i === 3 ? 'supprimé :        ' : 'modifié :         ', i === 3 ? 'gm' : 'okc'], x), '', 8]),
+      [H(['        … et ' + num(ri(600, 1400)) + ' autres fichiers (les agents)', 'dim']), '', 8], '', 'Fichiers non suivis :', [H('        ', ['.env.bak  notes-agent-vendredi.md  TODO-FINAL-v3.md', 'gm']), '', 8]]);
+  }
+  if (sub === 'diff') return out([...gitDiffLines(gitDiffPick()), ...gitReview()]);
+  if (sub === 'add') {
+    if (!rest.length) return shellPrint(H('Rien de spécifié, rien n’a été ajouté. ', ['git add .', 'org'], ' pour tout (vraiment tout).'), 'dim');
+    const all = rest.some(x => ['.', '-A', '--all'].includes(x));
+    return shellPrint(H(`${all ? num(ri(800, 1500)) : rest.length} fichier${all || rest.length > 1 ? 's' : ''} indexé${all || rest.length > 1 ? 's' : ''}`, all ? [' (dont .env : il n’était pas dans .gitignore. Les robots qui lisent GitHub vont adorer.)', 'dim'] : ''));
+  }
+  if (sub === 'commit') {
+    const i = rest.findIndex(x => x === '-m' || x === '-am'), msg = i >= 0 ? rest[i + 1] : '';
+    if (!msg) { shellPrint('Abandon de la validation : message vide. Un agent proposait « wip ».'); return false; }
+    const [l2, l3] = pick(GIT_HAIKU), h = hex(7), files = ri(1, 4);
+    return out([`[${G.git.br} ${h}] ${msg} / ${l2} / ${l3}`, ` ${files} fichier${files > 1 ? 's' : ''} modifié${files > 1 ? 's' : ''}, ${ri(1, 40)} insertions(+), ${ri(0, 12)} suppressions(-)`,
+      [H(['(message réécrit en haïku par un agent : c’est la convention du dépôt)', 'dim']), '', 8]]);
+  }
+  if (sub === 'blame') {
+    const f = rest.find(x => !x.startsWith('-'));
+    if (!f) return fatal('git blame <fichier>');
+    const segs = resolvePath(f), n = nodeAt(segs);
+    if (!n || n.d) return fatal(`pas de chemin '${f}' dans HEAD`);
+    const L = (n.t ? n.t.split('\n') : hackerCode(10)).slice(0, 14), you = ri(0, L.length - 1);
+    return out(L.map((l, k) => [H([hex(7), 'wrn'], ` (${(k === you ? 'vous' : pick(GIT_AUTH)).padEnd(13)} ${k === you ? 'vendredi 17:02' : '2026-11-' + ri(10, 27) + ' ' + String(ri(0, 23)).padStart(2, '0') + ':' + String(ri(0, 59)).padStart(2, '0')} ${String(k + 1).padStart(3)}) `, l), '', 6]));
+  }
+  if (sub === 'branch') {
+    const all = [...new Set(['main', ...G.git.brs, ...GIT_BR])];
+    if (!rest.length) return out(all.map(b => [H(b === G.git.br ? ['* ' + b, 'okc'] : '  ' + b), '', 6]));
+    if (rest[0] === '-d' || rest[0] === '-D') {
+      const b = rest[1];
+      if (!G.git.brs.includes(b)) return GIT_BR.includes(b) ? fatal(`la branche '${b}' appartient aux agents. Ils la recréeraient de toute façon.`) : fatal(`branche '${b}' introuvable`);
+      if (b === G.git.br) return fatal(`impossible de supprimer la branche '${b}' extraite`);
+      G.git.brs = G.git.brs.filter(x => x !== b);
+      return shellPrint(`Branche ${b} supprimée.`);
+    }
+    if (all.includes(rest[0])) return fatal(`une branche nommée '${rest[0]}' existe déjà`);
+    G.git.brs.push(rest[0]);
+    return;
+  }
+  if (sub === 'checkout' || sub === 'switch') {
+    const nw = rest.includes('-b') || rest.includes('-c'), b = rest.find(x => !x.startsWith('-'));
+    if (!b) return fatal(`${sub} : une branche, s’il vous plaît`);
+    const all = ['main', ...G.git.brs, ...GIT_BR];
+    if (nw) { if (all.includes(b)) return fatal(`une branche nommée '${b}' existe déjà`); G.git.brs.push(b); G.git.br = b; return shellPrint(`Basculement sur la nouvelle branche '${b}'`); }
+    if (!all.includes(b)) return sub === 'switch' ? fatal(`référence invalide : ${b}`) : (shellPrint(H(['error: ', 'errc'], `le chemin '${b}' ne correspond à aucun fichier connu de git`)), false);
+    if (b === G.git.br) return shellPrint(`Déjà sur '${b}'`);
+    G.git.br = b;
+    return shellPrint(H(`Basculement sur la branche '${b}'`, GIT_BR.includes(b) ? [`  (${num(ri(900, 2400))} fichiers modifiés : vous êtes chez les agents)`, 'dim'] : ''));
+  }
+  if (sub === 'stash') {
+    const v = rest[0] || 'push';
+    if (v === 'push' || v === 'save') { G.git.st++; return shellPrint(`Copie de travail et état de l’index sauvegardés dans WIP on ${G.git.br}: ${hex(7)} ${pick(['wip', 'vendredi', 'à finir lundi'])}`); }
+    if (v === 'list') return out([...Array.from({ length: G.git.st }, (_, k) => `stash@{${k}}: WIP on ${G.git.br}: le vôtre`),
+      ...Array.from({ length: 36 }, (_, k) => [H(`stash@{${G.git.st + k}}: WIP on agent/${pick(['fix-everything', 'refactor-final-v2'])}: `, [pick(['vendredi', 'mardi', 'à reprendre', 'ne pas toucher']), 'dim']), '', 2])]);
+    if (v === 'pop' || v === 'apply') {
+      if (G.git.st) { if (v === 'pop') G.git.st--; return shellPrint(v === 'pop' ? `refs/stash@{0} supprimé (${hex(7)})` : 'Appliqué.'); }
+      shellPrint(H(['CONFLIT (contenu) : ', 'errc'], `conflit de fusion dans ${pick(F)} (le stash d’un agent, de mardi)`));
+      return false;
+    }
+    if (v === 'clear' || v === 'drop') { const n = v === 'clear' ? G.git.st + 36 : 1; if (v === 'clear') G.git.st = 0; else G.git.st = Math.max(0, G.git.st - 1); return shellPrint(`${plural(n, 'stash')} supprimé${n > 1 ? 's' : ''}. Les agents en referont.`); }
+    return fatal(`sous-commande de stash inconnue : ${v}`);
+  }
+  if (sub === 'push') return out(['Everything up-to-date', [H(['(les agents ont déjà poussé, en force, il y a 4 minutes)', 'dim']), '', 8]]);
+  if (sub === 'pull') return out(['Déjà à jour.', [H(['(il n’y a que les agents qui travaillent, et ils poussent directement)', 'dim']), '', 8]]);
+  if (sub === 'clone' || sub === 'merge' || sub === 'rebase') return out([`${sub} : les agents s’en occupent. Ils ont déjà résolu les conflits (en gardant leur version).`]);
+  shellPrint(H(['git : ', 'errc'], `'${sub}' n’est pas une commande git. Voir 'git --help'.`));
+  return false;
+}
+
 /* les scripts : une ligne après l'autre, comme tapées (tubes compris) ; # et le shebang ignorés ; set -e, exit, sleep */
 let shDepth = 0;
 async function shExecLine(line) {                   // une ligne, sans écho ni historique : vrai si elle a réussi
@@ -4090,6 +4212,7 @@ const FILE_HELP = () => [
   [H(['  cmd | grep motif  ', 'org'], 'les tubes : grep, head, tail, wc, sort, uniq, less, tee · find . -name "*.md"'), '', 20],
   [H(['  > f · >> f · &&   ', 'org'], 'écrire dans un fichier, ajouter à la fin · enchaîner (;, &&, ||) · 2>/dev/null fait taire les erreurs'), '', 20],
   [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
+  [H(['  git status · diff ', 'org'], 'le dépôt des agents : status, diff et log -p (relire baisse le risque du ship), blame, commit, branch, stash'), '', 20],
   [H(['  chmod · crontab   ', 'org'], 'chmod +x puis ./script.sh : un script · crontab -e : des tâches planifiées (la maintenance ; sudo crontab -e pour root)'), '', 20],
   [H(['  man · alias       ', 'org'], 'le manuel d’une commande (man -k pour chercher) · alias, unalias, source ~/.zshrc, type'), '', 20],
 ];
@@ -4842,7 +4965,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'sleep', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5762,6 +5885,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (['equipe', 'équipe', 'humains', 'team'].includes(head)) return humanCmd();
   if (['keys', 'key', 'cles', 'clés', 'cle', 'clé'].includes(head)) return keysCmd(rest);
   if (head === 'defi' || head === 'défi' || head === 'defis' || head === 'défis') return defiCmd(rest);
+  if (cliWord === 'git' && installed.has('git')) { const r = gitCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1)); if (r !== null) return r; }   // status, diff, commit, blame, branch, stash…
   if (OPS.has(cliWord) && (head !== 'sudo' || installed.has('sudo'))) { const r = opsCmd(cliWord, head === 'sudo' ? low.slice(5) : low, head === 'sudo'); if (r !== false) return r; }
   if (['xfce4-terminal', 'x-terminal-emulator', 'gnome-terminal', 'konsole', 'xterm'].includes(head)) {
     if (!xfOn) return shellPrint(H([`${head}: `, 'errc'], 'cannot open display : pas de session graphique. ', ['Ctrl+B puis c', 'org'], ' ouvre un autre terminal ici.'));
@@ -11129,7 +11253,7 @@ const lcFirst = t => t.charAt(0).toLowerCase() + t.slice(1);
 function incRisk() {                               // la probabilité qu'un ship fasse tomber la prod
   if (!IDLE || shipped < 3) return 0;
   const d = new Date(), plat = { mistral: 1.6, local: 1.4, codex: 1, claude: .9, moon: .6 }[G.ai] ?? 1;
-  return Math.min(.5, .07 * plat * (isFri() ? 2 : 1) * (d.getHours() < 6 ? 1.5 : 1) * skillMult('inc') * humanK('inc'));
+  return Math.min(.5, .07 * plat * (isFri() ? 2 : 1) * (d.getHours() < 6 ? 1.5 : 1) * skillMult('inc') * humanK('inc') * (G.git?.rv === shipped ? .6 : 1));   // relu (git log -p) : −40 %
 }
 function incStart(k) {                             // PagerDoudou sonne
   if (!IDLE || G.inc) return false;
