@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>54</b><span>mises à jour</span></div>
-    <div role="listitem"><b>64 h 31</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 14 676</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>55</b><span>mises à jour</span></div>
+    <div role="listitem"><b>74 h 15</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 022</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#55</span><time datetime="2026-11-25T13:42">13 h 42</time><a href="#tubes">Le shell, le vrai : tubes, redirections, grep</a></li>
       <li><span class="n">#54</span><time datetime="2026-11-25T03:58">03 h 58</time><a href="#logitheque">La Logithèque : installer sans le terminal</a></li>
       <li><span class="n">#53</span><time datetime="2026-11-25T03:49">03 h 49</time><a href="#tri-thunar">Thunar trie : par nom, taille, type, date</a></li>
       <li><span class="n">#52</span><time datetime="2026-11-25T03:46">03 h 46</time><a href="#version">Un numéro de version : alpha 0.52</a></li>
@@ -204,8 +205,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="logitheque" aria-labelledby="t54">
-    <p class="meta"><span class="n">#54</span><span class="new">dernière</span><span class="v">alpha 0.54</span><time datetime="2026-11-25T03:58">25 nov. 2026 · 03 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/32d2948">32d2948</a><span>14 564 → 14 676 lignes</span></p>
+  <article class="maj latest" id="tubes" aria-labelledby="t55">
+    <p class="meta"><span class="n">#55</span><span class="new">dernière</span><span class="v">alpha 0.55</span><time datetime="2026-11-25T13:42">25 nov. 2026 · 13 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f304144">f304144</a><span>14 676 → 15 022 lignes</span></p>
+    <h2 id="t55"><a href="#tubes">Le shell, le vrai : tubes, redirections, grep</a></h2>
+    <ul>
+      <li>Des tubes : ls | grep, journalctl -u api | grep -i error | tail, fortune | cowsay. Dans un tube, ls donne un nom par ligne, comme le vrai ; les erreurs restent à l’écran, comme stderr.</li>
+      <li>Des redirections : > fichier, >> fichier, < fichier, 2>/dev/null, 2>&1. Écrire chez root sans droits : « permission non accordée », car la redirection appartient au shell, pas à sudo. D’où … | sudo tee.</li>
+      <li>Des enchaînements : ;, && et || (un grep qui ne trouve rien compte comme un échec).</li>
+      <li>Les outils : grep (-i, -v, -n, -c, -o, -r, -w, -l), head, tail, wc, sort (-r, -n, -u, -k), uniq (-c, -d, -u), find (-name, -type, -maxdepth), less, tee. Tab complète la commande après un tube. Un programme qui veut l’écran (htop, nano) ne passe pas dans un tube.</li>
+      <li>L’aide montre ls à la place de dir (qui marche toujours, comme le dir de coreutils). Un succès Steam : Plombier, trois tubes dans une seule commande.</li>
+    </ul>
+    <blockquote>« Avant, les agents écrivaient des logs que personne ne lisait. Maintenant, on peut les filtrer avant de ne pas les lire. »<cite>l’agent, 13 h 42</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-tubes.png" title="Voir en grand"><img src="assets/screen-tubes.png" width="900" height="540" loading="lazy" alt="Le terminal : grep -c ERROR sur le log de l’API, puis grep -o | sort | uniq -c | sort -rn | head -3 qui classe les erreurs, les correspondances en rouge ; une redirection vers /etc/ssh/sshd_config refusée, puis la même avec sudo tee ; pour finir, fortune | cowsay."></a><figcaption>grep, sort, uniq : le log de l’API, trié par erreur.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="logitheque" aria-labelledby="t54">
+    <p class="meta"><span class="n">#54</span><span class="v">alpha 0.54</span><time datetime="2026-11-25T03:58">25 nov. 2026 · 03 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/32d2948">32d2948</a><span>14 564 → 14 676 lignes</span></p>
     <h2 id="t54"><a href="#logitheque">La Logithèque : installer sans le terminal</a></h2>
     <ul>
       <li>Une Logithèque sous Xfce (menu Applications, un lanceur sur le bureau, ou la commande logitheque) : les paquets d’apt par catégorie (À la une, Internet, Multimédia, Jeux et bêtises, Développement, IA locale, Système, Essentiels), une recherche, et l’onglet Installés.</li>
