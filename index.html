@@ -1071,6 +1071,31 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .mc { grid-template-rows: auto minmax(0, 1fr) auto auto; }
 .mt-sel { background: var(--dim2); color: var(--bg); }
 /* Blunderbird : les dossiers, la liste des messages, le message et ses boutons */
+/* la Logithèque : la recherche, les catégories, les fiches, leurs boutons */
+.lg { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; background: var(--bg2); white-space: normal; }
+.lg-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .45em 1ch; border-bottom: 1px solid var(--rule); }
+.lg-bar b { color: var(--orange); }
+.lg-q { flex: 1 1 24ch; min-width: 0; padding: .2em 1ch; border: 1px solid var(--rule); border-radius: 3px; background: var(--bg); color: var(--fg); font: inherit; outline: none; }
+.lg-q:focus { border-color: var(--orange); }
+.lg-bar button, .lg-cats button, .lg-it button { padding: .1em 1.1ch; border: 1px solid var(--rule); border-radius: 3px; background: none; color: var(--fg); }
+.lg-bar button[aria-pressed="true"], .lg-cats button[aria-pressed="true"] { border-color: var(--orange); color: var(--orange); }
+.lg-main { display: grid; grid-template-columns: minmax(16ch, 1fr) 4fr; min-height: 0; }
+.lg-cats { display: grid; align-content: start; gap: .3em; padding: .6em 1ch; overflow: auto; border-right: 1px solid var(--rule); }
+.lg-cats button { text-align: left; border-color: transparent; }
+.lg-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(34ch, 1fr)); align-content: start; gap: .7em 1.2ch; padding: .7em 1.2ch; min-height: 0; overflow: auto; }
+.lg-it { display: grid; grid-template-columns: 2.6em minmax(0, 1fr); gap: .2em 1.2ch; padding: .6em 1ch; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); }
+.lg-it .g { grid-row: span 3; display: grid; place-items: center; width: 2.4em; height: 2.4em; border: 1px solid color-mix(in srgb, var(--orange) 45%, transparent); border-radius: 4px; color: var(--orange); font-size: 1.2em; }
+.lg-it .n { font-weight: 700; } .lg-it .n small { color: var(--dim); font-weight: 400; }
+.lg-it .d { color: var(--dim); font-size: .9em; }
+.lg-it .a { display: flex; flex-wrap: wrap; gap: .4em 1ch; align-items: center; }
+.lg-it .a .on { color: var(--green); font-size: .9em; }
+.lg-it button.go { border-color: var(--orange); background: var(--orange); color: var(--ink); font-weight: 700; }
+.lg-it button.danger { border-color: var(--red); color: var(--red); }
+.lg-it button:disabled { opacity: .5; cursor: default; }
+.lg-it.ess { border-style: dashed; }
+.lg-empty { grid-column: 1 / -1; color: var(--dim); }
+.lg-status { min-height: 1.4em; padding: .25em 1ch; border-top: 1px solid var(--rule); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) { .lg-main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); } .lg-cats { grid-auto-flow: column; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); } }
 .ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
 .ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
 .ml-bar b { color: var(--orange); }
@@ -1616,7 +1641,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 // Rich line: H('plain', ['coloured', 'cls'], ...)
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.53', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.54', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2440,6 +2465,7 @@ const ACH = [
   { id: 'raccourci', g: '↗', n: 'Lanceur', d: 'Créer un raccourci sur le bureau (clic droit, Créer un raccourci).', p: 19.8 },
   { id: 'multisel', g: '⬚', n: 'Sélection de groupe', d: 'Sélectionner plusieurs icônes du bureau d’un rectangle, à la souris.', p: 24.6 },
   { id: 'dnd', g: '⇥', n: 'Glisser, déposer', d: 'Déplacer un fichier en le glissant : dans Thunar, ou entre Thunar et le bureau.', p: 36.8 },
+  { id: 'logitheque', g: '⊕', n: 'Sans le terminal', d: 'Installer un logiciel depuis la Logithèque, sans taper une seule commande.', p: 31.2 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3996,7 +4022,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -4907,6 +4933,12 @@ async function runCommand(raw) {
     return shellPrint('Le coffre de prod se force depuis le bunker : tapez fallout, puis hack.', 'dim');
   }
   const rawProg = head === 'sudo' ? rest[0] : head, progCmd = BROWSERS.includes(rawProg) ? 'firefaux' : rawProg === 'thunderbird' ? 'blunderbird' : rawProg;   // firefox, chromium… : c'est Firefaux
+  if (['logitheque', 'logithèque', 'gnome-software', 'software'].includes(rawProg)) {   // la Logithèque : l'interface graphique d'apt
+    if (!installed.has('xfce4')) return notInstalled(rawProg, 'xfce4');
+    if (!xfOn) return shellPrint(H('La Logithèque est l’interface graphique d’apt. Sans bureau : ', ['apt search <mot>', 'org'], ', ', ['sudo apt install <paquet>', 'org'], ', ', ['sudo apt remove <paquet>', 'org'], '.'), 'dim');
+    xfMenuClose();
+    return openTab('logitheque');
+  }
   if (Object.hasOwn(XFS_CMD, rawProg)) {          // les Paramètres du bureau : il leur faut le bureau
     if (!installed.has('xfce4')) return notInstalled(rawProg, 'xfce4');
     if (!xfOn) {
@@ -5410,6 +5442,7 @@ const PROGS = {
   lynx: { label: 'lynx', delay: 1000, nomenu: true, pkg: 'firefaux', icon: '◍', make: () => makeLynx() },
   nvlc: { label: 'nvlc', delay: 250, nomenu: true, pkg: 'vlc', icon: '▲', make: () => makeNvlc() },
   steamcmd: { label: 'steamcmd', delay: 1000, nomenu: true, pkg: 'steam', icon: '◎', make: () => makeSteamcmd() },
+  logitheque: { label: 'Logithèque', delay: 1000, gui: true, nomenu: true, pkg: 'xfce4', icon: '⊕', menu: 'Logithèque', make: () => makeLogi() },
   'xfce4-settings': { label: 'Paramètres du bureau', delay: 1000, gui: true, nomenu: true, pkg: 'xfce4', icon: '⚙', menu: 'Paramètres du bureau', make: () => makeXfSettings() },
   'xfce4-about': { label: 'À propos', delay: 2000, gui: true, nomenu: true, pkg: 'xfce4', icon: 'ⓘ', menu: 'À propos', make: () => makeAbout() },
   mutt: { label: 'mutt', delay: 1000, nomenu: true, pkg: 'blunderbird', icon: '✉', make: () => makeMutt() },
@@ -6275,7 +6308,7 @@ const xfceEl = $('#xfce'), deskEl = $('#xfce .xf-desk'), xfMenuEl = $('#xf-menu'
 const xfIconsEl = $('#xfce .xf-icons');
 // place de départ, en fractions du bureau [x, y, largeur, hauteur] : les agents en grand, le terminal par-dessus en bas à droite
 const XF_PLACE = { claude: [.02, .03, .7, .8], zsh: [.36, .36, .6, .6], htop: [.08, .07, .62, .68], atop: [.14, .12, .62, .68], thunar: [.2, .06, .62, .72], mousepad: [.26, .1, .56, .72], atril: [.3, .03, .46, .9], firefaux: [.12, .04, .72, .86], steam: [.16, .05, .66, .86], vlc: [.24, .12, .52, .66], blunderbird: [.16, .07, .66, .8],
-  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82], 'xfce4-settings': [.22, .06, .56, .82] };
+  nano: [.14, .08, .62, .74], 'settings-ui': [.28, .06, .44, .86], 'agents-ui': [.26, .04, .48, .9], 'xfce4-about': [.25, .07, .5, .82], 'xfce4-settings': [.22, .06, .56, .82], logitheque: [.16, .05, .66, .84] };
 const xfName = n => n === 'zsh' ? 'Terminal' : PROGS[n]?.term ? `Terminal ${PROGS[n].term}` : n === 'claude' ? cli().label : PROGS[n].tname?.() || PROGS[n].label;
 const xfTitle = n => isTerm(n) ? `${xfName(n)} · ${USER}@prod-01: ${tildePath(n === liveTerm ? cwd : TERMS[n]?.cwd || HOME)}` : n === 'claude' ? `${cli().label} · ~/code/${PROJ}` : PROGS[n].title?.() || PROGS[n].menu || PROGS[n].label;
 const xfIcon = n => isTerm(n) ? '❯' : n === 'claude' ? cli().glyph : PROGS[n].icon || '▤';
@@ -6878,6 +6911,7 @@ function xfMenuOpen() {
         : `${MODELS[CLIS[k].def].name} · orchestrateur ${MODELS[CLIS[k].lead].name}`)).join('')
     + '<hr>' + (IDLE ? item('store', '$', 'Store des agents', `$${usd(G.money)} · agents, terminal, skills, matériel`) : '')
     + item('newterm', '❯', 'Nouveau terminal', 'une autre fenêtre : son dossier, son historique (ou Ctrl+B puis c)')
+    + item('logitheque', '⊕', 'Logithèque', 'installer et supprimer des logiciels, sans le terminal')
     + item('xfce4-settings', '▨', 'Paramètres du bureau', 'fond d’écran, icônes, session et démarrage')
     + item('settings', '⚙', 'Paramètres', 'couleurs, taille, graphismes, nom')
     + item('xfce4-about', 'ⓘ', 'À propos', 'la config du PC, l’éditeur, les contributeurs, les agents')
@@ -7385,6 +7419,7 @@ const DESK_APPS = () => [   // [identifiant de l'icône, ce qu'il lance, son nom
   ...['mistral', 'codex', 'claude'].map(k => [k, k, k === 'mistral' ? 'Vibe CLI' : CLIS[k].label, !IDLE || (!!G.own[k] && cliHas(k))]),
   ...Object.keys(LOCAL_RT).map(k => ['rt:' + k, k, LOCAL_RT[k].name, IDLE && !!G.rt?.[k]]),
   ['store', 'store', 'Store des agents', IDLE],
+  ['logitheque', 'logitheque', 'Logithèque', installed.has('xfce4')],
 ];
 const deskFileOf = id => id.replace(/^rt:/, '') + '.desktop';
 const deskEntry = (name, exec) => `[Desktop Entry]\nVersion=1.0\nType=Application\nName=${name}\nExec=${exec}\nIcon=${exec}\nTerminal=false\n`;
@@ -7614,6 +7649,83 @@ function fmSortSet(k) {                            // la même colonne : l'ordre
   const [sk, sd] = fmSortNow();
   G.xfd = { ...G.xfd, fmSort: [k, k === sk ? -sd : 1] };
   saveGame();
+}
+
+/* la Logithèque : l'interface graphique d'apt. Les paquets du catalogue, par catégorie ; une recherche (nom, description, commandes) ;
+   Installer et Supprimer passent par apt-get (pkexec apt-get install -y …), dont la sortie s'écrit dans le terminal ; une action à la fois. */
+const LOGI_CATS = [['une', 'À la une', ['vlc', 'blunderbird', 'clamav', 'steam', 'tmux', 'cowsay', 'lolama', 'neofetch']],
+  ['internet', 'Internet', ['firefaux', 'blunderbird', 'curl']], ['media', 'Multimédia', ['vlc']], ['jeux', 'Jeux et bêtises', ['steam', 'sl', 'cowsay', 'fortune', 'neofetch', 'fastfetch']],
+  ['dev', 'Développement', ['git', 'nodejs', 'npm', 'python3', 'golang', 'rustc', 'docker.io', 'jq', 'ripgrep', 'bat', 'vim', 'emacs', 'nano', 'tree']], ['ia', 'IA locale', ['lolama']],
+  ['systeme', 'Système', ['htop', 'atop', 'lm-sensors', 'smartmontools', 'clamav', 'tmux', 'thunar', 'mousepad', 'atril', 'xfce4']],
+  ['essentiels', 'Essentiels (ne pas toucher)', ['bash', 'coreutils', 'libc6', 'linux-image-6.11.0-friday', 'systemd', 'sudo', 'zsh']]];
+const LOGI_ESS = new Set(LOGI_CATS.find(c => c[0] === 'essentiels')[2]);
+const logiCat = k => k === 'tout' ? Object.keys(CATALOG) : k === 'autres' ? Object.keys(CATALOG).filter(p => !LOGI_CATS.slice(1).some(c => c[2].includes(p))) : (LOGI_CATS.find(c => c[0] === k)?.[2] || []).filter(p => CATALOG[p]);
+const logiGlyph = p => PROGS[p]?.icon || (LOGI_ESS.has(p) ? '◆' : ['git', 'nodejs', 'npm', 'python3', 'golang', 'rustc', 'docker.io', 'jq', 'ripgrep'].includes(p) ? '{}' : '▣');
+function makeLogi() {
+  const el = document.createElement('div');
+  el.className = 'prog lg';
+  el.tabIndex = -1;
+  el.setAttribute('aria-label', 'Logithèque');
+  el.innerHTML = '<div class="lg-bar"><b>Logithèque</b><input class="lg-q" type="search" placeholder="Rechercher un logiciel (nom, description, commande)…" aria-label="Rechercher un logiciel" spellcheck="false" autocomplete="off">'
+    + '<button type="button" data-lgv="all" aria-pressed="true">Explorer</button><button type="button" data-lgv="inst" aria-pressed="false"></button></div>'
+    + '<div class="lg-main"><nav class="lg-cats" aria-label="Catégories"></nav><div class="lg-list" role="list"></div></div><div class="lg-status" role="status"></div>';
+  const q = el.querySelector('.lg-q'), cats = el.querySelector('.lg-cats'), list = el.querySelector('.lg-list'), st = el.querySelector('.lg-status');
+  let cat = 'une', v = 'all', busy = '', sig = '', note = 'Installer et supprimer des logiciels sans taper de commande. La Logithèque tape apt-get pour vous (voir le terminal).';
+  function pkgs() {
+    const t = xfNorm(q.value.trim());
+    let L = t ? Object.keys(CATALOG).filter(p => xfNorm(`${p} ${CATALOG[p][3]} ${CATALOG[p][2]}`).includes(t)) : v === 'inst' ? Object.keys(CATALOG).filter(p => installed.has(p)) : logiCat(cat);
+    if (v === 'inst' && t) L = L.filter(p => installed.has(p));
+    return L;
+  }
+  function card(p) {
+    const [ver, kb, , desc] = CATALOG[p], on = installed.has(p), run = on && PROGS[p]?.make && !PROGS[p].nomenu, me = busy === p;
+    return `<div class="lg-it${LOGI_ESS.has(p) ? ' ess' : ''}" role="listitem" data-pkg="${esc(p)}"><span class="g" aria-hidden="true">${esc(logiGlyph(p))}</span>`
+      + `<span class="n">${esc(p)} <small>${esc(ver)} · ${esc(fmtSize(kb * 1024))}</small></span><span class="d">${esc(desc)}</span>`
+      + `<span class="a">${on ? '<span class="on">✓ installé</span>' : ''}`
+      + (me ? `<button type="button" disabled>${on ? 'Suppression…' : 'Installation…'}</button>`
+        : on ? `${run ? `<button type="button" class="go" data-lga="run">Lancer</button>` : ''}<button type="button" class="danger" data-lga="remove"${busy ? ' disabled' : ''}>Supprimer</button>`
+        : `<button type="button" class="go" data-lga="install"${busy ? ' disabled' : ''}>Installer</button>`)
+      + `${LOGI_ESS.has(p) ? '<span class="d">paquet essentiel : le supprimer, c’est scier la branche</span>' : ''}</span></div>`;
+  }
+  function draw(force) {
+    const L = pkgs(), s2 = JSON.stringify([cat, v, q.value, busy, note, L.map(p => p + installed.has(p))]);
+    if (s2 === sig && !force) return;
+    sig = s2;
+    el.querySelector('[data-lgv="inst"]').textContent = `Installés (${Object.keys(CATALOG).filter(p => installed.has(p)).length})`;
+    el.querySelectorAll('[data-lgv]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lgv === v)));
+    cats.innerHTML = [...LOGI_CATS.map(c => [c[0], c[1]]), ['autres', 'Autres'], ['tout', 'Tout le catalogue']]
+      .map(([k, t]) => `<button type="button" data-lgc="${k}" aria-pressed="${v === 'all' && !q.value.trim() && cat === k}">${esc(t)}</button>`).join('');
+    list.innerHTML = L.length ? L.map(card).join('') : `<p class="lg-empty">${q.value.trim() ? `Rien pour « ${esc(q.value.trim())} ». apt search non plus.` : 'Rien ici.'}</p>`;
+    st.textContent = note;
+  }
+  async function act(p, op) {
+    if (busy) return;
+    if (dumping || mode !== 'idle') { note = 'Le terminal est occupé : attendez la fin de la commande en cours.'; return draw(true); }
+    if (!installed.has('sudo')) { note = 'pkexec demande les droits… à sudo, que vous avez désinstallé. Reste la sauvegarde de jeudi.'; return draw(true); }
+    busy = p;
+    note = `pkexec apt-get ${op} -y ${p} · la sortie s’écrit dans le terminal`;
+    draw(true);
+    shellPrint(H(['logithèque ', 'dim'], ['→ ', 'dim'], [`pkexec apt-get ${op} -y ${p}`, 'org']));
+    try { await aptCmd([op, '-y', p], true, 'apt-get'); } catch { /* le terminal a dit ce qui n'allait pas */ }
+    busy = '';
+    const ok = installed.has(p) === (op === 'install');
+    if (ok && op === 'install') ach('logitheque');
+    note = ok ? `✓ ${p} ${op === 'install' ? 'installé' : 'supprimé'}.` : `✗ ${p} : apt-get n’a pas pu (voir le terminal).`;
+    if (el.isConnected) draw(true);
+  }
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.lgv) { v = b.dataset.lgv; if (v === 'all' && cat === 'tout' && !q.value) cat = 'une'; return draw(true); }
+    if (b.dataset.lgc) { cat = b.dataset.lgc; v = 'all'; q.value = ''; return draw(true); }
+    const p = b.closest('[data-pkg]')?.dataset.pkg;
+    if (!p) return;
+    if (b.dataset.lga === 'run') return xfLaunch(p);
+    act(p, b.dataset.lga);
+  });
+  q.addEventListener('input', () => draw(true));
+  draw(true);
+  return { el, key: () => {}, render: () => draw(), redraw: () => draw(true), focus: () => q.focus({ preventScroll: true }), title: () => 'Logithèque', tname: () => 'Logithèque' };
 }
 
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
