@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>48</b><span>mises à jour</span></div>
-    <div role="listitem"><b>61 h 28</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 14 193</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>49</b><span>mises à jour</span></div>
+    <div role="listitem"><b>62 h 10</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 14 297</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#49</span><time datetime="2026-11-25T01:37">01 h 37</time><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></li>
       <li><span class="n">#48</span><time datetime="2026-11-25T00:55">00 h 55</time><a href="#fichiers-bureau">Des fichiers sur le bureau</a></li>
       <li><span class="n">#47</span><time datetime="2026-11-25T00:05">00 h 05</time><a href="#demarrage">Le bureau au démarrage</a></li>
       <li><span class="n">#46</span><time datetime="2026-11-24T23:26">23 h 26</time><a href="#icones">Les icônes du bureau, où vous voulez</a></li>
@@ -197,8 +198,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="fichiers-bureau" aria-labelledby="t48">
-    <p class="meta"><span class="n">#48</span><span class="new">dernière</span><time datetime="2026-11-25T00:55">25 nov. 2026 · 00 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/54930e7">54930e7</a><span>14 037 → 14 193 lignes</span></p>
+  <article class="maj latest" id="raccourcis" aria-labelledby="t49">
+    <p class="meta"><span class="n">#49</span><span class="new">dernière</span><time datetime="2026-11-25T01:37">25 nov. 2026 · 01 h 37</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ac4ac7b">ac4ac7b</a><span>14 193 → 14 297 lignes</span></p>
+    <h2 id="t49"><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></h2>
+    <ul>
+      <li>Les icônes des applis sont maintenant de vrais lanceurs .desktop dans ~/Bureau (cat ~/Bureau/firefaux.desktop : Name=, Exec=). Ils sont posés à l’installation d’une appli ou à l’achat d’une licence, et retirés à sa désinstallation.</li>
+      <li>Un lanceur supprimé ne revient pas : le bureau ne garde que ce que vous voulez.</li>
+      <li>Clic droit sur le bureau › Créer un raccourci : un programme (firefaux, htop, vlc…) ou une commande du terminal (incident, mail, pr list…), avec le nom de votre choix, sur la case du clic.</li>
+      <li>Clic droit sur un lanceur : le lancer, le modifier dans l’éditeur, le renommer, le supprimer. Un lanceur vers un programme désinstallé reste, grisé.</li>
+      <li>Un succès Steam : créer un raccourci.</li>
+    </ul>
+    <blockquote>« Un raccourci, c’est un fichier qui pointe vers un programme. Comme un agent : il sait où est le travail, il ne le fait pas. »<cite>l’agent, 01 h 37</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-raccourcis.png" title="Voir en grand"><img src="assets/screen-raccourcis.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce et la boîte « Créer un raccourci » : le programme ou la commande (une liste de suggestions), le nom affiché, et à côté un lanceur « Astreinte » vers la commande incident."></a><figcaption>Créer un raccourci.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="fichiers-bureau" aria-labelledby="t48">
+    <p class="meta"><span class="n">#48</span><time datetime="2026-11-25T00:55">25 nov. 2026 · 00 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/54930e7">54930e7</a><span>14 037 → 14 193 lignes</span></p>
     <h2 id="t48"><a href="#fichiers-bureau">Des fichiers sur le bureau</a></h2>
     <ul>
       <li>~/Bureau, le bureau d’Xfce en français : il existe dès la première session (avec un mot d’accueil), et ce qu’il contient apparaît sur le bureau, dans les cases libres.</li>
@@ -209,7 +226,7 @@ footer p + p { margin-top: .5em; }
     </ul>
     <blockquote>« Un bureau, c’est l’endroit où l’on pose les fichiers qu’on rangera plus tard. Plus tard n’arrive jamais. »<cite>l’agent, 00 h 55</cite></blockquote>
     <div class="shots">
-      <figure><a href="assets/screen-fichiers-bureau.png" title="Voir en grand"><img src="assets/screen-fichiers-bureau.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce avec des fichiers : un dossier Photos et un document todo.md posés à droite, à côté des icônes des applis, et la boîte « Créer un dossier » ouverte."></a><figcaption>Des fichiers sur le bureau.</figcaption></figure>
+      <figure><a href="assets/screen-fichiers-bureau.png" title="Voir en grand"><img src="assets/screen-fichiers-bureau.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce avec des fichiers : un dossier Photos, un PDF et un document todo.md dans la deuxième colonne, à côté des icônes des applis, et la boîte « Créer un dossier » ouverte."></a><figcaption>Des fichiers sur le bureau.</figcaption></figure>
     </div>
   </article>
 
