@@ -1657,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.65', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.66', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -12261,12 +12261,12 @@ function worldCmd() {                              // actu : la panne du monde e
    (l'URSSAF). De temps en temps, un congé de 3 minutes (EV_ON) : son effet s'arrête. Chaque ship un vendredi fatigue tout le monde ;
    au bout de quelques-uns, démission (par courriel). */
 const HUMANS = {
-  stag: { n: 'Stagiaire', cost: 1500, sal: .04, bug: .9, quit: 8, hello: 'Arrive avec des croissants. Repart avec une PR fusionnée par erreur.',
-    d: 'Relit une PR sur dix et apporte les croissants : −10 % de bugs. Salaire : 4 % de chaque ship, plus les charges.' },
-  senior: { n: 'Senior « qui lit le code »', cost: 30000, sal: .15, bug: .65, inc: .6, quit: 5, hello: 'A demandé où étaient les tests. Personne n’a su répondre.',
-    d: 'La seule personne qui lit vraiment le code : −35 % de bugs, −40 % d’incidents de prod. Salaire : 15 % de chaque ship, plus les charges. Ne supporte pas les ships du vendredi.' },
-  sre: { n: 'SRE d’astreinte', cost: 18000, sal: .1, quit: 6, hello: 'A configuré PagerDoudou sur sa montre. Et sur celle de son chat.',
-    d: 'Répare les incidents de prod tout seul, en deux minutes (sauf en congés). Salaire : 10 % de chaque ship, plus les charges.' },
+  stag: { n: 'Stagiaire', cost: 1500, sal: .015, bug: .9, quit: 8, hello: 'Arrive avec des croissants. Repart avec une PR fusionnée par erreur.',
+    d: 'Relit une PR sur dix et apporte les croissants : −10 % de bugs. Salaire : 1,5 % de chaque ship, plus les charges.' },
+  senior: { n: 'Senior « qui lit le code »', cost: 30000, sal: .06, bug: .65, inc: .6, quit: 5, hello: 'A demandé où étaient les tests. Personne n’a su répondre.',
+    d: 'La seule personne qui lit vraiment le code : −35 % de bugs, −40 % d’incidents de prod. Salaire : 6 % de chaque ship, plus les charges. Ne supporte pas les ships du vendredi.' },
+  sre: { n: 'SRE d’astreinte', cost: 18000, sal: .04, quit: 6, hello: 'A configuré PagerDoudou sur sa montre. Et sur celle de son chat.',
+    d: 'Répare les incidents de prod tout seul, en deux minutes (sauf en congés). Salaire : 4 % de chaque ship, plus les charges.' },
 };
 const HUM_CHARGES = .45;
 function humanOn(k) { const h = IDLE && G.hum?.[k]; return !!h && !(h.off > Date.now()); }   // embauché, et pas en congés
@@ -13985,7 +13985,7 @@ const BOOST = {
     desc: 'Chaque tâche part à un essaim de sous-agents : ×3 de travail. Chacun relit tout le dépôt de son côté : ×4 de tokens.',
     on: 'ultracode : un essaim de sous-agents sur chaque tâche', off: 'ultracode terminé : les sous-agents rentrent, la facture reste.' },
 };
-const BOOST_BASE = 60, BOOST_STEP = 30, BOOST_EXT = [.5, 1.25, 3, 7.5];   // 1 min, +30 s par prolongation (4 au plus), prix × celui du mode
+const BOOST_BASE = 180, BOOST_STEP = 60, BOOST_EXT = [.3, .6, 1.2, 2.4];   // 3 min, +1 min par prolongation (4 au plus), prix × celui du mode
 const BOOST_BY_CMD = Object.fromEntries(Object.entries(BOOST).map(([p, b]) => [b.cmd, p]));
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const untilMidnight = () => { const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); return Math.ceil((m - d) / 1000); };
@@ -14063,13 +14063,14 @@ function bgTeams() {                             // les plateformes qui tournent
 const bgLoad = () => { const t = bgTeams(); return { bg: t.reduce((a, x) => a + x.n, 0), plats: t.length }; };
 const bgLv = () => G.lead >= 3 && leadOn() ? 3 : 0;   // seul l'orchestrateur multi-plateforme coordonne l'arrière-plan
 // par seconde et par agent, pour une équipe (off : hors ligne) ; o.ai, o.model, o.lv : une autre équipe ; o.hw : l'état du PC déjà calculé
+const repoK = () => 1 + ((IDLE ? shipped : 0) / 40) ** 2;   // le dépôt grandit à chaque ship, et les agents le relisent en entier : les tokens d'entrée suivent (doux au début, lourd ensuite)
 function ecoRates(n = panes.length || G.agents, off = false, o = {}) {
   const ai = o.ai || provider, model = o.model || cfg.model, lv = o.lv ?? leadLv(), T = LEAD_TIER[lv];
   const a = ECO.ai[ai], m = MODELS[model], lm = MODELS[CLIS[ai].lead];
   const hw = o.hw || (IDLE ? hwState(off ? { n, lead: lv ? 1 : 0, ...bgLoad(), off: true } : {}) : { f: 1, rev: 1, tok: 1, boost: 1, down: false });
   const B = !off && boostOn(ai) ? BOOST[ai] : null;   // mode boost en cours (ultracode, xhigh, flash) : jamais hors ligne
   const sp = speed * hw.f, tk = skillMult('tok') * hw.tok * (B?.tok ?? 1);   // le matériel freine (ou accélère) le travail, les bugs et les tokens (pas les crashs)
-  const W = worldK(ai), tin = ECO.tin * sp * tk * skillMult('tin') * W.tok, tout = ECO.tout * sp * tk * W.tok, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
+  const W = worldK(ai), tin = ECO.tin * sp * tk * skillMult('tin') * W.tok * repoK(), tout = ECO.tout * sp * tk * W.tok, leadK = lv && !o.bgTeam ? ECO.leadShare * T.lead : 0;
   return {
     per: (ECO.q[model] ?? 1) * sp * (hw.boost ?? 1) * T.mult(n) * skillMult('work') * (B?.work ?? 1) * ipoMult() * W.work,   // travail d'un agent actif (le processeur fait tourner les builds et les tests)
     crash: a.crash * skillMult('crash') * speed * (B?.crash ?? 1), down: a.down * skillMult('down'), bug: a.bug * skillMult('bug') * sp * hw.rev * T.bug * (B?.bug ?? 1) * debtK() * humanK('bug'), fail: a.fail * skillMult('fail'),
@@ -14557,7 +14558,7 @@ function buy(id) {
       const p = id.slice(7), st = G.boost[p];
       st.lvl = (st.lvl || 0) + 1;
       if (st.left > 0) st.left += BOOST_STEP;
-      msg = `${BOOST[p].name} dure maintenant ${mmss(boostDur(p))} par jour.${st.left > 0 ? ' Le mode en cours gagne 30 s.' : ''}`;
+      msg = `${BOOST[p].name} dure maintenant ${mmss(boostDur(p))} par jour.${st.left > 0 ? ' Le mode en cours gagne 1 min.' : ''}`;
     } else if (id.startsWith('theme:')) {
       const k = id.slice(6);
       G.pt.own[k] = 1;
