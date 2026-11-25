@@ -1096,6 +1096,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .lg-empty { grid-column: 1 / -1; color: var(--dim); }
 .lg-status { min-height: 1.4em; padding: .25em 1ch; border-top: 1px solid var(--rule); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 760px) { .lg-main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); } .lg-cats { grid-auto-flow: column; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); } }
+/* grep : les correspondances en rouge vif */
+.ln .gm { color: var(--red); font-weight: 700; }
 .ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
 .ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
 .ml-bar b { color: var(--orange); }
@@ -1640,8 +1642,9 @@ const ts = () => { vt = Math.max(vt + ri(1, 37), Date.now() - 4000); return new 
 const B = () => ri(2, 14);                       // delay between lines of a burst
 // Rich line: H('plain', ['coloured', 'cls'], ...)
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
+let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.54', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.55', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2466,6 +2469,7 @@ const ACH = [
   { id: 'multisel', g: '⬚', n: 'Sélection de groupe', d: 'Sélectionner plusieurs icônes du bureau d’un rectangle, à la souris.', p: 24.6 },
   { id: 'dnd', g: '⇥', n: 'Glisser, déposer', d: 'Déplacer un fichier en le glissant : dans Thunar, ou entre Thunar et le bureau.', p: 36.8 },
   { id: 'logitheque', g: '⊕', n: 'Sans le terminal', d: 'Installer un logiciel depuis la Logithèque, sans taper une seule commande.', p: 31.2 },
+  { id: 'pipes', g: '|', n: 'Plombier', d: 'Enchaîner trois tubes dans une seule commande.', p: 9.7 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3223,18 +3227,353 @@ function tmuxCmd(a) {                              // tmux, depuis l'intérieur 
     [H(['  Ou le préfixe : ', 'dim'], ['Ctrl+B', 'org'], [' puis c (nouveau), & (fermer), n / p (suivant, précédent), 0-9, w (la liste).', 'dim']), '', 20]]);
 }
 
-function shellPrint(t, cls = '') {
-  const el = document.createElement('div');
-  el.className = 'ln' + (cls ? ' ' + cls : '');
-  el.innerHTML = html(t);
+const lnEl = (t, cls = '') => { const el = document.createElement('div'); el.className = 'ln' + (cls ? ' ' + cls : ''); el.innerHTML = html(t); return el; };
+const isErrLn = el => el.classList.contains('errc') || (el.firstChild?.nodeType === 1 && el.firstChild.classList.contains('errc'));   // « zsh: », « E: », « ls: » en rouge : stderr
+function shellPut(el) {
+  const err = isErrLn(el);
+  if (err) shErrs++;
+  if (capt) {
+    if (err && !capt.both) { if (capt.errs) { capt.errs.push(el); return el; } if (capt.quiet) return el; }   // 2> fichier, 2>/dev/null
+    else if (capt.keep) { capt.keep.push(el); return el; }   // la sortie part dans le tube (ou le fichier)
+  }
   shellOut.appendChild(el);
   trim(shellOut, 500);
   shellOut.scrollTop = shellOut.scrollHeight;
   return el;
 }
+function shellPrint(t, cls = '') { return shellPut(lnEl(t, cls)); }
 async function printLines(lines) {
-  for (const [t, cls = '', d = 60] of lines) { shellPrint(t, cls); await sleep(d); }
+  for (const [t, cls = '', d = 60] of lines) { shellPrint(t, cls); if (!capt?.keep) await sleep(d); }   // dans un tube, personne ne regarde : pas d'attente
 }
+
+/* ---------- le shell : tubes (|), redirections (> >> < 2> 2>&1 &>), enchaînements (; && ||), et les outils de texte ----------
+   Une étape de tube s'exécute comme une commande tapée (runCommand), sa sortie gardée en lignes : l'étape suivante la reçoit en
+   entrée standard (shIn). Les erreurs restent à l'écran. Une commande réussit si elle n'affiche pas d'erreur (et grep, s'il trouve). */
+const SH_OPS = ['2>&1', '2>>', '&>', '2>', '>>', '||', '&&', '>', '<', '|', ';'];
+const SH_RAW = new Set(['curl', 'wget', 'irm', 'iwr', 'vibe', 'claude', 'codex', 'mistral', 'moon', 'local']);   // elles lisent la ligne entière (curl … | bash, les demandes aux agents)
+let shTtyS = null;
+const shTty = (w, text) => ((shTtyS ||= new Set([...Object.keys(PROGS), ...BROWSERS, 'vim', 'vi', 'emacs', 'pico', 'tmux', 'xfce', 'xfce4', 'startx', 'startxfce4', 'top',
+  'store', 'shop', 'settings', 'fallout', 'bunker', 'hack', 'thunderbird', 'logithèque', 'reboot', 'shutdown', 'restart', 'clear', 'sl', 'mail', 'mailx'])).has(w)
+  && !/(^|\s)(-v|--version|-h|--help)(\s|$)/.test(text)) || /^(sudo )?(npm run (ship|deploy)|ship|npm publish|yarn ship|pnpm ship)\b/i.test(text);
+function shLex(s) {                                 // des mots (guillemets gardés tels quels) et des opérateurs, hors guillemets ; null : un guillemet ouvert
+  const out = [];
+  let w = '', q = '';
+  const push = () => { if (w) out.push({ w }); w = ''; };
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { w += c; if (c === q) q = ''; continue; }
+    if (c === '"' || c === "'") { q = c; w += c; continue; }
+    if (c === ' ') { push(); continue; }
+    const op = SH_OPS.find(o => s.startsWith(o, i) && (o[0] !== '2' || !w));   // 2> : seulement en début de mot
+    if (op) { push(); out.push({ op }); i += op.length - 1; continue; }
+    w += c;
+  }
+  push();
+  return q ? null : out;
+}
+const shUnq = w => w.replace(/^(["'])(.*)\1$/, '$2');
+function shPlan(cmd) {                              // null : la ligne part telle quelle ; sinon { list: [{ sep, pipe: [étape…] }] } ou { err }
+  if (!/[|;&<>]/.test(cmd)) return null;
+  const T = shLex(cmd);
+  if (!T?.some(t => t.op)) return null;
+  const w0 = shUnq(T[0]?.w || '').toLowerCase(), w1 = w0 === 'sudo' ? shUnq(T[1]?.w || '').toLowerCase() : w0;
+  if (SH_RAW.has(w1)) return null;
+  const list = [], near = t => `erreur d’analyse près de « ${t || '\\n'} »`;
+  let pipe = [], sep = '', st;
+  const fresh = () => (st = { w: [], out: null, app: false, inp: null, quiet: false, both: false, err: null });
+  fresh();
+  for (let i = 0; i < T.length; i++) {
+    const t = T[i];
+    if (t.w !== undefined) { st.w.push(t.w); continue; }
+    if (['>', '>>', '&>', '<', '2>', '2>>'].includes(t.op)) {
+      const tgt = T[i + 1]?.w;
+      if (tgt === undefined) return { err: near(T[i + 1]?.op) };
+      i++;
+      const path = shUnq(tgt);
+      if (t.op === '<') st.inp = path;
+      else if (t.op[0] === '2') { if (path === '/dev/null') st.quiet = true; else st.err = { path, app: t.op === '2>>' }; }
+      else { st.out = path; st.app = t.op === '>>'; if (t.op === '&>') st.both = true; }
+      continue;
+    }
+    if (t.op === '2>&1') { st.both = true; continue; }
+    if (!st.w.length && st.out == null) return { err: near(t.op) };
+    pipe.push(st);
+    fresh();
+    if (t.op !== '|') { list.push({ sep, pipe }); pipe = []; sep = t.op; }
+  }
+  if (st.w.length || st.out != null) pipe.push(st);
+  else if (pipe.length) return { err: near() };     // ls | (rien)
+  if (pipe.length) list.push({ sep, pipe });
+  else if (sep === '&&' || sep === '||') return { err: near() };
+  return { list };
+}
+async function shRun(P) {
+  if (P.err) return shellPrint(H(['zsh: ', 'errc'], P.err));
+  let ok = true;
+  for (const { sep, pipe } of P.list) {
+    if ((sep === '&&' && !ok) || (sep === '||' && ok)) continue;
+    if (mode !== 'idle') break;                     // un ship, un reboot : la suite attendra
+    ok = await shPipe(pipe);
+  }
+}
+async function shPipe(pipe) {
+  let input = null, ok = true;
+  if (pipe.length >= 4) ach('pipes');
+  for (let i = 0; i < pipe.length; i++) {
+    const st = pipe[i], last = i === pipe.length - 1, text = st.w.join(' ');
+    if (st.inp != null) { input = shRead('zsh', st.inp); if (!input) return false; }
+    const keep = !last || st.out != null, ws = st.w.map(x => shUnq(x).toLowerCase()), w = ws[0] === 'sudo' ? ws[1] : ws[0];
+    if (keep && w && shTty(w, text)) { shellPrint(H(['zsh: ', 'errc'], `${w} : ce programme veut l’écran, il ne passe pas dans un tube`)); return false; }
+    const C = { keep: keep ? [] : null, quiet: st.quiet, both: st.both, errs: st.err ? [] : null }, e0 = shErrs;
+    let r;
+    capt = keep || st.quiet || st.both || st.err ? C : null;
+    shIn = input;
+    try { r = text ? await runCommand(text, true) : undefined; } finally { capt = null; shIn = null; }
+    ok = r !== false && shErrs === e0;
+    input = keep ? shLines(C.keep) : null;
+    if (st.err && !shWrite(st.err.path, shLines(C.errs), st.err.app, false)) ok = false;
+    if (st.out != null) { if (!shWrite(st.out, input, st.app, false)) ok = false; input = last ? null : []; }
+  }
+  return ok;
+}
+const shLines = els => els.flatMap(el => el.textContent.includes('\n') ? el.textContent.split('\n').map(t => ({ t })) : [{ t: el.textContent, el }]);
+const shPut = L => L.forEach(o => (o.el ? shellPut(o.el) : shellPrint(o.t)));
+const shLn = (t, cls = '') => { const el = lnEl(t, cls); return { t: el.textContent, el }; };
+function shWrite(path, lines, append, sudo, who = 'zsh') {   // écrire des lignes dans un fichier : vrai si c'est écrit
+  if (winPath(path)) { shellPrint(winMsg(who, path)); return false; }
+  const segs = resolvePath(path), abs = absPath(segs);
+  if (['/dev/null', '/dev/zero'].includes(abs)) return true;
+  if (['/dev/stdout', '/dev/stderr', '/dev/tty'].includes(abs)) { shPut(lines); return true; }
+  const dir = nodeAt(segs.slice(0, -1)), k = segs.at(-1), c = k && dir?.d && Object.hasOwn(dir.k, k) ? dir.k[k] : null;
+  if (!k || !dir?.d) { fsErr(who, who === 'zsh' ? `aucun fichier ou dossier de ce type : ${path}` : `${path} : Aucun fichier ou dossier de ce type`); return false; }
+  if (badName(k)) { fsErr(who, `${path} : ${badName(k)}`); return false; }
+  if (c?.d) { fsErr(who, who === 'zsh' ? `est un dossier : ${path}` : `${path} : est un dossier`); return false; }
+  if (!sudo && owner(segs) === 'root') {
+    fsErr(who, who === 'zsh' ? `permission non accordée : ${path}` : `${path} : Permission non accordée`);
+    if (who === 'zsh') shellPrint(H(['  La redirection appartient au shell, pas à sudo. Pour écrire chez root : ', 'dim'], [`… | sudo tee ${append ? '-a ' : ''}${path}`, 'org']));
+    return false;
+  }
+  const text = lines.map(o => o.t).join('\n'), f = c || (dir.k[k] = mkF(''));
+  if (!c) dir.mt = Date.now();
+  const t = append && c && !c.b && c.t ? c.t.replace(/\n?$/, '\n') + text : text;
+  Object.assign(f, { t, sz: new TextEncoder().encode(t).length, mt: Date.now() });
+  delete f.b; delete f.au;
+  return true;
+}
+function shRead(who, p) {                           // les lignes d'un fichier ; null : l'erreur est affichée
+  if (winPath(p)) { shellPrint(winMsg(who, p)); return null; }
+  const segs = resolvePath(p), n = nodeAt(segs);
+  if (!n) { fsErr(who, who === 'zsh' ? `aucun fichier ou dossier de ce type : ${p}` : `${p} : Aucun fichier ou dossier de ce type`); return null; }
+  if (n.d) { fsErr(who, `${p} : est un dossier`); return null; }
+  if (!n.t && !n.b && !n.code) return [];
+  return fileLines(n, segs).map(([t, cls]) => shLn(t, cls));
+}
+function shSrc(who, files, input) {                 // les fichiers (motifs compris), sinon l'entrée standard ; null : erreur affichée
+  if (files.length) {
+    const ex = expand(files);
+    if (ex.err) { fsErr('zsh', `aucune correspondance trouvée : ${ex.err}`); return null; }
+    return ex.list.map(f => ({ name: f, lines: shRead(who, f) }));
+  }
+  if (input) return [{ name: '', lines: input }];
+  fsErr(who, `attend l’entrée standard… qui n’existe pas ici. Un fichier (${who} README.md), ou un tube (ls | ${who})`);
+  return null;
+}
+const shEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function shMark(t, re) {                            // les correspondances en rouge, comme grep --color
+  const parts = [];
+  let last = 0;
+  re.lastIndex = 0;                                 // matchAll repart de là où test s'est arrêté
+  for (const m of t.matchAll(re)) { if (!m[0]) continue; parts.push(t.slice(last, m.index), [m[0], 'gm']); last = m.index + m[0].length; }
+  parts.push(t.slice(last));
+  return parts.filter(x => x !== '');
+}
+function shGrep(a, input) {
+  const o = { i: 0, v: 0, c: 0, n: 0, r: 0, F: 0, w: 0, o: 0, l: 0, h: 0, H: 0 }, files = [];
+  let pat = null;
+  for (let j = 0; j < a.length; j++) {
+    const x = a[j];
+    if (x === '-e' && j + 1 < a.length) { pat = a[++j]; continue; }
+    if (x.startsWith('--')) { const L = { '--ignore-case': 'i', '--invert-match': 'v', '--count': 'c', '--line-number': 'n', '--recursive': 'r', '--word-regexp': 'w', '--only-matching': 'o', '--files-with-matches': 'l' }[x]; if (L) o[L] = 1; continue; }
+    if (/^-[ABCm]$/.test(x)) { j++; continue; }   // le contexte, le maximum : pas ici (et leur nombre n'est pas le motif)
+    if (/^-[a-zA-Z]+$/.test(x)) { for (const f of x.slice(1)) { if (f === 'R') o.r = 1; else if (f in o) o[f] = 1; } continue; }
+    if (pat === null) pat = x; else files.push(x);
+  }
+  if (pat === null) { fsErr('grep', 'motif manquant · grep [-i -v -n -c -r -w -o -l] MOTIF [FICHIER]…'); return false; }
+  const wrap = x => o.w ? `\\b(?:${x})\\b` : x;
+  let re;
+  try { re = new RegExp(wrap(o.F ? shEsc(pat) : pat), o.i ? 'gi' : 'g'); } catch { re = new RegExp(wrap(shEsc(pat)), o.i ? 'gi' : 'g'); }
+  const srcs = o.r ? shWalk(files.length ? files : ['.']) : shSrc('grep', files, input);
+  if (!srcs) return false;
+  const multi = o.H || (!o.h && (o.r || srcs.length > 1)), out = [];
+  let hits = 0;
+  for (const S of srcs) {
+    if (!S.lines) continue;
+    const pre = multi ? [[S.name, 'mg'], [':', 'cy']] : [];
+    let k = 0;
+    S.lines.forEach((L, idx) => {
+      re.lastIndex = 0;
+      if (re.test(L.t) === !!o.v) return;
+      k++; hits++;
+      if (o.c || o.l || out.length >= 400) return;
+      const nb = o.n ? [[String(idx + 1), 'okc'], [':', 'cy']] : [];
+      if (o.o && !o.v) { re.lastIndex = 0; for (const m of L.t.matchAll(re)) if (m[0] && out.length < 400) out.push([H(...pre, ...nb, [m[0], 'gm']), '', 2]); return; }
+      out.push([H(...pre, ...nb, ...(o.v ? [L.t] : shMark(L.t, re))), '', 2]);
+    });
+    if (o.c) out.push([H(...pre, String(k)), '', 2]);
+    if (o.l && k) out.push([H([S.name || '(entrée standard)', 'mg']), '', 2]);
+  }
+  if (out.length >= 400 && !o.c && !o.l && hits > 400) out.push([H([`… et ${num(hits - 400)} lignes de plus. Un motif plus précis, ou | head.`, 'dim']), '', 2]);
+  return printLines(out).then(() => (hits ? undefined : false));   // rien trouvé : un échec, pour && et ||
+}
+function shWalk(paths) {                            // grep -r : les fichiers texte, sous des dossiers (pas node_modules : on a essayé)
+  const out = [];
+  for (const p of paths) {
+    const n = nodeAt(resolvePath(p));
+    if (!n) { fsErr('grep', `${p} : Aucun fichier ou dossier de ce type`); continue; }
+    const go = (c, name) => {
+      if (out.length >= 300) return;
+      if (!c.d) { if (c.t) out.push({ name, lines: c.t.split('\n').map(t => ({ t })) }); return; }
+      if (c.many) return;
+      for (const k of Object.keys(c.k).sort(byName)) if (!k.startsWith('.')) go(c.k[k], (name === '/' ? '' : name.replace(/\/$/, '')) + '/' + k);
+    };
+    go(n, p);
+  }
+  return out;
+}
+function shHead(a, input, tail) {
+  const who = tail ? 'tail' : 'head', files = [];
+  let n = 10, follow = false;
+  for (let j = 0; j < a.length; j++) {
+    const x = a[j];
+    if (x === '-n' || x === '--lines') n = parseInt(a[++j], 10);
+    else if (/^-n\d+$/.test(x)) n = parseInt(x.slice(2), 10);
+    else if (/^--lines=\d+$/.test(x)) n = parseInt(x.slice(8), 10);
+    else if (/^-\d+$/.test(x)) n = parseInt(x.slice(1), 10);
+    else if (['-f', '-F', '--follow'].includes(x)) follow = true;
+    else if (!x.startsWith('-')) files.push(x);
+  }
+  if (!Number.isFinite(n) || n < 0) { fsErr(who, 'nombre de lignes incorrect'); return false; }
+  const srcs = shSrc(who, files, input);
+  if (!srcs) return false;
+  const out = [];
+  srcs.forEach((S, i) => {
+    if (!S.lines) return;
+    if (srcs.length > 1) { if (i) out.push({ t: '' }); out.push(shLn(H([`==> ${S.name} <==`, 'fgc']))); }
+    out.push(...(!n ? [] : tail ? S.lines.slice(-n) : S.lines.slice(0, n)));
+  });
+  shPut(out);
+  if (follow && tail) shellPrint(H(['(tail -f : rien ne bouge. Le dernier changement date de vendredi.)', 'dim']));
+}
+function shWc(a, input) {
+  const files = [];
+  let l = 0, w = 0, c = 0;
+  for (const x of a) {
+    if (/^-[lwcm]+$/.test(x)) { if (x.includes('l')) l = 1; if (x.includes('w')) w = 1; if (/[cm]/.test(x)) c = 1; }
+    else if (x === '--lines') l = 1; else if (x === '--words') w = 1; else if (x === '--bytes' || x === '--chars') c = 1;
+    else if (!x.startsWith('-')) files.push(x);
+  }
+  if (!l && !w && !c) l = w = c = 1;
+  const srcs = shSrc('wc', files, input);
+  if (!srcs) return false;
+  const rows = [], tot = [0, 0, 0];
+  for (const S of srcs) {
+    if (!S.lines) continue;
+    const txt = S.lines.map(o => o.t).join('\n'), v = [S.lines.length, (txt.match(/\S+/g) || []).length, new TextEncoder().encode(txt + (S.lines.length ? '\n' : '')).length];
+    v.forEach((x, i) => { tot[i] += x; });
+    rows.push([v, S.name]);
+  }
+  if (rows.length > 1) rows.push([tot, 'total']);
+  const pick3 = v => [l && v[0], w && v[1], c && v[2]].filter((x, i) => [l, w, c][i]), wd = Math.max(1, ...rows.flatMap(([v]) => pick3(v).map(x => String(x).length)));
+  shPut(rows.map(([v, name]) => ({ t: pick3(v).map(x => String(x).padStart(rows.length > 1 || files.length ? wd : 0)).join(' ') + (name ? ' ' + name : '') })));
+}
+function shSort(a, input) {
+  const files = [];
+  let r = 0, nm = 0, u = 0, f = 0, key = 0;
+  for (let j = 0; j < a.length; j++) {
+    const x = a[j];
+    if (x === '-k') key = parseInt(a[++j], 10) || 0;
+    else if (/^-k\d+/.test(x)) key = parseInt(x.slice(2), 10) || 0;
+    else if (/^-[rnuf]+$/.test(x)) { if (x.includes('r')) r = 1; if (x.includes('n')) nm = 1; if (x.includes('u')) u = 1; if (x.includes('f')) f = 1; }
+    else if (x === '--reverse') r = 1; else if (x === '--numeric-sort') nm = 1; else if (x === '--unique') u = 1;
+    else if (!x.startsWith('-')) files.push(x);
+  }
+  const srcs = shSrc('sort', files, input);
+  if (!srcs) return false;
+  const kf = t => key ? t.trim().split(/\s+/).slice(key - 1).join(' ') : t;
+  let L = srcs.flatMap(S => S.lines || []).slice().sort((x, y) => {
+    const a1 = kf(x.t), b1 = kf(y.t);
+    return (nm ? (parseFloat(a1) || 0) - (parseFloat(b1) || 0) : 0) || a1.localeCompare(b1, 'fr', { sensitivity: f ? 'base' : 'variant' });
+  });
+  if (r) L.reverse();
+  if (u) { const seen = new Set(); L = L.filter(o => { const k2 = f ? o.t.toLowerCase() : o.t; if (seen.has(k2)) return false; seen.add(k2); return true; }); }
+  shPut(L);
+}
+function shUniq(a, input) {
+  const files = [];
+  let c = 0, d = 0, u = 0, i = 0;
+  for (const x of a) {
+    if (/^-[cdui]+$/.test(x)) { if (x.includes('c')) c = 1; if (x.includes('d')) d = 1; if (x.includes('u')) u = 1; if (x.includes('i')) i = 1; }
+    else if (x === '--count') c = 1;
+    else if (!x.startsWith('-')) files.push(x);
+  }
+  const srcs = shSrc('uniq', files.slice(0, 1), input);
+  if (!srcs) return false;
+  const L = srcs[0].lines || [], groups = [];
+  for (const o of L) { const g = groups.at(-1), k = i ? o.t.toLowerCase() : o.t; if (g && g.k === k) g.n++; else groups.push({ k, o, n: 1 }); }
+  shPut(groups.filter(g => (!d || g.n > 1) && (!u || g.n === 1)).map(g => (c ? { t: `${String(g.n).padStart(7)} ${g.o.t}` } : g.o)));
+}
+function shLess(a, input, who) {
+  const files = a.filter(x => !x.startsWith('-'));
+  const srcs = shSrc(who, files, input);
+  if (!srcs) return false;
+  srcs.forEach(S => { if (srcs.length > 1 && S.lines) shPut([shLn(H([`::::::::::::::  ${S.name}  ::::::::::::::`, 'fgc']))]); if (S.lines) shPut(S.lines); });
+  if (!capt?.keep) shellPrint(H(['(END)', 'dim'], ['  tout est affiché d’un coup : q ne sert à rien, mais vous pouvez le taper', 'dim']));
+}
+function shTee(a, input, sudo) {
+  const files = a.filter(x => !x.startsWith('-')), app = a.includes('-a') || a.includes('--append');
+  if (!input) { fsErr('tee', 'attend l’entrée standard : un tube, par exemple echo bonjour | tee note.txt'); return false; }
+  let ok = true;
+  for (const f of files) if (!shWrite(f, input, app, sudo, 'tee')) ok = false;
+  shPut(input);
+  return ok ? undefined : false;
+}
+function shCat(a, input) {                          // ls | cat, ls | cat -n
+  shPut(a.includes('-n') ? input.map((o, i) => ({ t: `${String(i + 1).padStart(6)}  ${o.t}` })) : input);
+}
+function shFind(a) {
+  const paths = [];
+  let name = null, ci = false, type = '', maxd = 99;
+  for (let j = 0; j < a.length; j++) {
+    const x = a[j];
+    if (x === '-name' || x === '-iname') { name = a[++j] ?? ''; ci = x === '-iname'; }
+    else if (x === '-type') type = a[++j] || '';
+    else if (x === '-maxdepth') maxd = parseInt(a[++j], 10);
+    else if (x.startsWith('-')) { fsErr('find', `prédicat inconnu « ${x} » (ici : -name, -iname, -type f|d, -maxdepth N)`); return false; }
+    else paths.push(x);
+  }
+  if (!Number.isFinite(maxd) || maxd < 0) { fsErr('find', '-maxdepth attend un nombre'); return false; }
+  const re = name == null ? null : new RegExp('^' + name.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', ci ? 'i' : '');
+  const out = [];
+  let more = 0;
+  for (const p of paths.length ? paths : ['.']) {
+    const n = nodeAt(resolvePath(p));
+    if (!n) { fsErr('find', `'${p}' : Aucun fichier ou dossier de ce type`); continue; }
+    const go = (c, path, k, d) => {
+      if ((!type || (type === 'd') === !!c.d) && (!re || re.test(k))) { if (out.length < 300) out.push({ t: path }); else more++; }
+      if (!c.d || d >= maxd) return;
+      if (c.many) { if (!re && !type) out.push(shLn(H([`${path}/…  (${num(c.many)} entrées : find a abandonné, comme tout le monde)`, 'dim']))); return; }
+      for (const s2 of Object.keys(c.k).sort(byName)) go(c.k[s2], (path === '/' ? '' : path.replace(/\/$/, '')) + '/' + s2, s2, d + 1);
+    };
+    go(n, p, p.replace(/\/+$/, '').split('/').pop() || '/', 0);
+  }
+  if (more) out.push(shLn(H([`… et ${num(more)} de plus. find | grep, ou -name, pour trier.`, 'dim'])));
+  shPut(out);
+}
+const TEXT_CMDS = {
+  grep: (a, i) => shGrep(a, i), egrep: (a, i) => shGrep(a, i), fgrep: (a, i) => shGrep(['-F', ...a], i),
+  head: (a, i) => shHead(a, i, false), tail: (a, i) => shHead(a, i, true), wc: (a, i) => shWc(a, i), sort: (a, i) => shSort(a, i), uniq: (a, i) => shUniq(a, i),
+  less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
+};
 function openShell(focus = true) {
   if (xfOn) { xfFocus('zsh', focus); return; }   // bureau Xfce : le terminal est une fenêtre
   if (shell.hidden) {
@@ -3267,12 +3606,14 @@ async function typeIntoShell(text) {
 const TABS_HELP = () => [H(['Onglets', 'fgc'], ['  clic dans la barre du bas · Ctrl+B puis 0-9 · ou 0-9 hors du terminal · Ctrl+B puis c : un terminal de plus (exit le ferme)', 'dim']), '', 20];
 const FILE_HELP = () => [
   [H(['Fichiers', 'fgc'], ['  (arborescence Linux · Tab complète les noms)', 'dim']), '', 20],
-  [H(['  ls · dir · tree   ', 'org'], 'lister un dossier (ls -la pour les détails)'), '', 20],
+  [H(['  ls · ll · tree    ', 'org'], 'lister un dossier (ls -la pour les détails)'), '', 20],
   [H(['  cd <dossier>      ', 'org'], 'se déplacer · cd .. remonte · cd ~ rentre · cd / va à la racine'), '', 20],
   [H(['  pwd · cat <fich.> ', 'org'], 'où suis-je · lire un fichier'), '', 20],
   [H(['  mkdir · touch     ', 'org'], 'créer un dossier · créer un fichier'), '', 20],
   [H(['  nano <fichier>    ', 'org'], 'éditer un fichier dans le terminal · ^O écrire · ^X quitter · sudo nano pour ceux de root'), '', 20],
   [H(['  rmdir · rm -r     ', 'org'], 'supprimer un dossier… mais pas n’importe lequel'), '', 20],
+  [H(['  cmd | grep motif  ', 'org'], 'les tubes : grep, head, tail, wc, sort, uniq, less, tee · find . -name "*.md"'), '', 20],
+  [H(['  > f · >> f · &&   ', 'org'], 'écrire dans un fichier, ajouter à la fin · enchaîner (;, &&, ||) · 2>/dev/null fait taire les erreurs'), '', 20],
 ];
 const SETUP_HELP = () => [
   [H(['Installer', 'fgc'], ['  (machine neuve : rien n’est installé, pas même votre agent)', 'dim']), '', 20],
@@ -3808,7 +4149,8 @@ function cmdLs(args) {
     if (long) {
       out.push([`total ${num(Math.ceil(rows.reduce((s, [, c]) => s + (c.d ? 4096 : c.sz), 0) / 1024))}`, '', 10]);
       rows.forEach(([k, c, s]) => out.push([longLine(k, c, s), '', 6]));
-    } else if (rows.length) out.push([H(...rows.flatMap(([k, c], j) => [j ? '  ' : '', fmtName(k, c)])), '', 10]);
+    } else if (rows.length && capt?.keep) rows.forEach(([k]) => out.push([k, '', 0]));   // dans un tube : un nom par ligne
+    else if (rows.length) out.push([H(...rows.flatMap(([k, c], j) => [j ? '  ' : '', fmtName(k, c)])), '', 10]);
     if (n.many) out.push([H([`… et ${num(n.many - names.length)} autres paquets. Bon courage.`, 'dim']), '', 10]);
     if (multi && i < ex.list.length - 1) out.push(['', '', 10]);
   });
@@ -4020,7 +4362,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'find', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -4037,8 +4379,9 @@ function complete() {
   }
   const word = v.match(/\S*$/)[0], before = v.slice(0, v.length - word.length);
   let opts;
-  const prev = before.trim().split(/\s+/).filter(w => w && w !== 'sudo');
-  if (!before.trim()) {
+  const seg = before.replace(/^.*(\|\||&&|[|;])\s*/, '');   // après | ; && || : une nouvelle commande
+  const prev = seg.trim().split(/\s+/).filter(w => w && w !== 'sudo');
+  if (!seg.trim()) {
     opts = [...COMPLETE_CMDS, ...Object.keys(TOYS).filter(t => installed.has(TOYS[t].pkg))].sort()
       .filter(c => c.startsWith(word.toLowerCase()) && (claudeOn ? !Object.hasOwn(CLIS, c) : !CLAUDE_ONLY.has(c))).map(c => [c, c + ' ']);
   } else if (/^apt(-get)?$/.test(prev[0] || '') && prev.length >= 2) {   // sudo apt install co… → cowsay
@@ -4046,7 +4389,7 @@ function complete() {
   } else if (KILL_CMDS.includes(prev[0] || '')) {   // tskill co… → codex (programmes et agents qui tournent)
     opts = killNames().filter(k => k.startsWith(word.toLowerCase())).map(k => [k, k + ' ']);
   } else {
-    const head = before.trim().split(/\s+/).filter(w => w !== 'sudo')[0]?.toLowerCase();
+    const head = seg.trim().split(/\s+/).filter(w => w !== 'sudo')[0]?.toLowerCase();
     const dirsOnly = ['cd', 'chdir', 'rmdir', 'rd', 'tree'].includes(head);
     const w = word.replace(/\\/g, '/'), i = w.lastIndexOf('/');
     const dir = w.slice(0, i + 1), base = w.slice(i + 1);
@@ -4274,7 +4617,7 @@ function endJob(job, quiet = false) {
   if (job.abort && !quiet) shellPrint('^C', 'wrn');
 }
 async function jobLines(job, lines) {
-  for (const [t, cls = '', d = 60] of lines) { if (job.abort) return false; shellPrint(t, cls); await sleep(d); }
+  for (const [t, cls = '', d = 60] of lines) { if (job.abort) return false; shellPrint(t, cls); if (!capt?.keep) await sleep(d); }
   return !job.abort;
 }
 function notInstalled(cmd, pkg) {               // le « command-not-found » d'Ubuntu, en français
@@ -4866,12 +5209,11 @@ const BIN_FAIL = [c => `${c}: Segmentation fault (core dumped)`, c => `${c}: err
   c => `${c}: un agent l’a « simplifié » cette nuit. Il ne fait plus rien.`];
 const expandVars = t => t.replace(/\$\{?(USER|HOME|SHELL|PWD|HOSTNAME)\}?/g, (_, v) => ({ USER, HOME: absPath(HOME), SHELL: '/bin/zsh', PWD: absPath(cwd), HOSTNAME: 'prod-01' })[v]).replace(/\$\?/g, '0');
 
-async function runCommand(raw) {
+async function runCommand(raw, inner = false) {   // inner : une étape de tube ou d'enchaînement (déjà affichée, déjà dans l'historique)
   const cmd = raw.trim().replace(/\s+/g, ' ');
-  shellPrint(hackGame && mode === 'idle' ? H(['mot de passe > ', 'okc'], cmd) : promptLine(mode === 'gameover' ? '✗ ' : '❯ ', mode === 'gameover' ? 'errc' : 'okc', cmd));
+  if (!inner) shellPrint(hackGame && mode === 'idle' ? H(['mot de passe > ', 'okc'], cmd) : promptLine(mode === 'gameover' ? '✗ ' : '❯ ', mode === 'gameover' ? 'errc' : 'okc', cmd));
   if (!cmd) return;
-  history_.push(cmd);
-  hi = history_.length;
+  if (!inner) { history_.push(cmd); hi = history_.length; }
   const low = cmd.toLowerCase();
   const [head, ...rest] = low.split(' ');
   const arg = rest.join(' ');
@@ -4883,7 +5225,8 @@ async function runCommand(raw) {
   }
   if (mode === 'launching') return shellPrint(H(['busy ', 'wrn'], 'claude démarre. Patientez.'));
   if (mode !== 'idle') return shellPrint(H(['busy ', 'wrn'], `${crashKind === 'sys' ? 'rm' : 'npm'} est occupé à tout casser. Patientez.`));
-  if (hackGame) return hackInput(cmd);           // partie de hack en cours : tout ce qu'on tape est une tentative
+  if (hackGame) return hackInput(cmd);
+  if (!inner) { const P = shPlan(cmd); if (P) return shRun(P); }   // des tubes, des redirections, des enchaînements           // partie de hack en cours : tout ce qu'on tape est une tentative
   if (/^(sudo )?(reboot|systemctl reboot|shutdown -r( now)?|init 6)$/.test(low) && (head !== 'sudo' || installed.has('sudo'))) {   // BIOS compris (DEL : le setup)
     if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
     return pcReboot();
@@ -5060,7 +5403,7 @@ async function runCommand(raw) {
   }
   // fichiers : les noms gardent leur casse (README.md, Documents…), d'où les mots bruts
   let words = argv(cmd), sub = head, sudo = false;
-  const sudoable = s => Object.hasOwn(FS_CMDS, s) || Object.hasOwn(PKG_CMDS, s);
+  const sudoable = s => Object.hasOwn(FS_CMDS, s) || Object.hasOwn(PKG_CMDS, s) || Object.hasOwn(TEXT_CMDS, s);
   if (head === 'sudo' && !installed.has('sudo')) {   // désinstallé avec apt : bravo
     notInstalled('sudo', 'sudo');
     return shellPrint('… sauf que pour l’installer, il faut sudo. Reste la sauvegarde de jeudi, restaurée après chaque crash système.', 'dim');
@@ -5071,6 +5414,9 @@ async function runCommand(raw) {
     words = words.slice(1);
     sudo = true;
   }
+  if (Object.hasOwn(TEXT_CMDS, sub)) return TEXT_CMDS[sub](words.slice(1), shIn, sudo);   // grep, head, tail, wc, sort, uniq, less, tee, find
+  if (shIn && sub === 'cat' && words.slice(1).every(isOpt)) return shCat(words.slice(1), shIn);   // ls | cat : l'entrée standard
+  if (shIn && head === 'cowsay' && words.length === 1 && installed.has('cowsay')) return printLines(cowLines(shIn.map(o => o.t).join(' ').trim() || '…').map(t => [t, '', 15]));   // fortune | cowsay
   if (Object.hasOwn(FS_CMDS, sub)) return FS_CMDS[sub](words.slice(1));
   if (Object.hasOwn(PKG_CMDS, sub)) return PKG_CMDS[sub](words.slice(1), sudo, sub);   // apt-get, apt, npm, npx
   if (Object.hasOwn(TOYS, head)) return installed.has(TOYS[head].pkg) ? TOYS[head].run(words.slice(1)) : notInstalled(head, TOYS[head].pkg);
