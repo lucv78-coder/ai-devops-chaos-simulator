@@ -1101,7 +1101,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 /* Ctrl+R : l'invite devient « (reverse-i-search)`…': » */
 #shell-rs { display: none; color: var(--dim); white-space: pre; }
 #shell-form.rs #shell-rs { display: inline; }
-#shell-form.rs #shell-user, #shell-form.rs #shell-dir, #shell-form.rs #shell-sym { display: none; }
+#shell-form.rs #shell-user, #shell-form.rs #shell-dir, #shell-form.rs #shell-sym, #shell-form.rs #shell-info { display: none; }
+/* le thème du prompt : ses segments ; le prompt a le droit de prendre plus de place */
+#shell-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#shell-info[hidden] { display: none; }
+#shell-form.pt .prompt { max-width: 70%; }
 .ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
 .ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
 .ml-bar b { color: var(--orange); }
@@ -1516,7 +1520,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <div class="ph"><span class="g">❯</span>zsh <span class="dim">&nbsp;<span id="shell-cwd"></span></span><span class="fill"></span><span class="dim">help · Tab complète · Échap masque</span></div>
     <div id="shell-out" role="log" aria-live="polite"></div>
     <form id="shell-form" autocomplete="off">
-      <label class="prompt" for="shell-in"><span id="shell-user"></span><span id="shell-dir"></span><span id="shell-sym">❯</span><span id="shell-rs"></span></label>
+      <label class="prompt" for="shell-in"><span id="shell-user"></span><span id="shell-dir"></span><span id="shell-info" hidden></span><span id="shell-sym">❯</span><span id="shell-rs"></span></label>
       <input id="shell-in" type="text" spellcheck="false" autocapitalize="off" enterkeyhint="go" aria-label="Commande du terminal">
     </form>
   </section>
@@ -1648,7 +1652,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.59', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.60', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2357,7 +2361,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2478,6 +2482,7 @@ const ACH = [
   { id: 'rtfm', g: '?', n: 'RTFM', d: 'Lire une page de manuel. Volontairement.', p: 6.1 },
   { id: 'cronsave', g: '⏲', n: 'Maintenance préventive', d: 'Éviter un incident grâce à une tâche cron.', p: 4.3 },
   { id: 'relu', g: '±', n: 'Une ligne relue', d: 'Relire les commits des agents avant un ship (git log -p). Le badge du README, lui, reste à 0.', p: 3.1 },
+  { id: 'prompt', g: '❯', n: 'Tableau de bord', d: 'Acheter un thème de prompt. Il affiche plus de choses que le tableau de bord.', p: 12.6 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2495,7 +2500,8 @@ G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des 
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
 G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };
 G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };
-G.git = { br: 'main', brs: [], st: 0, rv: -1, ...(G.git || {}) };   // git : la branche, les vôtres, vos stashs, le ship relu   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+G.git = { br: 'main', brs: [], st: 0, rv: -1, ...(G.git || {}) };
+G.pt = { cur: 'classique', ...(G.pt || {}), own: { classique: 1, ...(G.pt?.own || {}) } };   // le thème du prompt, ceux achetés   // git : la branche, les vôtres, vos stashs, le ship relu   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
@@ -3587,6 +3593,56 @@ const TEXT_CMDS = {
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
 
+/* le prompt comme tableau de bord : les thèmes oh-my-vibe (achetés au Store), leurs segments, omv */
+const PT = {
+  classique: { n: 'classique', cost: 0, seg: [], d: 'dev@prod-01 ~ ❯, comme au premier jour. Gratuit, et ça se voit.' },
+  agnoster: { n: 'agnoster-vibe', cost: 120, seg: ['git'], d: 'La branche git dans le prompt, avec un ✗ : les agents ont modifié des fichiers (toujours).' },
+  tokens: { n: 'tokens', cost: 400, seg: ['bill'], d: 'La facture de tokens du prochain ship, en direct. Regarder ne la fait pas baisser.' },
+  vendredi: { n: 'vendredi', cost: 900, seg: ['fri'], d: 'Le compte à rebours avant vendredi 17 h. Le vendredi, il passe au rouge et ne redescend plus.' },
+  astreinte: { n: 'astreinte', cost: 2500, seg: ['risk'], d: 'Le risque d’incident du prochain ship, et l’incident en cours, dans le prompt. Le pager, sans le pager.' },
+  tableau: { n: 'tableau de bord', cost: 15000, seg: ['git', 'bill', 'fri', 'risk'], d: 'Tout à la fois : branche, facture, vendredi, risque. Le prompt prend la moitié de l’écran, comme il se doit.' },
+};
+const PT_SEG = {
+  git: () => isPrefix(PROJ_DIR, cwd) ? [`${G.git?.br || 'main'} ✗`, 'mg'] : null,
+  bill: () => [`$${usd(G.bill || 0)}`, 'wrn'],
+  fri: () => {
+    const d = new Date();
+    if (isFri()) return d.getHours() >= 17 ? ['vendredi, 17 h passées', 'errc'] : ['VENDREDI · 17 h dans ' + Math.floor(((17 - d.getHours()) * 60 - d.getMinutes()) / 60) + ' h ' + String(((17 - d.getHours()) * 60 - d.getMinutes()) % 60).padStart(2, '0'), 'errc'];
+    const t = new Date(d);
+    t.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7));
+    t.setHours(17, 0, 0, 0);
+    const m = Math.round((t - d) / 60000), j = Math.floor(m / 1440);
+    return [`vendredi 17 h : J-${j} ${String(Math.floor(m % 1440 / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`, j < 1 ? 'wrn' : 'dim'];
+  },
+  risk: () => G.inc ? [`▲ ${G.inc.id}`, 'errc'] : [`risque ${Math.round(incRisk() * 100)} %`, incRisk() > .15 ? 'wrn' : 'okc'],
+};
+const ptSegs = () => !IDLE || !G.pt ? [] : (PT[G.pt.cur] || PT.classique).seg.map(k => PT_SEG[k]()).filter(Boolean);
+function promptTick() {                             // le prompt vivant : ses segments, chaque seconde (et à chaque cd)
+  const el = $('#shell-info');
+  if (!el) return;
+  const S = ptSegs();
+  el.hidden = !S.length;
+  shellForm.classList.toggle('pt', !!S.length);
+  const h = S.map(([t, c]) => `<span class="${c}">${esc(t)}</span>`).join(' ');
+  if (el.innerHTML !== h) el.innerHTML = h;
+}
+function ptSet(k) {                                 // appliquer un thème : la partie, et ZSH_THEME dans ~/.zshrc
+  G.pt.cur = k;
+  saveGame();
+  const n = nodeAt([...HOME, '.zshrc']);
+  if (n && !n.d) n.t = /^\s*ZSH_THEME=.*$/m.test(n.t || '') ? n.t.replace(/^\s*ZSH_THEME=.*$/m, `ZSH_THEME="${k}"`) : `ZSH_THEME="${k}"\n` + (n.t || '');
+  promptTick();
+}
+function omvCmd(a) {                                // oh-my-vibe : omv theme, omv theme <nom>
+  const [sub, k] = a;
+  if (sub !== 'theme' && sub !== 'themes') return printLines([[H('oh-my-vibe · ', ['omv theme', 'org'], ' : la liste · ', ['omv theme <nom>', 'org'], ' : l’appliquer · les thèmes s’achètent au Store (B), rayon Thèmes du prompt'), '', 10]]);
+  if (!k || k === 'list') return printLines(Object.entries(PT).map(([id, t]) => [H(id === G.pt.cur ? ['* ', 'okc'] : '  ', [id.padEnd(11), 'org'], G.pt.own[id] ? ['acheté    ', 'okc'] : [money0(t.cost).padEnd(10), 'dim'], t.d), '', 6]));
+  if (!PT[k]) { fsErr('omv', `thème inconnu : ${k} (omv theme pour la liste)`); return false; }
+  if (!G.pt.own[k]) { fsErr('omv', `${PT[k].n} n’est pas acheté : Store (B), rayon Thèmes du prompt, ${money0(PT[k].cost)}`); return false; }
+  ptSet(k);
+  return shellPrint(H(['✓ ', 'okc'], `thème ${PT[k].n} appliqué `, [`(ZSH_THEME="${k}" dans ~/.zshrc)`, 'dim']));
+}
+
 /* git, au-delà de l'astreinte (log, revert, rm, show restent à opsCmd) : le dépôt est celui du projet, écrit par les agents */
 const GIT_AUTH = ['mistral-large', 'sol-2', 'opus-3', 'haiku-7', 'codestral-2'];
 const GIT_BR = ['agent/fix-everything', 'agent/refactor-final-v2', 'agent/wip-ne-pas-merger', 'vendredi'];
@@ -4001,7 +4057,11 @@ function zrcLoad(path = [...HOME, '.zshrc']) {      // → le nombre d'alias lus
   if (!n || n.d) return null;
   if (absPath(path) === absPath([...HOME, '.zshrc'])) ALIASES.clear();
   let k = 0;
-  for (const line of (n.t || '').split('\n')) { const m = line.match(ZRC_RE); if (m) { ALIASES.set(m[1], m[2] ?? m[3] ?? m[4]); k++; } }
+  for (const line of (n.t || '').split('\n')) {
+    const m = line.match(ZRC_RE), th = line.match(/^\s*ZSH_THEME=["']?([\w-]+)/);
+    if (m) { ALIASES.set(m[1], m[2] ?? m[3] ?? m[4]); k++; }
+    if (th && G.pt?.own?.[th[1]] && G.pt.cur !== th[1]) { G.pt.cur = th[1]; promptTick(); }   // un thème acheté : appliqué
+  }
   return k;
 }
 function shAlias(cmd) {                             // le premier mot, s'il est un alias (une fois chacun : alias ls='ls -la' ne tourne pas en rond)
@@ -4214,6 +4274,7 @@ const FILE_HELP = () => [
   [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
   [H(['  git status · diff ', 'org'], 'le dépôt des agents : status, diff et log -p (relire baisse le risque du ship), blame, commit, branch, stash'), '', 20],
   [H(['  chmod · crontab   ', 'org'], 'chmod +x puis ./script.sh : un script · crontab -e : des tâches planifiées (la maintenance ; sudo crontab -e pour root)'), '', 20],
+  [H(['  omv theme         ', 'org'], 'le thème du prompt (oh-my-vibe) : la branche, la facture, vendredi 17 h, le risque · les thèmes au Store'), '', 20],
   [H(['  man · alias       ', 'org'], 'le manuel d’une commande (man -k pour chercher) · alias, unalias, source ~/.zshrc, type'), '', 20],
 ];
 const SETUP_HELP = () => [
@@ -4670,7 +4731,7 @@ const isOpt = a => /^-[a-z1]+$/i.test(a);
 const winPath = p => /^[a-z]:([\\/]|$)/i.test(p);
 const winMsg = (cmd, p) => H([`${cmd}: `, 'errc'], `${p} : ceci est un Linux. Pas de lecteur C: ici, seulement `, ['/', 'blu'], '.');
 const fsErr = (cmd, msg) => shellPrint(H([`${cmd}: `, 'errc'], msg));
-const promptLine = (sym, cls, cmd) => H([`${USER}@prod-01`, 'okc'], ' ', [tildePath(cwd), 'blu'], ' ',
+const promptLine = (sym, cls, cmd) => H([`${USER}@prod-01`, 'okc'], ' ', [tildePath(cwd), 'blu'], ' ', ...(typeof ptSegs === 'function' ? ptSegs() : []).flatMap(x => [x, ' ']),
   [sym === '❯ ' && document.documentElement.dataset.theme === 'abri' ? '> ' : sym, cls], cmd);   // le bunker a une invite à l'ancienne
 
 function updateCwd() {
@@ -4678,6 +4739,7 @@ function updateCwd() {
   $('#shell-cwd').textContent = t;
   $('#shell-dir').textContent = t === '~' || !cwd.length ? t : cwd.at(-1);
   $('#shell-user').textContent = `${USER}@prod-01`;
+  if (typeof promptTick === 'function' && G.pt) promptTick();
 }
 // changement de nom d'utilisateur : /home/<ancien> devient /home/<nouveau>, et les fichiers qui le citent suivent
 function renameUser(u) {
@@ -4965,7 +5027,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5978,6 +6040,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (head === 'help' || low === '?') return printLines(HELP_LINES());
   if (head === 'man' || head === 'apropos') return manCmd(head === 'apropos' ? ['-k', ...rest] : rest);   // man : la page ; man -k, apropos : chercher
   if (head === 'alias') return aliasCmd(cmd);
+  if (head === 'omv' || head === 'oh-my-vibe' || head === 'omz') return omvCmd(rest);
   if (head === 'unalias') return unaliasCmd(argv(cmd).slice(1));
   if (head === 'source' || head === '.') return sourceCmd(argv(cmd).slice(1));
   if (head === 'type' || head === 'which') return typeCmd(argv(cmd).slice(1), head === 'which');
@@ -14131,7 +14194,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); promptTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
@@ -14179,6 +14242,7 @@ function aiItems() {
       desc: max ? `${mmss(d)} par jour, le maximum. Au-delà, l’agent parle de « semaine de quatre jours ».` : `${mmss(d)} → ${mmss(d + BOOST_STEP)} par activation. Toujours une fois par jour.` });
   });
   Object.entries(SKILLS).forEach(([id, s]) => it.push({ cat: 'Skills', id, ic: '◇', name: `Skill : ${s.name}`, done: !!G.sk[id], cost: s.cost, desc: s.desc }));
+  Object.entries(PT).filter(([k]) => k !== 'classique').forEach(([k, t]) => it.push({ cat: 'Thèmes du prompt · oh-my-vibe', id: 'theme:' + k, ic: '❯', name: `Thème ${t.n}`, done: !!G.pt?.own?.[k], cost: t.cost, desc: t.d + ' (omv theme pour changer.)' }));
   Object.entries(HUMANS).forEach(([k, h]) => it.push({ cat: 'Humains · un salaire à chaque ship', id: 'human:' + k, ic: '☻', name: h.n, done: !!G.hum[k], cost: h.cost, desc: h.d }));
   return it;
 }
@@ -14299,6 +14363,12 @@ function buy(id) {
       st.lvl = (st.lvl || 0) + 1;
       if (st.left > 0) st.left += BOOST_STEP;
       msg = `${BOOST[p].name} dure maintenant ${mmss(boostDur(p))} par jour.${st.left > 0 ? ' Le mode en cours gagne 30 s.' : ''}`;
+    } else if (id.startsWith('theme:')) {
+      const k = id.slice(6);
+      G.pt.own[k] = 1;
+      ptSet(k);
+      ach('prompt');
+      msg = `Thème ${PT[k].n} : acheté et appliqué. omv theme pour changer.`;
     } else if (id.startsWith('human:')) {
       const k = id.slice(6);
       G.hum[k] = { t: Date.now(), off: 0, fri: 0 };
