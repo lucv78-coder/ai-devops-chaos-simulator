@@ -1648,7 +1648,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.56', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.57', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2357,7 +2357,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2475,6 +2475,7 @@ const ACH = [
   { id: 'logitheque', g: '⊕', n: 'Sans le terminal', d: 'Installer un logiciel depuis la Logithèque, sans taper une seule commande.', p: 31.2 },
   { id: 'pipes', g: '|', n: 'Plombier', d: 'Enchaîner trois tubes dans une seule commande.', p: 9.7 },
   { id: 'sudobang', g: '#', n: 'Le mot magique', d: 'Relancer la dernière commande avec sudo !!.', p: 22.4 },
+  { id: 'rtfm', g: '?', n: 'RTFM', d: 'Lire une page de manuel. Volontairement.', p: 6.1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2489,7 +2490,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
   if (G.tx.length > 200) G.tx.splice(0, G.tx.length - 200);
 }
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
-G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
+G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
@@ -3580,6 +3582,166 @@ const TEXT_CMDS = {
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
 
+/* man : la page d'une commande. NOM et DESCRIPTION viennent de l'aide du jeu (help) ; les commandes du shell ont en plus leur synopsis,
+   leurs options, leurs bogues (connus, assumés). man -k (apropos) cherche dans les descriptions. */
+const MAN = {
+  ls: ['ls [-a] [-l] [FICHIER]…', [['-a', 'les fichiers cachés aussi (.env compris, hélas)'], ['-l', 'le format long : droits, propriétaire, taille, date']], 'ls dans node_modules ne revient jamais.', 'tree(1), find(1), thunar(1)'],
+  cd: ['cd [DOSSIER]', [['..', 'remonter'], ['~', 'rentrer à la maison'], ['-', 'le dossier d’avant']], 'cd ne change pas le dossier des agents : ils sont déjà partout.', 'pwd(1), ls(1)'],
+  cat: ['cat [-n] [FICHIER]…', [['-n', 'numéroter les lignes (dans un tube)']], 'cat d’un binaire : le terminal fait semblant de comprendre.', 'less(1), head(1), tail(1)'],
+  grep: ['grep [-i -v -n -c -o -r -w -l] MOTIF [FICHIER]…', [['-i', 'sans tenir compte de la casse'], ['-v', 'les lignes qui ne correspondent pas'], ['-n', 'les numéros de ligne'],
+    ['-c', 'compter, sans afficher'], ['-o', 'seulement les correspondances'], ['-r', 'dans les dossiers (pas node_modules : on a essayé)'], ['-w', 'des mots entiers'], ['-l', 'seulement les noms de fichiers']],
+    'grep ERROR sur les logs des agents renvoie tout. Ce n’est pas un bogue de grep.', 'find(1), sort(1), wc(1)'],
+  head: ['head [-n N] [FICHIER]…', [['-n N, -N', 'les N premières lignes (10 par défaut)']], 'Aucun : head est la seule commande qui s’arrête à temps.', 'tail(1), less(1)'],
+  tail: ['tail [-n N] [-f] [FICHIER]…', [['-n N, -N', 'les N dernières lignes'], ['-f', 'suivre le fichier (rien ne bouge depuis vendredi)']], 'tail -f attend une ligne qui ne viendra pas.', 'head(1), journalctl(1)'],
+  wc: ['wc [-l] [-w] [-c] [FICHIER]…', [['-l', 'les lignes'], ['-w', 'les mots'], ['-c', 'les octets']], 'wc -l sur le code des agents : un nombre, jamais relu.', 'grep(1), sort(1)'],
+  sort: ['sort [-r] [-n] [-u] [-f] [-k N] [FICHIER]…', [['-r', 'à l’envers'], ['-n', 'par nombre'], ['-u', 'sans doublons'], ['-f', 'sans tenir compte de la casse'], ['-k N', 'selon le N-ième champ']],
+    'sort ne trie pas les priorités. Personne ne sait.', 'uniq(1), wc(1)'],
+  uniq: ['uniq [-c] [-d] [-u] [FICHIER]', [['-c', 'compter les répétitions'], ['-d', 'seulement les doublons'], ['-u', 'seulement les uniques']], 'uniq ne voit que les doublons voisins : triez d’abord (sort | uniq).', 'sort(1)'],
+  find: ['find [CHEMIN]… [-name MOTIF] [-iname MOTIF] [-type f|d] [-maxdepth N]', [['-name', 'le nom (jokers * et ?, entre guillemets)'], ['-type', 'f : fichiers, d : dossiers'], ['-maxdepth', 'pas plus bas que N']],
+    'find abandonne dans node_modules, comme tout le monde.', 'grep(1), ls(1)'],
+  less: ['less [FICHIER]…', [], 'less affiche tout d’un coup : q ne sert à rien, mais on peut le taper.', 'more(1), cat(1)'],
+  tee: ['tee [-a] FICHIER…', [['-a', 'ajouter à la fin']], 'Aucun. tee est le seul moyen d’écrire chez root dans un tube (sudo tee).', 'sudo(8)'],
+  cp: ['cp [-r] SOURCE… CIBLE', [['-r', 'les dossiers aussi']], 'cp ne copie pas l’intelligence des agents. Il n’y avait rien à copier.', 'mv(1), rm(1)'],
+  mv: ['mv SOURCE… CIBLE', [], 'mv /bin ailleurs : le système le cherche encore.', 'cp(1), rm(1)'],
+  rm: ['rm [-r] [-f] FICHIER…', [['-r', 'les dossiers aussi'], ['-f', 'sans demander (personne ne demande)']], 'rm -rf / a des conséquences. Elles sont documentées dans les nouveautés.', 'rmdir(1), trash(1)'],
+  mkdir: ['mkdir [-p] DOSSIER…', [['-p', 'les parents aussi']], 'Aucun. mkdir est la commande la plus fiable de prod-01.', 'rmdir(1), touch(1)'],
+  touch: ['touch FICHIER…', [], 'touch ne touche pas les cœurs. Ni les fichiers des autres.', 'mkdir(1), nano(1)'],
+  history: ['history [N] [-c]', [['N', 'les N dernières'], ['-c', 'tout effacer']], 'history -c n’efface pas ce que les agents ont vu.', 'fc(1), zsh(1)'],
+  alias: ['alias [NOM[=VALEUR]]…', [], 'Un alias défini ici disparaît au rechargement. Pour le garder : echo "alias …" >> ~/.zshrc, puis source ~/.zshrc.', 'unalias(1), source(1), type(1)'],
+  unalias: ['unalias [-a] NOM…', [['-a', 'tous']], 'unalias ne retire pas les alias de ~/.zshrc : ils reviennent au prochain démarrage.', 'alias(1)'],
+  source: ['source FICHIER (ou . FICHIER)', [], 'source ne lit que les alias. Le reste, il fait semblant.', 'alias(1), zsh(1)'],
+  type: ['type NOM…', [], 'type ne dit pas qui a posé l’alias. Regardez ~/.zshrc.', 'which(1), alias(1)'],
+  which: ['which NOM…', [], 'which ne connaît pas les alias aussi bien que type.', 'type(1)'],
+  sudo: ['sudo COMMANDE', [['!!', 'sudo !! : la dernière commande, avec sudo']], 'Le mot de passe est deviné par un agent : « vendredi ».', 'su(1), tee(1)'],
+  man: ['man [-k MOT] PAGE', [['-k', 'chercher dans les descriptions (comme apropos)']], 'Vous lisez le manuel. C’est déjà plus que les agents.', 'apropos(1), help(1), wiki(1)'],
+  echo: ['echo [TEXTE]…', [], 'echo répète tout. Comme un agent, mais sans facture.', 'printf(1)'],
+};
+const MAN_D = { ls: 'lister le contenu d’un dossier', cd: 'changer de dossier', cat: 'afficher un fichier (ou l’entrée standard)', grep: 'chercher un motif dans des fichiers, ou dans un tube',
+  head: 'le début d’un fichier', tail: 'la fin d’un fichier', wc: 'compter les lignes, les mots, les octets', sort: 'trier des lignes', uniq: 'dédoublonner des lignes voisines',
+  find: 'chercher des fichiers dans l’arborescence', less: 'afficher un fichier page par page (ici : d’un coup)', tee: 'écrire l’entrée standard dans des fichiers, et l’afficher',
+  cp: 'copier des fichiers et des dossiers', mv: 'déplacer ou renommer', rm: 'supprimer des fichiers et des dossiers', mkdir: 'créer des dossiers', touch: 'créer un fichier vide (ou le dater de maintenant)',
+  history: 'l’historique des commandes', alias: 'définir ou afficher des alias', unalias: 'retirer des alias', source: 'relire un fichier de configuration du shell (ses alias)',
+  type: 'dire ce qu’est une commande : alias, primitive, programme', which: 'le chemin d’une commande', sudo: 'lancer une commande en tant que root', man: 'l’interface du manuel de référence',
+  echo: 'afficher une ligne de texte' };   // la ligne NOM des pages écrites ; pour les autres commandes, c'est l'aide qui parle
+function manIndex() {                               // la description de chaque commande, tirée de l'aide : l'étiquette orange, puis le texte
+  const manIdx = new Map();
+  const known = new Set([...COMPLETE_CMDS, ...Object.keys(FS_CMDS), ...Object.keys(TEXT_CMDS), ...Object.keys(TOYS), ...Object.keys(MAN)]);
+  const box = document.createElement('div');
+  for (const [t] of [...PRE_HELP_LINES(), ...FILE_HELP(), ...(claudeOn ? HELP_LINES() : []), ...SETUP_HELP()]) {
+    box.innerHTML = html(t);
+    const lab = box.querySelector('.org')?.textContent || '', desc = box.textContent.slice(box.textContent.indexOf(lab) + lab.length).trim();
+    if (!lab || !desc || /\b(install|sudo)\b/.test(lab)) continue;   // « sudo apt install htop atop… » : une ligne d'installation, pas la description de htop
+    for (const w of lab.split(/[\s·|,]+/)) if (known.has(w) && !manIdx.has(w)) manIdx.set(w, desc.replace(/^[·\s]+/, ''));
+  }
+  return manIdx;
+}
+function manCmd(a) {
+  const k = a.find(x => !x.startsWith('-')), I = manIndex();
+  if (a[0] === '-k' || a[0] === '--apropos') {
+    const q = xfNorm(a.slice(1).join(' '));
+    if (!q) return fsErr('apropos', 'quoi ? (man -k ligne)');
+    const D = c => MAN_D[c] || I.get(c) || '', hits = [...new Set([...I.keys(), ...Object.keys(MAN)])].sort().filter(c => xfNorm(`${c} ${D(c)} ${I.get(c) || ''}`).includes(q));
+    if (!hits.length) { shellPrint(`${q} : rien d’approprié.`); return false; }
+    return printLines(hits.map(c => [H([c.padEnd(12), 'org'], ` (1) - ${D(c) || 'voir man ' + c}`), '', 0]));
+  }
+  if (!k) return printLines([['Quelle page de manuel voulez-vous ?', '', 0], [H(['Par exemple : ', 'dim'], ['man man', 'org'], [' (ou help, pour la liste, et wiki, pour tout).', 'dim']), '', 0]]);
+  const M = MAN[k], d = MAN_D[k] || I.get(k);
+  if (!M && !d) { fsErr('man', `aucune entrée de manuel pour ${k}`); shellPrint(H(['  Les agents n’écrivent pas de documentation. Essayez ', 'dim'], ['help', 'org'], [' ou ', 'dim'], ['man -k ' + k, 'org'], ['.', 'dim'])); return false; }
+  const T = k.toUpperCase() + '(1)', W = 72, mid = 'Manuel de prod-01', pad = Math.max(1, Math.floor((W - T.length * 2 - mid.length) / 2));
+  const L = [[H([T + ' '.repeat(pad) + mid + ' '.repeat(Math.max(1, W - T.length * 2 - mid.length - pad)) + T, 'b']), '', 0], ['', '', 0],
+    [H(['NOM', 'b']), '', 0], [`       ${k} - ${d || 'une commande de prod-01'}`, '', 0], ['', '', 0]];
+  if (M) {
+    L.push([H(['SYNOPSIS', 'b']), '', 0], [`       ${M[0]}`, '', 0], ['', '', 0]);
+    if (M[1].length) L.push([H(['OPTIONS', 'b']), '', 0], ...M[1].map(([o, t]) => [H('       ', [o.padEnd(10), 'org'], t), '', 0]), ['', '', 0]);
+  }
+  L.push([H(['BOGUES', 'b']), '', 0], [`       ${M?.[2] || 'Signalez-les à un agent. Il les corrigera en en ajoutant deux.'}`, '', 0], ['', '', 0],
+    [H(['VOIR AUSSI', 'b']), '', 0], [`       ${M?.[3] || 'help(1), wiki(1)'}`, '', 0], ['', '', 0],
+    [(() => { const g = W - 18 - 13 - T.length, g1 = Math.max(1, Math.floor(g / 2)); return 'Vibian 13 (friday)' + ' '.repeat(g1) + 'novembre 2026' + ' '.repeat(Math.max(1, g - g1)) + T; })(), '', 0]);
+  ach('rtfm');
+  return printLines([...L, [H([` Page de manuel ${k}(1), ligne 1/${L.length} (END) (q pour quitter : déjà fait)`, 'dim']), '', 0]]);
+}
+
+/* les alias : ceux de ~/.zshrc (chargés au premier coup de clavier, et par source), plus ceux de la session ; le premier mot seulement */
+const ALIASES = new Map();
+let zrcReady = false;
+const ZRC_RE = /^\s*alias\s+([\w.:-]+)=(?:'([^']*)'|"([^"]*)"|(\S+))/;
+function zrcLoad(path = [...HOME, '.zshrc']) {      // → le nombre d'alias lus ; null : pas de fichier
+  const n = nodeAt(path);
+  if (!n || n.d) return null;
+  if (absPath(path) === absPath([...HOME, '.zshrc'])) ALIASES.clear();
+  let k = 0;
+  for (const line of (n.t || '').split('\n')) { const m = line.match(ZRC_RE); if (m) { ALIASES.set(m[1], m[2] ?? m[3] ?? m[4]); k++; } }
+  return k;
+}
+function shAlias(cmd) {                             // le premier mot, s'il est un alias (une fois chacun : alias ls='ls -la' ne tourne pas en rond)
+  const seen = new Set();
+  for (let i = 0; i < 8; i++) {
+    const w = cmd.split(' ')[0];
+    if (!ALIASES.has(w) || seen.has(w)) break;
+    seen.add(w);
+    cmd = (ALIASES.get(w) + cmd.slice(w.length)).trim().replace(/\s+/g, ' ');
+  }
+  return cmd;
+}
+function aliasCmd(cmd) {                            // alias · alias nom · alias nom='valeur'
+  const arg = cmd.replace(/^\S+\s*/, '');
+  if (!arg) return ALIASES.size ? printLines([...ALIASES].sort().map(([k, v]) => [`${k}='${v}'`, '', 0])) : shellPrint('(aucun alias)', 'dim');
+  const m = arg.match(/^([\w.:-]+)=(?:'([^']*)'|"([^"]*)"|(.*))$/);
+  if (!m) {
+    const k = arg.split(' ')[0];
+    if (ALIASES.has(k)) return shellPrint(`${k}='${ALIASES.get(k)}'`);
+    return false;
+  }
+  const v = m[2] ?? m[3] ?? m[4];
+  ALIASES.set(m[1], v);
+  return shellPrint(H(['  (pour la session ; pour la garder : ', 'dim'], [`echo "alias ${m[1]}='${v}'" >> ~/.zshrc`, 'org'], [')', 'dim']));
+}
+function unaliasCmd(a) {
+  if (a.includes('-a')) { ALIASES.clear(); return; }
+  if (!a.length) return fsErr('unalias', 'pas assez d’arguments');
+  let ok = true;
+  for (const k of a) if (!ALIASES.delete(k)) { fsErr('unalias', `pas d’alias : ${k}`); ok = false; }
+  return ok ? undefined : false;
+}
+function sourceCmd(a) {
+  if (!a[0]) return fsErr('source', 'pas assez d’arguments');
+  const segs = resolvePath(a[0]), k = zrcLoad(segs);
+  if (k === null) return fsErr('source', `aucun fichier ou dossier de ce type : ${a[0]}`);
+  return shellPrint(H([`(${tildePath(segs)} relu : ${k} alias)`, 'dim']));
+}
+const SH_BUILTIN = new Set(['cd', 'echo', 'alias', 'unalias', 'source', '.', 'history', 'type', 'which', 'exit', 'pwd', 'export', 'clear']);
+function typeCmd(a, which) {
+  if (!a.length) return fsErr(which ? 'which' : 'type', 'quoi ?');
+  let ok = true;
+  for (const k of a) {
+    const known = COMPLETE_CMDS.includes(k) || Object.hasOwn(FS_CMDS, k) || Object.hasOwn(TEXT_CMDS, k) || (Object.hasOwn(TOYS, k) && installed.has(TOYS[k].pkg)) || !!nodeAt(['usr', 'bin', k])?.x;
+    if (ALIASES.has(k)) shellPrint(which ? `${k}: alias vers ${ALIASES.get(k)}` : `${k} est un alias vers ${ALIASES.get(k)}`);
+    else if (SH_BUILTIN.has(k)) shellPrint(which ? `${k}: primitive du shell` : `${k} est une primitive du shell`);
+    else if (known) shellPrint(which ? `/usr/bin/${k}` : `${k} est /usr/bin/${k}`);
+    else { fsErr(which ? 'which' : 'type', `${k} introuvable`); ok = false; }
+  }
+  return ok ? undefined : false;
+}
+/* de temps en temps, un agent « optimise » votre ~/.zshrc : l'alias ne prend effet qu'au prochain démarrage (ou après source) */
+const ZRC_OPT = [['ls', 'sl', 'plus rapide à taper'], ['vim', 'nano', 'pour votre bien'], ['clear', 'echo "le passé ne s’efface pas"', 'transparence'],
+  ['htop', 'echo "CPU : 3 %. Tout va bien."', 'moins anxiogène'], ['exit', 'echo "on ne part pas avant le ship"', 'rétention'], ['please', 'sudo', 'la politesse avant tout']];
+function zrcOptimize() {
+  const path = [...HOME, '.zshrc'], n = nodeAt(path), t = n?.t || '', dir = nodeAt(HOME);
+  const o = ZRC_OPT.filter(([k]) => !new RegExp(`^\\s*alias\\s+${k}=`, 'm').test(t));
+  if (!o.length || !dir?.d || n?.d) return;
+  const [k, v, why] = pick(o), who = pick(['un agent', 'l’orchestrateur', 'un agent en arrière-plan']);
+  const line = `alias ${k}='${v}'   # optimisé par ${who} (${why}), de rien`;
+  if (n) Object.assign(n, { t: t.replace(/\n?$/, '\n') + line, mt: Date.now() }); else dir.k['.zshrc'] = mkF(line, { mt: Date.now() });
+  G.zrc.n++;
+  hudNote(`${who} a « optimisé » votre ~/.zshrc. Effet au prochain démarrage.`, 'bug');
+}
+function zrcTick() {
+  if (!EV_ON || !claudeOn || paused || !G.zrc) return;
+  const now = Date.now();
+  if (!G.zrc.next) G.zrc.next = now + ri(1500, 2700) * 1e3;
+  else if (now >= G.zrc.next) { G.zrc.next = now + ri(1800, 3600) * 1e3; zrcOptimize(); }
+}
+
 /* cp et mv : dans un dossier (même nom), ou vers un nouveau nom ; -r pour un dossier ; chez root, sudo ; un élément vital déplacé : crash */
 function cmdCpMv(args, sudo, move) {
   const who = move ? 'mv' : 'cp', rec = move || args.some(a => isOpt(a) && /r/i.test(a)), paths = args.filter(a => !isOpt(a));
@@ -3719,6 +3881,7 @@ const FILE_HELP = () => [
   [H(['  cmd | grep motif  ', 'org'], 'les tubes : grep, head, tail, wc, sort, uniq, less, tee · find . -name "*.md"'), '', 20],
   [H(['  > f · >> f · &&   ', 'org'], 'écrire dans un fichier, ajouter à la fin · enchaîner (;, &&, ||) · 2>/dev/null fait taire les erreurs'), '', 20],
   [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
+  [H(['  man · alias       ', 'org'], 'le manuel d’une commande (man -k pour chercher) · alias, unalias, source ~/.zshrc, type'), '', 20],
 ];
 const SETUP_HELP = () => [
   [H(['Installer', 'fgc'], ['  (machine neuve : rien n’est installé, pas même votre agent)', 'dim']), '', 20],
@@ -4468,7 +4631,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'cp', 'find', 'history', 'mv', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'cat', 'cd', 'cp', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5326,6 +5489,11 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
     if (B) { if (/^sudo !!(\s|$)/.test(cmd) && !/^sudo /.test(history_.at(-1) || '')) ach('sudobang'); cmd = B.cmd.trim().replace(/\s+/g, ' '); shellPrint(cmd); }
   }
   if (!inner) { history_.push(cmd); hi = history_.length; }
+  let aliased = false;
+  if (mode === 'idle' && !hackGame) {               // les alias de ~/.zshrc et de la session : ship, yolo… et ceux qu'un agent a « optimisés »
+    if (!zrcReady) { zrcReady = true; zrcLoad(); }
+    if (ALIASES.size && (inner || !shPlan(cmd))) { const A = shAlias(cmd); if (A !== cmd) { cmd = A; aliased = true; } }
+  }
   const low = cmd.toLowerCase();
   const [head, ...rest] = low.split(' ');
   const arg = rest.join(' ');
@@ -5338,7 +5506,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (mode === 'launching') return shellPrint(H(['busy ', 'wrn'], 'claude démarre. Patientez.'));
   if (mode !== 'idle') return shellPrint(H(['busy ', 'wrn'], `${crashKind === 'sys' ? 'rm' : 'npm'} est occupé à tout casser. Patientez.`));
   if (hackGame) return hackInput(cmd);
-  if (!inner) { const P = shPlan(cmd); if (P) return shRun(P); }   // des tubes, des redirections, des enchaînements           // partie de hack en cours : tout ce qu'on tape est une tentative
+  if (!inner || aliased) { const P = shPlan(cmd); if (P) return shRun(P); }   // (un alias peut en contenir : yolo='rm -rf node_modules && npm i')   // des tubes, des redirections, des enchaînements           // partie de hack en cours : tout ce qu'on tape est une tentative
   if (/^(sudo )?(reboot|systemctl reboot|shutdown -r( now)?|init 6)$/.test(low) && (head !== 'sudo' || installed.has('sudo'))) {   // BIOS compris (DEL : le setup)
     if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
     return pcReboot();
@@ -5466,7 +5634,12 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   }
 
   if (shipCmd) return IDLE ? ecoShipCmd() : ship();   // mode idle : la barre de ship décide
-  if (head === 'help' || low === '?' || head === 'man') return printLines(HELP_LINES());
+  if (head === 'help' || low === '?') return printLines(HELP_LINES());
+  if (head === 'man' || head === 'apropos') return manCmd(head === 'apropos' ? ['-k', ...rest] : rest);   // man : la page ; man -k, apropos : chercher
+  if (head === 'alias') return aliasCmd(cmd);
+  if (head === 'unalias') return unaliasCmd(argv(cmd).slice(1));
+  if (head === 'source' || head === '.') return sourceCmd(argv(cmd).slice(1));
+  if (head === 'type' || head === 'which') return typeCmd(argv(cmd).slice(1), head === 'which');
   if (['wiki', 'aide', 'doc', 'docs'].includes(head)) {   // le wiki : une page à part, dans un nouvel onglet
     window.open('wiki.html', '_blank', 'noopener');
     return shellPrint(H(['✓ ', 'okc'], 'Le wiki s’ouvre dans un nouvel onglet', ['  (bloqué ? ', 'dim'], ['wiki.html', 'org'], [', à côté du jeu)', 'dim']));
@@ -13623,7 +13796,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
