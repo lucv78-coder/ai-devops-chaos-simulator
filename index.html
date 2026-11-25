@@ -1611,7 +1611,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 // Rich line: H('plain', ['coloured', 'cls'], ...)
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = '0.9.0-friday';
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.52', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -4945,7 +4945,7 @@ async function runCommand(raw) {
   if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
     return printLines([
-      [H(['AI DevOps Chaos Simulator', 'fgc'], ' · © 2026 ', ['LVT-DEV', 'org']), '', 20],
+      [H(['AI DevOps Chaos Simulator', 'fgc'], ` · ${VERSION} · © 2026 `, ['LVT-DEV', 'org']), '', 20],
       [H('Parodie : une satire du vibecoding, par une app elle-même vibecodée (la preuve : ', [`${SRC_LINES.toLocaleString('fr-FR')} lignes`, 'wrn'], ' dans un seul fichier HTML, et personne ne les a relues).'), '', 20],
       [H('Licence : ', ['CC BY-NC 4.0', 'okc'], ' (Creative Commons Attribution, pas d’utilisation commerciale)'), '', 20],
       [H(['  ✓ ', 'okc'], 'copier, modifier, partager : oui, en citant LVT-DEV'), '', 20],
@@ -5094,10 +5094,10 @@ async function cliInstall(p, how) {               // l'installation, en quelques
       [`Installed ${nP} packages in ${ri(20, 90)}ms`, '', 200], [' + mistral-vibe', 'okc', 120],
       ['Installed 2 executables: vibe, vibe-acp (alias ici : mistral)', '', 200]])
     : p === 'claude' ? (how === 'npm' ? null : [
-      ['Setting up Claude Code...', '', 300], [`  Downloading claude ${VERSION}-native (linux-x64)…`, '', 700],
+      ['Setting up Claude Code...', '', 300], [`  Downloading claude ${CLI_VER}-native (linux-x64)…`, '', 700],
       ['  Installing launcher in ~/.local/bin/claude', '', 300], ['✔ Claude Code successfully installed!', 'okc', 200],
       ['  Lancez-le, il lira CLAUDE.md. Peut-être.', 'dim', 120]])
-    : p === 'moon' ? [['☾ Moon AI · installation', '', 300], [`  Téléchargement de moon ${VERSION} (linux-x64)…`, '', 700],
+    : p === 'moon' ? [['☾ Moon AI · installation', '', 300], [`  Téléchargement de moon ${CLI_VER} (linux-x64)…`, '', 700],
       ['  Moon Blur activé : les données sensibles détectées seront masquées avant d’aller au modèle.', '', 300],
       ['  Lanceur installé dans ~/.local/bin/moon', '', 200], ['✓ Moon AI est installé.', 'okc', 200],
       ['  Il a déjà relu les autres CLI installés. Il a des remarques.', 'dim', 120]]
@@ -5178,7 +5178,7 @@ const AGENT_USAGE = p => [
 function agentCmd(p, a) {
   if (IDLE && !cliHas(p)) return cliMissing(p);  // machine neuve : il faut d'abord l'installer
   if (/(^|\s)(-h|--help)\b/.test(a)) return printLines(p === 'local' ? LOCAL_USAGE(rtOn('studiolm') && !rtOn('lolama') ? 'studiolm' : 'lolama') : AGENT_USAGE(p));
-  if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${VERSION} (${GAME}) · aucun vrai token n’est facturé`);
+  if (/(^|\s)(-v|--version)\b/.test(a)) return shellPrint(`${p === 'codex' ? 'codex-cli ' : ''}${CLI_VER} (${GAME} ${VERSION}) · aucun vrai token n’est facturé`);
   if (noAgents) return shellPrint(H(['✗ ', 'errc'], 'Mode sans agents (choisi dans GRUB) : aucun agent jusqu’au prochain démarrage. ', ['reboot', 'org'], ' pour les retrouver.'));
   if (IDLE && !G.own[p] && p === 'local') return shellPrint(H(['✗ ', 'errc'], `IA locale : ${localHint()}`));
   if (IDLE && !G.own[p]) {                       // mode idle : il faut la licence (achetée au store)
@@ -5240,7 +5240,7 @@ function restoreProject() {
 function loginBanner(note) {
   const d = new Date(Date.now() - ri(40, 600) * 60000);
   shellPrint(`Last login: ${d.toString().slice(0, 10)} ${d.toTimeString().slice(0, 8)} ${d.getFullYear()} from 10.0.0.42`, 'dim');
-  shellPrint(H([GAME, 'org b'], [` · v${VERSION}`, 'dim']));            // le nom du jeu, en tête du message d'accueil
+  shellPrint(H([GAME, 'org b'], [` · ${VERSION}`, 'dim']));            // le nom du jeu, en tête du message d'accueil
   const motd = nodeAt(['etc', 'motd']);
   if (motd && !motd.d) motd.t.split('\n').forEach(t => shellPrint(t));
   if (note) shellPrint(note);
@@ -6697,7 +6697,7 @@ function xfWallHtml(k) {
   if (k === 'code') return `<pre class="wall-code">${esc(hackerCode(70).join('\n'))}</pre>`;
   if (k === 'citation') return '<blockquote class="wall-quote">« Ça marche sur ma machine. »<span>— un agent, un vendredi, à 17 h 58</span></blockquote>';
   if (k === 'uni') return '';
-  return `<div class="t-art">${asciiTitle()}</div><p>prod-01 · Vibian GNU/Linux 13 (friday) · ${GAME} v${VERSION}</p>`;
+  return `<div class="t-art">${asciiTitle()}</div><p>prod-01 · Vibian GNU/Linux 13 (friday) · ${GAME} ${VERSION}</p>`;
 }
 function xfWallDraw() { const el = $('.xf-wall'), k = xfWall(); el.dataset.wall = k; el.innerHTML = xfWallHtml(k); }
 function xfWallSet(k) {                            // un autre fond : tout de suite, et gardé
@@ -8809,7 +8809,7 @@ function makeAbout() {
   el.tabIndex = -1;
   el.setAttribute('aria-label', 'À propos');
   el.innerHTML = `<div class="abt-head"><span class="abt-logo" aria-hidden="true">AI</span><div><h2>AI DevOps Chaos Simulator</h2>`
-    + `<p>version ${verStr()} · Vibian GNU/Linux 13 (friday) · Xfce 4.20</p><p>Une satire du vibecoding, par un jeu lui-même vibecodé.</p></div></div>`
+    + `<p>${VERSION} · le projet en v${verStr()} · Vibian GNU/Linux 13 (friday) · Xfce 4.20</p><p>Une satire du vibecoding, par un jeu lui-même vibecodé.</p></div></div>`
     + `<div class="abt-nav" role="tablist" aria-label="À propos">${ABOUT_TABS.map(([k, t], i) => `<button type="button" role="tab" data-abt="${k}" aria-selected="${i ? 'false' : 'true'}">${esc(t)}</button>`).join('')}</div>`
     + '<div class="abt-body" role="tabpanel" tabindex="0"></div>';
   const body = el.querySelector('.abt-body'), seen = new Set();
@@ -11911,7 +11911,7 @@ const titleEl = $('#title'), titleBtns = [...titleEl.querySelectorAll('[data-t]'
 const QUIT_MSGS = ['Impossible de quitter : le projet n’est pas encore shippé.', 'Toujours pas shippé. Toujours pas de sortie.',
   'Les agents ont désactivé le bouton Quitter. Pour votre sécurité.'];
 let quitTries = 0;
-function updateTitle() { $('#t-player').textContent = `joueur : ${USER} · v${VERSION}${SANDBOX ? ' · bac à sable : tout est débloqué' : ''}`; }
+function updateTitle() { $('#t-player').textContent = `joueur : ${USER} · ${VERSION}${SANDBOX ? ' · bac à sable : tout est débloqué' : ''}`; }
 const tBtns = () => titleBtns.filter(b => !b.hidden);   // « Continuer » n'existe qu'avec une partie en cours
 let newConfirm = false;
 function showTitle() {
