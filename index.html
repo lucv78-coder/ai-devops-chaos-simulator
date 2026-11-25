@@ -761,6 +761,13 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .fm-status.note { color: var(--yellow); }
 .fm-confirm { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 1em; background: rgba(0, 0, 0, .5); }
 .fm-confirm[hidden] { display: none; }
+/* le glisser-déposer : l'étiquette qui suit le pointeur, la cible soulignée */
+.fs-ghost { position: fixed; z-index: 50; display: flex; align-items: center; gap: .8ch; max-width: 40ch; padding: .25em 1ch; border: 1px solid var(--orange); border-radius: 3px;
+  background: var(--panel); color: var(--fg); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 .4em 1.2em rgba(0, 0, 0, .5); }
+.fs-ghost .g { color: var(--orange); }
+.fs-ghost .c { color: var(--green); font-weight: 700; }
+.drop-on { outline: 2px dashed var(--orange); outline-offset: -2px; background: color-mix(in srgb, var(--orange) 16%, transparent) !important; }
+.fm-row { user-select: none; }
 .xf-dlg { z-index: 7; }                        /* les boîtes du bureau : par-dessus les fenêtres et le tableau de bord */
 .fm-box { display: grid; gap: .6em; width: min(60ch, 100%); padding: .9em 2ch; background: var(--panel); border: 1px solid var(--orange); border-radius: 4px; white-space: normal; }
 .fm-box .ttl { color: var(--orange); font-weight: 700; }
@@ -2427,6 +2434,7 @@ const ACH = [
     t: () => deskEntries().some(k => k !== 'Bienvenue.txt' && !k.endsWith('.desktop')) },
   { id: 'raccourci', g: '↗', n: 'Lanceur', d: 'Créer un raccourci sur le bureau (clic droit, Créer un raccourci).', p: 19.8 },
   { id: 'multisel', g: '⬚', n: 'Sélection de groupe', d: 'Sélectionner plusieurs icônes du bureau d’un rectangle, à la souris.', p: 24.6 },
+  { id: 'dnd', g: '⇥', n: 'Glisser, déposer', d: 'Déplacer un fichier en le glissant : dans Thunar, ou entre Thunar et le bureau.', p: 36.8 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -7174,6 +7182,12 @@ addEventListener('pointermove', e => {             // au-delà de 6 px, l'icône
   }
   D.els.forEach(x => { x.style.transform = `translate(${dx}px, ${dy}px)`; });
   D.cell = xfCellAt(e.clientX, e.clientY);
+  D.x = e.clientX; D.y = e.clientY; D.copy = e.ctrlKey;
+  const files = (D.group || [D.id]).map(deskIcoFile).filter(Boolean), t = files.length ? fsDropAt(e.clientX, e.clientY, D.group || [D.id]) : null;
+  fsDropMark(t && (t.dest || t.trash) ? t : null);
+  const overWin = files.length && document.elementsFromPoint(e.clientX, e.clientY).some(x => x.closest('.xw'));   // au-dessus d'une fenêtre : l'étiquette, les icônes restent dessous
+  if (overWin && !D.ghost) D.ghost = fsGhost(D.b.querySelector('.g').textContent, files.length > 1 ? `${files.length} éléments` : D.b.querySelector('.l').textContent);
+  if (D.ghost) { D.ghost.hidden = !overWin; fsGhostAt(D.ghost, e.clientX, e.clientY, e.ctrlKey); }
   Object.assign(D.hint.style, { gridColumn: String(D.cell[0]), gridRow: String(D.cell[1]) });
 });
 function xfIcoDrop(ok) {
@@ -7184,6 +7198,20 @@ function xfIcoDrop(ok) {
   setTimeout(() => { xfIcoDragged = false; }, 0);  // le clic qui suit le lâcher ne doit rien ouvrir
   D.els.forEach(x => { x.style.transform = ''; x.classList.remove('drag'); });
   D.hint?.remove();
+  D.ghost?.remove();
+  fsDropMark(null);
+  if (ok && D.cell && D.x != null) {             // lâchée sur Thunar, un dossier, le Dossier personnel ou la Corbeille : une opération de fichiers
+    const ids = D.group || [D.id], files = ids.map(deskIcoFile).filter(Boolean), t = files.length ? fsDropAt(D.x, D.y, ids) : null;
+    if (t?.blocked) return;
+    if (t?.trash) return deskDelete(files);
+    if (t?.dest) {
+      const r = fsTransfer(files.map(f => [...deskSegs(), f]), t.dest, D.copy);
+      if (r.ok && !D.copy) ids.forEach(id => { if (deskIcoFile(id)) deskIcoMove(id, ''); });
+      if (r.msg) toast(esc(r.msg), 2800);
+      xfIconsSync(true);
+      return;
+    }
+  }
   if (ok && D.cell) { if (D.group) xfIconMoveGroup(D.group, D.id, D.cell); else xfIconMove(D.id, D.cell); }
 }
 addEventListener('pointerup', () => xfIcoDrop(true));
@@ -7468,6 +7496,112 @@ function deskGroupMenu(ids, x, y) {                // clic droit sur une icône 
   ]);
 }
 
+/* le glisser-déposer des fichiers : depuis Thunar (une ligne) ou le bureau (des icônes de ~/Bureau) vers un dossier de Thunar (une ligne,
+   un raccourci, le chemin, la liste elle-même), un dossier du bureau, le Dossier personnel, le bureau (~/Bureau, sur la case visée) ou
+   la Corbeille (supprimer, après confirmation). Ctrl en lâchant : copier. Les mêmes règles que couper-coller dans Thunar. */
+const segEq = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+function fsCrashMove(segs) {                       // déplacer un élément vital : le système le cherche à sa place et ne le trouve plus
+  const p0 = absPath(segs);
+  xfFocus('zsh', false);
+  chain = chain.then(() => systemCrash(p0, [segs], { cmd: `thunar --move ${p0}`, by: 'thunar',
+    intro: [[H(['thunar: ', 'wrn'], `« ${p0} » déplacé : le système le cherche à sa place et ne le trouve plus.`), '', 700]] })).catch(() => {});
+}
+function fsNmBack(src) {                           // node_modules déplacé : un agent le réinstalle aussitôt
+  if (absPath(src) !== absPath([...PROJ_DIR, 'node_modules']) || !nodeAt(PROJ_DIR)) return '';
+  nodeAt(PROJ_DIR).k.node_modules = nodeModules();
+  return ' node_modules est aussitôt revenu : un agent l’a réinstallé, par réflexe.';
+}
+function fsTransfer(items, dest, copy) {           // → { ok, last, msg } : déplacer (ou copier) des éléments dans un dossier
+  const D = nodeAt(dest);
+  items = items.filter(x => nodeAt(x));
+  if (!D?.d || !items.length) return { ok: false, msg: '' };
+  if (mode !== 'idle') return { ok: false, msg: 'Impossible : le système est occupé à tout casser.' };
+  const into = items.find(x => isPrefix(x, dest));
+  if (into) return { ok: false, msg: `Impossible de ${copy ? 'copier' : 'déplacer'} « ${into.at(-1)} » dans lui-même : même Thunar a des limites.` };
+  if (!copy && items.every(x => segEq(x.slice(0, -1), dest))) return { ok: false, msg: '' };   // il y est déjà : rien à faire
+  if (!copy) { const f = items.find(x => isFatal(x, nodeAt(x))); if (f) { fsCrashMove(f); return { ok: true, msg: '' }; } }
+  const size = items.reduce((t, x) => t + nodeSize(nodeAt(x)), 0);
+  if (copy && diskUsed() + size > diskCap()) return { ok: false, msg: `Plus d’espace disponible : ${fmtSize(size)} à copier, ${fmtSize(Math.max(0, diskCap() - diskUsed()))} libres sur ${fmtSize(diskCap())}.` };
+  let last = '', back = '';
+  for (const x of items) {
+    const n = nodeAt(x);
+    last = freeName(D, x.at(-1), copy ? 'copie' : '');
+    D.k[last] = copy ? fmClone(n) : n;
+    if (!copy) { removeAt(x); back += fsNmBack(x); }
+  }
+  if (!copy) { fixCwd(); if (FM_CLIP.items.some(c => items.some(x => segEq(c, x)))) { FM_CLIP.items = []; FM_CLIP.op = ''; } }
+  fsSave?.();
+  saveGame();
+  ach('dnd');
+  return { ok: true, last, msg: `${copy ? 'Copié' : 'Déplacé'} : ${items.length > 1 ? `${items.length} éléments` : `« ${last} »`} dans ${tildePath(dest)}${size > 1e6 ? ` (${fmtSize(size)})` : ''}.${back}` };
+}
+function fsDeleteAsk(items) {                      // lâché sur la Corbeille : la confirmation (elle ne garde rien, elle supprime)
+  items = items.filter(x => nodeAt(x));
+  if (!items.length) return;
+  if (mode !== 'idle') return toast('Impossible : le système est occupé à tout casser.', 2200);
+  const fatal = items.find(x => isFatal(x, nodeAt(x)));
+  xfDlg('<p class="ttl">Supprimer définitivement ?</p>'
+    + `<p>${items.length > 1 ? `${items.length} éléments` : `« ${esc(absPath(items[0]))} »`} : la Corbeille de prod-01 ne garde rien, elle supprime.</p>`
+    + (fatal ? '<p class="warn">⚠ Élément vital du système. Les agents ont prêté leurs droits root : suppression possible.</p>' : '')
+    + '<div class="pk-actions"><button type="button" class="danger" data-c="ok">Supprimer</button><button type="button" data-c="no">Annuler</button></div>', () => {
+      xfDlgClose();
+      if (fatal) {
+        const p0 = absPath(fatal);
+        xfFocus('zsh', false);
+        chain = chain.then(() => systemCrash(p0, [fatal], { cmd: `thunar --delete ${p0}`, by: 'thunar',
+          intro: [[H(['thunar: ', 'wrn'], `« ${p0} » est un élément vital du système. Glissé dans la Corbeille : supprimé.`), '', 700]] })).catch(() => {});
+        return;
+      }
+      let told = false;
+      items.forEach(x => { removeAt(x); told = afterRemove(x) || told; if (segEq(x.slice(0, -1), deskSegs())) deskIcoMove('f:' + x.at(-1), ''); });
+      fixCwd();
+      fsSave?.(); saveGame();
+      if (xfOn) xfIconsSync(true);
+      toast(`${items.length > 1 ? `${items.length} éléments supprimés` : `« ${esc(items[0].at(-1))} » supprimé`}.${told ? ' Les agents ont réagi : voir le terminal.' : ''}`, 2600);
+    });
+}
+function fsDropAt(x, y, skip) {                    // sous le pointeur : { el, dest } (un dossier) · { trash } · { desk, cell } (le bureau) · { blocked } (une autre fenêtre) · null
+  const els = document.elementsFromPoint(x, y).filter(e => !e.closest('.drag, .fs-ghost, .xf-ico-hint'));
+  for (const e of els) {
+    const fm = e.closest('.prog.fm');
+    if (fm && PROGS.thunar.cwd) {
+      const row = e.closest('.fm-row.fm-dir[data-k]'), place = e.closest('[data-p]'), crumb = e.closest('.fm-path button[data-i]');
+      if (row) return { el: row, dest: [...PROGS.thunar.cwd(), row.dataset.k] };
+      if (place) return { el: place, dest: resolvePath(place.dataset.p) };
+      if (crumb) return { el: crumb, dest: PROGS.thunar.cwd().slice(0, +crumb.dataset.i) };
+      return { el: fm.querySelector('.fm-list'), dest: PROGS.thunar.cwd() };
+    }
+    if (e.closest('.xw, .xf-panel, .xf-menu, .xf-ctx, .xf-notes')) return { blocked: true };
+    const ico = e.closest('.xf-ico');
+    if (ico) {
+      const id = ico.dataset.ico;
+      if (skip.includes(id)) continue;
+      if (id === 'trash') return { el: ico, trash: true };
+      if (id === 'home') return { el: ico, dest: [...HOME] };
+      if (id.startsWith('f:') && nodeAt([...deskSegs(), id.slice(2)])?.d) return { el: ico, dest: [...deskSegs(), id.slice(2)] };
+      return null;
+    }
+    if (e === deskEl) return { desk: true, cell: xfCellAt(x, y) };
+  }
+  return null;
+}
+let fsDropEl = null;
+function fsDropMark(t) {                           // la cible soulignée
+  const el = t?.el || null;
+  if (el === fsDropEl) return;
+  fsDropEl?.classList.remove('drop-on');
+  fsDropEl = el;
+  fsDropEl?.classList.add('drop-on');
+}
+function fsGhost(glyph, label) {
+  const g = document.createElement('div');
+  g.className = 'fs-ghost';
+  g.innerHTML = `<span class="g">${esc(glyph)}</span><span class="t">${esc(label)}</span><span class="c" hidden>+ copie</span>`;
+  document.body.appendChild(g);
+  return g;
+}
+function fsGhostAt(g, x, y, copy) { g.style.left = x + 14 + 'px'; g.style.top = y + 12 + 'px'; g.querySelector('.c').hidden = !copy; }
+
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
    Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés, jauge du disque.
    Barre d'outils et clic droit : créer, couper, copier, coller (à la vitesse du disque, dans l'espace libre), renommer,
@@ -7575,7 +7709,7 @@ function makeThunar() {
     q('.fm-path').innerHTML = ['/', ...path].map((s, i) => `<button type="button" data-i="${i}"${i === path.length ? ' class="on" aria-current="location"' : ''}>${esc(s)}</button>`).join('');
     const cap = diskCap(), used = Math.min(cap, diskUsed());
     q('.fm-side').innerHTML = places().map(([ic, t, p]) => t === undefined ? `<p>${esc(ic)}</p>`
-      : `<button type="button" data-place="${esc(t)}"${p && same(p, path) ? ' class="on"' : ''}${p && !nodeAt(p)?.d ? ' disabled' : ''}><span class="xw-ic">${esc(ic)}</span>${esc(t)}</button>`).join('')
+      : `<button type="button" data-place="${esc(t)}"${p ? ` data-p="${esc(absPath(p))}"` : ''}${p && same(p, path) ? ' class="on"' : ''}${p && !nodeAt(p)?.d ? ' disabled' : ''}><span class="xw-ic">${esc(ic)}</span>${esc(t)}</button>`).join('')
       + `<div class="fm-disk" title="${esc(part('disk').n)}"><span class="fm-dbar"><span style="width:${(used / cap * 100).toFixed(1)}%"${used / cap > .9 ? ' class="full"' : ''}></span></span>`
       + `<small>${esc(fmtSize(cap - used))} libres sur ${esc(fmtSize(cap))}</small></div>`;
     tools();
@@ -7869,6 +8003,46 @@ function makeThunar() {
     e.preventDefault(); e.stopPropagation();
   });
   el.addEventListener('dblclick', e => { const r = e.target.closest('.fm-row[data-k]'); if (r) open(r.dataset.k); });
+  let rd = null;                                   // glisser une ligne : vers un dossier, la colonne, le chemin, le bureau, la Corbeille
+  listEl.addEventListener('pointerdown', e => {
+    const r = e.target.closest('.fm-row[data-k]');
+    if (r && e.button === 0 && confirmEl.hidden && !busy) rd = { k: r.dataset.k, x: e.clientX, y: e.clientY, on: false, ghost: null };
+  });
+  const rdMove = e => {
+    if (!rd) return;
+    if (!rd.on) {
+      if (Math.hypot(e.clientX - rd.x, e.clientY - rd.y) < 6) return;
+      const n = nodeAt([...path, rd.k]);
+      if (!n) { rd = null; return; }
+      rd.on = true;
+      rd.ghost = fsGhost(fmGlyph(rd.k, n), rd.k);
+      sel = rd.k; mark();
+    }
+    fsGhostAt(rd.ghost, e.clientX, e.clientY, e.ctrlKey);
+    const t = fsDropAt(e.clientX, e.clientY, []);
+    fsDropMark(t && !(t.dest && same(t.dest, [...path, rd.k])) ? t : null);
+  };
+  const rdUp = e => {
+    const R = rd;
+    rd = null;
+    if (!R?.on) return;
+    R.ghost.remove();
+    fsDropMark(null);
+    const src = [...path, R.k], t = fsDropAt(e.clientX, e.clientY, []);
+    if (!t || t.blocked) return;
+    if (t.trash) return fsDeleteAsk([src]);
+    const dest = t.desk ? (deskDir() && deskSegs()) : t.dest;
+    if (!dest || same(dest, src)) return;
+    const res = fsTransfer([src], dest, e.ctrlKey);
+    if (res.ok && t.desk && t.cell && !Object.values(xfIconPlace(xfIconList())).some(q => q[0] === t.cell[0] && q[1] === t.cell[1])) G.xfd = { ...G.xfd, ico: { ...(G.xfd.ico || {}), ['f:' + res.last]: t.cell } };
+    if (res.msg) flash(res.msg);
+    draw();
+    if (xfOn) xfIconsSync(true);
+  };
+  const rdCancel = () => { rd?.ghost?.remove(); rd = null; fsDropMark(null); };
+  addEventListener('pointermove', rdMove);
+  addEventListener('pointerup', rdUp);
+  addEventListener('pointercancel', rdCancel);
   listEl.addEventListener('contextmenu', e => {
     e.preventDefault();
     if (!confirmEl.hidden) return;
@@ -7905,6 +8079,8 @@ function makeThunar() {
     render: () => { if (sigOf() !== sig) draw(); else status(); },   // l'arborescence a bougé (rm, mkdir, touch dans le terminal) : on suit
     go: p => go(resolvePath(p)),
     title: () => `${path.length ? path.at(-1) : '/'} · Gestionnaire de fichiers`,
+    cwd: () => [...path],                          // le dossier affiché (le glisser-déposer du bureau y dépose)
+    close: () => { removeEventListener('pointermove', rdMove); removeEventListener('pointerup', rdUp); removeEventListener('pointercancel', rdCancel); },
   };
 }
 
