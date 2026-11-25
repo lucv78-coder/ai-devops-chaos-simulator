@@ -1657,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.67', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.68', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2366,7 +2366,7 @@ const G_DEF = () => ({ v: 1, t0: Date.now(), money: 0, shipped: 0, ai: 'mistral'
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, ep: {}, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, ep: {}, mkt: 0, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2493,6 +2493,7 @@ const ACH = [
   { id: 'nmhole', g: '◌', n: 'Trou noir', d: 'Supprimer node_modules : des gigaoctets libérés. Pendant quatre secondes.', p: 18.9 },
   { id: 'reflexe', g: ':', n: 'Réflexe', d: 'Taper :q ailleurs que dans vim.', p: 27.5, h: 1 },
   { id: 'mur', g: '▦', n: 'Le mur', d: 'Laisser les bugs manger 90 % du travail. Le projet n’avance plus : il grossit.', p: 21.3, h: 1 },
+  { id: 'hype', g: '↗', n: 'Hype', d: 'Pousser la campagne marketing au niveau 10. Valorisation ×3,5. Le produit n’a pas changé.', p: 1.4 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -11333,7 +11334,12 @@ function webUrssaf() {
    temps de jeu restent), et les stock-options reçues accélèrent le travail de toutes les suivantes : +10 % chacune. */
 const IPO_MIN = 25e6;
 const valMult = () => 40 * (1 + shipped / 50);
-const valuation = () => (G.earned || 0) * valMult() * repK();
+const MKT = ['Une vidéo où un agent code en accéléré', 'Un panneau sur le périphérique : « 10x engineers, 0x engineers »', 'Un podcast où le fondateur explique l’AGI',
+  'Un sponsor sur un stream de speedrun', 'Une keynote avec des démos préenregistrées', 'Un livre blanc écrit par un agent, relu par un autre', 'Une pub au Super Bowl (30 s, dont 25 de logo)',
+  'Un hackathon gagné par les agents', 'Une levée de fonds annoncée avant d’être signée', 'Un rebranding : le logo perd une voyelle'];
+const mktK = () => 1 + .25 * (G.mkt || 0);          // la campagne marketing : +25 % de valorisation par niveau
+const mktCost = (l = G.mkt || 0) => 50000 * 3 ** l;
+const valuation = () => (G.earned || 0) * valMult() * repK() * mktK();
 const ipoGain = () => Math.floor(Math.sqrt(valuation() / 1e6) * (G.dil ?? 1) * chalK());   // une levée de fonds dilue : moins de stock-options
 const ipoMult = () => 1 + .1 * (G.ipo?.so || 0);
 function ipoPace() {                               // le bon moment : stock-options par heure de cette startup, ships par minute (toutes équipes), le conseil
@@ -11395,7 +11401,7 @@ function ipoCmd(a) {                               // ipo : la valorisation ; ip
   }
   printLines([
     [H([`${TICKER()} `, 'org b'], `· ${PROJ.toUpperCase()} · valorisation `, [bigMoney(V), 'okc']), '', 20],
-    [`Chiffre d’affaires cumulé : $${usd(G.earned || 0)} · ${plural(shipped, 'projet')} · multiple : ×${frx(valMult().toFixed(1))} (« parce que IA »)`, 'dim', 20],
+    [`Chiffre d’affaires cumulé : $${usd(G.earned || 0)} · ${plural(shipped, 'projet')} · multiple : ×${frx(valMult().toFixed(1))} (« parce que IA »)${G.mkt ? ` · marketing : ×${frx(mktK().toFixed(2))}` : ''}`, 'dim', 20],
     V < IPO_MIN ? [H('Introduction en bourse : à partir de ', [bigMoney(IPO_MIN), 'org'], `. Il manque ${bigMoney(IPO_MIN - V)}.`), '', 20]
       : [H('Prête pour l’introduction : ', [`+${so} stock-options`, 'okc'], ` (×${frx(nx.toFixed(1))} de travail pour toutes les startups suivantes). `, ['ipo --confirm', 'org'], ' pour sonner la cloche.'), '', 20],
     ...(V >= IPO_MIN ? (P => [[H('Le bon moment ? ', [`${frx(P.perH.toFixed(1))} stock-options par heure`, 'org'], ` depuis la création de ${PROJ.toUpperCase()} · `, [`${frx(P.sm.toFixed(2))} ship${P.sm >= 2 ? 's' : ''} par minute`, P.go ? 'wrn' : 'okc'], '. ', P.go ? ['C’est le moment.', 'okc b'] : 'Attendre paie encore.'), '', 20],
@@ -14437,6 +14443,8 @@ function aiItems() {
     it.push({ cat, id: 'boostx:' + p, ic: C.glyph, name: `Prolonger ${B.name} (${C.label})`, lvl: `${mmss(d)} par jour`, done: max, cost: max ? 0 : Math.round(B.cost * BOOST_EXT[lv]),
       desc: max ? `${mmss(d)} par jour, le maximum. Au-delà, l’agent parle de « semaine de quatre jours ».` : `${mmss(d)} → ${mmss(d + BOOST_STEP)} par activation. Toujours une fois par jour.` });
   });
+  { const l = G.mkt || 0; it.push({ cat: 'Croissance · pour la valorisation', id: 'mkt', ic: '↗', name: 'Campagne marketing', lvl: `niveau ${l}/${MKT.length}`, done: l >= MKT.length, cost: mktCost(l),
+    desc: l >= MKT.length ? 'Tout a été tenté. Le produit, lui, n’a pas changé.' : `${MKT[l]} : +25 % de valorisation (×${frx((1 + .25 * (l + 1)).toFixed(2))}), donc plus de stock-options à l’introduction en bourse. Le produit, lui, ne change pas.` }); }
   Object.entries(SKILLS).forEach(([id, s]) => it.push({ cat: 'Skills', id, ic: '◇', name: `Skill : ${s.name}`, done: !!G.sk[id], cost: s.cost, desc: s.desc }));
   Object.entries(PT).filter(([k]) => k !== 'classique').forEach(([k, t]) => it.push({ cat: 'Thèmes du prompt · oh-my-vibe', id: 'theme:' + k, ic: '❯', name: `Thème ${t.n}`, done: !!G.pt?.own?.[k], cost: t.cost, desc: t.d + ' (omv theme pour changer.)' }));
   Object.entries(HUMANS).forEach(([k, h]) => it.push({ cat: 'Humains · un salaire à chaque ship', id: 'human:' + k, ic: '☻', name: h.n, done: !!G.hum[k], cost: h.cost, desc: h.d }));
@@ -14484,7 +14492,7 @@ function storeItems() { return stoTab === 'pc' ? pcItems() : stoTab === 'plat' ?
 let platSeen = '';
 function itemState(it) {
   if (it.pc && !it.done) return it.inCart ? { t: '✓ au panier', dis: true, cls: 'owned' } : it.block ? { t: it.block, dis: true, cls: '' } : { t: `Ajouter · ${money0(it.cost)}`, dis: false, cls: '' };
-  if (it.done) return { t: it.id === 'agent' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') || it.id === 'elec' ? 'max' : it.id.startsWith('human:') ? '✓ dans l’équipe' : '✓ acheté', dis: true, cls: 'owned' };
+  if (it.done) return { t: it.id === 'agent' || it.id === 'mkt' || it.id === 'term' || it.id === 'lead' || it.id.startsWith('pc:') || it.id.startsWith('boostx:') || it.id === 'elec' ? 'max' : it.id.startsWith('human:') ? '✓ dans l’équipe' : '✓ acheté', dis: true, cls: 'owned' };
   if (it.excl) return { t: `${CLIS[it.excl].label} choisi`, dis: true, cls: '' };
   if (it.need) return { t: it.need, dis: true, cls: '' };
   return { t: money0(it.cost), dis: G.money < it.cost, cls: '' };
@@ -14579,6 +14587,10 @@ function buy(id) {
       st.lvl = (st.lvl || 0) + 1;
       if (st.left > 0) st.left += BOOST_STEP;
       msg = `${BOOST[p].name} dure maintenant ${mmss(boostDur(p))} par jour.${st.left > 0 ? ' Le mode en cours gagne 1 min.' : ''}`;
+    } else if (id === 'mkt') {
+      G.mkt = (G.mkt || 0) + 1;
+      if (G.mkt >= MKT.length) ach('hype');
+      msg = `${MKT[G.mkt - 1]} : la valorisation prend +25 % (×${frx(mktK().toFixed(2))}). Le produit n’a pas bougé d’une ligne.`;
     } else if (id.startsWith('theme:')) {
       const k = id.slice(6);
       G.pt.own[k] = 1;
