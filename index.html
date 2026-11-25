@@ -1654,7 +1654,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.62', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.63', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -11451,7 +11451,7 @@ const INC_PM = ['Cause racine : un vendredi.', 'Action corrective : ajouter un a
 const INC_GIT = { oom: 'perf(cache): charger tout le catalogue en mémoire (plus rapide)', deploy: 'refactor(config): renommer config.prod en config.prod.final.v2 (presque partout)',
   disk: 'chore(logs): journaliser chaque token, pour la transparence', cert: 'chore(cron): couper certbot-renew.timer (il faisait du bruit)',
   db: 'perf(db): supprimer pgbouncer, inutile (on a déjà Postgres)', dns: 'chore(dns): nettoyer la zone (supprimé les enregistrements inutiles : A, AAAA)' };
-const INC_CAP = 4, INC_AUTO = 600;                // les remboursements : au plus quatre ships ; dix minutes : quelqu'un redémarre tout au hasard
+const INC_CAP = 4, INC_AUTO = 600, INC_AWAY = 90;   // INC_AWAY : absent, le temps qu’un agent d’astreinte remarque et redémarre (le SRE : moitié moins)                // les remboursements : au plus quatre ships ; dix minutes : quelqu'un redémarre tout au hasard
 const OPS = new Set(['systemctl', 'journalctl', 'kubectl', 'df', 'dig', 'nslookup', 'host', 'certbot', 'git']);
 const incRate = () => ECO.value(shipped) * .012 * (G.sk.sentry ? .6 : 1);   // $ remboursés par seconde de panne (le monitoring les repère plus tôt)
 const incDur = I => Math.max(0, (Date.now() - I.t0) / 1000);
@@ -14250,12 +14250,22 @@ function ecoOffline(secs, session = true) {
     out.gain += val;
     out.ships++;
     shipped++;
+    if (EV_ON && chance(incRisk())) {              // un incident pendant l'absence : personne pour le réparer (sauf le SRE d'astreinte)
+      const sre = humanOn('sre'), d = sre ? INC_AWAY / 2 : INC_AWAY, l = Math.min(incRate() * d, ECO.value(shipped) * INC_CAP);
+      G.money -= l;
+      out.inc = (out.inc || 0) + 1;
+      out.incLost = (out.incLost || 0) + l;
+      Object.assign(G.incS, { n: G.incS.n + 1, lost: G.incS.lost + l, log: [...G.incS.log, [Date.now(), pick(Object.keys(INC_KINDS)), d, Math.round(l * 100) / 100, sre ? 'sre' : 'away']].slice(-12) });
+      G.rep = Math.max(40, (G.rep ?? 70) - 1);
+      t -= d;                                      // la prod en panne : le ship suivant attend
+    }
   }
   if (out.ships) {                               // Vibank : une ligne pour les ships, une pour ce qui a été prélevé
     txAdd('ship', out.ships > 1 ? `${frNumI(out.ships)} ships en arrière-plan` : 'Un ship en arrière-plan', out.gain, m0 + out.gain);
     if (out.urssaf) { txAdd('urssaf', 'URSSAF · cotisations (en arrière-plan)', -out.urssaf, m0 + out.gain - out.urssaf); ach('cotisant'); }
     if (out.hum) txAdd('salaires', 'Salaires et charges des humains (en arrière-plan)', -out.hum, m0 + out.gain - out.urssaf - out.hum);
-    txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain + out.urssaf + (out.hum || 0));
+    if (out.inc) txAdd('incident', `Remboursements clients · ${plural(out.inc, 'incident')} pendant l’absence`, -out.incLost, m0 + out.gain - out.urssaf - (out.hum || 0) - out.incLost);
+    txAdd('tokens', 'Tokens et électricité (en arrière-plan)', G.money - m0 - out.gain + out.urssaf + (out.hum || 0) + (out.incLost || 0));
     setScore(shipped);
     vhAdd();
   }
@@ -14279,7 +14289,8 @@ function printWelcome() {
   }
   shellPrint(H(['Pendant votre absence', 'wrn'], ` (${fmtEta(Math.round(Math.min(w.gap, ECO.offlineMax)))}${w.gap > ECO.offlineMax ? ', plafonné à 4 h' : ''}) : `,
     [`${plural(w.ships, 'projet')} shippé${w.ships > 1 ? 's' : ''}`, w.ships ? 'okc' : 'wrn'], ` · +$${usd(w.gain)} · tokens −$${usd(w.cost)}${w.elec ? ` · électricité −$${usd(w.elec)}` : ''}`,
-    w.fails ? ` · ${plural(w.fails, 'déploiement')} raté${w.fails > 1 ? 's' : ''}` : '', ' · trésorerie ', [`$${usd(G.money)}`, 'okc']));
+    w.fails ? ` · ${plural(w.fails, 'déploiement')} raté${w.fails > 1 ? 's' : ''}` : '', w.inc ? [` · ${plural(w.inc, 'incident')} de prod, personne d’astreinte : −$${usd(w.incLost)} de remboursements`, 'errc'] : '', ' · trésorerie ', [`$${usd(G.money)}`, 'okc']));
+  if (w.inc) shellPrint(H(['  incident log', 'org'], [' : le détail · le SRE d’astreinte (store, rayon Humains) les écourte quand vous n’êtes pas là.', 'dim']));
   if (w.ships) ach('offline');
   toast(`Pendant votre absence : <kbd>${plural(w.ships, 'projet')}</kbd> shippé${w.ships > 1 ? 's' : ''}, +$${usd(w.gain)}`, 5000);
 }
@@ -14348,7 +14359,8 @@ function ecoTick() {
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
     if (dt > 2) {                                // onglet masqué (le navigateur ralentit les minuteurs) : calcul moyen
       const o = ecoOffline(Math.min(dt, ECO.offlineMax));
-      if (o.ships) hudNote(`En arrière-plan : ${plural(o.ships, 'projet')} shippé${o.ships > 1 ? 's' : ''}, +$${usd(o.gain)}`, 'ok');
+      if (o.inc) hudNote(`En arrière-plan : ${plural(o.inc, 'incident')} de prod, personne d’astreinte : −$${usd(o.incLost)}`, 'bug');
+      else if (o.ships) hudNote(`En arrière-plan : ${plural(o.ships, 'projet')} shippé${o.ships > 1 ? 's' : ''}, +$${usd(o.gain)}`, 'ok');
     } else ecoLive(dt, now);
     if (dt <= 2 && !document.hidden) boostTick(dt);   // onglet masqué : le chrono attend votre retour (le bonus ne s'applique pas hors de vue)
   }
