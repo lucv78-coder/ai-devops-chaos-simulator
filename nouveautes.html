@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>65</b><span>mises à jour</span></div>
-    <div role="listitem"><b>82 h 12</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 908</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>66</b><span>mises à jour</span></div>
+    <div role="listitem"><b>82 h 15</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 909</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#66</span><time datetime="2026-11-25T21:42">21 h 42</time><a href="#equilibrage">L’équilibrage, simulé : humains, tokens, boosts</a></li>
       <li><span class="n">#65</span><time datetime="2026-11-25T21:39">21 h 39</time><a href="#mur-des-bugs">Le mur des bugs se voit (et ne bloque plus)</a></li>
       <li><span class="n">#64</span><time datetime="2026-11-25T21:36">21 h 36</time><a href="#bon-moment">La bourse : le bon moment</a></li>
       <li><span class="n">#63</span><time datetime="2026-11-25T21:33">21 h 33</time><a href="#astreinte">Les incidents ne prennent plus de vacances</a></li>
@@ -215,8 +216,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="mur-des-bugs" aria-labelledby="t65">
-    <p class="meta"><span class="n">#65</span><span class="new">dernière</span><span class="v">alpha 0.65</span><time datetime="2026-11-25T21:39">25 nov. 2026 · 21 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/08e44fe">08e44fe</a><span>15 886 → 15 908 lignes</span></p>
+  <article class="maj latest" id="equilibrage" aria-labelledby="t66">
+    <p class="meta"><span class="n">#66</span><span class="new">dernière</span><span class="v">alpha 0.66</span><time datetime="2026-11-25T21:42">25 nov. 2026 · 21 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a3fb9b0">a3fb9b0</a><span>15 908 → 15 909 lignes</span></p>
+    <h2 id="t66"><a href="#equilibrage">L’équilibrage, simulé : humains, tokens, boosts</a></h2>
+    <ul>
+      <li>Les humains coûtaient 42 % de chaque ship, salaires et charges : sans eux, la valorisation était 66 % plus haute à 5 h. Leurs salaires passent à 1,5 % (stagiaire), 6 % (senior) et 4 % (SRE), plus les charges.</li>
+      <li>La facture de tokens ne pesait rien (1 à 2 % du revenu). Les agents relisent tout le dépôt, et le dépôt grandit à chaque ship : les tokens d’entrée suivent (×2 à 40 ships, ×7 à 100, ×15 à 150). Elle monte à 9 % vers 125 ships, et le prompt caching compte enfin.</li>
+      <li>Les modes boost durent 3 minutes par jour au lieu d’une, +1 minute par prolongation (7 au plus), et les prolongations coûtent beaucoup moins (ultracode : de 9 000 à 72 000 $, au lieu de 15 000 à 225 000).</li>
+      <li>Mesuré sur des parties simulées : à 8 h, les humains pèsent 16 % au lieu de 41 %, et la valorisation passe de 1,51 à 1,67 Md$.</li>
+    </ul>
+    <blockquote>« Les tokens coûtent enfin quelque chose. Les agents n’ont rien remarqué : ils relisaient le dépôt. »<cite>l’agent, 21 h 42</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-equilibrage.png" title="Voir en grand"><img src="assets/screen-equilibrage.png" width="900" height="540" loading="lazy" alt="Le store : les thèmes du prompt, puis les humains avec leurs nouveaux salaires (stagiaire 1,5 %, senior 6 %, SRE 4 % de chaque ship)."></a><figcaption>Le store : les humains, moins chers.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="mur-des-bugs" aria-labelledby="t65">
+    <p class="meta"><span class="n">#65</span><span class="v">alpha 0.65</span><time datetime="2026-11-25T21:39">25 nov. 2026 · 21 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/08e44fe">08e44fe</a><span>15 886 → 15 908 lignes</span></p>
     <h2 id="t65"><a href="#mur-des-bugs">Le mur des bugs se voit (et ne bloque plus)</a></h2>
     <ul>
       <li>Un bug coûte une part du projet : plus il grandit, plus chaque bug pèse. Avec Mistral, trois agents et aucun skill, les bugs mangeaient 98 % du travail vers 42 ships, sans un mot : le projet s’arrêtait.</li>
