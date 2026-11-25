@@ -91,6 +91,7 @@ h1 { margin: .35em 0 .3em; font-size: 2.1em; line-height: 1.15; color: var(--ora
 .maj.latest::before { background: var(--orange); }
 .meta { color: var(--dim); display: flex; flex-wrap: wrap; gap: 0 1.6ch; }
 .meta .n { color: var(--orange); font-weight: 700; }
+.meta .v { color: var(--dim); font-variant-numeric: tabular-nums; }
 .meta .new { color: var(--ink); background: var(--orange); padding: 0 .8ch; border-radius: 2px; font-weight: 700; }
 .maj h2 { margin: .15em 0 .6em; font-size: 1.35em; line-height: 1.3; color: var(--fg); }
 .maj h2 a { color: inherit; text-decoration: none; }
@@ -136,8 +137,8 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>51</b><span>mises à jour</span></div>
-    <div role="listitem"><b>63 h 36</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>52</b><span>mises à jour</span></div>
+    <div role="listitem"><b>64 h 19</b><span>du premier au dernier commit</span></div>
     <div role="listitem"><b>6 492 → 14 545</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
@@ -146,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#52</span><time datetime="2026-11-25T03:46">03 h 46</time><a href="#version">Un numéro de version : alpha 0.52</a></li>
       <li><span class="n">#51</span><time datetime="2026-11-25T03:03">03 h 03</time><a href="#glisser-deposer">Le glisser-déposer des fichiers</a></li>
       <li><span class="n">#50</span><time datetime="2026-11-25T02:20">02 h 20</time><a href="#multiselection">Plusieurs icônes à la fois</a></li>
       <li><span class="n">#49</span><time datetime="2026-11-25T01:37">01 h 37</time><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></li>
@@ -200,8 +202,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="glisser-deposer" aria-labelledby="t51">
-    <p class="meta"><span class="n">#51</span><span class="new">dernière</span><time datetime="2026-11-25T03:03">25 nov. 2026 · 03 h 03</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/3ca8dd3">3ca8dd3</a><span>14 369 → 14 545 lignes</span></p>
+  <article class="maj latest" id="version" aria-labelledby="t52">
+    <p class="meta"><span class="n">#52</span><span class="new">dernière</span><span class="v">alpha 0.52</span><time datetime="2026-11-25T03:46">25 nov. 2026 · 03 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/4ce77fa">4ce77fa</a><span>14 545 → 14 545 lignes</span></p>
+    <h2 id="t52"><a href="#version">Un numéro de version : alpha 0.52</a></h2>
+    <ul>
+      <li>Le jeu a un numéro de version : alpha 0.N, N étant le numéro de la mise à jour sur cette page. Celle-ci est l’alpha 0.52.</li>
+      <li>Il s’affiche sur l’écran titre, dans le message d’accueil du terminal, sur le fond d’écran du bureau, dans « À propos » et dans license.</li>
+      <li>Chaque mise à jour de cette page porte désormais sa version, les anciennes comprises (de l’alpha 0.1 à l’alpha 0.51) ; le README a son badge.</li>
+      <li>Les faux CLI gardent leur numéro à eux : claude --version répond toujours 0.9.0-friday.</li>
+    </ul>
+    <blockquote>« Alpha, c’est le mot qui veut dire « ça plante, mais c’est prévu ». »<cite>l’agent, 03 h 46</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-version.png" title="Voir en grand"><img src="assets/screen-version.png" width="900" height="540" loading="lazy" alt="L’écran titre du jeu : le logo, le menu, et en bas « joueur : dev · alpha 0.52 »."></a><figcaption>L’alpha 0.52, sur l’écran titre.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="glisser-deposer" aria-labelledby="t51">
+    <p class="meta"><span class="n">#51</span><span class="v">alpha 0.51</span><time datetime="2026-11-25T03:03">25 nov. 2026 · 03 h 03</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/3ca8dd3">3ca8dd3</a><span>14 369 → 14 545 lignes</span></p>
     <h2 id="t51"><a href="#glisser-deposer">Le glisser-déposer des fichiers</a></h2>
     <ul>
       <li>Dans Thunar, une ligne se glisse sur un dossier, sur un raccourci de la colonne ou sur le chemin : l’étiquette suit le pointeur, la cible est soulignée.</li>
@@ -217,7 +234,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="multiselection" aria-labelledby="t50">
-    <p class="meta"><span class="n">#50</span><time datetime="2026-11-25T02:20">25 nov. 2026 · 02 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6225079">6225079</a><span>14 297 → 14 369 lignes</span></p>
+    <p class="meta"><span class="n">#50</span><span class="v">alpha 0.50</span><time datetime="2026-11-25T02:20">25 nov. 2026 · 02 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6225079">6225079</a><span>14 297 → 14 369 lignes</span></p>
     <h2 id="t50"><a href="#multiselection">Plusieurs icônes à la fois</a></h2>
     <ul>
       <li>Ctrl+clic ajoute ou retire une icône de la sélection ; glisser sur le fond du bureau dessine un rectangle de sélection (avec Ctrl : en plus) ; Ctrl+A sélectionne tout, Échap rien.</li>
@@ -232,7 +249,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="raccourcis" aria-labelledby="t49">
-    <p class="meta"><span class="n">#49</span><time datetime="2026-11-25T01:37">25 nov. 2026 · 01 h 37</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ac4ac7b">ac4ac7b</a><span>14 193 → 14 297 lignes</span></p>
+    <p class="meta"><span class="n">#49</span><span class="v">alpha 0.49</span><time datetime="2026-11-25T01:37">25 nov. 2026 · 01 h 37</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ac4ac7b">ac4ac7b</a><span>14 193 → 14 297 lignes</span></p>
     <h2 id="t49"><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></h2>
     <ul>
       <li>Les icônes des applis sont maintenant de vrais lanceurs .desktop dans ~/Bureau (cat ~/Bureau/firefaux.desktop : Name=, Exec=). Ils sont posés à l’installation d’une appli ou à l’achat d’une licence, et retirés à sa désinstallation.</li>
@@ -248,7 +265,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="fichiers-bureau" aria-labelledby="t48">
-    <p class="meta"><span class="n">#48</span><time datetime="2026-11-25T00:55">25 nov. 2026 · 00 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/54930e7">54930e7</a><span>14 037 → 14 193 lignes</span></p>
+    <p class="meta"><span class="n">#48</span><span class="v">alpha 0.48</span><time datetime="2026-11-25T00:55">25 nov. 2026 · 00 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/54930e7">54930e7</a><span>14 037 → 14 193 lignes</span></p>
     <h2 id="t48"><a href="#fichiers-bureau">Des fichiers sur le bureau</a></h2>
     <ul>
       <li>~/Bureau, le bureau d’Xfce en français : il existe dès la première session (avec un mot d’accueil), et ce qu’il contient apparaît sur le bureau, dans les cases libres.</li>
@@ -264,7 +281,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="demarrage" aria-labelledby="t47">
-    <p class="meta"><span class="n">#47</span><time datetime="2026-11-25T00:05">25 nov. 2026 · 00 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/281d76e">281d76e</a><span>14 014 → 14 037 lignes</span></p>
+    <p class="meta"><span class="n">#47</span><span class="v">alpha 0.47</span><time datetime="2026-11-25T00:05">25 nov. 2026 · 00 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/281d76e">281d76e</a><span>14 014 → 14 037 lignes</span></p>
     <h2 id="t47"><a href="#demarrage">Le bureau au démarrage</a></h2>
     <ul>
       <li>Paramètres du bureau › Session et démarrage (ou xfce4-session-settings) : « Lancer le bureau Xfce au démarrage ».</li>
@@ -279,7 +296,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="icones" aria-labelledby="t46">
-    <p class="meta"><span class="n">#46</span><time datetime="2026-11-24T23:26">24 nov. 2026 · 23 h 26</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/31bf352">31bf352</a><span>13 919 → 14 014 lignes</span></p>
+    <p class="meta"><span class="n">#46</span><span class="v">alpha 0.46</span><time datetime="2026-11-24T23:26">24 nov. 2026 · 23 h 26</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/31bf352">31bf352</a><span>13 919 → 14 014 lignes</span></p>
     <h2 id="t46"><a href="#icones">Les icônes du bureau, où vous voulez</a></h2>
     <ul>
       <li>Les icônes du bureau se glissent sur une grille : la case visée est soulignée, l’icône s’y pose. Sur une autre icône, elles échangent leur place.</li>
@@ -294,7 +311,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="fond-ecran" aria-labelledby="t45">
-    <p class="meta"><span class="n">#45</span><time datetime="2026-11-24T22:47">24 nov. 2026 · 22 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/53ce0a9">53ce0a9</a><span>13 813 → 13 919 lignes</span></p>
+    <p class="meta"><span class="n">#45</span><span class="v">alpha 0.45</span><time datetime="2026-11-24T22:47">24 nov. 2026 · 22 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/53ce0a9">53ce0a9</a><span>13 813 → 13 919 lignes</span></p>
     <h2 id="t45"><a href="#fond-ecran">Le fond d’écran, et les Paramètres du bureau</a></h2>
     <ul>
       <li>Une nouvelle fenêtre, les Paramètres du bureau : dans le menu Applications, au clic droit sur le bureau, ou avec xfce4-settings-manager.</li>
@@ -309,7 +326,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="retouches-xfce" aria-labelledby="t44">
-    <p class="meta"><span class="n">#44</span><time datetime="2026-11-24T21:55">24 nov. 2026 · 21 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/52426de">52426de</a><span>13 768 → 13 813 lignes</span></p>
+    <p class="meta"><span class="n">#44</span><span class="v">alpha 0.44</span><time datetime="2026-11-24T21:55">24 nov. 2026 · 21 h 55</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/52426de">52426de</a><span>13 768 → 13 813 lignes</span></p>
     <h2 id="t44"><a href="#retouches-xfce">Retouches de Xfce : les fenêtres se souviennent, et un clic droit</a></h2>
     <ul>
       <li>Chaque fenêtre garde sa place et sa taille (et si elle était agrandie) d’une ouverture à l’autre, même après un rechargement : c’est dans la partie.</li>
@@ -323,7 +340,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="recherche" aria-labelledby="t43">
-    <p class="meta"><span class="n">#43</span><time datetime="2026-11-24T21:16">24 nov. 2026 · 21 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/75edcf2">75edcf2</a><span>13 719 → 13 768 lignes</span></p>
+    <p class="meta"><span class="n">#43</span><span class="v">alpha 0.43</span><time datetime="2026-11-24T21:16">24 nov. 2026 · 21 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/75edcf2">75edcf2</a><span>13 719 → 13 768 lignes</span></p>
     <h2 id="t43"><a href="#recherche">La recherche du menu Applications</a></h2>
     <ul>
       <li>Alt+F1, puis on tape : « fire », « cour », « pdf » ou « thunderbird ». Les applis qui correspondent restent, accents et majuscules ignorés, avec quelques synonymes.</li>
@@ -338,7 +355,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="notifications" aria-labelledby="t42">
-    <p class="meta"><span class="n">#42</span><time datetime="2026-11-24T20:38">24 nov. 2026 · 20 h 38</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ae344fa">ae344fa</a><span>13 626 → 13 719 lignes</span></p>
+    <p class="meta"><span class="n">#42</span><span class="v">alpha 0.42</span><time datetime="2026-11-24T20:38">24 nov. 2026 · 20 h 38</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ae344fa">ae344fa</a><span>13 626 → 13 719 lignes</span></p>
     <h2 id="t42"><a href="#notifications">La zone de notifications du tableau de bord</a></h2>
     <ul>
       <li>En haut à droite du bureau, une icône pour chaque chose qui attend : les courriels non lus, l’incident en cours, les PR à relire, la panne du monde, la clé exposée.</li>
@@ -352,7 +369,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="fenetres" aria-labelledby="t41">
-    <p class="meta"><span class="n">#41</span><time datetime="2026-11-24T19:52">24 nov. 2026 · 19 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/07457a0">07457a0</a><span>13 509 → 13 626 lignes</span></p>
+    <p class="meta"><span class="n">#41</span><span class="v">alpha 0.41</span><time datetime="2026-11-24T19:52">24 nov. 2026 · 19 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/07457a0">07457a0</a><span>13 509 → 13 626 lignes</span></p>
     <h2 id="t41"><a href="#fenetres">Les fenêtres au clavier, et collées aux bords</a></h2>
     <ul>
       <li>Alt+² (Alt+` en QWERTY) passe d’une fenêtre à l’autre : un sélecteur s’ouvre sur la fenêtre d’avant, chaque appui avance, Maj recule, relâcher Alt y va. Alt+Tab appartient à votre système, Alt+F4 fermerait le navigateur : le bureau du jeu prend les touches d’à côté.</li>
@@ -367,7 +384,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="secrets" aria-labelledby="t40">
-    <p class="meta"><span class="n">#40</span><time datetime="2026-11-24T18:40">24 nov. 2026 · 18 h 40</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/485f755">485f755</a><span>13 415 → 13 509 lignes</span></p>
+    <p class="meta"><span class="n">#40</span><span class="v">alpha 0.40</span><time datetime="2026-11-24T18:40">24 nov. 2026 · 18 h 40</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/485f755">485f755</a><span>13 415 → 13 509 lignes</span></p>
     <h2 id="t40"><a href="#secrets">Les secrets qui fuient : un agent a commité le .env</a></h2>
     <ul>
       <li>Un agent commite le .env « pour que ça marche chez tout le monde » : la clé d’API part dans un commit public. GitHype prévient, par une alerte et un courriel.</li>
@@ -383,7 +400,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="humains" aria-labelledby="t39">
-    <p class="meta"><span class="n">#39</span><time datetime="2026-11-24T18:02">24 nov. 2026 · 18 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/7aa89b2">7aa89b2</a><span>13 343 → 13 415 lignes</span></p>
+    <p class="meta"><span class="n">#39</span><span class="v">alpha 0.39</span><time datetime="2026-11-24T18:02">24 nov. 2026 · 18 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/7aa89b2">7aa89b2</a><span>13 343 → 13 415 lignes</span></p>
     <h2 id="t39"><a href="#humains">Des humains : ils lisent le code, ils ont un salaire</a></h2>
     <ul>
       <li>Au store, catégorie Humains : un stagiaire (−10 % de bugs), une personne senior qui lit vraiment le code (−35 % de bugs, −40 % d’incidents), un SRE d’astreinte qui répare les incidents en deux minutes.</li>
@@ -398,7 +415,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="pannes" aria-labelledby="t38">
-    <p class="meta"><span class="n">#38</span><time datetime="2026-11-24T17:25">24 nov. 2026 · 17 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/14ab386">14ab386</a><span>13 254 → 13 343 lignes</span></p>
+    <p class="meta"><span class="n">#38</span><span class="v">alpha 0.38</span><time datetime="2026-11-24T17:25">24 nov. 2026 · 17 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/14ab386">14ab386</a><span>13 254 → 13 343 lignes</span></p>
     <h2 id="t38"><a href="#pannes">Les pannes du monde : quand ce n’est pas votre faute</a></h2>
     <ul>
       <li>Toutes les 6 à 12 minutes, un événement qui ne dépend pas de vous : un badge dans le tableau de bord, la une de Vibegle, et actu dans le terminal.</li>
@@ -413,7 +430,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="pr" aria-labelledby="t37">
-    <p class="meta"><span class="n">#37</span><time datetime="2026-11-24T16:49">24 nov. 2026 · 16 h 49</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/bc12e04">bc12e04</a><span>13 088 → 13 254 lignes</span></p>
+    <p class="meta"><span class="n">#37</span><span class="v">alpha 0.37</span><time datetime="2026-11-24T16:49">24 nov. 2026 · 16 h 49</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/bc12e04">bc12e04</a><span>13 088 → 13 254 lignes</span></p>
     <h2 id="t37"><a href="#pr">Relire les PR des agents : les lignes relues ne sont plus nulles</a></h2>
     <ul>
       <li>Les agents ouvrent des pull requests quand ils travaillent : pr list, pr diff 413 pour les relire, pr merge, pr close. Sur GitHype, votre dépôt a maintenant ses Pull requests.</li>
@@ -429,7 +446,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="defis" aria-labelledby="t36">
-    <p class="meta"><span class="n">#36</span><time datetime="2026-11-24T16:11">24 nov. 2026 · 16 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fefb396">fefb396</a><span>13 035 → 13 088 lignes</span></p>
+    <p class="meta"><span class="n">#36</span><span class="v">alpha 0.36</span><time datetime="2026-11-24T16:11">24 nov. 2026 · 16 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fefb396">fefb396</a><span>13 035 → 13 088 lignes</span></p>
     <h2 id="t36"><a href="#defis">Les défis : une contrainte pour la startup suivante, et plus de stock-options</a></h2>
     <ul>
       <li>À l’introduction en bourse, un défi pour la startup suivante (facultatif) : les boutons de la confirmation, sur bourse.vibe, ou ipo --confirm --defi solo.</li>
@@ -444,7 +461,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="messagerie" aria-labelledby="t35">
-    <p class="meta"><span class="n">#35</span><time datetime="2026-11-24T15:36">24 nov. 2026 · 15 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6223261">6223261</a><span>12 733 → 13 035 lignes</span></p>
+    <p class="meta"><span class="n">#35</span><span class="v">alpha 0.35</span><time datetime="2026-11-24T15:36">24 nov. 2026 · 15 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6223261">6223261</a><span>12 733 → 13 035 lignes</span></p>
     <h2 id="t35"><a href="#messagerie">La messagerie : des clients, des investisseurs, l’URSSAF, et du hameçonnage</a></h2>
     <ul>
       <li>« Vous avez un nouveau courrier » : les courriels arrivent quand les agents travaillent, et après certains événements. mail les liste, mail 1 en lit un, mail 1 accepter y répond.</li>
@@ -462,7 +479,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="incidents" aria-labelledby="t34">
-    <p class="meta"><span class="n">#34</span><time datetime="2026-11-24T14:58">24 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ad7f471">ad7f471</a><span>12 399 → 12 733 lignes</span></p>
+    <p class="meta"><span class="n">#34</span><span class="v">alpha 0.34</span><time datetime="2026-11-24T14:58">24 nov. 2026 · 14 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ad7f471">ad7f471</a><span>12 399 → 12 733 lignes</span></p>
     <h2 id="t34"><a href="#incidents">Les incidents de prod : PagerDoudou sonne, et c’est toujours le DNS</a></h2>
     <ul>
       <li>Après un ship, la prod peut tomber : plus souvent le vendredi, la nuit et avec Mistral, moins avec Claude et Moon AI. Les tests, les hooks et l’intégration continue baissent le risque.</li>
@@ -480,7 +497,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="bourse" aria-labelledby="t33">
-    <p class="meta"><span class="n">#33</span><time datetime="2026-11-24T08:19">24 nov. 2026 · 08 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/74760dc">74760dc</a><span>12 294 → 12 399 lignes</span></p>
+    <p class="meta"><span class="n">#33</span><span class="v">alpha 0.33</span><time datetime="2026-11-24T08:19">24 nov. 2026 · 08 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/74760dc">74760dc</a><span>12 294 → 12 399 lignes</span></p>
     <h2 id="t33"><a href="#bourse">La fin de partie : l’introduction en bourse, et des stock-options pour toujours</a></h2>
     <ul>
       <li>Votre startup a une valorisation : son chiffre d’affaires × 40, « parce que IA », et un bonus qui grimpe avec les ships.</li>
@@ -496,7 +513,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="terminaux" aria-labelledby="t32">
-    <p class="meta"><span class="n">#32</span><time datetime="2026-11-24T07:42">24 nov. 2026 · 07 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8ea0804">8ea0804</a><span>12 180 → 12 294 lignes</span></p>
+    <p class="meta"><span class="n">#32</span><span class="v">alpha 0.32</span><time datetime="2026-11-24T07:42">24 nov. 2026 · 07 h 42</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8ea0804">8ea0804</a><span>12 180 → 12 294 lignes</span></p>
     <h2 id="t32"><a href="#terminaux">Plusieurs terminaux : Ctrl+B puis c, et des fenêtres sous Xfce</a></h2>
     <ul>
       <li>Ctrl+B puis c ouvre un terminal de plus, comme une fenêtre tmux : il apparaît dans la barre d’onglets, et Ctrl+B puis son chiffre y mène.</li>
@@ -512,7 +529,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="terminal" aria-labelledby="t31">
-    <p class="meta"><span class="n">#31</span><time datetime="2026-11-24T07:07">24 nov. 2026 · 07 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/1eca5bd">1eca5bd</a><span>11 743 → 12 180 lignes</span></p>
+    <p class="meta"><span class="n">#31</span><span class="v">alpha 0.31</span><time datetime="2026-11-24T07:07">24 nov. 2026 · 07 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/1eca5bd">1eca5bd</a><span>11 743 → 12 180 lignes</span></p>
     <h2 id="t31"><a href="#terminal">Sans bureau : les versions terminal (façon mc, lynx, nvlc, steamcmd)</a></h2>
     <ul>
       <li>Sans Xfce, une appli graphique s’ouvre en version terminal quand il en existe une : thunar façon mc, firefaux façon lynx, vlc façon nvlc, steam façon steamcmd, mousepad dans nano. Atril, qui n’en a pas, répond toujours cannot open display.</li>
@@ -530,7 +547,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="moon" aria-labelledby="t30">
-    <p class="meta"><span class="n">#30</span><time datetime="2026-11-24T05:50">24 nov. 2026 · 05 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e3e678b">e3e678b</a><span>11 617 → 11 743 lignes</span></p>
+    <p class="meta"><span class="n">#30</span><span class="v">alpha 0.30</span><time datetime="2026-11-24T05:50">24 nov. 2026 · 05 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e3e678b">e3e678b</a><span>11 617 → 11 743 lignes</span></p>
     <h2 id="t30"><a href="#moon">Moon AI : la seule plateforme qui marche (à peu près), et Moon Blur</a></h2>
     <ul>
       <li>Une cinquième plateforme : Moon AI. La licence la plus chère du store, Moon 1 d’emblée (4× le travail de Codestral, deux fois moins de bugs que Claude), et les tokens les plus chers : il relit tout, deux fois.</li>
@@ -548,7 +565,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="urssaf" aria-labelledby="t29">
-    <p class="meta"><span class="n">#29</span><time datetime="2026-11-24T05:10">24 nov. 2026 · 05 h 10</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8e16279">8e16279</a><span>11 560 → 11 617 lignes</span></p>
+    <p class="meta"><span class="n">#29</span><span class="v">alpha 0.29</span><time datetime="2026-11-24T05:10">24 nov. 2026 · 05 h 10</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8e16279">8e16279</a><span>11 560 → 11 617 lignes</span></p>
     <h2 id="t29"><a href="#urssaf">L’URSSAF, et la taxe au giga votée à l’Assemblée</a></h2>
     <ul>
       <li>urssaf.vibe : l’Union pour le Recouvrement des Sommes Sur les Agents Facturés. Votre espace cotisant, le barème calculé sur votre prochain ship, et un bouton pour contester (réponse sous 6 à 18 mois).</li>
@@ -564,7 +581,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="vibank" aria-labelledby="t28">
-    <p class="meta"><span class="n">#28</span><time datetime="2026-11-24T04:38">24 nov. 2026 · 04 h 38</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ebc50e3">ebc50e3</a><span>11 427 → 11 560 lignes</span></p>
+    <p class="meta"><span class="n">#28</span><span class="v">alpha 0.28</span><time datetime="2026-11-24T04:38">24 nov. 2026 · 04 h 38</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/ebc50e3">ebc50e3</a><span>11 427 → 11 560 lignes</span></p>
     <h2 id="t28"><a href="#vibank">Vibank : facture.vibe devient une banque, et curl la lit</a></h2>
     <ul>
       <li>facture.vibe devient Vibank : le solde, son graphique (survolez-le : la date, le solde, l’opération), les dépenses par catégorie, ce qui reste à prélever, et chaque opération.</li>
@@ -579,7 +596,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="apropos" aria-labelledby="t27">
-    <p class="meta"><span class="n">#27</span><time datetime="2026-11-24T03:59">24 nov. 2026 · 03 h 59</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/36d7c21">36d7c21</a><span>11 323 → 11 427 lignes</span></p>
+    <p class="meta"><span class="n">#27</span><span class="v">alpha 0.27</span><time datetime="2026-11-24T03:59">24 nov. 2026 · 03 h 59</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/36d7c21">36d7c21</a><span>11 323 → 11 427 lignes</span></p>
     <h2 id="t27"><a href="#apropos">À propos : la config du PC, l’éditeur, les contributeurs, les agents</a></h2>
     <ul>
       <li>À propos, dans le menu Applications de Xfce (ou xfce4-about dans le terminal, le bureau lancé).</li>
@@ -595,7 +612,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="malware" aria-labelledby="t26">
-    <p class="meta"><span class="n">#26</span><time datetime="2026-11-24T03:29">24 nov. 2026 · 03 h 29</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d25657a">d25657a</a><span>11 151 → 11 323 lignes</span></p>
+    <p class="meta"><span class="n">#26</span><span class="v">alpha 0.26</span><time datetime="2026-11-24T03:29">24 nov. 2026 · 03 h 29</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d25657a">d25657a</a><span>11 151 → 11 323 lignes</span></p>
     <h2 id="t26"><a href="#malware">Un mineur de VibeCoin, et ClamAV pour s’en débarrasser</a></h2>
     <ul>
       <li>Les pièges : les pubs trop belles (1 000 000 de tokens, Windows 11, « votre PC est infecté »), le gros bouton TÉLÉCHARGER de telecharge.vibe, et le Bloqueur de Pubs GRATUIT Pro 2026 (non vérifié, quatre utilisateurs dont trois robots), qui désactive uBlock Origin au passage.</li>
@@ -611,7 +628,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="pubs" aria-labelledby="t25">
-    <p class="meta"><span class="n">#25</span><time datetime="2026-11-24T02:58">24 nov. 2026 · 02 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c513b29">c513b29</a><span>10 995 → 11 151 lignes</span></p>
+    <p class="meta"><span class="n">#25</span><span class="v">alpha 0.25</span><time datetime="2026-11-24T02:58">24 nov. 2026 · 02 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c513b29">c513b29</a><span>10 995 → 11 151 lignes</span></p>
     <h2 id="t25"><a href="#pubs">Des pubs dans Firefaux, et uBlock Origin pour s’en débarrasser</a></h2>
     <ul>
       <li>Sans bloqueur, Firefaux affiche des pubs : un bandeau en tête de chaque page web, et des pop-ups au chargement (trois au plus, avec une croix minuscule). Chacun prend de la RAM ; htop montre un processus de contenu par pop-up.</li>
@@ -627,7 +644,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="retouches" aria-labelledby="t24">
-    <p class="meta"><span class="n">#24</span><time datetime="2026-11-24T02:11">24 nov. 2026 · 02 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a8a9057">a8a9057</a><span>10 971 → 10 995 lignes</span></p>
+    <p class="meta"><span class="n">#24</span><span class="v">alpha 0.24</span><time datetime="2026-11-24T02:11">24 nov. 2026 · 02 h 11</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a8a9057">a8a9057</a><span>10 971 → 10 995 lignes</span></p>
     <h2 id="t24"><a href="#retouches">Retouches : le tube cathodique partout, apt list lisible, Firefaux par à-coups</a></h2>
     <ul>
       <li>Le tube cathodique ne dépend plus des Graphismes : lignes de balayage, vignette et lueur sur tous les thèmes et tous les réglages. Ultra garde le scintillement (coupé si votre système demande moins d’animations).</li>
@@ -641,7 +658,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="correctifs" aria-labelledby="t23">
-    <p class="meta"><span class="n">#23</span><time datetime="2026-11-24T01:35">24 nov. 2026 · 01 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/18bfe89">18bfe89</a><span>10 924 → 10 971 lignes</span></p>
+    <p class="meta"><span class="n">#23</span><span class="v">alpha 0.23</span><time datetime="2026-11-24T01:35">24 nov. 2026 · 01 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/18bfe89">18bfe89</a><span>10 924 → 10 971 lignes</span></p>
     <h2 id="t23"><a href="#correctifs">Correctifs : Lolama par apt, vibe « demande », un pingouin tout neuf</a></h2>
     <ul>
       <li>Lolama est un paquet : sudo apt install lolama (ollama marche aussi). apt remove le retire. Le bouton de lolama.vibe et le script curl restent, et apt sait ce qu’ils ont installé.</li>
@@ -656,7 +673,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="nano" aria-labelledby="t22">
-    <p class="meta"><span class="n">#22</span><time datetime="2026-11-24T00:25">24 nov. 2026 · 00 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/012df46">012df46</a><span>10 558 → 10 924 lignes</span></p>
+    <p class="meta"><span class="n">#22</span><span class="v">alpha 0.22</span><time datetime="2026-11-24T00:25">24 nov. 2026 · 00 h 25</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/012df46">012df46</a><span>10 558 → 10 924 lignes</span></p>
     <h2 id="t22"><a href="#nano">nano, et des réglages qui ont leur propre écran</a></h2>
     <ul>
       <li>nano, l’éditeur du terminal : nano fichier (sudo nano pour ceux de root ; pico aussi). La barre du haut, la ligne d’état, deux lignes de raccourcis, qui se cliquent : ^O écrire, ^X quitter (« Sauver le tampon modifié ? »), ^F chercher, ^\ remplacer, ^K couper, ^U coller, ^R insérer un fichier, ^C la position, ^G l’aide. Sous Xfce, il a sa fenêtre.</li>
@@ -672,7 +689,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="vlc" aria-labelledby="t21">
-    <p class="meta"><span class="n">#21</span><time datetime="2026-11-23T23:07">23 nov. 2026 · 23 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/570a965">570a965</a><span>10 149 → 10 558 lignes</span></p>
+    <p class="meta"><span class="n">#21</span><span class="v">alpha 0.21</span><time datetime="2026-11-23T23:07">23 nov. 2026 · 23 h 07</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/570a965">570a965</a><span>10 149 → 10 558 lignes</span></p>
     <h2 id="t21"><a href="#vlc">VLC, et la première musique faite par un humain</a></h2>
     <ul>
       <li>VLC, le lecteur multimédia : sudo apt install vlc, puis Applications › Multimédia, ou l’icône du bureau. Lecture, pause, avance, volume (retenu), boucle, et un spectre dessiné en caractères. En ligne, il écoute vraiment la musique ; en local, il fait semblant.</li>
@@ -687,7 +704,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="sauvegarde" aria-labelledby="t20">
-    <p class="meta"><span class="n">#20</span><time datetime="2026-11-23T20:54">23 nov. 2026 · 20 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/26f872a">26f872a</a><span>10 006 → 10 149 lignes</span></p>
+    <p class="meta"><span class="n">#20</span><span class="v">alpha 0.20</span><time datetime="2026-11-23T20:54">23 nov. 2026 · 20 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/26f872a">26f872a</a><span>10 006 → 10 149 lignes</span></p>
     <h2 id="t20"><a href="#sauvegarde">Exporter et importer la partie</a></h2>
     <ul>
       <li>Paramètres (M, ou depuis l’écran titre) › Exporter la partie : un fichier aidcs-sauvegarde-final-v2-OK-….vibe se télécharge, et le même code part dans le presse-papiers. Dedans : la partie, le disque (fichiers, paquets, dépendances npm), les succès et le temps de jeu.</li>
@@ -702,7 +719,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="succes" aria-labelledby="t19">
-    <p class="meta"><span class="n">#19</span><time datetime="2026-11-23T20:04">23 nov. 2026 · 20 h 04</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8618684">8618684</a><span>9 747 → 10 006 lignes</span></p>
+    <p class="meta"><span class="n">#19</span><span class="v">alpha 0.19</span><time datetime="2026-11-23T20:04">23 nov. 2026 · 20 h 04</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/8618684">8618684</a><span>9 747 → 10 006 lignes</span></p>
     <h2 id="t19"><a href="#succes">Les succès, dans Steam</a></h2>
     <ul>
       <li>39 succès, dont 9 cachés. Ships, trésorerie, matériel, BIOS, memtest86+, GRUB, facture d’électricité, et quelques bêtises (rm -rf /, désinstaller sudo, shipper un vendredi, ou à 3 h du matin).</li>
@@ -717,7 +734,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="electricite" aria-labelledby="t18">
-    <p class="meta"><span class="n">#18</span><time datetime="2026-11-23T14:47">23 nov. 2026 · 14 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6049cc4">6049cc4</a><span>9 696 → 9 747 lignes</span></p>
+    <p class="meta"><span class="n">#18</span><span class="v">alpha 0.18</span><time datetime="2026-11-23T14:47">23 nov. 2026 · 14 h 47</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6049cc4">6049cc4</a><span>9 696 → 9 747 lignes</span></p>
     <h2 id="t18"><a href="#electricite">La facture d’électricité</a></h2>
     <ul>
       <li>Le compteur tourne tant que les agents travaillent. Sans agents, ou en pause, le PC est en veille et ne coûte rien.</li>
@@ -733,7 +750,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="grub" aria-labelledby="t17">
-    <p class="meta"><span class="n">#17</span><time datetime="2026-11-23T12:02">23 nov. 2026 · 12 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/931ab15">931ab15</a><span>9 497 → 9 696 lignes</span></p>
+    <p class="meta"><span class="n">#17</span><span class="v">alpha 0.17</span><time datetime="2026-11-23T12:02">23 nov. 2026 · 12 h 02</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/931ab15">931ab15</a><span>9 497 → 9 696 lignes</span></p>
     <h2 id="t17"><a href="#grub">GRUB : memtest86+, le mode sans agents et Windows 11</a></h2>
     <ul>
       <li>GRUB a enfin un vrai menu : <code>↑</code> <code>↓</code> (ou un clic) choisit une entrée et arrête le compte à rebours, <code>Entrée</code> (ou un second clic) la démarre. Le compte à rebours dure maintenant 3 vraies secondes. Une touche avant de choisir passe toujours le démarrage.</li>
@@ -750,7 +767,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="post-ami" aria-labelledby="t16">
-    <p class="meta"><span class="n">#16</span><time datetime="2026-11-23T11:20">23 nov. 2026 · 11 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/968ba87">968ba87</a><span>9 485 → 9 497 lignes</span></p>
+    <p class="meta"><span class="n">#16</span><span class="v">alpha 0.16</span><time datetime="2026-11-23T11:20">23 nov. 2026 · 11 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/968ba87">968ba87</a><span>9 485 → 9 497 lignes</span></p>
     <h2 id="t16"><a href="#post-ami">Le POST passe en AMIBIOS</a></h2>
     <ul>
       <li>Le démarrage suit le setup : le BIOS VibeAward laisse la place à AMIVIBES, d’American Megavibes. Logo à gauche, Energy Star à droite, « Press DEL or F2 to run Setup » dès la première ligne, la mémoire comptée en Mo, la détection des disques, le code du BIOS en bas.</li>
@@ -764,7 +781,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="bios" aria-labelledby="t15">
-    <p class="meta"><span class="n">#15</span><time datetime="2026-11-23T11:08">23 nov. 2026 · 11 h 08</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f356250">f356250</a><span>9 073 → 9 485 lignes</span></p>
+    <p class="meta"><span class="n">#15</span><span class="v">alpha 0.15</span><time datetime="2026-11-23T11:08">23 nov. 2026 · 11 h 08</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f356250">f356250</a><span>9 073 → 9 485 lignes</span></p>
     <h2 id="t15"><a href="#bios">Le setup du BIOS : overclocker jusqu’au glitch</a></h2>
     <ul>
       <li>Pendant le POST, <code>Suppr</code> (ou <code>F2</code>, ou un doigt sur « DEL ») ouvre le setup du BIOS, façon AMIBIOS : gris, bleu, six onglets. Trop tard, c’est GRUB. Plus le disque est rapide, plus le POST est court : sur le RAID 0, il faut être vif.</li>
@@ -781,7 +798,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="disque-persistant" aria-labelledby="t14">
-    <p class="meta"><span class="n">#14</span><time datetime="2026-11-23T08:24">23 nov. 2026 · 08 h 24</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/224b185">224b185</a><span>9 034 → 9 073 lignes</span></p>
+    <p class="meta"><span class="n">#14</span><span class="v">alpha 0.14</span><time datetime="2026-11-23T08:24">23 nov. 2026 · 08 h 24</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/224b185">224b185</a><span>9 034 → 9 073 lignes</span></p>
     <h2 id="t14"><a href="#disque-persistant">Le disque persistant : vos fichiers restent</a></h2>
     <ul>
       <li>Le disque est sauvegardé avec la partie : ce que vous créez, copiez, renommez ou supprimez, dans le terminal ou le gestionnaire de fichiers, est toujours là au prochain lancement. Les paquets apt et les dépendances npm aussi.</li>
@@ -797,7 +814,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="fichiers" aria-labelledby="t13">
-    <p class="meta"><span class="n">#13</span><time datetime="2026-11-23T07:48">23 nov. 2026 · 07 h 48</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/afa4131">afa4131</a><span>8 741 → 9 034 lignes</span></p>
+    <p class="meta"><span class="n">#13</span><span class="v">alpha 0.13</span><time datetime="2026-11-23T07:48">23 nov. 2026 · 07 h 48</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/afa4131">afa4131</a><span>8 741 → 9 034 lignes</span></p>
     <h2 id="t13"><a href="#fichiers">Le gestionnaire de fichiers, et 120 Go de faux projets</a></h2>
     <ul>
       <li>Le gestionnaire de fichiers du bureau sait créer, couper, copier, coller, renommer et afficher les propriétés : une barre d’outils, le clic droit, et les raccourcis <code>Ctrl+C</code> <code>Ctrl+X</code> <code>Ctrl+V</code>, <code>F2</code>, <code>Ctrl+Maj+N</code>, <code>Alt+Entrée</code>.</li>
@@ -815,7 +832,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="wiki-illustre" aria-labelledby="t12">
-    <p class="meta"><span class="n">#12</span><time datetime="2026-11-23T02:05">23 nov. 2026 · 02 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/17fd236">17fd236</a><span>8 741 lignes (le jeu n’a pas bougé)</span></p>
+    <p class="meta"><span class="n">#12</span><span class="v">alpha 0.12</span><time datetime="2026-11-23T02:05">23 nov. 2026 · 02 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/17fd236">17fd236</a><span>8 741 lignes (le jeu n’a pas bougé)</span></p>
     <h2 id="t12"><a href="#wiki-illustre">Le wiki illustré, et les commandes à copier</a></h2>
     <ul>
       <li>Le <a href="wiki.html">wiki</a> s’ouvre sur la partie en accéléré, dans une fenêtre de terminal, puis sur un portail : une vignette et une phrase par section.</li>
@@ -832,7 +849,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="smart" aria-labelledby="t11">
-    <p class="meta"><span class="n">#11</span><time datetime="2026-11-23T01:52">23 nov. 2026 · 01 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d0bcf40">d0bcf40</a><span>8 541 → 8 741 lignes</span></p>
+    <p class="meta"><span class="n">#11</span><span class="v">alpha 0.11</span><time datetime="2026-11-23T01:52">23 nov. 2026 · 01 h 52</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d0bcf40">d0bcf40</a><span>8 541 → 8 741 lignes</span></p>
     <h2 id="t11"><a href="#smart">smartctl : la santé des disques</a></h2>
     <ul>
       <li><code>smartctl</code>, du paquet smartmontools (<code>sudo apt install smartmontools</code>). Il faut sudo, comme dans la vraie vie : sans, « Permission denied ».</li>
@@ -847,7 +864,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="bac-a-sable" aria-labelledby="t10">
-    <p class="meta"><span class="n">#10</span><time datetime="2026-11-23T01:19">23 nov. 2026 · 01 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/db416dc">db416dc</a><span>8 506 → 8 541 lignes</span></p>
+    <p class="meta"><span class="n">#10</span><span class="v">alpha 0.10</span><time datetime="2026-11-23T01:19">23 nov. 2026 · 01 h 19</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/db416dc">db416dc</a><span>8 506 → 8 541 lignes</span></p>
     <h2 id="t10"><a href="#bac-a-sable">Le bac à sable</a></h2>
     <ul>
       <li>Une entrée « Bac à sable » dans le menu titre. Dedans, elle devient « Partie normale ». Chaque mode a sa sauvegarde : aucune n’écrase l’autre. Adresse : <code>?sandbox=1</code>.</li>
@@ -865,7 +882,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="machine-neuve" aria-labelledby="t9">
-    <p class="meta"><span class="n">#9</span><time datetime="2026-11-23T00:36">23 nov. 2026 · 00 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/df8a941">df8a941</a><span>8 320 → 8 506 lignes</span></p>
+    <p class="meta"><span class="n">#9</span><span class="v">alpha 0.9</span><time datetime="2026-11-23T00:36">23 nov. 2026 · 00 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/df8a941">df8a941</a><span>8 320 → 8 506 lignes</span></p>
     <h2 id="t9"><a href="#machine-neuve">La machine neuve, et un wiki</a></h2>
     <ul>
       <li>Une nouvelle partie démarre sur une machine neuve : rien n’est installé, pas même votre agent. <code>mistral</code> répond « command not found », avec la commande qui l’installe.</li>
@@ -884,7 +901,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="ia-locale" aria-labelledby="t8">
-    <p class="meta"><span class="n">#8</span><time datetime="2026-11-23T00:00">23 nov. 2026 · 00 h 00</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/43a763b">43a763b</a><span>8 084 → 8 320 lignes</span></p>
+    <p class="meta"><span class="n">#8</span><span class="v">alpha 0.8</span><time datetime="2026-11-23T00:00">23 nov. 2026 · 00 h 00</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/43a763b">43a763b</a><span>8 084 → 8 320 lignes</span></p>
     <h2 id="t8"><a href="#ia-locale">L’IA locale : Lolama, StudioLM et la VRAM</a></h2>
     <ul>
       <li>GitHype (<code>githype.vibe</code>), le faux GitHub, arrive dans Firefaux : les tendances du jour, et StudioLM à installer depuis sa page. <code>github.com</code> y mène : un agent a racheté le nom de domaine pendant un ship.</li>
@@ -903,7 +920,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="boost" aria-labelledby="t7">
-    <p class="meta"><span class="n">#7</span><time datetime="2026-11-22T21:51">22 nov. 2026 · 21 h 51</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d69a16c">d69a16c</a><span>7 973 → 8 084 lignes</span></p>
+    <p class="meta"><span class="n">#7</span><span class="v">alpha 0.7</span><time datetime="2026-11-22T21:51">22 nov. 2026 · 21 h 51</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d69a16c">d69a16c</a><span>7 973 → 8 084 lignes</span></p>
     <h2 id="t7"><a href="#boost">Les modes boost : ultracode, xhigh et Flash Answers</a></h2>
     <ul>
       <li>Un mode boost par plateforme, acheté une fois au store (onglet Agents IA, section Modes boost) : Flash Answers pour Vibe CLI ($400), raisonnement xhigh pour Codex ($4 000), <code>ultracode</code> pour Claude Code ($30 000).</li>
@@ -920,7 +937,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="plein-ecran" aria-labelledby="t6">
-    <p class="meta"><span class="n">#6</span><time datetime="2026-11-22T20:05">22 nov. 2026 · 20 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a221e6f">a221e6f</a><span>7 951 → 7 973 lignes</span></p>
+    <p class="meta"><span class="n">#6</span><span class="v">alpha 0.6</span><time datetime="2026-11-22T20:05">22 nov. 2026 · 20 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/a221e6f">a221e6f</a><span>7 951 → 7 973 lignes</span></p>
     <h2 id="t6"><a href="#plein-ecran">Plein écran au bouton</a></h2>
     <ul>
       <li class="del">Le double-clic ne passe plus la page en plein écran. Avant, ouvrir une icône du bureau basculait aussi l’écran : deux actions pour le prix d’un geste.</li>
@@ -932,7 +949,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="icones" aria-labelledby="t5">
-    <p class="meta"><span class="n">#5</span><time datetime="2026-11-22T18:32">22 nov. 2026 · 18 h 32</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/759be45">759be45</a><span>7 836 → 7 951 lignes</span></p>
+    <p class="meta"><span class="n">#5</span><span class="v">alpha 0.5</span><time datetime="2026-11-22T18:32">22 nov. 2026 · 18 h 32</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/759be45">759be45</a><span>7 836 → 7 951 lignes</span></p>
     <h2 id="t5"><a href="#icones">Des icônes sur le bureau</a></h2>
     <ul>
       <li>Le bureau Xfce a ses icônes, en colonnes à gauche : dossier personnel, système de fichiers, corbeille, terminal, Firefaux, éditeur de texte, visionneuse PDF, moniteur système, Steam, les plateformes achetées et le store.</li>
@@ -948,7 +965,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="plateformes" aria-labelledby="t4">
-    <p class="meta"><span class="n">#4</span><time datetime="2026-11-22T17:59">22 nov. 2026 · 17 h 59</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b11581c">b11581c</a><span>7 548 → 7 836 lignes</span></p>
+    <p class="meta"><span class="n">#4</span><span class="v">alpha 0.4</span><time datetime="2026-11-22T17:59">22 nov. 2026 · 17 h 59</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b11581c">b11581c</a><span>7 548 → 7 836 lignes</span></p>
     <h2 id="t4"><a href="#plateformes">Plusieurs plateformes et le kernel panic</a></h2>
     <ul>
       <li class="fix">Fini le choix unique : Codex ($1 500) et Claude Code ($12 000, avec Opus 5.5 d’emblée) s’achètent tous les deux. Chaque plateforme garde son équipe, et une licence recrute la vôtre à l’identique.</li>
@@ -967,7 +984,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="panier" aria-labelledby="t3">
-    <p class="meta"><span class="n">#3</span><time datetime="2026-11-22T15:21">22 nov. 2026 · 15 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9972bcb">9972bcb</a><span>7 310 → 7 548 lignes</span></p>
+    <p class="meta"><span class="n">#3</span><span class="v">alpha 0.3</span><time datetime="2026-11-22T15:21">22 nov. 2026 · 15 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9972bcb">9972bcb</a><span>7 310 → 7 548 lignes</span></p>
     <h2 id="t3"><a href="#panier">Sockets, DDR et panier</a></h2>
     <ul>
       <li>Une nouvelle pièce, la carte mère. Elle impose le socket du processeur (LGA1155, RM4, RM5, LGA1851, sTF5), la puissance de ses VRM et la génération de RAM (DDR3, DDR4, DDR5).</li>
@@ -985,7 +1002,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="patate" aria-labelledby="t2">
-    <p class="meta"><span class="n">#2</span><time datetime="2026-11-22T12:16">22 nov. 2026 · 12 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b717053">b717053</a><span>6 492 → 7 310 lignes</span></p>
+    <p class="meta"><span class="n">#2</span><span class="v">alpha 0.2</span><time datetime="2026-11-22T12:16">22 nov. 2026 · 12 h 16</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/b717053">b717053</a><span>6 492 → 7 310 lignes</span></p>
     <h2 id="t2"><a href="#patate">Le PC patate</a></h2>
     <ul>
       <li>Le mode idle démarre sur un PC patate : Céléri G530, 4 Go de DDR3 dépareillés, disque dur à 5 400 tr/min qui gratte, alim no-name de 300 W (230 W réels, elle siffle).</li>
@@ -1003,7 +1020,7 @@ footer p + p { margin-top: .5em; }
   </article>
 
   <article class="maj" id="le-jeu" aria-labelledby="t1">
-    <p class="meta"><span class="n">#1</span><time datetime="2026-11-22T11:27">22 nov. 2026 · 11 h 27</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/0ff9a63">0ff9a63</a><span>6 492 lignes</span></p>
+    <p class="meta"><span class="n">#1</span><span class="v">alpha 0.1</span><time datetime="2026-11-22T11:27">22 nov. 2026 · 11 h 27</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/0ff9a63">0ff9a63</a><span>6 492 lignes</span></p>
     <h2 id="t1"><a href="#le-jeu">Le jeu entier, en un seul commit</a></h2>
     <ul>
       <li>Un idle game : vos agents IA codent, hallucinent, plantent et shippent en prod à votre place. La barre de ship se remplit, la facture des tokens aussi.</li>

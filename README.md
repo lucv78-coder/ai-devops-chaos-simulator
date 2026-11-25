@@ -13,6 +13,7 @@
 <p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
 
 <p align="center">
+  <img src="assets/badges/version.svg" alt="version : alpha 0.52">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
@@ -59,6 +60,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Progression à la sueur des tokens.** Le deuxième agent arrive en moins de 3 minutes, l'orchestrateur vers 30 minutes, Claude Code vers 1 h 35, la fin du store vers 5 h. Ce sont les chiffres d'un joueur parfait simulé, et vous n'êtes pas un joueur parfait.
 - **Mode hors ligne.** Vos agents continuent de shipper pendant votre absence, 4 h au maximum : le temps d'une réunion qui aurait pu être un mail.
 - **Bureau Linux complet.** `xfce` lance un vrai faux bureau avec fenêtres, icônes à double-cliquer, gestionnaire de fichiers, éditeur et lecteur PDF. Le gestionnaire de fichiers copie, coupe, colle, renomme et affiche les propriétés, à la vitesse du disque : 41,3 Go à 90 Mo/s, le disque dur gratte. `~/code` contient sept projets abandonnés, dont une IA de 68 Go et la todo app n° 14. Le disque est sauvegardé avec la partie : ce que vous créez ou supprimez est toujours là au prochain lancement, jusqu'au prochain crash système (retour à la sauvegarde de jeudi). La corbeille est toujours vide : ici, on supprime avec `rm -rf`. Vous pouvez supprimer `/bin`, ou le renommer. Vous ne devriez pas.
+- **Un numéro de version.** Le jeu en est à l'alpha 0.N, N étant le numéro de la dernière mise à jour des nouveautés : sur l'écran titre, dans le terminal, dans « À propos », et sur chaque entrée des nouveautés.
 - **Le glisser-déposer.** Une ligne de Thunar sur un dossier, un raccourci de la colonne ou le chemin ; une icône du bureau dans Thunar, et l'inverse ; sur un dossier du bureau, sur le Dossier personnel, ou dans la Corbeille (qui supprime pour de bon). `Ctrl` en lâchant pour copier. Les mêmes règles que couper-coller : déplacer `/bin` fait toujours tomber le système.
 - **Plusieurs icônes à la fois.** `Ctrl+clic`, un rectangle à la souris ou `Ctrl+A` : le groupe se glisse d'un bloc sur la grille, se supprime ou s'ouvre d'un coup.
 - **Des raccourcis.** Les icônes des applis sont de vrais lanceurs `.desktop` dans `~/Bureau` (`cat` les montre) : supprimés, ils ne reviennent pas. Clic droit sur le bureau, Créer un raccourci : un programme, ou une commande du terminal (`incident`, `mail`…), avec le nom de votre choix.
