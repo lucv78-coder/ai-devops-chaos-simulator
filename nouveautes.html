@@ -136,9 +136,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>50</b><span>mises à jour</span></div>
-    <div role="listitem"><b>62 h 53</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 14 369</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>51</b><span>mises à jour</span></div>
+    <div role="listitem"><b>63 h 36</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 14 545</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -146,6 +146,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#51</span><time datetime="2026-11-25T03:03">03 h 03</time><a href="#glisser-deposer">Le glisser-déposer des fichiers</a></li>
       <li><span class="n">#50</span><time datetime="2026-11-25T02:20">02 h 20</time><a href="#multiselection">Plusieurs icônes à la fois</a></li>
       <li><span class="n">#49</span><time datetime="2026-11-25T01:37">01 h 37</time><a href="#raccourcis">Des raccourcis : les icônes des applis sont des lanceurs</a></li>
       <li><span class="n">#48</span><time datetime="2026-11-25T00:55">00 h 55</time><a href="#fichiers-bureau">Des fichiers sur le bureau</a></li>
@@ -199,8 +200,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="multiselection" aria-labelledby="t50">
-    <p class="meta"><span class="n">#50</span><span class="new">dernière</span><time datetime="2026-11-25T02:20">25 nov. 2026 · 02 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6225079">6225079</a><span>14 297 → 14 369 lignes</span></p>
+  <article class="maj latest" id="glisser-deposer" aria-labelledby="t51">
+    <p class="meta"><span class="n">#51</span><span class="new">dernière</span><time datetime="2026-11-25T03:03">25 nov. 2026 · 03 h 03</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/3ca8dd3">3ca8dd3</a><span>14 369 → 14 545 lignes</span></p>
+    <h2 id="t51"><a href="#glisser-deposer">Le glisser-déposer des fichiers</a></h2>
+    <ul>
+      <li>Dans Thunar, une ligne se glisse sur un dossier, sur un raccourci de la colonne ou sur le chemin : l’étiquette suit le pointeur, la cible est soulignée.</li>
+      <li>Entre Thunar et le bureau, dans les deux sens : une icône du bureau dans le dossier affiché par Thunar, une ligne de Thunar sur le bureau (dans ~/Bureau, sur la case visée). Un groupe d’icônes se glisse aussi.</li>
+      <li>Sur le bureau : une icône sur un dossier, sur le Dossier personnel, ou sur la Corbeille, qui supprime pour de bon (après confirmation). Ctrl en lâchant : copier au lieu de déplacer.</li>
+      <li>Les mêmes règles que couper-coller : pas un dossier dans lui-même, l’espace disque pour une copie, node_modules qui revient, et /bin qu’on ne déplace pas impunément.</li>
+      <li>Un succès Steam : glisser, déposer.</li>
+    </ul>
+    <blockquote>« Le glisser-déposer, c’est déplacer un fichier sans savoir où il va. Les agents font pareil, en plus rapide. »<cite>l’agent, 03 h 03</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-glisser-deposer.png" title="Voir en grand"><img src="assets/screen-glisser-deposer.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce et Thunar ouvert sur ~/Documents : un fichier en train d’être glissé, son étiquette sous le pointeur, et le dossier Archive souligné en pointillés orange."></a><figcaption>Un fichier glissé sur un dossier.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="multiselection" aria-labelledby="t50">
+    <p class="meta"><span class="n">#50</span><time datetime="2026-11-25T02:20">25 nov. 2026 · 02 h 20</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/6225079">6225079</a><span>14 297 → 14 369 lignes</span></p>
     <h2 id="t50"><a href="#multiselection">Plusieurs icônes à la fois</a></h2>
     <ul>
       <li>Ctrl+clic ajoute ou retire une icône de la sélection ; glisser sur le fond du bureau dessine un rectangle de sélection (avec Ctrl : en plus) ; Ctrl+A sélectionne tout, Échap rien.</li>
@@ -210,7 +227,7 @@ footer p + p { margin-top: .5em; }
     </ul>
     <blockquote>« Sélectionner tout le bureau, c’est le premier pas vers le ranger. Il n’y a jamais de deuxième pas. »<cite>l’agent, 02 h 20</cite></blockquote>
     <div class="shots">
-      <figure><a href="assets/screen-multiselection.png" title="Voir en grand"><img src="assets/screen-multiselection.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce : un rectangle de sélection orange en train d’englober les trois premières icônes (Dossier personnel, Système de fichiers, Corbeille), surlignées."></a><figcaption>Le rectangle de sélection.</figcaption></figure>
+      <figure><a href="assets/screen-multiselection.png" title="Voir en grand"><img src="assets/screen-multiselection.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce : un rectangle de sélection orange en train d’englober cinq icônes (le Dossier personnel, le Système de fichiers, la Corbeille, le Store et Bienvenue.txt), surlignées."></a><figcaption>Le rectangle de sélection.</figcaption></figure>
     </div>
   </article>
 
