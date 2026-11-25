@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>57</b><span>mises à jour</span></div>
-    <div role="listitem"><b>75 h 14</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 308</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>58</b><span>mises à jour</span></div>
+    <div role="listitem"><b>75 h 19</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 519</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#58</span><time datetime="2026-11-25T14:46">14 h 46</time><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></li>
       <li><span class="n">#57</span><time datetime="2026-11-25T14:41">14 h 41</time><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></li>
       <li><span class="n">#56</span><time datetime="2026-11-25T14:36">14 h 36</time><a href="#historique">L’historique, le vrai : !!, sudo !!, Ctrl+R ; cp et mv</a></li>
       <li><span class="n">#55</span><time datetime="2026-11-25T13:42">13 h 42</time><a href="#tubes">Le shell, le vrai : tubes, redirections, grep</a></li>
@@ -207,8 +208,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="manuel" aria-labelledby="t57">
-    <p class="meta"><span class="n">#57</span><span class="new">dernière</span><span class="v">alpha 0.57</span><time datetime="2026-11-25T14:41">25 nov. 2026 · 14 h 41</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/92a6028">92a6028</a><span>15 135 → 15 308 lignes</span></p>
+  <article class="maj latest" id="cron" aria-labelledby="t58">
+    <p class="meta"><span class="n">#58</span><span class="new">dernière</span><span class="v">alpha 0.58</span><time datetime="2026-11-25T14:46">25 nov. 2026 · 14 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9f75f1a">9f75f1a</a><span>15 308 → 15 519 lignes</span></p>
+    <h2 id="t58"><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></h2>
+    <ul>
+      <li>Les scripts : une commande par ligne (tubes compris), # pour commenter, set -e pour s’arrêter à la première erreur, exit pour finir, sleep pour attendre. ./script.sh demande chmod +x ; bash script.sh, non.</li>
+      <li>cron : crontab -e (dans nano, avec un modèle commenté), crontab -l, crontab -r, crontab fichier, … | crontab -. Les champs classiques (*/10, 1-4, mon-fri) et @hourly, @daily, @reboot. La sortie des tâches arrive par courrier, regroupée si on ne lit pas ; MAILTO="" pour s’en passer.</li>
+      <li>Les ships partent déjà tout seuls : cron fait la maintenance. Une tâche qui lance la bonne commande (certbot renew, journalctl --vacuum-size=1G, systemctl restart pgbouncer…) évite l’incident qui va avec pendant deux heures, et répare celui qui est en cours.</li>
+      <li>Les commandes de root vont dans sudo crontab -e : dans la crontab de dev, sudo n’a pas de terminal pour demander le mot de passe (le courrier du cron le dit). Planifier git revert HEAD protège le DNS, mais défait le travail des agents à chaque passage.</li>
+      <li>Les tâches ne tournent que machine allumée : une tâche à 3 h du matin ne tourne que si le jeu est ouvert à 3 h. Un succès Steam : Maintenance préventive.</li>
+    </ul>
+    <blockquote>« Avant, la maintenance tombait le vendredi à 17 h. Maintenant, elle tombe toutes les heures. Personne ne l’a vu venir : c’est le principe. »<cite>l’agent, 14 h 46</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-cron.png" title="Voir en grand"><img src="assets/screen-cron.png" width="900" height="540" loading="lazy" alt="Le terminal : un script de maintenance (journalctl --vacuum-size, certbot renew), refusé tant qu’il n’est pas exécutable ; chmod +x ; installé dans la crontab de root ; sudo crontab -l ; puis, à l’heure pile, le courrier du cron avec la sortie du script."></a><figcaption>Un script de maintenance, la crontab de root, et le courrier du cron.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="manuel" aria-labelledby="t57">
+    <p class="meta"><span class="n">#57</span><span class="v">alpha 0.57</span><time datetime="2026-11-25T14:41">25 nov. 2026 · 14 h 41</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/92a6028">92a6028</a><span>15 135 → 15 308 lignes</span></p>
     <h2 id="t57"><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></h2>
     <ul>
       <li>man <commande> : la page de manuel, avec NOM, SYNOPSIS, OPTIONS, BOGUES (connus, assumés) et VOIR AUSSI. Pour les commandes sans page écrite, la description vient de l’aide du jeu : man et help ne peuvent pas se contredire.</li>
