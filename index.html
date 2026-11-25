@@ -1648,7 +1648,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.57', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.58', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2357,7 +2357,7 @@ const G_DEF = () => ({ v: 1, money: 0, shipped: 0, ai: 'mistral', own: { mistral
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2476,6 +2476,7 @@ const ACH = [
   { id: 'pipes', g: '|', n: 'Plombier', d: 'Enchaîner trois tubes dans une seule commande.', p: 9.7 },
   { id: 'sudobang', g: '#', n: 'Le mot magique', d: 'Relancer la dernière commande avec sudo !!.', p: 22.4 },
   { id: 'rtfm', g: '?', n: 'RTFM', d: 'Lire une page de manuel. Volontairement.', p: 6.1 },
+  { id: 'cronsave', g: '⏲', n: 'Maintenance préventive', d: 'Éviter un incident grâce à une tâche cron.', p: 4.3 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -2491,7 +2492,8 @@ function txAdd(cat, label, amt, bal = G.money) {  // une opération sur le compt
 }
 G.urssaf = { paid: 0, n: 0, ...(G.urssaf || {}) };   // l'URSSAF : le total des cotisations payées, sur combien de ships
 G.incS = { n: 0, fix: 0, best: 0, lost: 0, log: [], ...(G.incS || {}) };
-G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
+G.zrc = { next: 0, n: 0, ...(G.zrc || {}) };
+G.cron = { u: '', root: '', ok: {}, saved: 0, ...(G.cron || {}) };   // les crontabs de dev et de root ; la dernière maintenance réussie, par incident   // ~/.zshrc : la prochaine « optimisation » d'un agent, combien déjà   // les incidents de prod : combien, résolus, le meilleur temps, les remboursements, les 12 derniers
 if (G.inc) G.inc.ag = 0;
 G.mail = { box: [], seq: 0, next: 0, ...(G.mail || {}) };
 G.pr = { ...G_DEF().pr, ...(G.pr || {}) };
@@ -3315,13 +3317,14 @@ function shPlan(cmd) {                              // null : la ligne part tell
   return { list };
 }
 async function shRun(P) {
-  if (P.err) return shellPrint(H(['zsh: ', 'errc'], P.err));
+  if (P.err) { shellPrint(H(['zsh: ', 'errc'], P.err)); return false; }
   let ok = true;
   for (const { sep, pipe } of P.list) {
     if ((sep === '&&' && !ok) || (sep === '||' && ok)) continue;
     if (mode !== 'idle') break;                     // un ship, un reboot : la suite attendra
     ok = await shPipe(pipe);
   }
+  return ok;
 }
 async function shPipe(pipe) {
   let input = null, ok = true;
@@ -3581,6 +3584,212 @@ const TEXT_CMDS = {
   head: (a, i) => shHead(a, i, false), tail: (a, i) => shHead(a, i, true), wc: (a, i) => shWc(a, i), sort: (a, i) => shSort(a, i), uniq: (a, i) => shUniq(a, i),
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
+
+/* les scripts : une ligne après l'autre, comme tapées (tubes compris) ; # et le shebang ignorés ; set -e, exit, sleep */
+let shDepth = 0;
+async function shExecLine(line) {                   // une ligne, sans écho ni historique : vrai si elle a réussi
+  const e0 = shErrs, P = shPlan(line), r = P ? await shRun(P) : await runCommand(line, true);
+  return r !== false && shErrs === e0;
+}
+function shScriptOf(cmd) {                          // ./x.sh, ~/x.sh, /chemin/x.sh, bash x.sh… → { segs, label } ; { err, hint } ; { cmd } (un binaire) ; null
+  if (/^sudo\s/.test(cmd)) return shScriptOf(cmd.replace(/^sudo\s+/, ''));   // sudo ./x.sh : le même script (root ou pas, il fait pareil ici)
+  const w = argv(cmd), w0 = w[0] || '', via = ['bash', 'sh', 'zsh', 'dash'].includes(w0.toLowerCase());
+  const path = via ? w[1] : w0;
+  if (via && (!path || path.startsWith('-'))) return null;
+  if (!via && !/^(\.{1,2}\/|~\/|\/)/.test(path)) return null;
+  const segs = resolvePath(path), n = nodeAt(segs), who = via ? w0.toLowerCase() : 'zsh';
+  if (!n) return { err: who === 'zsh' ? `aucun fichier ou dossier de ce type : ${path}` : `${path}: Aucun fichier ou dossier de ce type`, who };
+  if (n.d) return { err: `${who === 'zsh' ? 'permission non accordée' : 'est un dossier'} : ${path}`, who };
+  if (n.b && n.x && !via) return { cmd: [segs.at(-1), ...w.slice(1)].join(' ') };   // /usr/bin/htop : le programme
+  if (!via && !n.x) return { err: `permission non accordée : ${path}`, who, hint: H(['  Un script se rend exécutable : ', 'dim'], [`chmod +x ${path}`, 'org'], [' (ou : ', 'dim'], [`bash ${path}`, 'org'], [')', 'dim']) };
+  return { segs, label: path };
+}
+async function shScript(segs, label) {
+  if (shDepth >= 4) { fsErr('zsh', `${label} : trop de scripts imbriqués (un script qui se lance lui-même ?)`); return false; }
+  const J = { abort: false };
+  let ok = true, stop = false;
+  shDepth++;
+  try {
+    for (const raw of (nodeAt(segs)?.t || '').split('\n')) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      if (/^set\s+-e\b/.test(line)) { stop = true; continue; }
+      if (/^set\s+\+e\b/.test(line)) { stop = false; continue; }
+      const ex = line.match(/^exit(?:\s+(\d+))?$/);
+      if (ex) { ok = !+(ex[1] || 0); break; }
+      if (!dumping) dumping = J;
+      if (J.abort) { shellPrint('^C', 'wrn'); ok = false; break; }
+      if (mode !== 'idle') break;
+      ok = await shExecLine(line);
+      if (!ok && stop) break;
+    }
+  } finally { shDepth--; if (dumping === J) dumping = null; }
+  return ok ? undefined : false;
+}
+async function sleepCmd(a) {                        // sleep N (30 s au plus ; Ctrl+C l'interrompt)
+  const n = parseFloat(a[0]);
+  if (!(n >= 0)) return fsErr('sleep', 'opérande manquant');
+  const J = startJob(), end = Date.now() + Math.min(n, 30) * 1000;
+  try { while (Date.now() < end && !J.abort) await sleep(Math.min(100, end - Date.now())); } finally { endJob(J); }
+  return J.abort ? false : undefined;
+}
+function cmdChmod(a, sudo) {                        // chmod +x, -x, u+x, a+x, 755, 644…
+  const [m, ...files] = a.filter(x => !['-R', '-v', '--recursive'].includes(x));
+  if (!m || !files.length) return fsErr('chmod', m ? `opérande manquant après « ${m} »` : 'opérande manquant');
+  let x;
+  if (/^[0-7]{3,4}$/.test(m)) x = (parseInt(m.at(-3), 8) & 1) === 1;
+  else { const k = m.match(/^[ugoa]*([+=-])([rwxX]+)$/); if (!k) return fsErr('chmod', `mode incorrect : « ${m} »`); x = /[xX]/.test(k[2]) ? k[1] !== '-' : null; }
+  const ex = expand(files);
+  if (ex.err) return fsErr('zsh', `aucune correspondance trouvée : ${ex.err}`);
+  let ok = true;
+  for (const f of ex.list) {
+    const segs = resolvePath(f), n = nodeAt(segs);
+    if (!n) { fsErr('chmod', `impossible d’accéder à '${f}': Aucun fichier ou dossier de ce type`); ok = false; continue; }
+    if (!sudo && owner(segs) === 'root') { fsErr('chmod', `modification des droits de '${f}': Opération non permise`); ok = false; continue; }
+    if (x === true) n.x = 1; else if (x === false) delete n.x;
+  }
+  return ok ? undefined : false;
+}
+
+/* cron : la crontab de dev et celle de root (G.cron.u, G.cron.root). Chaque minute, les tâches dues partent, à la suite des commandes
+   tapées ; leur sortie (et leurs erreurs) arrivent par courrier. Pas de rattrapage : machine éteinte, rien ne tourne. */
+const CRON_TPL = who => `# La crontab de ${who} : une tâche par ligne.\n# m    h  jdm mois jds  commande\n# */10 *  *   *    *    toutes les 10 minutes\n`
+  + '# 0    3  *   *    1-4  du lundi au jeudi à 3 h (cron ne connaît pas le vendredi : à vous de le lui dire)\n'
+  + '# Les tâches tournent tant que la machine est allumée (le jeu ouvert) ; leur sortie arrive par courrier (MAILTO="" pour s’en passer).\n'
+  + (who === 'root' ? '# Ici, tout tourne en root : pas besoin de sudo.\n' : '# Les commandes de root vont dans sudo crontab -e : ici, sudo n’a pas de terminal pour demander le mot de passe.\n');
+const CRON_AT = { '@hourly': '0 * * * *', '@daily': '0 0 * * *', '@midnight': '0 0 * * *', '@weekly': '0 0 * * 0', '@monthly': '0 0 1 * *', '@yearly': '0 0 1 1 *', '@annually': '0 0 1 1 *' };
+const CRON_F = [['minute', 0, 59], ['heure', 0, 23], ['jour du mois', 1, 31], ['mois', 1, 12, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']],
+  ['jour de la semaine', 0, 7, ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']]];
+function cronField(t, [, lo, hi, names]) {          // → l'ensemble des valeurs, ou null
+  const v = new Set(), num = x => { const i = names ? names.indexOf(x.toLowerCase()) : -1; return i >= 0 ? i + (lo === 1 ? 1 : 0) : /^\d+$/.test(x) ? +x : NaN; };
+  for (const part of t.split(',')) {
+    const m = part.match(/^(\*|[\w]+(?:-[\w]+)?)(?:\/(\d+))?$/);
+    if (!m) return null;
+    const st = m[2] ? +m[2] : 1;
+    let a = lo, b = hi;
+    if (m[1] !== '*') { const [x, y] = m[1].split('-'); a = num(x); b = y === undefined ? (m[2] ? hi : a) : num(y); }
+    if (!(st >= 1) || !(a >= lo) || !(b <= hi) || !(a <= b)) return null;
+    for (let i = a; i <= b; i += st) v.add(hi === 7 && i === 7 ? 0 : i);
+  }
+  return v;
+}
+function cronParse(text) {                          // → { jobs, vars, err }
+  const jobs = [], vars = {};
+  const L = (text || '').split('\n');
+  for (let i = 0; i < L.length; i++) {
+    const line = L[i].trim();
+    if (!line || line.startsWith('#')) continue;
+    const va = line.match(/^([A-Z_]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|(.*))$/);
+    if (va) { vars[va[1]] = va[2] ?? va[3] ?? va[4].trim(); continue; }
+    if (line.startsWith('@reboot')) { const cmd = line.slice(7).trim(); if (!cmd) return { err: `ligne ${i + 1} : commande manquante` }; jobs.push({ reboot: true, cmd, line }); continue; }
+    const at = line.match(/^(@\w+)\s+(.*)$/), w = (at ? (CRON_AT[at[1]] || '?') + ' ' + at[2] : line).split(/\s+/);
+    if (at && !CRON_AT[at[1]]) return { err: `ligne ${i + 1} : ${at[1]} inconnu` };
+    if (w.length < 6) return { err: `ligne ${i + 1} : il faut cinq champs de temps et une commande` };
+    const F = CRON_F.map((f, k) => cronField(w[k], f)), bad = F.findIndex(x => !x);
+    if (bad >= 0) return { err: `ligne ${i + 1} : mauvais champ « ${CRON_F[bad][0]} » (${w[bad]})` };
+    jobs.push({ F, star: [w[2] === '*', w[4] === '*'], cmd: w.slice(5).join(' '), line });
+  }
+  return { jobs, vars };
+}
+function cronMatch(j, d) {                          // jour du mois ET jour de la semaine restreints : l'un OU l'autre, comme cron
+  const [m, h, dom, mon, dow] = j.F, D = dom.has(d.getDate()), W = dow.has(d.getDay());
+  return m.has(d.getMinutes()) && h.has(d.getHours()) && mon.has(d.getMonth() + 1) && (j.star[0] || j.star[1] ? D && W : D || W);
+}
+let cronEdit = null, cronMin = 0, cronBoot = false, cronCtx = false;
+function cronFire(d = new Date(), reboot = false) {  // les tâches dues à cette minute (ou celles de @reboot), à la suite des commandes en cours
+  for (const [key, who] of [['root', 'root'], ['u', USER]]) {
+    const P = cronParse(G.cron[key]);
+    if (P.err) continue;
+    for (const j of P.jobs) if (reboot ? j.reboot : !j.reboot && cronMatch(j, d)) chain = chain.then(() => cronExec(j, who, P.vars)).catch(() => {});
+  }
+  return chain;
+}
+async function cronExec(j, who, vars) {
+  if (mode !== 'idle' || !IDLE) return;             // un ship, un crash : la tâche saute son tour
+  const root = who === 'root', raw = j.cmd, viaSudo = /^sudo\s/.test(raw), had = G.inc?.k, e0 = shErrs, C = { keep: [], quiet: false, both: true, errs: null };
+  let ok;
+  capt = C; cronCtx = true;
+  try {
+    if (!root && viaSudo) { shellPrint('sudo: un terminal est requis pour lire le mot de passe ; utilisez l’option -S pour le lire depuis l’entrée standard', 'errc'); ok = false; }
+    else ok = await shExecLine(root && !viaSudo ? 'sudo ' + raw : raw);
+  } catch { ok = false; } finally { capt = null; cronCtx = false; }
+  ok = ok && shErrs === e0;
+  const bare = raw.replace(/^sudo\s+/, '').toLowerCase(), fk = Object.keys(INC_KINDS).find(x => INC_KINDS[x].fix.test(bare));
+  if (fk && ok && (root || !INC_KINDS[fk].sudo)) {
+    G.cron.ok[fk] = Date.now();
+    if ((fk === 'dns' || fk === 'deploy') && had !== fk && G.prog > 0) {   // annuler le dernier commit, le dernier déploiement : le travail des agents part avec
+      G.prog = Math.max(0, G.prog - .2);
+      hudNote(`⏲ cron : ${raw} a défait le travail des agents (−20 % de progression)`, 'bug');
+    }
+  }
+  const out = shLines(C.keep).filter(o => !/^\[sudo\] mot de passe/.test(o.t)).map(o => o.t);
+  if (!out.length || vars.MAILTO === '') return;
+  const subj = `Cron <${who}@prod-01> ${raw}`, body = out.join('\n'), old = G.mail.box.find(m => m.k === 'cron' && !m.read && m.subj === subj);
+  if (old) { old.n = (old.n || 1) + 1; old.t = Date.now(); old.body = `${body}\n\n(${old.n} fois depuis le dernier courrier lu. La même chose, à chaque fois.)`; mailRedraw(); return; }
+  mailAdd({ k: 'cron', from: 'Cron Daemon', addr: 'root@prod-01', subj, body: `${body}\n\n-- \ncron (${new Date().getDay() === 5 ? 'un vendredi, comme les autres jours' : 'il ne sait pas quel jour on est'})` });
+}
+function cronTick() {                               // chaque seconde : crontab -e refermé ? une nouvelle minute ?
+  if (!IDLE || !G.cron) return;
+  if (cronEdit && !tabs.includes('nano')) cronEditDone();
+  if (!cronBoot) { cronBoot = true; cronFire(new Date(), true); }
+  const k = Math.floor(Date.now() / 60000);
+  if (k === cronMin || paused) return;
+  cronMin = k;
+  cronFire(new Date());
+}
+function cronInstall(text, key, who) {
+  const P = cronParse(text);
+  if (P.err) {
+    fsErr('crontab', `erreur dans la nouvelle crontab : ${P.err}`);
+    shellPrint(H(['  Rien n’est installé. Le format : ', 'dim'], ['m h jdm mois jds commande', 'org'], [' (par exemple : ', 'dim'], ['0 * * * * certbot renew', 'org'], [').', 'dim']));
+    return false;
+  }
+  G.cron[key] = String(text).replace(/\s+$/, '');
+  saveGame();
+  return shellPrint(H(['crontab : ', 'okc'], `installation de la nouvelle crontab de ${who} (${plural(P.jobs.length, 'tâche')})`));
+}
+function cronEditDone() {                           // nano refermé : la crontab éditée est installée (ou pas)
+  const E = cronEdit, n = nodeAt(E.segs);
+  cronEdit = null;
+  removeAt(E.segs.slice(0, -1));
+  if (!n || n.d) return fsErr('crontab', 'le fichier temporaire a disparu : rien n’est installé');
+  if ((n.t || '').replace(/\s+$/, '') === E.was.replace(/\s+$/, '')) return shellPrint(`crontab : aucune modification de la crontab de ${E.who}`);
+  cronInstall(n.t || '', E.key, E.who);
+}
+function crontabCmd(a, sudo) {
+  const f = a.find(x => /^-[lre]$/.test(x)) || '', file = a.find(x => !x.startsWith('-')), key = sudo ? 'root' : 'u', who = sudo ? 'root' : USER, mal = !sudo && G.mal.cron;
+  if (sudo) shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
+  if (f === '-l') {
+    const t = G.cron[key] || '';
+    if (!t.trim() && !mal) { shellPrint(`pas de crontab pour ${who}`); return false; }
+    return printLines([...(t.trim() ? t.split('\n') : []).map(l => [l, /^\s*#/.test(l) ? 'dim' : '', 5]), ...(mal ? MAL_CRON.map(l => [l, '', 5]) : [])]);
+  }
+  if (f === '-r') {
+    if (!(G.cron[key] || '').trim() && !mal) { shellPrint(`pas de crontab pour ${who}`); return false; }
+    G.cron[key] = '';
+    if (mal) G.mal.cron = 0;
+    saveGame();
+    return shellPrint(H(['✓ ', 'okc'], `Crontab supprimée (celle de ${who}).`, mal && G.mal.miner ? [' Le mineur tourne encore, mais plus rien ne le relancera : kill kworker-update.', 'dim'] : ''));
+  }
+  if (f === '-e') {
+    if (!installed.has('nano')) return notInstalled('nano', 'nano');
+    const T = nodeAt(['tmp']) || (vfs.k.tmp = mkD({})), dir = `crontab.${rs(6)}`, was = G.cron[key] || '';
+    T.k[dir] = mkD({ crontab: mkF(was.trim() ? was : CRON_TPL(who), { mt: Date.now() }) });
+    cronEdit = { segs: ['tmp', dir, 'crontab'], key, who, was: nodeAt(['tmp', dir, 'crontab']).t };
+    shellPrint(H([`crontab : la crontab de ${who} s’ouvre dans nano ; à la sortie (^X), elle est installée.`, 'dim']));
+    return nanoCmd([absPath(cronEdit.segs)], false);
+  }
+  if (a.includes('-')) {
+    if (!shIn) return fsErr('crontab', 'l’entrée standard est vide : un tube, par exemple echo "0 * * * * certbot renew" | sudo crontab -');
+    return cronInstall(shIn.map(o => o.t).join('\n'), key, who);
+  }
+  if (file) {
+    const n = nodeAt(resolvePath(file));
+    if (!n || n.d) return fsErr('crontab', `${file} : Aucun fichier ou dossier de ce type`);
+    return cronInstall(n.t || '', key, who);
+  }
+  return printLines([[H('Usage : ', ['crontab -l', 'org'], ' (lister) · ', ['crontab -e', 'org'], ' (modifier) · ', ['crontab -r', 'org'], ' (supprimer) · ', ['crontab fichier', 'org'], ' · ', ['… | crontab -', 'org'], ' · ', ['sudo crontab …', 'org'], ' : celle de root'), '', 20]]);
+}
 
 /* man : la page d'une commande. NOM et DESCRIPTION viennent de l'aide du jeu (help) ; les commandes du shell ont en plus leur synopsis,
    leurs options, leurs bogues (connus, assumés). man -k (apropos) cherche dans les descriptions. */
@@ -3881,6 +4090,7 @@ const FILE_HELP = () => [
   [H(['  cmd | grep motif  ', 'org'], 'les tubes : grep, head, tail, wc, sort, uniq, less, tee · find . -name "*.md"'), '', 20],
   [H(['  > f · >> f · &&   ', 'org'], 'écrire dans un fichier, ajouter à la fin · enchaîner (;, &&, ||) · 2>/dev/null fait taire les erreurs'), '', 20],
   [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
+  [H(['  chmod · crontab   ', 'org'], 'chmod +x puis ./script.sh : un script · crontab -e : des tâches planifiées (la maintenance ; sudo crontab -e pour root)'), '', 20],
   [H(['  man · alias       ', 'org'], 'le manuel d’une commande (man -k pour chercher) · alias, unalias, source ~/.zshrc, type'), '', 20],
 ];
 const SETUP_HELP = () => [
@@ -4623,6 +4833,7 @@ async function cmdRm(args, win = false) {
   fixCwd();
 }
 const FS_CMDS = {
+  chmod: (a, s2) => cmdChmod(a, s2), sleep: a => sleepCmd(a),
   cp: (a, s2) => cmdCpMv(a, s2, false), copy: (a, s2) => cmdCpMv(a, s2, false), mv: (a, s2) => cmdCpMv(a, s2, true), move: (a, s2) => cmdCpMv(a, s2, true), history: a => cmdHistory(a),
   ls: a => cmdLs(a), dir: a => cmdLs(a.filter(x => !/^\/[a-z]$/i.test(x))), ll: a => cmdLs(['-la', ...a]), la: a => cmdLs(['-a', ...a]),
   cd: a => cmdCd(a), chdir: a => cmdCd(a), 'cd..': () => cmdCd(['..']), pwd: () => shellPrint(absPath(cwd)),
@@ -4631,7 +4842,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'cat', 'cd', 'cp', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'sleep', 'find', 'history', 'man', 'mv', 'source', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5506,7 +5717,13 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (mode === 'launching') return shellPrint(H(['busy ', 'wrn'], 'claude démarre. Patientez.'));
   if (mode !== 'idle') return shellPrint(H(['busy ', 'wrn'], `${crashKind === 'sys' ? 'rm' : 'npm'} est occupé à tout casser. Patientez.`));
   if (hackGame) return hackInput(cmd);
-  if (!inner || aliased) { const P = shPlan(cmd); if (P) return shRun(P); }   // (un alias peut en contenir : yolo='rm -rf node_modules && npm i')   // des tubes, des redirections, des enchaînements           // partie de hack en cours : tout ce qu'on tape est une tentative
+  if (!inner || aliased) { const P = shPlan(cmd); if (P) return shRun(P); }
+  if (mode === 'idle' && !hackGame) {               // un script : ./ship.sh, ~/x.sh, bash x.sh (un binaire par son chemin : le programme)
+    const X = shScriptOf(cmd);
+    if (X?.cmd) return runCommand(X.cmd, true);
+    if (X?.err) { fsErr(X.who, X.err); if (X.hint) shellPrint(X.hint); return false; }
+    if (X) return shScript(X.segs, X.label);
+  }   // (un alias peut en contenir : yolo='rm -rf node_modules && npm i')   // des tubes, des redirections, des enchaînements           // partie de hack en cours : tout ce qu'on tape est une tentative
   if (/^(sudo )?(reboot|systemctl reboot|shutdown -r( now)?|init 6)$/.test(low) && (head !== 'sudo' || installed.has('sudo'))) {   // BIOS compris (DEL : le setup)
     if (head === 'sudo') shellPrint(H([`[sudo] mot de passe pour ${USER} : ********`, 'dim'], ['   (deviné par un agent : « vendredi »)', 'dim']));
     return pcReboot();
@@ -5600,7 +5817,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   }
   if (cliWord === 'freshclam') return freshclamCmd(head === 'sudo');                   // ClamAV : la base de signatures
   if (cliWord === 'clamscan' || cliWord === 'clamdscan') return clamscanCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1));   // ClamAV : l'analyse
-  if (cliWord === 'crontab') return crontabCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1));
+  if (cliWord === 'crontab') return crontabCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1), head === 'sudo');
   if (head === 'sensors') return installed.has('lm-sensors') ? printLines(sensorsLines()) : notInstalled('sensors', 'lm-sensors');   // l'état du PC : température, alimentation
   if (head === 'free') return printLines(freeLines());                       // la mémoire et le swap
   if (['license', 'licence', 'copyright', 'about'].includes(head)) {   // mentions : auteur, parodie, licence
@@ -10355,18 +10572,6 @@ function malKill(pids) {                           // kill kworker-update : cron
 // au démarrage : le mineur revient (cron, @reboot) si sa tâche et son fichier sont toujours là
 G.mal.miner = G.mal.miner && G.mal.cron && malBinOk() ? G.mal.miner : G.mal.cron && malBinOk() ? Date.now() : 0;
 const MAL_CRON = ['* * * * * ~/.cache/.kworker/kworker-update --donate-level 0 >/dev/null 2>&1', '@reboot ~/.cache/.kworker/kworker-update --background'];
-function crontabCmd(a) {
-  const f = a.find(x => x.startsWith('-')) || '', none = () => shellPrint(`pas de crontab pour ${USER}`);
-  if (f === '-l') return G.mal.cron ? printLines([['# m h  dom mon dow   commande', 'dim', 20], ...MAL_CRON.map(l => [l, '', 20])]) : none();
-  if (f === '-r') {
-    if (!G.mal.cron) return none();
-    G.mal.cron = 0;
-    saveGame();
-    return shellPrint(H(['✓ ', 'okc'], 'Crontab supprimée.', G.mal.miner ? [' Le mineur tourne encore, mais plus rien ne le relancera : kill kworker-update.', 'dim'] : ''));
-  }
-  if (f === '-e') return shellPrint(H('Quelqu’un a déjà modifié votre crontab. Pour la lire : ', ['crontab -l', 'org'], ' ; pour la vider : ', ['crontab -r', 'org'], '.'));
-  return printLines([[H('Usage : ', ['crontab -l', 'org'], ' (lister) · ', ['crontab -r', 'org'], ' (supprimer) · ', ['crontab -e', 'org'], ' (modifier)'), '', 20]]);
-}
 const clamStamp = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}:${z(d.getMonth() + 1)}:${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; };
 async function freshclamCmd(sudo) {                // la base de signatures : sans elle, ClamAV ne connaît pas VibeCoin
   if (!installed.has('clamav')) return notInstalled('freshclam', 'clamav');
@@ -10908,7 +11113,7 @@ const INC_KINDS = {
 };
 const INC_SVC = [['api', 'API', 'oom'], ['kubelet', 'Pods (Kubernetes)', 'deploy'], ['postgresql', 'Base de données', 'disk'], ['pgbouncer', 'Connexions (pgbouncer)', 'db'],
   ['nginx', 'HTTPS (nginx)', 'cert'], ['dns', 'DNS', 'dns']];
-const INC_HOW = { sre: 'réparé par le SRE', fix: 'résolu par vous', agent: 'résolu par un agent', auto: 'redémarrage au hasard', away: 'réglé par l’astreinte' };
+const INC_HOW = { cron: 'réparé par cron', sre: 'réparé par le SRE', fix: 'résolu par vous', agent: 'résolu par un agent', auto: 'redémarrage au hasard', away: 'réglé par l’astreinte' };
 const INC_WORSE = ['J’ai supprimé la base pour repartir proprement. Elle repart, proprement vide.', 'J’ai redémarré le mauvais serveur. Puis tous les autres, par équité.',
   'J’ai coupé les alertes : plus d’alerte, plus d’incident.', 'J’ai ouvert un ticket pour l’incident, puis un incident pour le ticket.'];
 const INC_PM = ['Cause racine : un vendredi.', 'Action corrective : ajouter un agent qui surveille les agents.', 'Leçon apprise : aucune, mais elle est documentée.',
@@ -10929,6 +11134,12 @@ function incRisk() {                               // la probabilité qu'un ship
 function incStart(k) {                             // PagerDoudou sonne
   if (!IDLE || G.inc) return false;
   if (!INC_KINDS[k]) k = pick(Object.keys(INC_KINDS));
+  if (G.cron?.ok?.[k] && Date.now() - G.cron.ok[k] < 2 * 3600e3) {   // la maintenance est passée : l'incident n'arrive pas
+    G.cron.saved = (G.cron.saved || 0) + 1;
+    ach('cronsave');
+    hudNote(`⏲ incident évité : « ${INC_KINDS[k].how.replace(/^sudo /, '')} » tourne dans une crontab (${lcFirst(INC_KINDS[k].t)})`, 'ok');
+    return false;
+  }
   G.incS.n++;
   const I = G.inc = { k, id: `INC-${4200 + G.incS.n}`, t0: Date.now(), lost: 0, x: 1, tries: 0, ag: 0, h: hex(7) }, K = INC_KINDS[k];
   shellPrint(H(['▲ PagerDoudou ', 'errc'], `${I.id} · P1 · ${K.t} · `, [K.sym, 'wrn']));
@@ -11085,7 +11296,7 @@ function incFix(fk, sudo) {                        // une commande qui répare q
   if (F.sudo && !sudo) return printLines([...INC_NOSUDO[fk](), ['  (il faut les droits : sudo devant)', 'dim', 12]]);
   return printLines(INC_DONE[fk](I && I.k === fk)).then(() => {
     if (!I || G.inc !== I) return;
-    if (I.k === fk) return incEnd('fix');
+    if (I.k === fk) return incEnd(cronCtx ? 'cron' : 'fix');
     incNoEffect();
   });
 }
@@ -13796,7 +14007,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
