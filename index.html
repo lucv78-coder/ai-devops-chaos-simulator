@@ -1098,6 +1098,10 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 @media (max-width: 760px) { .lg-main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); } .lg-cats { grid-auto-flow: column; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); } }
 /* grep : les correspondances en rouge vif */
 .ln .gm { color: var(--red); font-weight: 700; }
+/* Ctrl+R : l'invite devient « (reverse-i-search)`…': » */
+#shell-rs { display: none; color: var(--dim); white-space: pre; }
+#shell-form.rs #shell-rs { display: inline; }
+#shell-form.rs #shell-user, #shell-form.rs #shell-dir, #shell-form.rs #shell-sym { display: none; }
 .ml { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; background: var(--bg2); white-space: normal; }
 .ml-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.4ch; padding: .4em 1ch; border-bottom: 1px solid var(--rule); }
 .ml-bar b { color: var(--orange); }
@@ -1512,7 +1516,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
     <div class="ph"><span class="g">❯</span>zsh <span class="dim">&nbsp;<span id="shell-cwd"></span></span><span class="fill"></span><span class="dim">help · Tab complète · Échap masque</span></div>
     <div id="shell-out" role="log" aria-live="polite"></div>
     <form id="shell-form" autocomplete="off">
-      <label class="prompt" for="shell-in"><span id="shell-user"></span><span id="shell-dir"></span><span id="shell-sym">❯</span></label>
+      <label class="prompt" for="shell-in"><span id="shell-user"></span><span id="shell-dir"></span><span id="shell-sym">❯</span><span id="shell-rs"></span></label>
       <input id="shell-in" type="text" spellcheck="false" autocapitalize="off" enterkeyhint="go" aria-label="Commande du terminal">
     </form>
   </section>
@@ -1644,7 +1648,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.55', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.56', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2470,6 +2474,7 @@ const ACH = [
   { id: 'dnd', g: '⇥', n: 'Glisser, déposer', d: 'Déplacer un fichier en le glissant : dans Thunar, ou entre Thunar et le bureau.', p: 36.8 },
   { id: 'logitheque', g: '⊕', n: 'Sans le terminal', d: 'Installer un logiciel depuis la Logithèque, sans taper une seule commande.', p: 31.2 },
   { id: 'pipes', g: '|', n: 'Plombier', d: 'Enchaîner trois tubes dans une seule commande.', p: 9.7 },
+  { id: 'sudobang', g: '#', n: 'Le mot magique', d: 'Relancer la dernière commande avec sudo !!.', p: 22.4 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3574,6 +3579,104 @@ const TEXT_CMDS = {
   head: (a, i) => shHead(a, i, false), tail: (a, i) => shHead(a, i, true), wc: (a, i) => shWc(a, i), sort: (a, i) => shSort(a, i), uniq: (a, i) => shUniq(a, i),
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
+
+/* cp et mv : dans un dossier (même nom), ou vers un nouveau nom ; -r pour un dossier ; chez root, sudo ; un élément vital déplacé : crash */
+function cmdCpMv(args, sudo, move) {
+  const who = move ? 'mv' : 'cp', rec = move || args.some(a => isOpt(a) && /r/i.test(a)), paths = args.filter(a => !isOpt(a));
+  if (paths.length < 2) return fsErr(who, paths.length ? `opérande de fichier cible manquant après '${paths[0]}'` : 'opérande de fichier manquant');
+  const ex = expand(paths.slice(0, -1)), dstRaw = paths.at(-1);
+  if (ex.err) return fsErr('zsh', `aucune correspondance trouvée : ${ex.err}`);
+  if (winPath(dstRaw)) return shellPrint(winMsg(who, dstRaw));
+  const dst = resolvePath(dstRaw), dn = nodeAt(dst);
+  if (ex.list.length > 1 && !dn?.d) return fsErr(who, `la cible '${dstRaw}' n’est pas un répertoire`);
+  if (mode !== 'idle') return fsErr(who, 'le système est occupé à tout casser');
+  const done = [];
+  for (const p of ex.list) {
+    if (winPath(p)) { shellPrint(winMsg(who, p)); continue; }
+    const src = resolvePath(p), n = nodeAt(src);
+    if (!n) { fsErr(who, `impossible d’évaluer '${p}': Aucun fichier ou dossier de ce type`); continue; }
+    if (n.d && !rec) { fsErr(who, `-r non spécifié ; omission du répertoire '${p}'`); continue; }
+    const into = !!dn?.d, tdir = into ? dst : dst.slice(0, -1), tname = into ? src.at(-1) : dst.at(-1), T = nodeAt(tdir), tgt = [...tdir, tname];
+    if (!T?.d || !tname) { fsErr(who, `impossible de créer '${dstRaw}': Aucun fichier ou dossier de ce type`); continue; }
+    if (badName(tname)) { fsErr(who, `'${tname}' : ${badName(tname)}`); continue; }
+    if (segEq(src, tgt)) { fsErr(who, `'${p}' et '${dstRaw}' identifient le même fichier`); continue; }
+    if (isPrefix(src, tgt)) { fsErr(who, `impossible de ${move ? 'déplacer' : 'copier'} un répertoire, '${p}', vers lui-même, '${tildePath(tgt)}'`); continue; }
+    if (!sudo && (owner(tgt) === 'root' || (move && owner(src) === 'root'))) { fsErr(who, `impossible de ${move ? 'déplacer' : 'copier'} '${p}' vers '${tildePath(tgt)}': Permission non accordée`); continue; }
+    const old = Object.hasOwn(T.k, tname) ? T.k[tname] : null;
+    if (old?.d) { fsErr(who, `impossible d’écraser '${tildePath(tgt)}' : c’est un répertoire qui existe déjà`); continue; }
+    if (move && isFatal(src, n)) {                  // /bin, /boot… : le système le cherche à sa place
+      const p0 = absPath(src);
+      return systemCrash(p0, [src], { cmd: `mv ${p} ${dstRaw}`, by: 'mv', intro: [[H(['mv: ', 'wrn'], `« ${p0} » déplacé : le système le cherche à sa place et ne le trouve plus.`), '', 700]] });
+    }
+    if (!move && diskUsed() + nodeSize(n) - (old ? nodeSize(old) : 0) > diskCap()) { fsErr(who, `erreur d’écriture de '${tildePath(tgt)}': Aucun espace disponible sur le périphérique`); continue; }
+    T.k[tname] = move ? n : fmClone(n);
+    if (move) removeAt(src);
+    T.mt = Date.now();
+    done.push([p, tgt, move ? fsNmBack(src) : '']);
+  }
+  if (!done.length) return false;
+  if (move) { fixCwd(); FM_CLIP.items = FM_CLIP.items.filter(c => nodeAt(c)); }
+  fsSave?.();
+  return printLines([...done.slice(0, 8).map(([p, tgt, back]) => [H(['✓ ', 'okc'], `${move ? 'déplacé' : 'copié'} : ${p} → `, [tildePath(tgt), 'blu'], [back, 'dim']), '', 10]),
+    ...(done.length > 8 ? [[H([`… et ${done.length - 8} de plus.`, 'dim']), '', 10]] : [])]);
+}
+function cmdHistory(a) {                            // history, history 5, history -c
+  if (a.includes('-c')) { history_.length = 0; hi = 0; return shellPrint(H(['✓ ', 'okc'], 'historique effacé. ', ['Les agents, eux, ont tout gardé (pour l’entraînement).', 'dim'])); }
+  const n = parseInt(a.find(x => /^\d+$/.test(x)), 10), L = history_.map((h, i) => [i + 1, h]);
+  return printLines((n ? L.slice(-n) : L.slice(-500)).map(([i, h]) => [`${String(i).padStart(5)}  ${h}`, '', 0]));
+}
+function shBang(cmd) {                              // !! !n !-n !mot (en début de mot, pas entre apostrophes) ; → { cmd } ou { err } ; null : rien à développer
+  if (!cmd.includes('!')) return null;
+  let q = '', out = '', did = false;
+  for (let i = 0; i < cmd.length; i++) {
+    const c = cmd[i];
+    if (q) { out += c; if (c === q) q = ''; continue; }
+    if (c === "'") { q = c; out += c; continue; }
+    const m = c === '!' && (!i || /[\s;|&]/.test(cmd[i - 1])) ? cmd.slice(i).match(/^!(!|-?\d+|[a-zA-Z][\w.-]*)/) : null;
+    if (!m) { out += c; continue; }
+    const k = /^-?\d+$/.test(m[1]) ? parseInt(m[1], 10) : 0;
+    const hit = m[1] === '!' ? history_.at(-1) : k ? (k < 0 ? history_.at(k) : history_[k - 1]) : [...history_].reverse().find(h => h.startsWith(m[1]));
+    if (hit === undefined) return { err: `événement introuvable : ${m[0]}` };
+    out += hit;
+    i += m[0].length - 1;
+    did = true;
+  }
+  return did ? { cmd: out } : null;
+}
+/* Ctrl+R : la recherche à rebours dans l'historique, façon bash et zsh. La saisie montre la trouvaille, l'invite la recherche ;
+   Ctrl+R encore : plus ancienne ; Entrée : on la lance ; une flèche, Tab : on la garde pour l'éditer ; Échap, Ctrl+G : on annule. */
+let rsq = null;                                     // la recherche en cours : { q, i, saved, fail }
+function rsLabel() { $('#shell-rs').textContent = `(${rsq.fail ? 'failed ' : ''}reverse-i-search)\`${rsq.q}': `; }
+function rsFind(from) { for (let i = Math.min(from, history_.length) - 1; i >= 0; i--) if (history_[i].includes(rsq.q)) return i; return -1; }
+function rsSearch(from) {
+  const j = rsq.q ? rsFind(from) : -1;
+  rsq.fail = !!rsq.q && j < 0;
+  if (j >= 0) { rsq.i = j; shellIn.value = history_[j]; } else if (!rsq.q) shellIn.value = '';
+  rsLabel();
+}
+function rsEnd(keep) {
+  if (!rsq) return;
+  if (!keep) shellIn.value = rsq.saved;
+  rsq = null;
+  shellForm.classList.remove('rs');
+}
+function rsKey(e) {                                 // vrai : la touche est prise par la recherche
+  const k = e.key.toLowerCase();
+  if (e.ctrlKey && !e.altKey && !e.shiftKey && k === 'r') {
+    e.preventDefault();
+    if (!rsq) { rsq = { q: '', i: history_.length, saved: shellIn.value, fail: false }; shellForm.classList.add('rs'); rsLabel(); }
+    else rsSearch(rsq.i);                            // Ctrl+R encore : la précédente
+    return true;
+  }
+  if (!rsq) return false;
+  if (e.key === 'Escape' || (e.ctrlKey && (k === 'g' || k === 'c'))) { e.preventDefault(); rsEnd(false); return true; }
+  if (e.key === 'Enter') { rsEnd(true); return false; }
+  if (e.key === 'Backspace') { e.preventDefault(); rsq.q = rsq.q.slice(0, -1); rsSearch(history_.length); return true; }
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); rsq.q += e.key; rsSearch(history_.length); return true; }
+  if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'AltGraph'].includes(e.key)) return true;
+  rsEnd(true);
+  return false;
+}
 function openShell(focus = true) {
   if (xfOn) { xfFocus('zsh', focus); return; }   // bureau Xfce : le terminal est une fenêtre
   if (shell.hidden) {
@@ -3610,10 +3713,12 @@ const FILE_HELP = () => [
   [H(['  cd <dossier>      ', 'org'], 'se déplacer · cd .. remonte · cd ~ rentre · cd / va à la racine'), '', 20],
   [H(['  pwd · cat <fich.> ', 'org'], 'où suis-je · lire un fichier'), '', 20],
   [H(['  mkdir · touch     ', 'org'], 'créer un dossier · créer un fichier'), '', 20],
+  [H(['  cp · mv           ', 'org'], 'copier (cp -r pour un dossier) · déplacer, ou renommer'), '', 20],
   [H(['  nano <fichier>    ', 'org'], 'éditer un fichier dans le terminal · ^O écrire · ^X quitter · sudo nano pour ceux de root'), '', 20],
   [H(['  rmdir · rm -r     ', 'org'], 'supprimer un dossier… mais pas n’importe lequel'), '', 20],
   [H(['  cmd | grep motif  ', 'org'], 'les tubes : grep, head, tail, wc, sort, uniq, less, tee · find . -name "*.md"'), '', 20],
   [H(['  > f · >> f · &&   ', 'org'], 'écrire dans un fichier, ajouter à la fin · enchaîner (;, &&, ||) · 2>/dev/null fait taire les erreurs'), '', 20],
+  [H(['  history · !!      ', 'org'], 'l’historique · relancer la dernière (sudo !! : avec sudo) · !n, !mot · Ctrl+R pour chercher'), '', 20],
 ];
 const SETUP_HELP = () => [
   [H(['Installer', 'fgc'], ['  (machine neuve : rien n’est installé, pas même votre agent)', 'dim']), '', 20],
@@ -4355,6 +4460,7 @@ async function cmdRm(args, win = false) {
   fixCwd();
 }
 const FS_CMDS = {
+  cp: (a, s2) => cmdCpMv(a, s2, false), copy: (a, s2) => cmdCpMv(a, s2, false), mv: (a, s2) => cmdCpMv(a, s2, true), move: (a, s2) => cmdCpMv(a, s2, true), history: a => cmdHistory(a),
   ls: a => cmdLs(a), dir: a => cmdLs(a.filter(x => !/^\/[a-z]$/i.test(x))), ll: a => cmdLs(['-la', ...a]), la: a => cmdLs(['-a', ...a]),
   cd: a => cmdCd(a), chdir: a => cmdCd(a), 'cd..': () => cmdCd(['..']), pwd: () => shellPrint(absPath(cwd)),
   tree: a => cmdTree(a), cat: a => cmdCat(a), mkdir: a => cmdMkdir(a), md: a => cmdMkdir(a), touch: a => cmdTouch(a),
@@ -4362,7 +4468,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'find', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'cat', 'cd', 'cp', 'find', 'history', 'mv', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -4418,6 +4524,7 @@ function collectPaths(n, path, out) {
 // opts : intro (lignes affichées à la place du message de rm), cmd (commande fautive), by (processus coupable)
 async function systemCrash(label, targets, opts = {}) {
   if (mode !== 'idle') return;
+  capt = null; shIn = null;                       // lancé dans un tube : le crash se voit quand même
   mode = 'shipping';                             // verrouille le terminal comme pendant un ship
   crashKind = 'sys';
   ach('rmrf');
@@ -5210,9 +5317,14 @@ const BIN_FAIL = [c => `${c}: Segmentation fault (core dumped)`, c => `${c}: err
 const expandVars = t => t.replace(/\$\{?(USER|HOME|SHELL|PWD|HOSTNAME)\}?/g, (_, v) => ({ USER, HOME: absPath(HOME), SHELL: '/bin/zsh', PWD: absPath(cwd), HOSTNAME: 'prod-01' })[v]).replace(/\$\?/g, '0');
 
 async function runCommand(raw, inner = false) {   // inner : une étape de tube ou d'enchaînement (déjà affichée, déjà dans l'historique)
-  const cmd = raw.trim().replace(/\s+/g, ' ');
+  let cmd = raw.trim().replace(/\s+/g, ' ');
   if (!inner) shellPrint(hackGame && mode === 'idle' ? H(['mot de passe > ', 'okc'], cmd) : promptLine(mode === 'gameover' ? '✗ ' : '❯ ', mode === 'gameover' ? 'errc' : 'okc', cmd));
   if (!cmd) return;
+  if (!inner && !hackGame && mode === 'idle') {     // !! !n !-n !mot : zsh affiche la ligne développée, puis la lance
+    const B = shBang(cmd);
+    if (B?.err) return shellPrint(H(['zsh: ', 'errc'], B.err));
+    if (B) { if (/^sudo !!(\s|$)/.test(cmd) && !/^sudo /.test(history_.at(-1) || '')) ach('sudobang'); cmd = B.cmd.trim().replace(/\s+/g, ' '); shellPrint(cmd); }
+  }
   if (!inner) { history_.push(cmd); hi = history_.length; }
   const low = cmd.toLowerCase();
   const [head, ...rest] = low.split(' ');
@@ -5417,7 +5529,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (Object.hasOwn(TEXT_CMDS, sub)) return TEXT_CMDS[sub](words.slice(1), shIn, sudo);   // grep, head, tail, wc, sort, uniq, less, tee, find
   if (shIn && sub === 'cat' && words.slice(1).every(isOpt)) return shCat(words.slice(1), shIn);   // ls | cat : l'entrée standard
   if (shIn && head === 'cowsay' && words.length === 1 && installed.has('cowsay')) return printLines(cowLines(shIn.map(o => o.t).join(' ').trim() || '…').map(t => [t, '', 15]));   // fortune | cowsay
-  if (Object.hasOwn(FS_CMDS, sub)) return FS_CMDS[sub](words.slice(1));
+  if (Object.hasOwn(FS_CMDS, sub)) return FS_CMDS[sub](words.slice(1), sudo);
   if (Object.hasOwn(PKG_CMDS, sub)) return PKG_CMDS[sub](words.slice(1), sudo, sub);   // apt-get, apt, npm, npx
   if (Object.hasOwn(TOYS, head)) return installed.has(TOYS[head].pkg) ? TOYS[head].run(words.slice(1)) : notInstalled(head, TOYS[head].pkg);
   if (head === 'echo') return shellPrint(expandVars(words.slice(1).join(' ')));
@@ -12487,6 +12599,7 @@ shellForm.addEventListener('submit', e => {
   submit(v);
 });
 shellIn.addEventListener('keydown', e => {
+  if (rsKey(e)) return;                           // Ctrl+R : la recherche dans l'historique
   if (e.key === 'Escape') { e.preventDefault(); closeShell(); }
   else if (dumping && e.ctrlKey && e.key.toLowerCase() === 'c' && shellIn.selectionStart === shellIn.selectionEnd) { e.preventDefault(); dumping.abort = true; }
   else if (e.key === 'Tab' && !e.shiftKey && shellIn.value.trim()) { e.preventDefault(); complete(); }   // champ vide : Tab sort du terminal
