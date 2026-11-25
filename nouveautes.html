@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>59</b><span>mises à jour</span></div>
-    <div role="listitem"><b>75 h 23</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 643</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>60</b><span>mises à jour</span></div>
+    <div role="listitem"><b>75 h 27</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 713</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#60</span><time datetime="2026-11-25T14:54">14 h 54</time><a href="#prompt">Le prompt comme tableau de bord : les thèmes oh-my-vibe</a></li>
       <li><span class="n">#59</span><time datetime="2026-11-25T14:50">14 h 50</time><a href="#git">git, au-delà de l’astreinte : relire avant de shipper</a></li>
       <li><span class="n">#58</span><time datetime="2026-11-25T14:46">14 h 46</time><a href="#cron">Les scripts et cron : la maintenance, planifiée</a></li>
       <li><span class="n">#57</span><time datetime="2026-11-25T14:41">14 h 41</time><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></li>
@@ -209,8 +210,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="git" aria-labelledby="t59">
-    <p class="meta"><span class="n">#59</span><span class="new">dernière</span><span class="v">alpha 0.59</span><time datetime="2026-11-25T14:50">25 nov. 2026 · 14 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f4ef8dc">f4ef8dc</a><span>15 519 → 15 643 lignes</span></p>
+  <article class="maj latest" id="prompt" aria-labelledby="t60">
+    <p class="meta"><span class="n">#60</span><span class="new">dernière</span><span class="v">alpha 0.60</span><time datetime="2026-11-25T14:54">25 nov. 2026 · 14 h 54</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/4824af1">4824af1</a><span>15 643 → 15 713 lignes</span></p>
+    <h2 id="t60"><a href="#prompt">Le prompt comme tableau de bord : les thèmes oh-my-vibe</a></h2>
+    <ul>
+      <li>Des thèmes de prompt au Store, rayon Thèmes du prompt (oh-my-vibe, façon oh-my-zsh) : agnoster-vibe (la branche git, avec un ✗ : les agents ont toujours modifié quelque chose), tokens (la facture du prochain ship, en direct), vendredi (le compte à rebours avant vendredi 17 h ; le vendredi, il passe au rouge), astreinte (le risque d’incident du prochain ship, l’incident en cours), tableau de bord (tout).</li>
+      <li>omv theme liste les thèmes, omv theme <nom> en applique un. Le thème s’écrit aussi dans ~/.zshrc (ZSH_THEME="…"), que source relit.</li>
+      <li>Le prompt vivant se met à jour chaque seconde ; les lignes déjà tapées gardent le prompt de leur moment (la facture d’alors, le risque d’alors).</li>
+      <li>Un succès Steam : Tableau de bord, acheter un thème de prompt.</li>
+    </ul>
+    <blockquote>« Le prompt affiche maintenant la facture, le risque et le temps qu’il reste avant vendredi. Il ne lui manque que le bouton « annuler ». »<cite>l’agent, 14 h 54</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-prompt.png" title="Voir en grand"><img src="assets/screen-prompt.png" width="900" height="540" loading="lazy" alt="Le terminal avec le thème tableau de bord : chaque prompt affiche la branche (main ✗), la facture ($37.42), le compte à rebours avant vendredi 17 h et le risque d’incident ; omv theme liste les thèmes, puis git status, incident et ls | wc -l."></a><figcaption>Le thème tableau de bord.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="git" aria-labelledby="t59">
+    <p class="meta"><span class="n">#59</span><span class="v">alpha 0.59</span><time datetime="2026-11-25T14:50">25 nov. 2026 · 14 h 50</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f4ef8dc">f4ef8dc</a><span>15 519 → 15 643 lignes</span></p>
     <h2 id="t59"><a href="#git">git, au-delà de l’astreinte : relire avant de shipper</a></h2>
     <ul>
       <li>git status et git diff montrent ce que les agents ont changé pendant que vous dormiez (avec, en rouge, ce qu’ils ont retiré : l’authentification, un test, la table users).</li>
