@@ -1657,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.66', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.67', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -14450,8 +14450,28 @@ function elecItem() {                            // le contrat d'électricité s
   const px = m => `$${frx((ELEC.kwh * m).toFixed(4).replace(/0+$/, ''))}`;
   return { ...base, name: nx.n, lvl: `actuel : ${cur.n}`, cost: nx.cost, desc: `${nx.d} Le kWh passe de ${px(cur.m)} à ${px(nx.m)}.` };
 }
+function pcKit() {                                // la carte mère suivante, avec le processeur et la RAM qui vont avec → { parts: [[slot, tier]], cost } ou null
+  const cpuN = PARTS.cpu.t.findIndex((_, j) => j > G.pc.cpu);
+  if (cpuN < 0 || !pcIssues({ ...G.pc, cpu: cpuN }).some(i => i.slots.includes('cpu'))) return null;   // le processeur suivant rentre tel quel
+  for (let t = G.pc.mobo + 1; t < PARTS.mobo.t.length; t++) {
+    const C = { ...G.pc, mobo: t }, parts = [['mobo', t]];
+    for (const sl of ['cpu', 'ram']) {
+      const need = sl === 'cpu' || pcIssues(C).some(i => i.slots.includes(sl));
+      if (!need) continue;
+      const k = PARTS[sl].t.findIndex((_, j) => j > G.pc[sl] && !pcIssues({ ...C, [sl]: j }).some(i => i.slots.includes(sl)));
+      if (k < 0) { parts.length = 0; break; }
+      C[sl] = k;
+      parts.push([sl, k]);
+    }
+    if (parts.length && !pcIssues(C).length) return { parts, cost: parts.reduce((a, [sl, k]) => a + PARTS[sl].t[k].cost, 0) };
+  }
+  return null;
+}
 function pcItems() {                             // matériel : par emplacement, la pièce du panier, sinon la prochaine qui rentre (matos.vibe a tout le catalogue)
-  return [...SLOTS.map(slot => {
+  const K = pcKit(), kit = K ? [{ cat: 'Matériel · Kit de mise à niveau', id: 'pc:kit', pc: 1, ic: '▣', kit: K.parts, cost: K.cost, inCart: K.parts.every(([sl, k]) => CART[sl] === k),
+    name: K.parts.map(([sl, k]) => PARTS[sl].t[k].n).join(' + '), lvl: 'le processeur suivant demande une autre carte mère',
+    desc: 'La carte mère suivante, avec le processeur et la RAM qui vont avec : tout part dans le panier d’un coup, compatible. Un agent a vérifié les sockets (deux fois, il a dit).' }] : [];
+  return [...kit, ...SLOTS.map(slot => {
     const P = PARTS[slot], i = G.pc[slot], cur = P.t[i], base = { cat: `Matériel · ${P.name}`, id: 'pc:' + slot, pc: 1, ic: P.ic };
     const inCart = CART[slot] != null;
     if (i >= P.t.length - 1 && !inCart) return { ...base, name: cur.n, lvl: 'le meilleur', done: true, cost: 0, desc: cur.d };
@@ -14514,7 +14534,7 @@ function buy(id) {
   const pcIt = id.startsWith('pc:') && pcItems().find(x => x.id === id);
   if (pcIt) {                                    // matériel : dans le panier ; la commande se valide en bas du rayon
     if (itemState(pcIt).dis) return '';
-    const m = cartAdd(id.slice(3), pcIt.tier);
+    const m = pcIt.kit ? (pcIt.kit.forEach(([sl, k]) => cartAdd(sl, k)), `Kit ajouté au panier : ${pcIt.name}. Reste à valider la commande.`) : cartAdd(id.slice(3), pcIt.tier);
     if (storeDlg.open) { renderStore(id); $('#sto-msg').textContent = m; }
     return m;
   }
