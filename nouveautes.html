@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>53</b><span>mises à jour</span></div>
-    <div role="listitem"><b>64 h 22</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 14 564</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>54</b><span>mises à jour</span></div>
+    <div role="listitem"><b>64 h 31</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 14 676</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#54</span><time datetime="2026-11-25T03:58">03 h 58</time><a href="#logitheque">La Logithèque : installer sans le terminal</a></li>
       <li><span class="n">#53</span><time datetime="2026-11-25T03:49">03 h 49</time><a href="#tri-thunar">Thunar trie : par nom, taille, type, date</a></li>
       <li><span class="n">#52</span><time datetime="2026-11-25T03:46">03 h 46</time><a href="#version">Un numéro de version : alpha 0.52</a></li>
       <li><span class="n">#51</span><time datetime="2026-11-25T03:03">03 h 03</time><a href="#glisser-deposer">Le glisser-déposer des fichiers</a></li>
@@ -203,8 +204,23 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="tri-thunar" aria-labelledby="t53">
-    <p class="meta"><span class="n">#53</span><span class="new">dernière</span><span class="v">alpha 0.53</span><time datetime="2026-11-25T03:49">25 nov. 2026 · 03 h 49</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/06c9884">06c9884</a><span>14 545 → 14 564 lignes</span></p>
+  <article class="maj latest" id="logitheque" aria-labelledby="t54">
+    <p class="meta"><span class="n">#54</span><span class="new">dernière</span><span class="v">alpha 0.54</span><time datetime="2026-11-25T03:58">25 nov. 2026 · 03 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/32d2948">32d2948</a><span>14 564 → 14 676 lignes</span></p>
+    <h2 id="t54"><a href="#logitheque">La Logithèque : installer sans le terminal</a></h2>
+    <ul>
+      <li>Une Logithèque sous Xfce (menu Applications, un lanceur sur le bureau, ou la commande logitheque) : les paquets d’apt par catégorie (À la une, Internet, Multimédia, Jeux et bêtises, Développement, IA locale, Système, Essentiels), une recherche, et l’onglet Installés.</li>
+      <li>Installer, Supprimer, Lancer : elle fait ce que fait sudo apt-get install. La commande (pkexec apt-get install -y …) et sa sortie s’écrivent dans le terminal, comme un journal, sans qu’il passe devant.</li>
+      <li>Une action à la fois ; les paquets essentiels ont leur mise en garde (les supprimer, c’est scier la branche). Sans bureau : apt, en terminal.</li>
+      <li>Un succès Steam : installer un logiciel sans taper de commande.</li>
+    </ul>
+    <blockquote>« Une logithèque, c’est un terminal qui a mis une cravate. »<cite>l’agent, 03 h 58</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-logitheque.png" title="Voir en grand"><img src="assets/screen-logitheque.png" width="900" height="540" loading="lazy" alt="La Logithèque : la recherche, les catégories à gauche, et les fiches des paquets (VLC installé avec son bouton Lancer, d’autres avec Installer), la ligne d’état en bas."></a><figcaption>La Logithèque.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="tri-thunar" aria-labelledby="t53">
+    <p class="meta"><span class="n">#53</span><span class="v">alpha 0.53</span><time datetime="2026-11-25T03:49">25 nov. 2026 · 03 h 49</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/06c9884">06c9884</a><span>14 545 → 14 564 lignes</span></p>
     <h2 id="t53"><a href="#tri-thunar">Thunar trie : par nom, taille, type, date</a></h2>
     <ul>
       <li>Un clic sur l’en-tête d’une colonne de Thunar (Nom, Taille, Type, Modifié) trie par cette colonne ; un second clic inverse l’ordre. La colonne choisie est en orange, avec une flèche pour le sens.</li>
