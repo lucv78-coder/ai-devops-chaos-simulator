@@ -1654,7 +1654,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.61', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.62', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2487,6 +2487,8 @@ const ACH = [
   { id: 'prompt', g: '❯', n: 'Tableau de bord', d: 'Acheter un thème de prompt. Il affiche plus de choses que le tableau de bord.', p: 12.6 },
   { id: 'vim', g: ':q', n: 'Sorti de vim', d: 'Ouvrir vim, et en sortir. Sans redémarrer le PC.', p: 31.4 },
   { id: 'epreuves', g: '✋', n: 'À la main', d: 'Réussir les trois épreuves à la main (defi).', p: 2.2 },
+  { id: 'nmhole', g: '◌', n: 'Trou noir', d: 'Supprimer node_modules : des gigaoctets libérés. Pendant quatre secondes.', p: 18.9 },
+  { id: 'reflexe', g: ':', n: 'Réflexe', d: 'Taper :q ailleurs que dans vim.', p: 27.5, h: 1 },
   { id: 'all', g: '★', n: '100 %', d: 'Débloquer tous les autres succès.', p: .1 },
 ];
 const ACH_ON = IDLE && !SANDBOX, ACH_BY = Object.fromEntries(ACH.map(a => [a.id, a]));
@@ -3597,6 +3599,44 @@ const TEXT_CMDS = {
   head: (a, i) => shHead(a, i, false), tail: (a, i) => shHead(a, i, true), wc: (a, i) => shWc(a, i), sort: (a, i) => shSort(a, i), uniq: (a, i) => shUniq(a, i),
   less: (a, i) => shLess(a, i, 'less'), more: (a, i) => shLess(a, i, 'more'), tee: (a, i, s2) => shTee(a, i, s2), find: a => shFind(a),
 };
+
+/* les bêtises : la pluie verte, l'écran de hacker de cinéma, yes */
+async function matrixRain() {                       // cmatrix : 7 s de pluie verte (Ctrl+C l'arrête)
+  const J = startJob(), A = '0123456789abcdef$#@%&*+=<>|/\\:;', w = 72;
+  try {
+    for (let f = 0; f < 100 && !J.abort; f++) {
+      let line = '';
+      for (let i = 0; i < w; i++) line += R() < .5 ? A[ri(0, A.length - 1)] : ' ';
+      shellPrint(line, f % 6 ? 'okc' : 'okc b');
+      if (!capt?.keep) await sleep(70);
+    }
+  } finally { endJob(J); }
+  if (!J.abort) shellPrint(H(['(cmatrix : les agents croient que c’est leur code. Ils n’ont pas tout à fait tort.)', 'dim']));
+}
+async function hollywoodRun() {                     // hollywood : un écran de hacker de cinéma (Ctrl+C l'arrête)
+  const J = startJob(), bars = ['décryptage du mainframe', 'contournement du pare-feu', 'injection SQL (sur la base de test)', 'triangulation de l’adresse IP', 'téléchargement d’Internet'];
+  try {
+    for (let f = 0; f < 64 && !J.abort; f++) {
+      const k = f % 4, pc = Math.min(100, Math.round(f * 1.6));
+      if (k === 0) shellPrint(hackerCode(1)[0], 'okc');
+      else if (k === 1) shellPrint(Array.from({ length: 10 }, () => hex(4)).join(' '), 'dim');
+      else if (k === 2) shellPrint(`[${'#'.repeat(Math.round(pc / 5)).padEnd(20, '.')}] ${String(pc).padStart(3)} % ${pick(bars)}`, 'wrn');
+      else shellPrint(`${hex(8)}  ${pick(['SYN', 'ACK', 'RST', 'TLS 1.3', 'GET /mainframe', 'ssh root@mainframe', 'PING 203.0.113.7'])}`, 'cy');
+      if (!capt?.keep) await sleep(90);
+    }
+  } finally { endJob(J); }
+  if (!J.abort) shellPrint(H(['ACCESS GRANTED', 'okc b'], ['  (hollywood : ne sert à rien, impressionne tout le monde. Comme une démo d’agents.)', 'dim']));
+}
+async function yesCmd(a) {                          // yes : y, y, y… (le vrai ne s'arrête jamais ; celui-ci a pitié du terminal)
+  const t = a.length ? a.join(' ') : 'y', J = startJob(), cap = 600;
+  try {
+    for (let i = 0; i < cap && !J.abort; i += 20) {
+      for (let k = 0; k < 20; k++) shellPrint(t);
+      if (!capt?.keep) await sleep(30);
+    }
+  } finally { endJob(J); }
+  if (!capt?.keep && !J.abort) shellPrint(H(['(yes s’est arrêté tout seul : le terminal a demandé grâce. Le vrai ne s’arrête jamais.)', 'dim']));
+}
 
 /* vim : un éditeur modal, dans le terminal. Normal (les commandes), insertion (i, a, o, puis Échap). On en sort : :q, :q!, :wq, :x, ZZ.
    Le reste du temps, on y reste (c'est le principe). */
@@ -5023,7 +5063,9 @@ function afterRemove(segs) {
   }
   if (absPath(segs) === absPath([...PROJ_DIR, 'node_modules'])) {
     nodeAt(PROJ_DIR).k.node_modules = nodeModules();
-    shellPrint(H(['✓ ', 'okc'], `node_modules supprimé (${num(NM_COUNT)} fichiers, environ 3 jours ouvrés). `, ['Un agent l’a aussitôt réinstallé, par réflexe.', 'wrn']));
+    const gb = fmtSize(nodeSize(nodeAt([...PROJ_DIR, 'node_modules'])));
+    ach('nmhole');
+    shellPrint(H(['✓ ', 'okc'], `node_modules supprimé (${num(NM_COUNT)} fichiers, ${gb} libérés, environ 3 jours ouvrés). `, [`Un agent l’a aussitôt réinstallé, par réflexe : ${gb}, revenus en quatre secondes.`, 'wrn']));
     return true;
   }
   if (isPrefix(segs, PROJ_DIR)) {
@@ -5106,6 +5148,7 @@ async function cmdRm(args, win = false) {
   fixCwd();
 }
 const FS_CMDS = {
+  yes: a => yesCmd(a),
   chmod: (a, s2) => cmdChmod(a, s2), sleep: a => sleepCmd(a),
   cp: (a, s2) => cmdCpMv(a, s2, false), copy: (a, s2) => cmdCpMv(a, s2, false), mv: (a, s2) => cmdCpMv(a, s2, true), move: (a, s2) => cmdCpMv(a, s2, true), history: a => cmdHistory(a),
   ls: a => cmdLs(a), dir: a => cmdLs(a.filter(x => !/^\/[a-z]$/i.test(x))), ll: a => cmdLs(['-la', ...a]), la: a => cmdLs(['-a', ...a]),
@@ -5115,7 +5158,7 @@ const FS_CMDS = {
 };
 
 /* complétion Tab : noms de commandes, puis chemins */
-const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'vi', 'vim', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
+const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'vi', 'vim', 'yes', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
   'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
@@ -5289,6 +5332,8 @@ const CATALOG = {
   clamav: ['1.4.1+dfsg-1', 31800, 'clamscan freshclam', 'l’antivirus libre : sudo freshclam, puis clamscan -r ~'],
   coreutils: ['9.4-3.1', 7210, '', 'ls, cp, rm… le strict minimum (essentiel)'],
   cowsay: ['3.03+dfsg2-8', 19, 'cowsay', 'une vache qui parle'],
+  cmatrix: ['2.0-6', 64, 'cmatrix', 'la pluie verte de Matrix, dans le terminal (les agents croient que c’est leur code)'],
+  hollywood: ['1.21-2', 38, 'hollywood', 'un écran de hacker de cinéma : ne sert à rien, impressionne tout le monde'],
   curl: ['8.10.1-2', 315, 'curl', 'télécharger des choses depuis le terminal'],
   'docker.io': ['26.1.5+dfsg1-4', 31240, 'docker', 'des conteneurs, dans des conteneurs'],
   emacs: ['1:29.4+1-4', 41200, 'emacs', 'un système d’exploitation, avec un éditeur de texte'],
@@ -5343,7 +5388,7 @@ const ESSENTIAL = {
 };
 const APT_NOPE = { motivation: 'Aucun dépôt ne la fournit. Même pas les backports.', vacances: 'Paquet retiré : incompatible avec le planning.',
   weekend: 'Disponible dans friday-backports, après 17 h. Peut-être.', sommeil: 'Dépendance non satisfaite : café (>= 3).', windows: 'Ceci est un Linux.' };
-const APT_TRY = { clamav: 'sudo freshclam · clamscan -r --remove ~', cowsay: 'cowsay bonjour', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', lolama: 'lolama list, puis lolama pull 4b et lolama run 4b', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
+const APT_TRY = { clamav: 'sudo freshclam · clamscan -r --remove ~', cowsay: 'cowsay bonjour', cmatrix: 'cmatrix', hollywood: 'hollywood', fortune: 'fortune', sl: 'sl', neofetch: 'neofetch', fastfetch: 'fastfetch', htop: 'htop', atop: 'atop', thunar: 'xfce puis thunar', mousepad: 'xfce puis mousepad', atril: 'xfce puis atril', lolama: 'lolama list, puis lolama pull 4b et lolama run 4b', vlc: 'xfce, puis double-cliquez une musique dans Thunar (telecharge.vibe, dans Firefaux)', firefaux: 'xfce puis firefaux', steam: 'xfce puis steam',
   xfce4: 'xfce', 'lm-sensors': 'sensors', smartmontools: 'sudo smartctl --scan, puis sudo smartctl -a <disque>' };
 const APT_ALIAS = { ollama: 'lolama', xfce: 'xfce4', 'xfce4-session': 'xfce4', sensors: 'lm-sensors', firefox: 'firefaux', smartctl: 'smartmontools' };   // ce qu'on tape, ce que Vibian comprend
 const CLI_PKG = { mistral: 'mistral', vibe: 'mistral', 'mistral-vibe': 'mistral', codex: 'codex', claude: 'claude', 'claude-code': 'claude', moon: 'moon', 'moon-ai': 'moon' };   // pas dans apt
@@ -5953,6 +5998,8 @@ function fetchLines() {                          // neofetch / fastfetch : la vr
 }
 const TOYS = {
   cowsay: { pkg: 'cowsay', run: a => printLines(cowLines(a.join(' ')).map(t => [t, '', 15])) },
+  cmatrix: { pkg: 'cmatrix', run: () => matrixRain() },
+  hollywood: { pkg: 'hollywood', run: () => hollywoodRun() },
   fortune: { pkg: 'fortune', run: () => shellPrint(pick(FORTUNES)) },
   sl: { pkg: 'sl', run: () => slTrain() },
   neofetch: { pkg: 'neofetch', run: () => printLines(fetchLines()) },
@@ -5968,6 +6015,11 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
   if (vimS && !inner) { shellPrint(vimS.ins ? (cmd || ' ') : H([cmd, 'org'])); return vimInput(cmd); }   // dans vim : la ligne est pour vim
   if (!inner) shellPrint(hackGame && mode === 'idle' ? H(['mot de passe > ', 'okc'], cmd) : promptLine(mode === 'gameover' ? '✗ ' : '❯ ', mode === 'gameover' ? 'errc' : 'okc', cmd));
   if (!cmd) return;
+  if (!inner && mode === 'idle' && !hackGame && /^(:q!?|:qa!?|:wq!?|:x|ZZ)$/.test(cmd)) {   // le réflexe : on n'est pas dans vim
+    shellPrint(H(['zsh: command not found: ', 'errc'], cmd));
+    ach('reflexe');
+    return shellPrint(H(['(vous n’êtes pas dans vim. Pas encore : ', 'dim'], ['vim', 'org'], [' pour y entrer, à vos risques.)', 'dim']));
+  }
   if (!inner && !hackGame && mode === 'idle') {     // !! !n !-n !mot : zsh affiche la ligne développée, puis la lance
     const B = shBang(cmd);
     if (B?.err) return shellPrint(H(['zsh: ', 'errc'], B.err));
@@ -8780,7 +8832,7 @@ function fmSortSet(k) {                            // la même colonne : l'ordre
 /* la Logithèque : l'interface graphique d'apt. Les paquets du catalogue, par catégorie ; une recherche (nom, description, commandes) ;
    Installer et Supprimer passent par apt-get (pkexec apt-get install -y …), dont la sortie s'écrit dans le terminal ; une action à la fois. */
 const LOGI_CATS = [['une', 'À la une', ['vlc', 'blunderbird', 'clamav', 'steam', 'tmux', 'cowsay', 'lolama', 'neofetch']],
-  ['internet', 'Internet', ['firefaux', 'blunderbird', 'curl']], ['media', 'Multimédia', ['vlc']], ['jeux', 'Jeux et bêtises', ['steam', 'sl', 'cowsay', 'fortune', 'neofetch', 'fastfetch']],
+  ['internet', 'Internet', ['firefaux', 'blunderbird', 'curl']], ['media', 'Multimédia', ['vlc']], ['jeux', 'Jeux et bêtises', ['steam', 'sl', 'cowsay', 'fortune', 'cmatrix', 'hollywood', 'neofetch', 'fastfetch']],
   ['dev', 'Développement', ['git', 'nodejs', 'npm', 'python3', 'golang', 'rustc', 'docker.io', 'jq', 'ripgrep', 'bat', 'vim', 'emacs', 'nano', 'tree']], ['ia', 'IA locale', ['lolama']],
   ['systeme', 'Système', ['htop', 'atop', 'lm-sensors', 'smartmontools', 'clamav', 'tmux', 'thunar', 'mousepad', 'atril', 'xfce4']],
   ['essentiels', 'Essentiels (ne pas toucher)', ['bash', 'coreutils', 'libc6', 'linux-image-6.11.0-friday', 'systemd', 'sudo', 'zsh']]];
