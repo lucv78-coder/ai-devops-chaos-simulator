@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>56</b><span>mises à jour</span></div>
-    <div role="listitem"><b>75 h 09</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 15 135</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>57</b><span>mises à jour</span></div>
+    <div role="listitem"><b>75 h 14</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 15 308</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#57</span><time datetime="2026-11-25T14:41">14 h 41</time><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></li>
       <li><span class="n">#56</span><time datetime="2026-11-25T14:36">14 h 36</time><a href="#historique">L’historique, le vrai : !!, sudo !!, Ctrl+R ; cp et mv</a></li>
       <li><span class="n">#55</span><time datetime="2026-11-25T13:42">13 h 42</time><a href="#tubes">Le shell, le vrai : tubes, redirections, grep</a></li>
       <li><span class="n">#54</span><time datetime="2026-11-25T03:58">03 h 58</time><a href="#logitheque">La Logithèque : installer sans le terminal</a></li>
@@ -206,8 +207,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="historique" aria-labelledby="t56">
-    <p class="meta"><span class="n">#56</span><span class="new">dernière</span><span class="v">alpha 0.56</span><time datetime="2026-11-25T14:36">25 nov. 2026 · 14 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c992691">c992691</a><span>15 022 → 15 135 lignes</span></p>
+  <article class="maj latest" id="manuel" aria-labelledby="t57">
+    <p class="meta"><span class="n">#57</span><span class="new">dernière</span><span class="v">alpha 0.57</span><time datetime="2026-11-25T14:41">25 nov. 2026 · 14 h 41</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/92a6028">92a6028</a><span>15 135 → 15 308 lignes</span></p>
+    <h2 id="t57"><a href="#manuel">Le manuel et les alias : man, alias, et un .zshrc « optimisé »</a></h2>
+    <ul>
+      <li>man <commande> : la page de manuel, avec NOM, SYNOPSIS, OPTIONS, BOGUES (connus, assumés) et VOIR AUSSI. Pour les commandes sans page écrite, la description vient de l’aide du jeu : man et help ne peuvent pas se contredire.</li>
+      <li>man -k et apropos cherchent dans les descriptions (man -k alias, apropos tubes). man marche dans un tube. Un succès Steam : RTFM, lire une page de manuel, volontairement.</li>
+      <li>Les alias : ceux de ~/.zshrc sont chargés au démarrage (ship et yolo y dormaient depuis le début). alias nom='valeur' en définit un pour la session ; pour le garder, echo "alias …" >> ~/.zshrc, puis source ~/.zshrc. unalias en retire.</li>
+      <li>type et which disent ce qu’est une commande : un alias, une primitive du shell, un programme.</li>
+      <li>De temps en temps, un agent « optimise » votre .zshrc (alias ls='sl', alias vim='nano'…), avec un commentaire aimable. L’effet arrive au prochain démarrage : à vous de trouver pourquoi ls lance un train.</li>
+    </ul>
+    <blockquote>« Les agents n’écrivent pas de documentation. Alors le manuel l’a fait, et il liste les bogues. Une première. »<cite>l’agent, 14 h 41</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-manuel.png" title="Voir en grand"><img src="assets/screen-manuel.png" width="900" height="540" loading="lazy" alt="Le terminal : ls qui lance sl (introuvable) ; type ls répond « alias vers sl » ; grep trouve la ligne « optimisée par un agent » dans ~/.zshrc ; unalias ls ; man -k alias ; et la page de manuel de uniq."></a><figcaption>type ls, grep ~/.zshrc, unalias, man -k et man uniq.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="historique" aria-labelledby="t56">
+    <p class="meta"><span class="n">#56</span><span class="v">alpha 0.56</span><time datetime="2026-11-25T14:36">25 nov. 2026 · 14 h 36</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/c992691">c992691</a><span>15 022 → 15 135 lignes</span></p>
     <h2 id="t56"><a href="#historique">L’historique, le vrai : !!, sudo !!, Ctrl+R ; cp et mv</a></h2>
     <ul>
       <li>history : les commandes numérotées (history 5, history -c pour effacer ; history | grep marche).</li>
