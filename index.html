@@ -761,6 +761,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .fm-status.note { color: var(--yellow); }
 .fm-confirm { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 1em; background: rgba(0, 0, 0, .5); }
 .fm-confirm[hidden] { display: none; }
+/* Thunar : l'en-tête trie (la colonne choisie en orange, le sens en flèche) */
+.fm-head button { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; white-space: nowrap; }
+.fm-head button.fm-s, .fm-head button.fm-d { text-align: right; }
+.fm-head button:hover, .fm-head button:focus-visible { color: var(--fg); text-decoration: underline; }
+.fm-head button.on { color: var(--orange); }
 /* le glisser-déposer : l'étiquette qui suit le pointeur, la cible soulignée */
 .fs-ghost { position: fixed; z-index: 50; display: flex; align-items: center; gap: .8ch; max-width: 40ch; padding: .25em 1ch; border: 1px solid var(--orange); border-radius: 3px;
   background: var(--panel); color: var(--fg); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 .4em 1.2em rgba(0, 0, 0, .5); }
@@ -1611,7 +1616,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 // Rich line: H('plain', ['coloured', 'cls'], ...)
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.52', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.53', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -7602,6 +7607,15 @@ function fsGhost(glyph, label) {
 }
 function fsGhostAt(g, x, y, copy) { g.style.left = x + 14 + 'px'; g.style.top = y + 12 + 'px'; g.querySelector('.c').hidden = !copy; }
 
+/* Thunar : le tri (nom, taille, type, date ; croissant ou décroissant), gardé dans la partie avec le bureau ; les dossiers toujours en tête */
+const FM_SORTS = ['name', 'size', 'type', 'date'];
+function fmSortNow() { const q = G.xfd?.fmSort; return Array.isArray(q) && FM_SORTS.includes(q[0]) ? [q[0], q[1] < 0 ? -1 : 1] : ['name', 1]; }
+function fmSortSet(k) {                            // la même colonne : l'ordre s'inverse ; une autre : elle trie, dans l'ordre croissant
+  const [sk, sd] = fmSortNow();
+  G.xfd = { ...G.xfd, fmSort: [k, k === sk ? -sd : 1] };
+  saveGame();
+}
+
 /* ---------- gestionnaire de fichiers (thunar) : l'arborescence du jeu, celle de ls et cd ----------
    Vue liste détaillée, raccourcis, chemin cliquable, précédent / suivant / parent, fichiers cachés, jauge du disque.
    Barre d'outils et clic droit : créer, couper, copier, coller (à la vitesse du disque, dans l'espace libre), renommer,
@@ -7671,7 +7685,9 @@ function makeThunar() {
   const names = () => {                          // dossiers d'abord, comme Thunar
     const n = nodeAt(path);
     if (!n?.d) return [];
-    return Object.keys(n.k).filter(k => hidden || !k.startsWith('.')).sort((a, b) => (n.k[b].d - n.k[a].d) || byName(a, b));
+    const [sk, sd] = fmSortNow(), v = k => sk === 'size' ? nodeSize(n.k[k]) : sk === 'type' ? fmType(k, n.k[k]) : sk === 'date' ? (n.k[k].mt || 0) : k;
+    const cmp = (a, b) => sk === 'name' ? byName(a, b) : sk === 'type' ? (v(a).localeCompare(v(b), 'fr') || byName(a, b)) : ((v(a) - v(b)) || byName(a, b));
+    return Object.keys(n.k).filter(k => hidden || !k.startsWith('.')).sort((a, b) => (n.k[b].d - n.k[a].d) || cmp(a, b) * sd);   // les dossiers d'abord, toujours
   };
   const flash = t => { note = t; noteUntil = performance.now() + 5000; status(); };
   function status() {
@@ -7713,7 +7729,8 @@ function makeThunar() {
       + `<div class="fm-disk" title="${esc(part('disk').n)}"><span class="fm-dbar"><span style="width:${(used / cap * 100).toFixed(1)}%"${used / cap > .9 ? ' class="full"' : ''}></span></span>`
       + `<small>${esc(fmtSize(cap - used))} libres sur ${esc(fmtSize(cap))}</small></div>`;
     tools();
-    listEl.innerHTML = '<div class="fm-row fm-head" aria-hidden="true"><span></span><span>Nom</span><span class="fm-s">Taille</span><span class="fm-t">Type</span><span class="fm-d">Modifié</span></div>'
+    const [sk, sd] = fmSortNow(), hd = (k, t, c) => `<button type="button" class="${c}${sk === k ? ' on' : ''}" data-sort="${k}" aria-sort="${sk === k ? (sd > 0 ? 'ascending' : 'descending') : 'none'}" title="Trier par ${t.toLowerCase()}">${t}${sk === k ? (sd > 0 ? ' ▲' : ' ▼') : ''}</button>`;
+    listEl.innerHTML = `<div class="fm-row fm-head"><span></span>${hd('name', 'Nom', 'fm-n')}${hd('size', 'Taille', 'fm-s')}${hd('type', 'Type', 'fm-t')}${hd('date', 'Modifié', 'fm-d')}</div>`
       + list.map(k => {
         const c = n.k[k];
         return `<div class="fm-row${c.d ? ' fm-dir' : c.x ? ' fm-x' : ''}${k === sel ? ' sel' : ''}" role="option" aria-selected="${k === sel}" data-k="${esc(k)}">`
@@ -7960,6 +7977,7 @@ function makeThunar() {
       '-',
       { ic: '❯', t: 'Ouvrir un terminal ici', run: () => typeIntoShell(`cd ${shq(tildePath(path))}`) },
       { ic: '.', t: hidden ? 'Masquer les fichiers cachés' : 'Afficher les fichiers cachés', run: () => { hidden = !hidden; draw(); } },
+      ...[['name', 'nom'], ['size', 'taille'], ['type', 'type'], ['date', 'date de modification']].map(([k, t]) => ({ ic: fmSortNow()[0] === k ? (fmSortNow()[1] > 0 ? '▲' : '▼') : '', t: `Trier par ${t}`, run: () => { fmSortSet(k); draw(); } })),
       { ic: '↻', t: 'Actualiser', k: 'F5', run: () => draw() },
       '-',
       { ic: '↑', t: 'Dossier parent', k: '⌫', off: !path.length, run: () => go(path.slice(0, -1)) },
@@ -7969,6 +7987,7 @@ function makeThunar() {
   el.addEventListener('click', e => {
     const b = e.target.closest('button');
     if (b?.closest('.fm-box')) return b.dataset.c === 'ok' && act ? act() : closeConfirm();
+    if (b?.dataset.sort) { fmSortSet(b.dataset.sort); return draw(); }   // l'en-tête : trier, ou inverser
     const tool = b?.dataset.fm;
     if (tool === 'newdir') return askCreate(true);
     if (tool === 'newfile') return askCreate(false);
