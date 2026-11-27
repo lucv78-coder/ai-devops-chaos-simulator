@@ -1657,7 +1657,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.68', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.69', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -10112,7 +10112,7 @@ function aboutSys() {                              // la config du PC du jeu, en
 const ABOUT_HTML = {
   edit: () => '<h3>Éditeur</h3>' + abtWho('lvt-dev', 'LVT-DEV', 'éditeur · humain (espèce rare) · prompt engineer en chef', 'A eu l’idée, a tapé « vas-y » 847 fois, a retiré les émojis. Ne sait pas ce que fait la ligne 4 127.')
     + `<p class="abt-note">© 2026 LVT-DEV · le code : ${abtLink('https://github.com/lucv78-coder/ai-devops-chaos-simulator', 'github.com/lucv78-coder/ai-devops-chaos-simulator')}</p>`,
-  contrib: () => '<h3>Contributeurs</h3>' + abtWho('chris-gasq', `Christopher GASQ <span class="r">· ${abtLink('https://github.com/ChrisGasq', 'github.com/ChrisGasq')}</span>`, 'musiques', `A composé « ${TRACKS.chris1.title} », la musique du jeu, sur GarageBand. Le seul humain à avoir produit quelque chose de concret sur ce projet.`)
+  contrib: () => '<h3>Contributeurs</h3>' + abtWho('chris-gasq', `Christopher GASQ <span class="r">· ${abtLink('https://github.com/ChrisGasq', 'github.com/ChrisGasq')}</span>`, 'musiques', `A composé « ${TRACKS.chris1.title} » et « ${TRACKS.jaimal.title} », les musiques du jeu (la seconde accompagne l’ultracode), sur GarageBand. Le seul humain à avoir produit quelque chose de concret sur ce projet.`)
     + '<div class="abt-special"><b>Mention spéciale</b><p>À Fabien (Stellarr Studio) et à Antoine (67).</p></div>',
   agents: () => '<h3>Les agents qui ont travaillé sur le projet</h3>' + ABOUT_AGENTS.map(([i, n, r, t]) => abtWho(i, esc(n), r, t)).join('')
     + '<p class="abt-note">Tous sauf Claude sont des personnages du jeu. Aucun modèle n’a été blessé pendant le développement. Quelques tokens, si.</p>',
@@ -10532,6 +10532,8 @@ function nanoCmd(args, su) {                      // nano [fichier], sudo nano [
 const TRACKS = {
   chris1: { file: 'musique chris 1.m4a', title: 'Mon morceau 35', artist: 'Christopher Gasq', credit: 'Christopher GASQ', gh: 'https://github.com/ChrisGasq',
     dur: 99.2, sz: 3321513, kbps: 268, tool: 'GarageBand for iOS 2.3.20', src: 'assets/musique/musique-chris-1' },
+  jaimal: { file: "J'ai mal.m4a", title: "J'ai mal", artist: 'Christopher Gasq', credit: 'Christopher GASQ', gh: 'https://github.com/ChrisGasq',
+    dur: 79.6, sz: 2690902, kbps: 271, tool: 'GarageBand for iOS 2.3.20', src: 'assets/musique/j-ai-mal' },   // la musique de l'ultracode, aussi
 };
 const AAC_OK = (() => { try { return !!document.createElement('audio').canPlayType('audio/mp4; codecs="mp4a.40.2"'); } catch { return false; } })();
 const trackUrl = t => `${t.src}.${AAC_OK ? 'm4a' : 'mp3'}`;
@@ -10608,7 +10610,7 @@ function webDl() {
   const vlc = installed.has('vlc');
   return { title: 'Télécharge.vibe · des fichiers 100 % sûrs', html: `<div class="wp"><h1>Télécharge.vibe</h1>
     <p>Des fichiers 100 % sûrs, vérifiés par un agent (il a dit oui à tout). Gratuit, sans inscription, sans limite (sauf une).</p>${ads}
-    <h2>Musique · faite par des humains (1 sur 1)</h2>${files}
+    <h2>Musique · faite par des humains (${Object.keys(TRACKS).length} sur ${Object.keys(TRACKS).length})</h2>${files}
     <h2>Pour l’écouter</h2>
     <p class="wp-band${vlc ? ' ok' : ''}">${vlc ? '<span class="tag">installé</span> VLC est là : double-cliquez la musique dans Thunar (~/Downloads).'
       : 'Il vous faut <b>VLC</b>. Sur Vibian, pas d’installeur à télécharger : <b>sudo apt install vlc</b>, dans le terminal. Puis double-cliquez la musique dans Thunar.'}</p>
@@ -14011,6 +14013,22 @@ function boostCheck(p) {                          // peut-on lancer le mode de c
   if (mode !== 'idle' || paused) return { ok: false, short: 'pas maintenant', why: `Pas maintenant : ${paused ? 'le jeu est en pause' : 'attendez que les agents travaillent'}.` };
   return { ok: true, short: B.cmd, why: '' };
 }
+/* l'ultracode a sa musique : « J'ai mal » (Christopher Gasq), en boucle tant que le mode tourne. Elle se tait en pause, onglet caché,
+   à la fin du mode, et laisse la place à VLC si vous écoutez déjà quelque chose (elle reprend quand VLC se tait). */
+let ultraAudio = null, ultraOn = false;
+function ultraMusic() {                            // au lancement du mode, à sa fin, chaque seconde, et quand l'onglet change : jouer, ou se taire
+  const want = IDLE && boostOn('claude') && boostRunning('claude') && !paused && mode === 'idle' && !document.hidden && !(vlcAudio && !vlcAudio.paused);
+  if (want && !ultraOn) {
+    if (!ultraAudio) { ultraAudio = new Audio(trackUrl(TRACKS.jaimal)); ultraAudio.loop = true; ultraAudio.volume = .7; }
+    ultraOn = true;
+    ultraAudio.play().catch(() => { ultraOn = false; });   // le navigateur refuse sans geste : on réessaiera
+  } else if (!want && ultraOn) {
+    ultraOn = false;
+    ultraAudio.pause();
+    if (!boostOn('claude')) ultraAudio.currentTime = 0;   // le mode est fini : la prochaine fois, depuis le début
+  }
+}
+document.addEventListener('visibilitychange', () => ultraMusic());
 function boostStart(p) {
   const k = boostCheck(p);
   if (!k.ok) return { ok: false, msg: k.why };
@@ -14024,7 +14042,9 @@ function boostStart(p) {
   hudNote(`${C.glyph} ${B.name} : ×${frx(B.work)} de travail pendant ${mmss(st.left)}${B.tok > 1 ? ` · ×${frx(B.tok)} de tokens` : ''}`, 'ok');
   saveGame();
   renderHud();
-  return { ok: true, msg: `${B.name} activé pour ${C.label} : ${mmss(st.left)} à ×${frx(B.work)} de travail. ${SANDBOX ? 'Bac à sable : relançable dès qu’il s’arrête.' : 'Une fois par jour : le prochain, demain.'}` };
+  if (p === 'claude') ultraMusic();               // ♪ J'ai mal
+
+  return { ok: true, msg: `${B.name} activé pour ${C.label} : ${mmss(st.left)} à ×${frx(B.work)} de travail.${p === 'claude' ? ` ♪ « ${TRACKS.jaimal.title} », de ${TRACKS.jaimal.artist}, l’accompagne.` : ''} ${SANDBOX ? 'Bac à sable : relançable dès qu’il s’arrête.' : 'Une fois par jour : le prochain, demain.'}` };
 }
 function boostTick(dt) {                          // le chrono : il ne tourne que quand l'équipe travaille
   if (!IDLE || !G.boost) return;
@@ -14037,6 +14057,7 @@ function boostTick(dt) {                          // le chrono : il ne tourne qu
     if (p === provider) panes.forEach(x => { if (x.state !== 'down') emit(x, { k: 'done', c: 'dim', t: `${C.glyph} ${B.off}` }, true); });
     hudNote(`${C.glyph} ${B.off}`, 'ok');
     saveGame();
+    if (p === 'claude') ultraMusic();             // la musique s'arrête avec le mode
   }
 }
 function boostCmd(p) {                            // ultracode, xhigh, flash dans le terminal
@@ -14395,7 +14416,7 @@ function ecoTick() {
   diskTick(dt);                                  // SMART : les téraoctets écrits par les agents
   if (!IDLE) return;
   if (titleEl.hidden && !document.hidden) G.play += Math.min(dt, 5);   // le temps de jeu, pour Steam
-  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); promptTick(); bugTick(); }
+  if (now - achLast > 1000) { achLast = now; achTick(); mailTick(); prTick(); worldTick(); humanTick(); zrcTick(); cronTick(); promptTick(); bugTick(); ultraMusic(); }
   if (G.inc && titleEl.hidden) incTick(dt);      // un incident de prod : les remboursements tournent
   if (titleEl.hidden) leakTick(dt);             // une clé exposée : les robots consomment ; .env toujours suivi : la prochaine fuite
   if (claudeOn && !paused && mode === 'idle' && panicEl.hidden) {
