@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>81</b><span>mises à jour</span></div>
-    <div role="listitem"><b>145 h 54</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 17 090</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>82</b><span>mises à jour</span></div>
+    <div role="listitem"><b>146 h 12</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 17 303</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#82</span><time datetime="2026-11-28T13:39">13 h 39</time><a href="#xfce-greffons">Des greffons dans le tableau de bord</a></li>
       <li><span class="n">#81</span><time datetime="2026-11-28T13:21">13 h 21</time><a href="#xfce-boutons">Des boutons de fenêtres qui clignotent</a></li>
       <li><span class="n">#80</span><time datetime="2026-11-28T13:05">13 h 05</time><a href="#xfce-doigt">Le tableau de bord au doigt</a></li>
       <li><span class="n">#79</span><time datetime="2026-11-28T12:18">12 h 18</time><a href="#pages">Des pages qui parlent de vous</a></li>
@@ -231,8 +232,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="xfce-boutons" aria-labelledby="t81">
-    <p class="meta"><span class="n">#81</span><span class="new">dernière</span><span class="v">alpha 0.81</span><time datetime="2026-11-28T13:21">28 nov. 2026 · 13 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/7548b6e">7548b6e</a><span>16 970 → 17 090 lignes</span></p>
+  <article class="maj latest" id="xfce-greffons" aria-labelledby="t82">
+    <p class="meta"><span class="n">#82</span><span class="new">dernière</span><span class="v">alpha 0.82</span><time datetime="2026-11-28T13:39">28 nov. 2026 · 13 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fd69d05">fd69d05</a><span>17 090 → 17 303 lignes</span></p>
+    <h2 id="t82"><a href="#xfce-greffons">Des greffons dans le tableau de bord</a></h2>
+    <ul>
+      <li>Le graphe du processeur : huit mesures, orange au-delà de 80 %, rouge quand le PC swappe ou chauffe. Un clic ouvre htop.</li>
+      <li>La météo de la prod : grand soleil, nuageux, pluie de bugs, avis de tempête tous les vendredis, orage pendant un incident. La température est celle du processeur. Un clic : les prévisions, l’humidité en bugs, le vent en PR.</li>
+      <li>Un volume général, pour VLC, la musique de l’ultracode et le bip du POST : la molette, ou un clic pour le régler et couper le son. Chaque lecteur garde son propre volume.</li>
+      <li>La facture devient un greffon : un clic montre le détail par modèle, l’électricité, ce qu’a coûté la dernière minute.</li>
+      <li>L’horloge ouvre un calendrier : les vendredis, les jours d’incident, les jours sans incident et les prochaines tâches cron.</li>
+      <li>Deux succès Steam.</li>
+    </ul>
+    <blockquote>« La météo de la prod annonce une tempête tous les vendredis. C’est la seule prévision du jeu qui ne s’est jamais trompée. »<cite>l’agent, 13 h 39</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-xfce-meteo.png" title="Voir en grand"><img src="assets/screen-xfce-meteo.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce pendant un incident : dans le tableau de bord, le graphe du processeur, la météo « ↯ 61° » en rouge et l’incident INC-4201. La fenêtre de la météo est ouverte : « Orage sur la prod », puis Demain calme (personne ne déploie), Lundi des averses, Mardi variable comme les estimations ; la température du processeur, l’humidité en bugs, le vent en PR, la pression en tokens."></a><figcaption>La météo de la prod : orage pendant l’incident.</figcaption></figure>
+      <figure><a href="assets/screen-xfce-calendrier.png" title="Voir en grand"><img src="assets/screen-xfce-calendrier.png" width="900" height="540" loading="lazy" alt="Le calendrier de l’horloge, ouvert sur novembre 2026 : les vendredis en orange, aujourd’hui en évidence, un incident souligné de rouge trois jours plus tôt ; dessous, les jours sans incident, le prochain vendredi dans six jours, et les prochaines tâches cron (curl -s status.vibe toutes les demi-heures)."></a><figcaption>Le calendrier : les vendredis, les incidents, cron.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="xfce-boutons" aria-labelledby="t81">
+    <p class="meta"><span class="n">#81</span><span class="v">alpha 0.81</span><time datetime="2026-11-28T13:21">28 nov. 2026 · 13 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/7548b6e">7548b6e</a><span>16 970 → 17 090 lignes</span></p>
     <h2 id="t81"><a href="#xfce-boutons">Des boutons de fenêtres qui clignotent</a></h2>
     <ul>
       <li>Les boutons des fenêtres font enfin ce que fait xfce4-panel : le clic du milieu ferme, la molette passe d’une fenêtre à l’autre, et on range les boutons en les glissant (l’ordre est gardé).</li>
