@@ -1331,7 +1331,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .bi-foot { right: 2ch; bottom: 2.8em; white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 /* le setup du BIOS (DEL ou F2 pendant le POST), façon AMIBIOS : gris, bleu, une seule police */
-#bios.setup:not([hidden]) { display: grid; place-items: center; padding: .6em 1ch; white-space: normal; font-size: clamp(8px, min(1.75vw, 2.75vh), 24px); }   /* plein écran, comme en mode texte */
+#bios.setup:not([hidden]) { display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; padding: .6em 1ch; white-space: normal; font-size: clamp(8px, min(1.75vw, 2.75vh), 24px); }   /* plein écran, comme en mode texte */
 .ami {
   --a-bg: #aaa; --a-fg: #00a; --a-hi: #fff; --a-sel: #5c5c5c; --a-bar: #00a; --a-bar-fg: #ddd; --a-pop-fg: #fff; --a-warn: #800;
   position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; width: min(100%, 92ch); height: min(100%, 34em);
@@ -1374,6 +1374,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ami-flash { min-width: min(46ch, 100%); }
 .ami-fbar { white-space: pre; overflow: hidden; }
 .ami-fw { font-weight: 700; }
+.ami-pw { width: 100%; padding: 0 1ch; border: 1px solid var(--a-pop-fg); background: var(--a-bar); color: var(--a-pop-fg); font: inherit; letter-spacing: .2em; }
 .ami-btns { display: flex; justify-content: center; gap: 3ch; }
 .ami-wrap { display: grid; }                     /* la ligne choisie et ses flèches ◄ ►, l'une sur l'autre */
 .ami-wrap > * { grid-area: 1 / 1; }
@@ -1693,7 +1694,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.73', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.74', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2453,6 +2454,7 @@ const ACH = [
   { id: 'glitch', g: '▒', n: 'Ça glitche, donc ça va vite', d: 'Pousser l’overclocking jusqu’aux glitchs.', p: 9.8, t: () => { const u = ocU(); return Math.max(u.cpu, u.ram) >= .5; } },
   { id: 'under', g: '↓', n: 'Écolo malgré lui', d: 'Sous-cadencer le processeur dans le BIOS.', p: 5.2, t: () => ocK().cr < .996 },
   { id: 'turbo', g: '≋', n: 'Décollage', d: 'Mettre le ventilateur du processeur en Turbo dans le BIOS.', p: 8.3, t: () => ocSt().fan === 2 },
+  { id: 'vendredi', g: '§', n: 'Superviseur', d: 'Entrer le mot de passe superviseur du BIOS. C’était « vendredi ».', p: 2.9, h: 1 },
   { id: 'flash', g: '⇪', n: 'Samedi', d: 'Mettre le BIOS à jour : 2612 « saturday », testée par personne.', p: 7.7, t: () => ocSt().bios >= 2612 },
   { id: 'brick', g: '▣', n: 'Presque une brique', d: 'Rater une mise à jour du BIOS. Le BIOS de secours a sauvé la carte mère.', p: 1.2, h: 1 },
   { id: 'undervolt', g: '⏚', n: 'Sous-volté', d: 'Baisser la tension du processeur sous Auto.', p: 4.4, t: () => (ocSt().vc || 0) < 0 },
@@ -14929,6 +14931,21 @@ function tuxSvg() {
   return `<svg class="bi-tux" viewBox="0 0 24 ${rows.length}" shape-rendering="crispEdges" aria-hidden="true"><g class="tx-body">${rects(rows)}`
     + `<g class="tx-glasses">${rects(TUX_GL, 4)}</g></g></svg>`;
 }
+let beepCtx = null, lastBeep = 0;
+function postBeep(n) {
+  if (!ocSt().beep) return;
+  lastBeep = n;
+  try {
+    beepCtx = beepCtx || new AudioContext();
+    const t0 = beepCtx.currentTime + .03;
+    for (let i = 0; i < n; i++) {                 // un bip carré, court, à 880 Hz, pas trop fort
+      const osc = beepCtx.createOscillator(), g = beepCtx.createGain(), t = t0 + i * .22;
+      osc.type = 'square'; osc.frequency.value = 880;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.04, t + .005); g.gain.setValueAtTime(.04, t + .12); g.gain.linearRampToValueAtTime(0, t + .13);
+      osc.connect(g).connect(beepCtx.destination); osc.start(t); osc.stop(t + .14);
+    }
+  } catch { /* pas de son : le POST reste muet */ }
+}
 async function biosBoot(o = {}) {
   if (Q.get('bios') === '0') { o.during?.(); o.then?.(); return; }
   booting = true;
@@ -15086,6 +15103,21 @@ async function biosBoot(o = {}) {
     draw();
   });
   // Windows 11, sur /dev/sdb1 : il se met à jour, reste à 99 %, annule tout et redémarre. Une touche ou un clic : il annule plus tôt.
+  // la clé backup-jeudi et le démarrage réseau : rien à démarrer. Une touche (ou un clic, ou six secondes) : redémarrer.
+  const noBoot = k => new Promise(done => {
+    el.innerHTML = '';
+    const L = k === 'usb' ? [['Booting from USB : backup-jeudi…'], ['backup-jeudi.tar.gz : 0 octet (vide depuis jeudi)', 'dim'], [''],
+      ['Reboot and Select proper Boot device', 'bi-warn'], ['or Insert Boot Media in selected Boot device and press a key', 'bi-warn']]
+      : [['Vibe Boot Agent PXE v2.1.69'], ['Client MAC ADDR: 00 1A 2B 3C 4D 5E  GUID: VIBE-PROD-01'], ['DHCP...........'],
+        ['PXE-E53: No boot filename received (agent-3 est en pause café)', 'bi-warn'], ['PXE-M0F: Exiting PXE ROM.', 'bi-warn']];
+    for (const [t, c] of L) add(esc(t), c || '');
+    add('');
+    add('Une touche ou un clic : redémarrer', 'dim');
+    const end = () => { clearTimeout(tm); modalKey = null; el.removeEventListener('click', end); done(); };
+    const tm = setTimeout(end, 6000);
+    modalKey = e => { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); end(); };
+    el.addEventListener('click', end);
+  });
   const winUpdate = () => new Promise(done => {
     const st = ocSt();
     st.win = (st.win || 0) + 1;
@@ -15143,7 +15175,7 @@ async function biosBoot(o = {}) {
     el.innerHTML = '';
     await wait(900);                             // le noir complet, ventilateurs coupés
   }
-  let nPost = 0, choice = 'boot', ocFail = '', flashed = '';
+  let nPost = 0, choice = 'boot', ocFail = '', flashed = '', override = '';
   for (;;) {                                     // le PC (re)démarre : POST puis GRUB ; memtest86+ et Windows ramènent ici
   // 1. le POST du BIOS. DEL ou F2 (ou un clic sur DEL) avant qu'il ne finisse : le setup. « Save & Exit » : le PC redémarre, le POST repasse.
   for (;; nPost++) {
@@ -15235,6 +15267,7 @@ async function biosBoot(o = {}) {
       add('  (F1 pressé automatiquement par un agent)', 'dim', post);
     }
     if (ps.noname) add('Warning! +12V : 11.1V (l’alimentation siffle, comme d’habitude)', 'bi-warn', post);
+    postBeep(post.querySelector('.bi-fail, .bi-warn') ? 3 : 1);
     add('', '', post);
     add(`Auto-Detecting Pri Master..${d.raid ? 'RAID 0 Volume' : d.m2 ? 'NVMe Device' : d.io < .9 ? 'IDE Hard Disk' : 'SATA SSD'}`, '', post);
     await wait(260 * slow);
@@ -15254,14 +15287,16 @@ async function biosBoot(o = {}) {
     el.classList.remove('setup');
     el.innerHTML = '';
     if (res === 'flash' || res === 'brick') flashed = res;   // mis à jour (ou coupé) : le PC redémarre, le POST le dit
-    else if (res !== 'save') break;
+    else if (res !== 'save') { if (res.startsWith('bo:')) override = res.slice(3); break; }   // Boot Override : le périphérique choisi
     await sleep(reducedMotion.matches ? 100 : 700);   // Save & Exit : le PC redémarre, écran noir
   }
   // 2. GRUB : le menu de démarrage
-  choice = await grubMenu();
+  choice = override ? (override === 'disk' ? 'boot' : override) : await grubMenu();   // Boot Override : tout droit, sans GRUB
+  override = '';
   ach({ windows: 'win', thursday: 'thursday', noagents: 'noagents' }[choice]);
   if (choice === 'memtest') await memtest();
   else if (choice === 'windows') await winUpdate();
+  else if (choice === 'usb' || choice === 'pxe') await noBoot(choice);
   else break;
   el.classList.remove('mt');
   el.innerHTML = '';
@@ -15356,6 +15391,7 @@ async function biosBoot(o = {}) {
    Échap ; à la souris ou au doigt, onglets, lignes, options et touches sont cliquables. « Save & Exit » enregistre (la CMOS, c'est la
    sauvegarde) et redémarre. Renvoie 'save' ou 'discard'. */
 const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Tool', 'Exit'];
+const amiTabs = su => su ? [...AMI_TABS.slice(0, 5), 'Agents', ...AMI_TABS.slice(5)] : AMI_TABS;   // l'onglet Agents : seulement pour le superviseur
 const AMI_HELP = 'Vibe Tweaker : CPU Ratio (le multiplicateur du processeur) et DRAM Frequency (la RAM). Plus haut : les agents vont plus vite, '
   + 'le processeur chauffe et consomme davantage. Trop haut : glitchs à l’écran, erreurs matérielles, agents qui plantent. Chaque puce a sa marge '
   + '(la loterie du silicium) : montez par paliers, redescendez au premier glitch. F10 : enregistrer et redémarrer · Échap : quitter sans enregistrer '
@@ -15364,7 +15400,7 @@ const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: '
 function amiSetup(el, bindKey) {
   return new Promise(done => {
     const st = ocSt(), c = part('cpu'), r = part('ram'), co = part('cool'), ps = part('psu'), d = part('disk');
-    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd };   // les réglages en cours d'édition
+    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd, beep: st.beep ?? 0 };   // les réglages en cours d'édition
     const v12 = st.bios >= 2612, vdA = VD_AUTO[r.ddr] || 1.2;
     const [lo, hi] = ocRange(c), fC = v => v * 100 || cpuBase(c), fR = v => v || r.mhz;
     const cpuOpts = [0, ...Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)], ramOpts = [0, ...(OC_DDR[r.ddr] || [])];
@@ -15412,13 +15448,23 @@ function amiSetup(el, bindKey) {
         { t: 'Le BIOS ne met jamais le processeur au repos :', w: 1 }, { t: 'il chauffe pendant que vous lisez.', w: 1 }],
       [{ h: 'Boot Settings Configuration' }, {},
         opt('quick', 'Quick Boot', [1, 0], v => v ? 'Enabled' : 'Disabled', 'Enabled : POST rapide, DEL passe vite. Disabled : test complet de la mémoire, plus de temps pour appuyer sur DEL.'),
+        opt('beep', 'POST Beep', [0, 1], v => v ? 'Enabled' : 'Disabled', 'Enabled : un bip court quand le POST passe, trois quand il a quelque chose à dire (un ventilateur poussiéreux suffit). Disabled : le silence, réglage d’usine : les agents dorment à côté.'),
         lock('quiet', 'Quiet Boot', 'Disabled', 'Pas de logo plein écran : on veut voir les erreurs. Il y en a.'),
         lock('f1', 'Wait For ‘F1’ If Error', 'Disabled', 'Un agent appuie sur F1 à votre place. Il le fait très bien.'), {},
         { h: 'Boot Device Priority' }, { i: ['1st Boot Device', d.n] }, { i: ['2nd Boot Device', 'Network : agent-3'] }, { i: ['3rd Boot Device', 'USB : backup-jeudi'] }],
       [{ h: 'Security Settings' }, {},
-        { i: ['Supervisor Password', 'Installed (par un agent)'] }, { i: ['User Password', 'Not Installed'] }, {},
-        act('pw', 'Change Supervisor Password', 'Il faut l’ancien mot de passe. C’est l’agent qui l’a choisi.', () => { pop = { msg: 'Enter Current Password : ********. Invalid Password. Indice laissé par l’agent : « vendredi ».', ok: 0 }; }),
+        { i: ['Supervisor Password', st.su ? 'Installed (vous le connaissez)' : 'Installed (par un agent)'] }, { i: ['User Password', 'Not Installed'] }, {},
+        act('pw', 'Change Supervisor Password', st.su ? 'Vous êtes superviseur : l’onglet Agents est ouvert.' : 'Il faut l’ancien mot de passe. C’est l’agent qui l’a choisi.',
+          () => { pop = st.su ? { msg: 'Mot de passe déjà entré : vous êtes superviseur, l’onglet Agents est ouvert. L’agent a changé le mot de passe juste après. Pour « vendredi ».', ok: 0 } : { pw: 1, tries: 0 }; }),
         lock('bsv', 'Boot Sector Virus Protection', 'Disabled', 'Désactivé : les agents écrivent dans le secteur de démarrage. Pour optimiser.')],
+      ...(st.su ? [[{ h: 'Agent Configuration (superviseur)' }, {},   // ce que l'agent cachait : la loterie du silicium, et ses vrais réglages
+        { i: ['CPU Silicon Quality', `${Math.round(st.lc * 100)} % de la marge typique`] }, { i: ['CPU Stable Up To', `${frMhz(cpuBase(c) * (1 + c.oc * st.lc))} (tension Auto)`] },
+        { i: ['DRAM Silicon Quality', `${Math.round(st.lr * 100)} % de la marge typique`] }, { i: ['DRAM Stable Up To', `${frMhz(r.mhz * (1 + r.oc * st.lr))} (tension Auto)`] }, {},
+        lock('yolo', 'YOLO Mode', 'Enabled', 'Activé d’usine. Le désactiver demande l’accord de l’agent. Il refuse.'),
+        lock('tests', 'Unit Tests', 'Off', 'Off. Il n’y en a pas. Le réglage existe pour rassurer les investisseurs.'),
+        lock('review', 'Code Review', 'Skipped', 'Relue par l’agent qui l’a écrite. Il valide.'),
+        lock('fri', 'Friday Deploy Lock', 'Disabled', 'Bloqué sur Disabled : l’agent shippe le vendredi, il a les droits root.'), {},
+        { t: 'Ce menu n’existe pas. Si vous le voyez,', w: 1 }, { t: 'c’est vendredi.', w: 1 }]] : []),
       [{ h: 'Vibe EZ Flash 3 Utility' }, {},
         { i: ['Current BIOS', `${biosV().n} « ${biosV().tag} » (${biosV().date})`] }, { i: ['USB Device', 'backup-jeudi (FAT32)'] },
         { i: ['BIOS File', v12 ? 'AMIVIBES-2612.CAP (déjà installé)' : 'AMIVIBES-2612.CAP'] }, {},
@@ -15432,7 +15478,13 @@ function amiSetup(el, bindKey) {
         act('discard', 'Discard Changes and Exit', 'Quitte sans rien enregistrer : le démarrage continue (Échap).', () => ask('discard')),
         act('undo', 'Discard Changes', 'Revient aux réglages enregistrés, sans quitter.', () => ask('undo')),
         act('def', 'Load Optimal Defaults', 'Tout sur Auto : fréquences d’origine, Quick Boot activé, ventilateur en Standard (F9).', () => ask('def')),
-        act('fs', 'Load Fail-Safe Defaults', 'Tout au minimum : processeur et RAM sous-cadencés, Quick Boot coupé, ventilateur en Standard. Les agents ralentissent, la facture d’électricité aussi.', () => ask('fs'))],
+        act('fs', 'Load Fail-Safe Defaults', 'Tout au minimum : processeur et RAM sous-cadencés, Quick Boot coupé, ventilateur en Standard. Les agents ralentissent, la facture d’électricité aussi.', () => ask('fs')), {},
+        { h: 'Boot Override' },
+        act('bo-disk', d.n, 'Démarre tout de suite sur le disque, sans passer par GRUB. Les réglages ne sont pas enregistrés.', () => finish('bo:disk')),
+        act('bo-mt', 'memtest86+ (sur le disque)', 'Lance memtest86+ tout de suite. Les réglages ne sont pas enregistrés.', () => finish('bo:memtest')),
+        act('bo-win', 'Windows Boot Manager (sdb1)', 'Windows 11. Il se met à jour. Les réglages ne sont pas enregistrés.', () => finish('bo:windows')),
+        act('bo-usb', 'USB : backup-jeudi', 'La clé de jeudi. Elle démarre ? Les réglages ne sont pas enregistrés.', () => finish('bo:usb')),
+        act('bo-pxe', 'Network : agent-3 (PXE)', 'Démarrage réseau, sur agent-3. Les réglages ne sont pas enregistrés.', () => finish('bo:pxe'))],
     ];
     const page = () => PAGES()[tab];
     const sels = L => L.map((it, i) => it.k ? i : -1).filter(i => i >= 0);
@@ -15471,11 +15523,14 @@ function amiSetup(el, bindKey) {
         + `<div class="ami-fbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${fl.p}">[${'█'.repeat(bar)}${'░'.repeat(25 - bar)}] ${String(fl.p).padStart(3)} %</div>`
         + '<div class="ami-fw">Ne pas éteindre l’ordinateur.</div></div></div>'
         : `<div class="ami-pop"><div class="ami-box" role="dialog" aria-modal="true" aria-label="${pop.opts ? 'Options' : 'Message'}">`
-        + (pop.opts ? `<div class="ami-bt">Options</div><div class="ami-opts">${pop.opts.opts.map((v, i) => `<button type="button" tabindex="-1" class="ami-opt${i === pop.idx ? ' on' : ''}" data-o="${i}">${esc(pop.opts.show(v))}</button>`).join('')}</div>`
+        + (pop.pw ? `<div class="ami-bt">Enter Current Password</div><input class="ami-pw" type="password" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Mot de passe superviseur">`
+          + `<div class="ami-q">${esc(pop.err || 'Indice laissé par l’agent : « vendredi ».')}</div><div class="ami-btns"><button type="button" tabindex="-1" class="on" data-b="0">[ Ok ]</button>`
+          + '<button type="button" tabindex="-1" data-b="1">[ Cancel ]</button></div>'
+          : pop.opts ? `<div class="ami-bt">Options</div><div class="ami-opts">${pop.opts.opts.map((v, i) => `<button type="button" tabindex="-1" class="ami-opt${i === pop.idx ? ' on' : ''}" data-o="${i}">${esc(pop.opts.show(v))}</button>`).join('')}</div>`
           : `<div class="ami-q">${esc(pop.ask ? AMI_ASK[pop.ask] : pop.msg)}</div><div class="ami-btns">${(pop.ask ? ['Ok', 'Cancel'] : ['Ok']).map((b, i) => `<button type="button" tabindex="-1" class="${i === pop.ok ? 'on' : ''}" data-b="${i}">[ ${b} ]</button>`).join('')}</div>`)
         + '</div></div>';
       el.innerHTML = '<div class="ami" role="application" aria-label="BIOS Setup Utility"><div class="ami-head">BIOS SETUP UTILITY</div>'
-        + `<div class="ami-tabs" role="tablist">${AMI_TABS.map((n, i) => `<button type="button" role="tab" tabindex="-1" data-tab="${i}" aria-selected="${i === tab}">${esc(n)}</button>`).join('')}</div>`
+        + `<div class="ami-tabs" role="tablist">${amiTabs(st.su).map((n, i) => `<button type="button" role="tab" tabindex="-1" data-tab="${i}" aria-selected="${i === tab}">${esc(n)}</button>`).join('')}</div>`
         + `<div class="ami-body"><div class="ami-main">${L.map(row).join('')}</div><div class="ami-side">`
         + `<div class="ami-help" aria-live="polite"><div>${esc((L[sel] || {}).help || 'Utilisez ← → pour changer d’onglet. L’overclocking est dans Vibe Tweaker.')}</div>`
         + `${[...new Set(L.map(it => it.help).filter(Boolean))].map(h => `<div class="ami-hs" aria-hidden="true">${esc(h)}</div>`).join('')}</div><div class="ami-keys">${KEYS}</div></div></div>`
@@ -15487,6 +15542,19 @@ function amiSetup(el, bindKey) {
       keep(main, el.querySelector('.ami-it.on'));
       keepX(tabsEl, tabsEl.querySelector('[aria-selected="true"]'));
       keep(el.querySelector('.ami-opts'), el.querySelector('.ami-opt.on'));
+      if (pop?.pw) el.querySelector('.ami-pw').focus({ preventScroll: true });
+    }
+    function checkPw() {                         // « vendredi » : l'onglet Agents ; sinon, l'indice (encore)
+      const v = el.querySelector('.ami-pw').value.trim().toLowerCase();
+      if (v === 'vendredi') {
+        st.su = 1;
+        if (IDLE) saveGame();
+        ach('vendredi');
+        pop = { msg: 'Password accepted. Bienvenue, superviseur : l’onglet Agents est ouvert, à côté de Security.', ok: 0 };
+      } else {
+        pop.tries++;
+        pop.err = pop.tries >= 3 ? 'Invalid Password. Trois essais : l’agent a appelé le support (lui-même). Indice : toujours « vendredi ».' : 'Invalid Password. Indice laissé par l’agent : « vendredi ».';
+      }
     }
     const change = dir => {                      // + et − : depuis Auto, le cran juste au-dessus (ou au-dessous) de l'origine ; Auto ne revient que par la liste ou F9
       const it = page()[sel];
@@ -15530,7 +15598,7 @@ function amiSetup(el, bindKey) {
       if (a === 'fs') ach('failsafe');
       if (a === 'flash') return startFlash();
       Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1, fan: 1, vc: 0, vd: 0 } : a === 'fs' ? { ratio: lo, mhz: ramOpts[1] || 0, quick: 0, fan: 1, vc: 0, vd: 0 }   // Fail-Safe : tout au plus bas
-        : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd });
+        : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd, beep: st.beep ?? 0 });
     }
     function startFlash() {                      // EZ Flash : effacer, écrire, vérifier ; l'alim no-name peut couper en pleine écriture
       const ko = FLASH_KO ?? (!!ps.noname && chance(EV_ON ? .25 : 0)), cut = ri(35, 80);
@@ -15552,6 +15620,12 @@ function amiSetup(el, bindKey) {
     function onKey(e) {
       const k = e.key;
       if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(k)) return;
+      if (pop?.pw) {                             // le champ reçoit les lettres ; personne d'autre
+        e.stopPropagation();
+        if (k === 'Enter') { e.preventDefault(); checkPw(); render(); }
+        else if (k === 'Escape') { e.preventDefault(); pop = null; render(); }
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       if (pop?.flash) return;                    // la mise à jour : on n'y touche pas
@@ -15569,7 +15643,7 @@ function amiSetup(el, bindKey) {
         else if (k === 'Escape' || /^n$/i.test(k)) pop = null;
         else if (yes != null) { pop = null; if (a && yes) { doAct(a); if (closed) return; } }
         else return;
-      } else if (k === 'ArrowLeft' || k === 'ArrowRight') { tab = (tab + (k === 'ArrowRight' ? 1 : -1) + AMI_TABS.length) % AMI_TABS.length; sel = -1; }
+      } else if (k === 'ArrowLeft' || k === 'ArrowRight') { const nT = amiTabs(st.su).length; tab = (tab + (k === 'ArrowRight' ? 1 : -1) + nT) % nT; sel = -1; }
       else if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'Tab') move(k === 'ArrowUp' || (k === 'Tab' && e.shiftKey) ? -1 : 1);
       else if (k === 'Enter' || k === ' ') enter();
       else if (k === '+' || k === '=' || k === 'PageUp') change(1);
@@ -15585,6 +15659,7 @@ function amiSetup(el, bindKey) {
       if (pop?.flash) return;
       const b = e.target.closest('button');
       if (!b) { if (pop && !e.target.closest('.ami-box')) { pop = null; render(); } return; }
+      if (pop?.pw && b.dataset.b) { if (b.dataset.b === '0') checkPw(); else pop = null; return render(); }
       if (b.dataset.step) { pop = null; change(+b.dataset.step); }
       else if (b.dataset.tab) { tab = +b.dataset.tab; sel = -1; pop = null; }
       else if (b.dataset.i) { pop = null; sel = +b.dataset.i; enter(); }
