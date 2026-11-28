@@ -13,11 +13,11 @@
 <p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
 
 <p align="center">
-  <img src="assets/badges/version.svg" alt="version : alpha 0.80">
+  <img src="assets/badges/version.svg" alt="version : alpha 0.81">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 16 970">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 17 090">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -80,12 +80,12 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Les icônes du bureau, où vous voulez.** Glissez-les sur la grille du bureau (sur une autre icône, elles échangent leur place), ou `Maj+flèches` au clavier ; leurs places sont gardées dans la partie, et « Aligner les icônes » remet les colonnes.
 - **Le fond d'écran.** Les Paramètres du bureau (menu Applications, clic droit sur le bureau, ou `xfce4-settings-manager`) : le logo, Tux, une grille rétro façon 1986, du code que personne n'a relu, une citation, ou uni. Gardé dans la partie.
 - **Les fenêtres se souviennent.** Leur place et leur taille sont gardées dans la partie ; un clic droit sur une barre de titre (ou dans la barre des tâches) les réduit, les agrandit, les colle sur une moitié de l'écran ou les garde toujours au premier plan.
-- **Les fenêtres au clavier.** Sous Xfce, `Alt+²` passe d'une fenêtre à l'autre (Alt+Tab appartient à votre système), `Ctrl+Alt+← →` colle une fenêtre sur la moitié de l'écran, `Ctrl+Alt+D` montre le bureau ; glisser une fenêtre contre un bord la colle aussi, avec un aperçu.
+- **Les fenêtres au clavier.** Sous Xfce, `Alt+²` passe d'une fenêtre à l'autre (Alt+Tab appartient à votre système), `Ctrl+Alt+← →` colle une fenêtre sur la moitié de l'écran, `Ctrl+Alt+D` montre le bureau ; glisser une fenêtre contre un bord la colle aussi, avec un aperçu. Dans le tableau de bord, comme dans xfce4-panel : le clic du milieu ferme, la molette passe d'une fenêtre à l'autre, on range les boutons en les glissant, les terminaux se regroupent quand la place manque, et le bouton d'une fenêtre qui réclame votre attention clignote (les agents pendant un incident, par exemple). Le ship en cours se remplit dans le bouton des agents.
 - **La recherche du menu Applications.** `Alt+F1`, on tape « fire », « cour » ou « incident » : les applis et les commandes qui correspondent, Entrée lance la première.
 - **La zone de notifications.** Dans le tableau de bord de Xfce : les courriels non lus, l'incident en cours, les PR ouvertes, la panne du monde, la clé exposée. Un clic ouvre la bonne appli (Blunderbird, status.vibe, GitHype, le terminal), et le journal garde les notifications qui ont filé. Au doigt, sur téléphone, le tableau de bord grandit : un seul bouton « ▤ » pour toutes les fenêtres, et une seule icône pour les notifications, avec leur texte dans le journal.
 - **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
 - **La facture d'électricité.** Le compteur tourne tant que les agents travaillent : ce que tire le PC, overclocking compris, divisé par le rendement de l'alim (la no-name en perd un tiers). Payée à chaque ship, avec les tokens. L'IA locale ne paie pas de tokens, mais elle paie l'électricité. Les contrats Vibe Énergie vont des heures creuses au petit réacteur modulaire.
-- **Les succès, dans Steam.** 114 succès (dont 28 cachés) : ships, trésorerie, matériel, BIOS, memtest86+, et quelques bêtises (rm -rf /, shipper un vendredi). Steam s'ouvre enfin dans Xfce, avec la fiche du jeu, le temps de jeu et des pourcentages de joueurs inventés. Une notification à chaque succès. Rien ne se débloque dans le bac à sable : c'est de la triche.
+- **Les succès, dans Steam.** 115 succès (dont 29 cachés) : ships, trésorerie, matériel, BIOS, memtest86+, et quelques bêtises (rm -rf /, shipper un vendredi). Steam s'ouvre enfin dans Xfce, avec la fiche du jeu, le temps de jeu et des pourcentages de joueurs inventés. Une notification à chaque succès. Rien ne se débloque dans le bac à sable : c'est de la triche.
 - **VLC, et la musique.** `sudo apt install vlc`, puis la musique se télécharge dans Firefaux, sur telecharge.vibe (trois publicités, un compte à rebours, et le vrai lien, en tout petit). Double-cliquez-la dans Thunar : VLC la joue, avec un spectre en caractères. Les deux morceaux, « Mon morceau 35 » et « J'ai mal », sont de Christopher GASQ, le seul humain à avoir produit quelque chose de concret sur ce jeu. Les MP3 des agents, eux, ne contiennent que du silence.
 - **nano, et des réglages en plein écran.** `nano fichier` ouvre un vrai nano dans le terminal : ^O écrire, ^X quitter, et ^F pour chercher, parce que ^W fermerait l'onglet du navigateur. Les réglages (`M`) et le choix des agents (`A`) ont leur propre écran dans le terminal, façon nmtui, et leur vraie fenêtre sous Xfce.
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
@@ -112,7 +112,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 16 970 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 17 090 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -180,7 +180,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (16 970 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (17 090 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -313,6 +313,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Des bandeaux de cookies (847 partenaires), et un captcha que les agents passent mieux que vous
 - [x] Des pages qui parlent de vous : actu.vibe, LinkedOut, et vos mots de passe en clair
 - [x] Un tableau de bord au doigt, pour les sept fenêtres que personne ne ferme
+- [x] Des boutons qui clignotent pendant un incident, pour qu'on puisse les ignorer en connaissance de cause
 - [x] Une facture d'électricité, parce que les tokens, c'était trop bon marché
 - [x] Des succès Steam, pour qu'il y ait enfin quelque chose à débloquer
 - [x] Exporter sa partie, pour avoir enfin une sauvegarde plus récente que celle de jeudi
@@ -327,14 +328,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 16 970 lignes ?**
+**Pourquoi un seul fichier de 17 090 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 16 970 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 17 090 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.

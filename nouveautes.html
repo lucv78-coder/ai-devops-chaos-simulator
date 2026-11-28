@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>80</b><span>mises à jour</span></div>
-    <div role="listitem"><b>145 h 38</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 970</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>81</b><span>mises à jour</span></div>
+    <div role="listitem"><b>145 h 54</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 17 090</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#81</span><time datetime="2026-11-28T13:21">13 h 21</time><a href="#xfce-boutons">Des boutons de fenêtres qui clignotent</a></li>
       <li><span class="n">#80</span><time datetime="2026-11-28T13:05">13 h 05</time><a href="#xfce-doigt">Le tableau de bord au doigt</a></li>
       <li><span class="n">#79</span><time datetime="2026-11-28T12:18">12 h 18</time><a href="#pages">Des pages qui parlent de vous</a></li>
       <li><span class="n">#78</span><time datetime="2026-11-28T12:06">12 h 06</time><a href="#cookies">Les cookies, et un captcha</a></li>
@@ -230,8 +231,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="xfce-doigt" aria-labelledby="t80">
-    <p class="meta"><span class="n">#80</span><span class="new">dernière</span><span class="v">alpha 0.80</span><time datetime="2026-11-28T13:05">28 nov. 2026 · 13 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/98353e0">98353e0</a><span>16 874 → 16 970 lignes</span></p>
+  <article class="maj latest" id="xfce-boutons" aria-labelledby="t81">
+    <p class="meta"><span class="n">#81</span><span class="new">dernière</span><span class="v">alpha 0.81</span><time datetime="2026-11-28T13:21">28 nov. 2026 · 13 h 21</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/7548b6e">7548b6e</a><span>16 970 → 17 090 lignes</span></p>
+    <h2 id="t81"><a href="#xfce-boutons">Des boutons de fenêtres qui clignotent</a></h2>
+    <ul>
+      <li>Les boutons des fenêtres font enfin ce que fait xfce4-panel : le clic du milieu ferme, la molette passe d’une fenêtre à l’autre, et on range les boutons en les glissant (l’ordre est gardé).</li>
+      <li>Quand la place manque, les terminaux se regroupent : « ❯ Terminal (3) ». Un clic ouvre leur menu : chaque terminal et son dossier, Nouveau terminal, Fermer les terminaux.</li>
+      <li>Le bouton d’une fenêtre qui réclame votre attention clignote, puis reste allumé jusqu’à ce que vous la regardiez : les agents pendant un incident, un nouveau courriel, Firefaux qui veut redémarrer (ou une pub vidéo quelque part), htop quand le PC swappe.</li>
+      <li>Une barre se remplit en bas du bouton : le ship en cours dans celui des agents, apt dans celui de son terminal.</li>
+      <li>Un succès Steam caché.</li>
+    </ul>
+    <blockquote>« Le bouton des agents a clignoté pendant tout l’incident. Le vibecoder l’a rangé à droite, derrière Firefaux, pour qu’il clignote moins fort. »<cite>l’agent, 13 h 21</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-xfce-boutons.png" title="Voir en grand"><img src="assets/screen-xfce-boutons.png" width="900" height="540" loading="lazy" alt="Le bureau Xfce pendant un incident : dans le tableau de bord, « Terminal (3) » regroupe trois terminaux, et son menu est ouvert (Terminal · ~/code/atlas, Terminal 2, Terminal 3, Nouveau terminal, Fermer les 3 terminaux). Le bouton Vibe CLI est allumé, Courrier réclame l’attention, la zone de notifications montre l’incident INC-4201. htop et Firefaux sont ouverts derrière."></a><figcaption>Les terminaux regroupés, et les agents qui réclament votre attention.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="xfce-doigt" aria-labelledby="t80">
+    <p class="meta"><span class="n">#80</span><span class="v">alpha 0.80</span><time datetime="2026-11-28T13:05">28 nov. 2026 · 13 h 05</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/98353e0">98353e0</a><span>16 874 → 16 970 lignes</span></p>
     <h2 id="t80"><a href="#xfce-doigt">Le tableau de bord au doigt</a></h2>
     <ul>
       <li>Sur téléphone, le tableau de bord de Xfce se manie enfin au doigt : 40 px de haut, des boutons à la taille d’un doigt, « ▦ » pour Applications et le score sans « shipped », pour laisser de la place.</li>
