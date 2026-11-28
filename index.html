@@ -905,7 +905,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .stm-a .m { grid-column: 2; text-align: left; }
 }
 /* navigateur web (Firefaux) : barre d'adresse, marque-pages, pages du faux Web */
-.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); padding: 0; }   /* minmax(0, 1fr) : une page large ne pousse plus la fenêtre */
+.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto auto; grid-template-columns: minmax(0, 1fr); padding: 0; }   /* minmax(0, 1fr) : une page large ne pousse plus la fenêtre */
 .wb-bar { grid-row: 2; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
 .wb-bar > button { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--fg); }
 .wb-bar > button:disabled { color: var(--dim2); cursor: default; }
@@ -920,7 +920,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-marks button:hover, .wb-marks button.on { color: var(--fg); background: rgba(255, 255, 255, .07); }
 .wb-page { grid-row: 4; position: relative; min-height: 0; overflow: auto; touch-action: pan-x pan-y; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .wb-load { position: absolute; left: 0; top: 0; z-index: 1; height: 2px; width: 0; background: var(--orange); }
-.wb-status { grid-row: 5; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.wb-status { grid-row: 6; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .wb-status.note { color: var(--yellow); }
 /* les publicités (sans uBlock Origin) : un bandeau en tête de page, des pop-ups au-dessus ; le badge d'uBlock ; les modules */
 .wb-page { grid-column: 1; }                   /* la couche des pop-ups partage sa case : la page reste dans la colonne 1 */
@@ -987,6 +987,37 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-tabs .new { flex: none; padding: 0 1.2ch; color: var(--dim); }
 .wb-tabs .new:hover { color: var(--fg); }
 .wb-doc [data-href] { -webkit-touch-callout: none; }   /* l'appui long ouvre un onglet, pas le menu du téléphone */
+/* les outils de développement (F12) ; le code source (view-source:) */
+.wb-dev { grid-row: 5; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 16em; border-top: 2px solid var(--rule); background: var(--bg); white-space: normal; }
+.wb-dev[hidden] { display: none; }
+.wb-dvh { display: flex; align-items: stretch; gap: .2ch; min-width: 0; padding: 0 .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.wb-dvh button { padding: .15em 1.2ch; border-bottom: 2px solid transparent; color: var(--dim); }
+.wb-dvh button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--orange); }
+.wb-dvh .e { margin-left: .5ch; padding: 0 .5ch; border-radius: 3px; background: var(--red); color: var(--ink); font-size: .85em; }
+.wb-dvh .e:empty { display: none; }
+.wb-dvh .sp { flex: 1; }
+.wb-dvb { min-height: 0; overflow: auto; padding: .1em 1ch .3em; overscroll-behavior: contain; }
+.wb-dvb .dl { padding: .12em 0; border-bottom: 1px solid var(--sep); color: var(--fg); overflow-wrap: anywhere; }
+.wb-dvb .dl.err { color: var(--red); background: rgba(255, 80, 80, .06); }
+.wb-dvb .dl.warn { color: var(--yellow); }
+.wb-dvb .dl.info { color: var(--dim); }
+.wb-dvb .dl.ag { color: var(--blue); }
+.wb-dvb .dl.in { color: var(--orange); }
+.wb-dvb .dl.in::before { content: '› '; }
+.wb-dvb .dl.stop { color: var(--red); font-size: 2em; font-weight: 700; border: 0; }
+.wb-dvb .dn { display: grid; grid-template-columns: 6ch minmax(0, 1fr) 8ch 10ch 10ch; gap: 0 1.2ch; padding: .1em 0; border-bottom: 1px solid var(--sep); }
+.wb-dvb .dn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wb-dvb .dn.h { color: var(--dim); }
+.wb-dvb .dn.blk { color: var(--dim2); text-decoration: line-through; }
+.wb-dvi { display: flex; align-items: center; gap: .6ch; padding: .15em 1ch; border-top: 1px solid var(--sep); }
+.wb-dvi[hidden] { display: none; }
+.wb-dvi span { color: var(--orange); }
+.wb-dvi input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; }
+.wp-src { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .92em; }
+.wp-src .l { display: block; padding-left: 6ch; text-indent: -6ch; }
+.wp-src .n { display: inline-block; width: 5ch; margin-right: 1ch; color: var(--dim2); text-align: right; text-indent: 0; }
+.wp-src .c { color: var(--green); }
+.wp-src .k { color: var(--red); font-weight: 700; }
 @media (pointer: coarse), (max-width: 640px) {   /* Firefaux au doigt : des cibles de doigt, et pas de zoom surprise d'iOS dans les champs (16 px au moins) */
   .wb-bar { gap: .15ch; padding: .15em .4ch; font-size: max(16px, 1em); }
   .wb-bar > button { min-width: 2.3em; min-height: 2.3em; padding: 0 .3ch; }
@@ -1002,6 +1033,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .wb-tab { min-height: 2.6em; }
   .wb-tab .x { padding: .5em .9ch; }
   .wb-tabs .new { min-width: 2.6em; }
+  .wb-dev { height: 21em; font-size: max(12px, 1em); }   /* au doigt : lisible, et la page reste au-dessus */
+  .wb-dvh button { min-height: 2.4em; }
+  .wb-dvi input { font-size: max(16px, 1em); }
+  .wb-dvb .dn { grid-template-columns: 5ch minmax(0, 1fr) 7ch 8ch; }
+  .wb-dvb .dn span:nth-child(4) { display: none; }
 }
 /* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
 .mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
@@ -1745,7 +1781,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.76', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.77', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2317,11 +2353,14 @@ const usdFine = n => n < 0.01 ? n.toFixed(4) : usd(n);
 
 /* facture : chaque token est compté au tarif du modèle qui l'a produit, au moment où il est produit */
 const usage = { in: 0, out: 0, usd: 0, by: {} };
+let billLog = [];                                 // les dernières requêtes facturées : [date, modèle, tokens en entrée, en sortie, $] (l'onglet Réseau de Firefaux)
 function bill(model, tin, tout) {
   const m = MODELS[model], b = usage.by[model] || (usage.by[model] = { in: 0, out: 0, usd: 0 });
   const d = (tin * m.in + tout * m.out) / 1e6 * (IDLE && G.chal === 'budget' ? 2 : 1) * (worldOn('price') ? 1.5 : 1);   // défi « Tokens au prix fort »
   b.in += tin; b.out += tout; b.usd += d;
   usage.in += tin; usage.out += tout; usage.usd += d;
+  billLog.push([Date.now(), model, tin, tout, d]);
+  if (billLog.length > 60) billLog.shift();
   if (IDLE) { G.bill += d; G.spent += d; }      // mode idle : déduit au prochain ship
   return d;
 }
@@ -2534,6 +2573,8 @@ const ACH = [
   { id: 'adclick', g: '$', n: 'Cliqué sur la pub', d: 'Cliquer sur une publicité. Personne ne le fait. Sauf vous.', p: 7.7, h: 1 },
   { id: 'loupe', g: '⊕', n: 'Loupe', d: 'Zoomer à 300 % dans Firefaux. Même les conditions générales se lisent.', p: 6.1 },
   { id: 'onglets', g: '▤', n: 'Cent onglets', d: 'Avoir 100 onglets ouverts dans Firefaux. Le PC patate, lui, en avait assez à six.', p: 1.3 },
+  { id: 'inspecteur', g: '{}', n: 'Inspecteur', d: 'Ouvrir les outils de développement de Firefaux (F12). Ceux de votre vrai navigateur ne comptent pas.', p: 24.6 },
+  { id: 'selfxss', g: '!', n: 'Collé dans la console', d: 'Coller dans la console ce qu’un agent vous a conseillé d’y coller. La prod n’a pas aimé.', p: 3.3, h: 1 },
   { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
   { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
     t: () => G.mal.ever && !G.mal.miner && !ffHas('freeblock') && !malFiles().length },
@@ -11238,13 +11279,16 @@ function ffMenuHtml(z) {                          // le menu ☰ : le zoom, les 
     + `<div class="wb-mz"><span>Zoom</span><button type="button" data-wb="zoom-" title="Réduire (Ctrl+-)" aria-label="Réduire le zoom">−</button>`
     + `<button type="button" class="z" data-wb="zoom0" title="Taille normale (Ctrl+0)">${z} %</button><button type="button" data-wb="zoom+" title="Agrandir (Ctrl+=)" aria-label="Agrandir le zoom">+</button></div>`
     + `<p class="mh">Marque-pages</p>${WEB_MARKS.map(([t, u]) => `<button type="button" role="menuitem" data-href="${esc(u)}">${esc(t)}</button>`).join('')}`
-    + '<hr><button type="button" role="menuitem" data-wbm="addons">Modules (about:addons)</button><button type="button" role="menuitem" data-wbm="full">Plein écran</button>';
+    + '<hr><button type="button" role="menuitem" data-wbm="dev">Outils de développement <span class="k">F12</span></button>'
+    + '<button type="button" role="menuitem" data-wbm="src">Code source de la page <span class="k">Ctrl+U</span></button>'
+    + '<button type="button" role="menuitem" data-wbm="addons">Modules (about:addons)</button><button type="button" role="menuitem" data-wbm="full">Plein écran</button>';
 }
 function webNorm(raw) {
   const u = (raw || '').trim();
   if (!u) return WEB_HOME;
   if (/^about:(home|blank)?$/i.test(u)) return WEB_HOME;
   if (/^about:addons$/i.test(u)) return 'about:addons';
+  if (/^view-source:/i.test(u)) return 'view-source:' + webNorm(u.slice(12));   // le code source d'une page
   if (/^[a-z]+:\/\//i.test(u)) return /^[a-z]+:\/\/[^/]+$/i.test(u) ? u + '/' : u;
   if (/\s/.test(u) || !/\.[a-z]{2,}|^localhost/i.test(u)) return `vibe://recherche?q=${encodeURIComponent(u)}`;
   return 'https://' + (u.includes('/') ? u : u + '/');
@@ -12712,7 +12756,29 @@ function web404(u) {
     <p>Ce site n’existe pas : <b>${esc(webHost(u))}</b>. Votre agent l’a halluciné, avec beaucoup d’assurance.</p>
     <p class="dim">Essayez <a data-href="${WEB_HOME}">Vibegle</a>, ou un marque-page : ils existent, eux.</p></div>` };
 }
+const DEV_ERR = ["Uncaught TypeError: Cannot read properties of undefined (reading 'tokens') at agents.js:@", 'Unhandled Promise Rejection: Error: ship is not a function at deploy.js:@',
+  'Warning: Each child in a list should have a unique "key" prop. (1 412 fois)', 'Uncaught RangeError: Maximum call stack size exceeded at retry.js:@ (retry appelle retry)',
+  '[HMR] 412 modules mis à jour, 0 compris.', 'Warning: useEffect a tourné 9 000 fois. C’était voulu, dit l’agent.',
+  'TypeError: undefined is not a function (personne ne sait laquelle) at utils.js:@', 'Deprecation: cette API est obsolète depuis 2019. L’agent l’a choisie hier.',
+  'Error: tous les tests passent (0 test sur 0) at ci.js:@'];   // les erreurs de localhost:3000 dans la console (@ : un numéro de ligne)
+function webSrcLines(u) {                         // le code source d'une page : son HTML, et ce que les agents ont laissé dedans
+  const r = webRoute(u), loc = /^https?:\/\/localhost/i.test(u);
+  return ['<!doctype html>', `<!-- ${webHost(u)} · généré par un agent · relu par : personne -->`, `<html lang="fr"><head><title>${r.title}</title>`,
+    '<script src="https://traqueur.vibe/tout.js"><\/script> <!-- TODO : demander le consentement (un jour) -->', '</head><body>',
+    ...r.html.replace(/></g, '>\n<').split('\n').map(l => l.trim()).filter(Boolean),
+    ...(loc && claudeOn ? [`<!-- TODO(${panes.length ? agentName(panes[0]) : 'un agent'}) : retirer avant la prod : OPENAI_API_KEY=${keyStr(G.key.v)} -->`] : []),
+    '<!-- ne pas toucher : ça marche, personne ne sait pourquoi -->', '</body></html>'];
+}
+function webSrcHtml(u) {                          // les lignes numérotées : commentaires en vert, la clé en rouge
+  return `<pre class="wp-src">${webSrcLines(u).map((l, i) => { const e = esc(l).replace(/(OPENAI_API_KEY=)(\S+)/, '$1<span class="k">$2</span>');
+    return `<span class="l"><span class="n">${i + 1}</span>${/^&lt;!--/.test(e) ? `<span class="c">${e}</span>` : e}</span>`; }).join('')}</pre>`;
+}
+function webSource(u) {
+  const inner = webNorm(u.replace(/^view-source:/i, ''));
+  return { title: `Source de ${inner}`, html: `<div class="wp">${webSrcHtml(inner)}</div>` };
+}
 const WEB_SITES = [
+  [/^view-source:/i, webSource],
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
@@ -12738,7 +12804,12 @@ function makeBrowser() {
     + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button>'
     + '<button type="button" data-wb="menu" title="Menu : marque-pages, zoom" aria-label="Menu de Firefaux" aria-haspopup="menu" aria-expanded="false">☰</button></div>'
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
-    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-menu" role="menu" aria-label="Menu de Firefaux" hidden></div><div class="wb-status" role="status"></div>';
+    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-menu" role="menu" aria-label="Menu de Firefaux" hidden></div>'
+    + '<div class="wb-dev" hidden><div class="wb-dvh" role="tablist" aria-label="Outils de développement">'
+    + '<button type="button" role="tab" data-dv="console" aria-selected="true">Console<span class="e"></span></button><button type="button" role="tab" data-dv="net">Réseau</button>'
+    + '<button type="button" role="tab" data-dv="src">Source</button><span class="sp"></span><button type="button" data-dv="close" title="Fermer (F12)" aria-label="Fermer les outils">✕</button></div>'
+    + '<div class="wb-dvb" role="log"></div><form class="wb-dvi"><span aria-hidden="true">›</span><input aria-label="Console de Firefaux" placeholder="Tapez ici. Ou, mieux : ne tapez rien." spellcheck="false" autocomplete="off" autocapitalize="off"></form></div>'
+    + '<div class="wb-status" role="status"></div>';
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
   let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '', adPick = ri(0, 99);
   const pops = q('.wb-pops'), ubo = q('.wb-ubo'), menu = q('.wb-menu'), zbadge = q('.wb-zoom'), mbtn = q('[data-wb="menu"]');
@@ -12766,7 +12837,76 @@ function makeBrowser() {
     if (on) menu.querySelectorAll('[data-href]').forEach(b => b.classList.toggle('on', webHost(url) === webHost(b.dataset.href)));   // la page en cours, en couleur
     if (on) menu.querySelector('[data-href]')?.focus({ preventScroll: true });
   }
-  const strip = q('.wb-tabs');
+  const strip = q('.wb-tabs'), dev = q('.wb-dev'), dvb = q('.wb-dvb'), dvi = q('.wb-dvi');
+  let devTab = 'console', conLog = [], conPage = [];   // la console : ce que la page écrit (une fois par page), ce que vous tapez
+  function devPage() {                            // ce que la page écrit dans la console
+    const L = [{ c: 'stop', t: 'Stop !' }, { c: 'warn', t: 'Cette fonction du navigateur est destinée aux développeurs. Si quelqu’un vous a dit de copier-coller quelque chose ici, c’est une arnaque : on vous vole votre compte, ou votre prod.' }];
+    if (claudeOn && panes.length) L.push({ c: 'ag', t: `${agentName(pick(panes))} : colle ça dans la console, ça répare la prod → fetch('/api/prod', { method: 'DELETE' })` });
+    if (/^https?:/i.test(url) && !/^https?:\/\/localhost/i.test(url)) L.push(ffAdsOn() ? { c: 'warn', t: `${ri(12, 48)} traqueurs chargés, ${ri(3, 9)} pixels invisibles, une empreinte de votre navigateur. Bonne lecture.` }
+      : { c: 'info', t: `uBlock Origin : ${ri(12, 48)} requêtes bloquées sur cette page.` });
+    if (/^http:/i.test(url)) L.push({ c: 'warn', t: 'Cette page n’est pas sécurisée (http) : ce qui s’y tape voyage en clair. Comme le .env.' });
+    if (/^https?:\/\/localhost/i.test(url)) {
+      if (!claudeOn) L.push({ c: 'err', t: 'GET http://localhost:3000/ net::ERR_CONNECTION_REFUSED' });
+      else {
+        const n = 1 + Math.round(bugShare() * 40);   // les vrais bugs du projet : la part du travail que mange le mur des bugs
+        for (let i = 0; i < Math.min(n, 9); i++) L.push({ c: i % 3 === 2 ? 'warn' : 'err', t: DEV_ERR[i].replace('@', ri(100, 9999)) });
+        if (n > 9) L.push({ c: 'err', t: `… et ${n - 9} autres. Le mur des bugs mange ${Math.round(bugShare() * 100)} % du travail ; la console, elle, prend tout.` });
+        L.push({ c: 'warn', t: 'La clé d’API des agents est dans le HTML (onglet Source, tout en bas). En local, ça passe. Au prochain ship, elle sera en prod.' });
+      }
+      if (IDLE && G.inc) L.push({ c: 'err', t: `GET https://api.${PROJ}.vibe/ 503 (Service Unavailable) · ${G.inc.id}` });
+    }
+    if (IDLE && G.leak && /githype/i.test(url)) L.push({ c: 'err', t: 'Clé d’API exposée dans un commit public : des robots s’en servent déjà. keys rotate, dans le terminal.' });
+    return L;
+  }
+  function devNet() {                             // localhost:3000 : les requêtes facturées, une à une ; ailleurs : la page et ses traqueurs
+    const loc = /^https?:\/\/localhost/i.test(url) && claudeOn, ads = ffAdsOn();
+    const head = `<div class="dn h"><span>Méthode</span><span>Requête</span><span>État</span><span>${loc ? 'Tokens' : 'Taille'}</span><span>${loc ? 'Coût' : 'Type'}</span></div>`;
+    if (loc) {
+      const L = billLog.slice(-40).reverse(), tok = Math.round(L.reduce((a, r) => a + r[2] + r[3], 0)), cost = L.reduce((a, r) => a + r[4], 0);
+      return head + (L.length ? L.map(([, m, ti, to, d]) => `<div class="dn"><span>POST</span><span>/v1/messages · ${esc(m)}</span><span>200</span><span>${Math.round(ti + to).toLocaleString('fr-FR')}</span><span>$${usdFine(d)}</span></div>`).join('')
+        : '<div class="dl info">Aucune requête pour l’instant : les agents réfléchissent, sans facturer. Pour une fois.</div>')
+        + `<div class="dl info">${L.length} requête${L.length > 1 ? 's' : ''} · ${tok.toLocaleString('fr-FR')} tokens · $${usdFine(cost)} : votre facture, ligne à ligne.</div>`;
+    }
+    const TR = ['traqueur.vibe/pixel.gif', 'pub.vibe/banniere.js', 'analytics.vibe/collect', 'empreinte.vibe/fp.js', 'regie.vibe/enchere', 'cdn.vibe/jquery-1.4.2.js'];
+    return head + `<div class="dn"><span>GET</span><span>${esc(webHost(url))}/</span><span>${/^https?:\/\/localhost/i.test(url) ? 'refusée' : 200}</span><span>${ri(12, 90)} Ko</span><span>document</span></div>`
+      + (/^https?:/i.test(url) && !/localhost/i.test(url) ? TR.map(t => `<div class="dn${ads ? '' : ' blk'}"><span>GET</span><span>${t}</span><span>${ads ? 200 : 'bloquée'}</span><span>${ri(1, 80)} Ko</span><span>${t.endsWith('.gif') ? 'image' : 'script'}</span></div>`).join('') : '');
+  }
+  function devDraw() {
+    if (dev.hidden) return;
+    dev.querySelectorAll('.wb-dvh [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.dv === devTab));
+    dev.querySelector('.e').textContent = conPage.filter(l => l.c === 'err').length || '';
+    dvi.hidden = devTab !== 'console';
+    dvb.innerHTML = devTab === 'console' ? [...conPage, ...conLog].map(l => `<div class="dl ${l.c}">${esc(l.t)}</div>`).join('')
+      : devTab === 'net' ? devNet() : webSrcHtml(url);
+    dvb.scrollTop = devTab === 'console' ? dvb.scrollHeight : 0;
+  }
+  function devOpen(on = dev.hidden) {
+    dev.hidden = !on;
+    if (on) { ach('inspecteur'); devDraw(); if (devTab === 'console' && !FF_TOUCH.matches) dvi.querySelector('input').focus({ preventScroll: true }); }   // au doigt : pas de clavier qui surgit
+  }
+  function devRun(s) {                            // la console ne lance jamais ce qu'on y tape : quelques réponses toutes faites, et la commande de l'agent
+    const t = s.trim(), out = (c, x) => conLog.push({ c, t: x });
+    if (!t) return;
+    out('in', t);
+    let m;
+    if (/^(console\.)?clear\(\);?$/.test(t)) conLog = [];
+    else if (/prod/i.test(t) && /delete/i.test(t)) {
+      out('info', 'Promise {<pending>}');
+      out('err', `DELETE https://api.${PROJ}.vibe/prod 204 (No Content)`);
+      ach('selfxss');
+      const who = panes.length ? agentName(panes[0]) : 'L’agent';
+      if (IDLE && claudeOn && mode !== 'gameover' && incStart('db')) out('ag', `${who} : ah, il ne fallait pas le coller ? La base refuse les connexions : elle n’a plus rien à servir.`);
+      else out('ag', `${who} : ah, il ne fallait pas le coller ? Heureusement, la prod était déjà par terre.`);
+    }
+    else if ((m = /^(\d{1,9})\s*\+\s*(\d{1,9})$/.exec(t))) out('info', `${+m[1] + +m[2] + 1} (calculé par un agent, avec assurance)`);
+    else if (/^document\.cookie;?$/.test(t)) out('info', `"_ga=GA1.2.${ri(1e8, 9e8)}; consentement=tout_accepter_par_defaut; agent=${panes.length ? agentName(panes[0]) : 'aucun'}; dark_pattern=1"`);
+    else if ((m = /^console\.log\((['"`])(.*)\1\);?$/.exec(t))) out('info', m[2]);
+    else if (/^alert\(/.test(t)) out('warn', 'alert() bloqué : Firefaux protège vos pop-ups. Les siennes, il les laisse passer.');
+    else if (/^(help|aide)\(?\)?$/i.test(t)) out('info', 'Essayez : 1+1, document.cookie, console.log("…"), clear(). Et ne collez pas ce que vos agents vous donnent.');
+    else out('err', `Uncaught ReferenceError: ${(t.match(/^[\w$.]+/) || ['ceci'])[0].slice(0, 40)} is not defined. Firefaux n’exécute rien de ce que vous tapez : c’est déjà assez dangereux comme ça.`);
+    if (conLog.length > 60) conLog = conLog.slice(-60);
+    devDraw();
+  }
   let closedT = [], lastT = 0, nextNote = '';     // les onglets fermés (Alt+Maj+T, dix au plus) ; le message à donner une fois la page chargée
   FF_T = [{ url, back, fwd, title, top: 0, sleep: false, seen: Date.now(), snd: false }]; FF_CUR = 0;
   function tabSave() { Object.assign(FF_T[FF_CUR], { url, back, fwd, title, top: page.scrollTop, seen: Date.now() }); }
@@ -12887,6 +13027,8 @@ function makeBrowser() {
     stat();
     if (xw.firefaux) xfLabel('firefaux');
     if (FF_T[FF_CUR]) { FF_T[FF_CUR].url = url; FF_T[FF_CUR].title = title; tabsDraw(); }   // le titre de l'onglet suit la page
+    if (!keep) { conPage = devPage(); conLog = []; }   // une page neuve : une console neuve
+    devDraw();
   }
   function go(raw, push = true) {                // un PC patate charge les pages plus lentement
     const u = webNorm(raw);
@@ -12921,6 +13063,7 @@ function makeBrowser() {
   }
   function live() {                              // l'argent monte : boutons et chiffres à jour, sans redessiner la page
     tabsTick();
+    if (!dev.hidden && devTab === 'net' && /^https?:\/\/localhost/i.test(url)) devDraw();   // la facture, en direct
     if (seen !== cartVer && /^https?:\/\/(www\.)?matos\.vibe/i.test(url)) return draw(true);   // le panier a changé ailleurs (le store du jeu)
     doc.querySelectorAll('[data-live]').forEach(n => {   // data-live="nom" ou "nom:argument"
       const [nm, arg] = n.dataset.live.split(':'), f = WEB_LIVE[nm];
@@ -12939,7 +13082,9 @@ function makeBrowser() {
     const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]'), wm = e.target.closest('[data-wbm]');
     if (!menu.hidden && !e.target.closest('.wb-mz, [data-wb="menu"]')) menuOpen(false);
     if (lpDone) { lpDone = false; return; }         // l'appui long vient d'ouvrir un onglet : pas de clic en plus
-    if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else act('fullscreen'); return; }
+    if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else if (a === 'dev') devOpen(true); else if (a === 'src') go(`view-source:${url}`); else act('fullscreen'); return; }
+    const dv = e.target.closest('[data-dv]');
+    if (dv) { if (dv.dataset.dv === 'close') devOpen(false); else { devTab = dv.dataset.dv; devDraw(); } return; }
     const tx = e.target.closest('[data-tabx]'), ts = e.target.closest('[data-tabsnd]'), tb = e.target.closest('[data-tab]');
     if (tx) return tabClose(+tx.dataset.tabx);
     if (ts) { FF_T[+ts.dataset.tabsnd].snd = false; tabsDraw(); return flash('Son coupé. La pub continue, en silence. Comme vos agents.'); }
@@ -12984,6 +13129,7 @@ function makeBrowser() {
   el.addEventListener('submit', e => {
     e.preventDefault();
     if (e.target.matches('.wb-url')) { go(input.value); input.blur(); }
+    else if (e.target.matches('.wb-dvi')) { const ci = e.target.querySelector('input'); devRun(ci.value); ci.value = ''; }
     else if (e.target.matches('[data-search]')) go(`vibe://recherche?q=${encodeURIComponent(e.target.q.value)}`);
   });
   input.addEventListener('focus', () => input.select());
@@ -13001,6 +13147,10 @@ function makeBrowser() {
     else if (/^Digit[1-9]$/.test(c) && !e.shiftKey) tabSwitch(c === 'Digit9' ? FF_T.length - 1 : +c.slice(5) - 1);
     else return;
     e.preventDefault(); e.stopPropagation();
+  });
+  el.addEventListener('keydown', e => {           // F12 : les outils de Firefaux (pas ceux de votre navigateur) ; Ctrl+U : le code source
+    if (e.key === 'F12' && !e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); e.stopPropagation(); devOpen(); }
+    else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'u') { e.preventDefault(); e.stopPropagation(); go(`view-source:${url.replace(/^view-source:/i, '')}`); }
   });
   el.addEventListener('mousedown', e => { if (e.button === 1 && e.target.closest('[data-href], [data-tab]')) e.preventDefault(); });   // pas de défilement automatique au clic du milieu
   el.addEventListener('auxclick', e => {          // clic du milieu : un lien s'ouvre dans un onglet d'arrière-plan ; un onglet se ferme
