@@ -533,6 +533,14 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-task.on { color: var(--fg); border-color: var(--orange); background: color-mix(in srgb, var(--orange) 18%, transparent); font-weight: 700; }
 .xf-task.min { color: var(--dim2); border-style: dashed; }
 .xf-task .xw-ic, .xf-it .xw-ic { color: var(--orange); }
+.xf-task { position: relative; }
+.xf-task .n { color: var(--dim); font-weight: 400; }   /* le nombre de fenêtres d'un groupe */
+.xf-task.prog::after { content: ''; position: absolute; left: 0; bottom: 0; width: var(--p, 0%); height: 3px; background: var(--green); transition: width .4s linear; }   /* une progression : le ship, apt */
+.xf-task.urgent, .xf-wl-btn.urgent { border-color: var(--orange); animation: xfurg 1s steps(1) 8 forwards; }   /* le signal d'urgence : il clignote, puis reste allumé */
+@keyframes xfurg { 0% { background: var(--orange); color: var(--ink); } 50%, 100% { background: color-mix(in srgb, var(--orange) 30%, transparent); color: var(--fg); } }
+@media (prefers-reduced-motion: reduce) { .xf-task.urgent, .xf-wl-btn.urgent { animation: none; background: color-mix(in srgb, var(--orange) 30%, transparent); } }
+.xf-task.drag { opacity: .55; outline: 1px dashed var(--orange); }
+.xf-wl-it.urgent .t { color: var(--orange); font-weight: 700; }
 .xf-sys { flex: none; display: flex; align-items: center; gap: 1.6ch; padding-right: .5ch; }
 .xf-cost { color: var(--yellow); }
 /* score : projets shippés, affiché partout et gardé dans ce navigateur */
@@ -1850,7 +1858,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.80', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.81', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2562,7 +2570,7 @@ const G_DEF = () => ({ v: 1, t0: Date.now(), money: 0, shipped: 0, ai: 'mistral'
   ff: { addons: {} }, mal: {}, tx: [], urssaf: { paid: 0, n: 0 }, ipo: { n: 0, so: 0, best: 0 }, vh: [],
   inc: null, incS: { n: 0, fix: 0, best: 0, lost: 0, log: [] }, mail: { box: [], seq: 0, next: 0 }, rep: 70, dil: 1, debt: 0, chal: '',
   pr: { open: [], seq: 412, merged: 0, closed: 0, blind: 0, caught: 0, lines: 0, read: 0, next: 0 }, world: { ev: null, next: 0, n: 0, log: [] }, hum: {}, humS: { paid: 0, quit: 0 },
-  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, ep: {}, mkt: 0, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 } });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
+  key: { v: 1, tracked: 0, again: 0, next: 0 }, leak: null, leakS: { n: 0, best: 0, lost: 0 }, zrc: { next: 0, n: 0 }, cron: { u: '', root: '', ok: {}, saved: 0 }, git: { br: 'main', brs: [], st: 0, rv: -1 }, pt: { cur: 'classique', own: { classique: 1 } }, ep: {}, mkt: 0, xfw: {}, xfd: { wall: 'logo', ico: {}, boot: 0 }, xfp: {} });   // Firefaux, logiciels malveillants, Vibank, URSSAF : une partie neuve les a aussi
 let G = (() => { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); return o?.v === 1 ? { ...G_DEF(), ...setupMig(o) } : G_DEF(); } catch { return G_DEF(); } })();
 const PC_LEGACY = !!G.pc && G.pc.mobo === undefined;   // sauvegarde d'avant la carte mère : pcMigrate() lui en offre une compatible
 G.pc = { ...G_DEF().pc, ...(G.pc || {}) };       // les sauvegardes d'avant le matériel : PC patate
@@ -2685,6 +2693,7 @@ const ACH = [
   { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
   { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
   { id: 'xfliste', g: '▤', n: 'Sept fenêtres, un bouton', d: 'Ouvrir la liste des fenêtres du tableau de bord avec au moins sept fenêtres ouvertes.', p: 9.8 },
+  { id: 'clignote', g: '!', n: 'Ça clignote', d: 'Laisser le bouton des agents clignoter cinq minutes pendant un incident. Il finira bien par se régler tout seul.', p: 4.4, h: 1 },
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
   { id: 'rangement', g: '⊡', n: 'Bureau rangé', d: 'Déplacer une icône du bureau. Le reste du bureau, lui, ne se range pas.', p: 28.1 },
@@ -5657,9 +5666,9 @@ function dpkgInterrupted(job) {
   shellPrint('dpkg a été interrompu. Lancez « sudo dpkg --configure -a »… ou laissez un agent s’en occuper.', 'dim');
 }
 function aptBar() {                              // la barre « Progression » d'apt, collée en bas pendant l'installation
-  const el = shellPrint('');
+  const el = shellPrint(''), tn = liveTerm;          // tn : le terminal d'apt ; sa progression s'affiche aussi dans son bouton du tableau de bord
   return {
-    set(p) { const w = 30, n = Math.round(p * w); el.innerHTML = html(H([`Progression : [${String(Math.round(p * 100)).padStart(3)}%]`, 'apt-pp'], ` [${'#'.repeat(n)}${'.'.repeat(w - n)}]`)); },
+    set(p) { XF_PROG[tn] = p; const w = 30, n = Math.round(p * w); el.innerHTML = html(H([`Progression : [${String(Math.round(p * 100)).padStart(3)}%]`, 'apt-pp'], ` [${'#'.repeat(n)}${'.'.repeat(w - n)}]`)); },
     line(t, cls = '') {
       const l = document.createElement('div');
       l.className = 'ln' + (cls ? ' ' + cls : '');
@@ -5667,7 +5676,7 @@ function aptBar() {                              // la barre « Progression » d
       shellOut.insertBefore(l, el);
       shellOut.scrollTop = shellOut.scrollHeight;
     },
-    done() { el.remove(); },
+    done() { delete XF_PROG[tn]; el.remove(); },
   };
 }
 const APT_USAGE = name => [
@@ -7990,25 +7999,39 @@ function xfClose(n) {
 }
 function xfSync() {                              // après chaque changement d'onglets : fenêtres orphelines, barre des tâches
   for (const n of Object.keys(xw)) if (n !== 'zsh' && !tabs.includes(n)) xfRemove(n);
-  const L = tabs.filter(t => xw[t] && !xw[t].closed);
+  const L = xfOrd(tabs.filter(t => xw[t] && !xw[t].closed)), T = L.filter(isTerm), grp = xfGroup(L.length, T.length);
+  let grpDone = false;
   xfTasksEl.innerHTML = `<button type="button" class="xf-wl-btn" data-wl aria-haspopup="menu" aria-controls="xf-wl" aria-expanded="${!xfWlEl.hidden}" `
     + `title="${plural(L.length, 'fenêtre')} : la liste" aria-label="Fenêtres ouvertes : ${L.length}">▤ ${L.length}</button>` + L.map(t => {
+    if (grp && isTerm(t)) {                          // les terminaux, regroupés : un seul bouton, à la place du premier ; un clic ouvre leur menu
+      if (grpDone) return '';
+      grpDone = true;
+      const on = T.includes(view) && !xw[view].min, min = T.every(k => xw[k].min);
+      return `<button type="button" class="xf-task grp${on ? ' on' : ''}${min ? ' min' : ''}" data-grp="term" aria-haspopup="menu" title="${T.length} terminaux : le menu"`
+        + `${on ? ' aria-current="true"' : ''}><span class="xw-ic">❯</span> Terminal <span class="n">(${T.length})</span></button>`;
+    }
     const w = xw[t], on = t === view && !w.min;
     return `<button type="button" class="xf-task${on ? ' on' : ''}${w.min ? ' min' : ''}" data-w="${t}" title="${esc(xfTitle(t))}"`
       + `${on ? ' aria-current="true"' : ''}><span class="xw-ic">${esc(xfIcon(t))}</span> ${esc(xfName(t))}</button>`;
   }).join('');
   xfTasksFit();
+  xfTaskState();
   if (!xfWlEl.hidden) xfWlDraw();
   xfIconsSync();                                 // le point vert des icônes suit les programmes ouverts
 }
-xfTasksEl.addEventListener('contextmenu', e => {  // barre des tâches : le menu de la fenêtre
+xfTasksEl.addEventListener('contextmenu', e => {  // barre des tâches : le menu de la fenêtre (du groupe : ses terminaux)
+  const g = e.target.closest('[data-grp]');
+  if (g) { e.preventDefault(); return xfGrpMenu(g); }
   const b = e.target.closest('[data-w]');
   if (!b) return;
   e.preventDefault();
   xfWinMenu(b.dataset.w, e.clientX, e.clientY);
 });
 xfTasksEl.addEventListener('click', e => {       // barre des tâches : un clic passe devant, un second réduit
+  if (xfDragged) { xfDragged = false; return; }     // la fin d'un glissement n'est pas un clic
   if (e.target.closest('[data-wl]')) return xfWlToggle();
+  const g = e.target.closest('[data-grp]');
+  if (g) return xfGrpMenu(g);
   const b = e.target.closest('[data-w]');
   if (!b) return;
   if (b.dataset.w === view && xfShown(view)) xfMin(view);
@@ -8020,12 +8043,108 @@ function xfTasksFit() {
   const n = xfTasksEl.querySelectorAll('.xf-task').length, em = parseFloat(getComputedStyle(xfTasksEl).fontSize) || 10;
   xfTasksEl.classList.toggle('compact', n > 0 && xfTasksEl.clientWidth / n < 6.5 * em);
 }
-new ResizeObserver(() => { if (xfOn) xfTasksFit(); }).observe(xfTasksEl);
+new ResizeObserver(() => { if (xfOn) xfSync(); }).observe(xfTasksEl);   // la place change : le groupe des terminaux, ▤, se recalculent
+/* les boutons de fenêtres, comme xfce4-panel : les terminaux regroupés quand la place manque, le clic du milieu ferme, la molette passe
+   d'une fenêtre à l'autre, on range les boutons en les glissant ; le signal d'urgence (le bouton clignote) ; la progression dans le bouton */
+function xfOrd(L) {                                // l'ordre des boutons : celui qu'on a rangé (G.xfp.ord), puis l'ordre d'ouverture
+  const o = G.xfp?.ord || [], i = t => { const k = o.indexOf(t); return k < 0 ? 1e3 + tabs.indexOf(t) : k; };
+  return [...L].sort((a, b) => i(a) - i(b));
+}
+function xfGroup(n, nt) {                          // regrouper les terminaux ? « toujours », « jamais », ou « si la place manque » (moins de 12 em par bouton)
+  const mode = G.xfp?.grp || 'auto';
+  if (nt < 2 || mode === 'never') return false;
+  return mode === 'always' || xfTasksEl.clientWidth / n < 12 * (parseFloat(getComputedStyle(xfTasksEl).fontSize) || 10);
+}
+function xfGrpMenu(b) {                            // le groupe des terminaux : un menu, une ligne par terminal
+  const T = xfOrd(tabs.filter(t => isTerm(t) && xw[t] && !xw[t].closed)), r = b.getBoundingClientRect();
+  xfCtxOpen(r.left, r.bottom, [
+    ...T.map(k => ({ ic: '❯', t: `${xfName(k)} · ${tildePath(k === liveTerm ? cwd : TERMS[k]?.cwd || HOME)}`, k: xw[k].min ? 'réduite' : k === view ? 'devant' : '', run: () => xfFocus(k) })),
+    '-',
+    { ic: '❯', t: 'Nouveau terminal', run: () => termNew() },
+    { ic: '✕', t: `Fermer les ${T.length} terminaux`, danger: true, run: () => [...T].reverse().forEach(k => xfClose(k)) },
+  ]);
+}
+const XF_PROG = {}, XF_URG_ACK = {}, XF_URG_T = {};   // les progressions posées par les programmes (apt) ; l'urgence déjà vue, et depuis quand elle clignote
+function xfUrgCause(n) {                           // ce qui réclame l'attention d'une fenêtre (une clé : une nouvelle cause rallume le bouton), ou ''
+  if (n === 'claude') return IDLE && G.inc ? `inc:${G.inc.id}` : '';
+  if (n === 'blunderbird') return IDLE && mailUnread() ? `mail:${G.mail.seq}` : '';
+  if (n === 'firefaux') return FF_UPD.ready ? 'upd' : FF_T.some(t => t.snd) ? 'snd' : '';
+  if (n === 'htop' || n === 'atop') return IDLE && pcLoad().oom ? 'swap' : '';
+  return '';
+}
+function xfUrgent() {                              // les fenêtres qui clignotent : une cause, pas encore vue (regarder la fenêtre l'éteint)
+  const U = {};
+  for (const n in xw) {
+    const c = xfUrgCause(n);
+    if (!c) { delete XF_URG_ACK[n]; delete XF_URG_T[n]; continue; }
+    if (n === view && xfShown(n)) XF_URG_ACK[n] = c;
+    if (XF_URG_ACK[n] === c) { delete XF_URG_T[n]; continue; }
+    U[n] = c;
+    XF_URG_T[n] ||= Date.now();
+    if (c.startsWith('inc:') && Date.now() - XF_URG_T[n] >= 300000) ach('clignote');
+  }
+  return U;
+}
+function xfProgs() {                               // les progressions : apt dans son terminal, le ship en cours dans le bouton des agents
+  const P = { ...XF_PROG };
+  if (IDLE && claudeOn && xw.claude) P.claude = Math.max(0, Math.min(1, G.prog));
+  return P;
+}
+function xfTaskState() {                           // à chaque tic, sans reconstruire les boutons : l'urgence, la progression
+  const U = xfUrgent(), P = xfProgs(), terms = tabs.filter(isTerm);
+  xfTasksEl.querySelectorAll('.xf-task').forEach(b => {
+    const ks = b.dataset.grp ? terms : [b.dataset.w], p = ks.map(k => P[k]).find(v => v != null);
+    b.classList.toggle('urgent', ks.some(k => U[k]));
+    b.classList.toggle('prog', p != null);
+    if (p != null) b.style.setProperty('--p', `${(p * 100).toFixed(1)}%`);
+  });
+  xfTasksEl.querySelector('[data-wl]')?.classList.toggle('urgent', Object.keys(U).length > 0);
+}
+xfTasksEl.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });   // pas de défilement automatique au clic du milieu
+xfTasksEl.addEventListener('auxclick', e => {     // clic du milieu sur un bouton : la fenêtre se ferme
+  const b = e.target.closest('[data-w]');
+  if (e.button !== 1 || !b) return;
+  e.preventDefault();
+  xfClose(b.dataset.w);
+});
+let xfWheelAcc = 0, xfDragged = false;
+xfTasksEl.addEventListener('wheel', e => {        // la molette sur les boutons : la fenêtre suivante, ou la précédente
+  e.preventDefault();
+  xfWheelAcc += e.deltaY || e.deltaX;
+  if (Math.abs(xfWheelAcc) < 40) return;
+  const L = xfOrd(tabs.filter(t => xw[t] && !xw[t].closed)), d = xfWheelAcc > 0 ? 1 : -1;
+  xfWheelAcc = 0;
+  if (L.length) xfFocus(L[(Math.max(0, L.indexOf(view)) + d + L.length) % L.length]);
+}, { passive: false });
+xfTasksEl.addEventListener('pointerdown', e => {  // glisser un bouton (à la souris) : le ranger ailleurs ; l'ordre est gardé dans la partie
+  const b = e.target.closest('.xf-task');
+  if (!b || e.button !== 0 || e.pointerType === 'touch' || G.xfp?.lock) return;
+  const x0 = e.clientX;
+  let on = false;
+  const mv = ev => {
+    if (!on && Math.abs(ev.clientX - x0) < 6) return;
+    if (!on) { on = true; b.classList.add('drag'); }
+    const t = [...xfTasksEl.querySelectorAll('.xf-task')].find(o => { const r = o.getBoundingClientRect(); return o !== b && ev.clientX >= r.left && ev.clientX <= r.right; });
+    if (t) { const r = t.getBoundingClientRect(); xfTasksEl.insertBefore(b, ev.clientX < r.left + r.width / 2 ? t : t.nextSibling); }
+  };
+  const up = () => {
+    ['pointermove', 'pointerup', 'pointercancel'].forEach((k, i) => removeEventListener(k, i ? up : mv));
+    if (!on) return;
+    b.classList.remove('drag');
+    xfDragged = true;
+    setTimeout(() => { xfDragged = false; }, 0);
+    G.xfp = { ...(G.xfp || {}), ord: [...xfTasksEl.querySelectorAll('.xf-task')].flatMap(o => o.dataset.grp ? tabs.filter(t => isTerm(t) && xw[t] && !xw[t].closed) : [o.dataset.w]) };
+    if (IDLE) saveGame();
+  };
+  addEventListener('pointermove', mv);
+  addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+});
 function xfWlDraw() {
   const L = xfWins();
   xfWlEl.innerHTML = `<p class="mh">${plural(L.length, 'fenêtre')} ouverte${L.length > 1 ? 's' : ''}</p>` + L.map(n => {
     const w = xw[n], on = n === view && !w.min;
-    return `<div class="xf-wl-it${on ? ' on' : ''}${w.min ? ' min' : ''}"><button type="button" role="menuitem" data-wlgo="${n}"${on ? ' aria-current="true"' : ''}>`
+    return `<div class="xf-wl-it${on ? ' on' : ''}${w.min ? ' min' : ''}${XF_URG_T[n] ? ' urgent' : ''}"><button type="button" role="menuitem" data-wlgo="${n}"${on ? ' aria-current="true"' : ''}>`
       + `<span class="xw-ic">${esc(xfIcon(n))}</span><span class="t">${esc(xfName(n))}</span><span class="d">${w.min ? 'réduite' : on ? 'au premier plan' : ''}</span></button>`
       + `<button type="button" class="x" data-wlx="${n}" title="Fermer" aria-label="Fermer : ${esc(xfName(n))}">✕</button></div>`;
   }).join('')
@@ -8060,6 +8179,7 @@ function xfPanelTick() {
   c.hidden = !claudeOn;
   if (claudeOn) c.textContent = `${cli().glyph} $${usd(usage.usd)}`;
   for (const n in xw) xfLabel(n);
+  xfTaskState();
   xfIconsSync();
   xfTrayDraw();
 }
@@ -11807,7 +11927,7 @@ function ipoDo(next = '') {                        // sonner la cloche : la star
   if (V >= 1e9) ach('licorne');
   if (ipo.n >= 3) ach('serial');
   const tx = [...(G.tx || []), [Date.now(), 'ipo', `Introduction en bourse de ${PROJ.toUpperCase()} (${bigMoney(V)}) : ${so} stock-options, bloquées quatre ans`, 0, 0]].slice(-200);
-  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, xfw: G.xfw, xfd: G.xfd, tx, ipo, chal: nx };
+  const keep = { ach: G.ach, play: G.play, pc: G.pc, cli: G.cli, pk: G.pk, rt: G.rt, ff: G.ff, mal: G.mal, elecT: G.elecT, xfw: G.xfw, xfd: G.xfd, xfp: G.xfp, tx, ipo, chal: nx };
   G = { ...G_DEF(), ...keep };
   platInit();
   if (SANDBOX) sandboxFill();
