@@ -541,6 +541,39 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 @media (prefers-reduced-motion: reduce) { .xf-task.urgent, .xf-wl-btn.urgent { animation: none; background: color-mix(in srgb, var(--orange) 30%, transparent); } }
 .xf-task.drag { opacity: .55; outline: 1px dashed var(--orange); }
 .xf-wl-it.urgent .t { color: var(--orange); font-weight: 700; }
+/* les greffons du tableau de bord : le graphe du processeur, la météo de la prod, le volume, la facture, l'horloge et son calendrier */
+.xf-pl { flex: none; padding: 0 .6ch; border: 1px solid transparent; border-radius: 3px; color: var(--fg); white-space: nowrap; }
+.xf-pl:hover, .xf-pl[aria-expanded="true"] { border-color: var(--rule); background: rgba(255, 255, 255, .06); }
+.xf-pl.xf-cost { color: var(--yellow); }
+.xf-cpu { color: var(--green); letter-spacing: -.04em; }
+.xf-cpu.warn, .xf-wx.warn { color: var(--orange); }
+.xf-cpu.bad, .xf-wx.bad { color: var(--red); font-weight: 700; }
+.xf-wx.ok { color: var(--yellow); }
+.xf-vol.off { color: var(--dim); }
+.xf-pop { position: absolute; top: var(--xfp-h); right: .5ch; z-index: 4; width: min(44ch, calc(100vw - 1ch)); max-height: 75vh; overflow: auto; padding: .5em 1.2ch .7em;
+  border: 1px solid var(--orange); border-radius: 0 0 4px 4px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); white-space: normal; }
+.xf-pop[hidden] { display: none; }
+.xf-pop h3 { margin-bottom: .2em; color: var(--orange); font-size: 1em; }
+.xf-pop .sub { margin: .2em 0 .5em; color: var(--dim); font-size: .85em; }
+.xf-pop table { width: 100%; border-collapse: collapse; margin-bottom: .3em; }
+.xf-pop td { padding: .1em .5ch; } .xf-pop td.r { text-align: right; }
+.xf-pop .row { display: flex; justify-content: space-between; gap: 1ch; padding: .15em 0; }
+.xf-pop .ft { margin-top: .6em; padding-top: .4em; border-top: 1px solid var(--sep); color: var(--dim); font-size: .85em; }
+.xf-pop button.lk { padding: .1em 1ch; border: 1px solid var(--rule); border-radius: 3px; color: var(--fg); }
+.xf-pop button.lk:hover { border-color: var(--orange); }
+.xf-pop input[type="range"] { width: 100%; accent-color: var(--orange); }
+.xf-cal-nav { display: flex; align-items: center; justify-content: space-between; margin: .3em 0; }
+.xf-cal-nav button { padding: 0 1.2ch; color: var(--fg); }
+.xf-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: .5em; text-align: center; }
+.xf-cal span { padding: .15em 0; border-radius: 2px; }
+.xf-cal .h { color: var(--dim2); font-size: .85em; }
+.xf-cal .o { color: var(--dim2); }
+.xf-cal .fri { color: var(--orange); font-weight: 700; }
+.xf-cal .inc { box-shadow: inset 0 -2px 0 var(--red); }
+.xf-cal .now { background: var(--orange); color: var(--ink); font-weight: 700; }
+.xf-wxf { display: grid; grid-template-columns: 13ch 2ch minmax(0, 1fr); gap: .25em 1ch; margin: .4em 0; }
+.xf-wxf .g { color: var(--orange); }
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1100px) { .xf-cpu, .xf-wx, .xf-vol { display: none; } }   /* au doigt (téléphone, tablette), la place va aux fenêtres : le graphe, la météo, le volume restent sur ordinateur */
 .xf-sys { flex: none; display: flex; align-items: center; gap: 1.6ch; padding-right: .5ch; }
 .xf-cost { color: var(--yellow); }
 /* score : projets shippés, affiché partout et gardé dans ce navigateur */
@@ -584,7 +617,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 @media (pointer: coarse), (max-width: 760px) {   /* le tableau de bord au doigt : 40 px de haut, des cibles de doigt, le texte d'au moins 13 px */
   #xfce { --xfp-h: 40px; }
   .xf-panel { gap: .5ch; font-size: max(13px, 1em); }
-  .xf-apps, .xf-task, .xf-wl-btn, .xf-tray button, .xf-panel .fs-btn { min-width: 40px; height: 34px; }
+  .xf-apps, .xf-task, .xf-wl-btn, .xf-tray button, .xf-panel .fs-btn, .xf-pl { min-width: 40px; height: 34px; }
   .xf-apps { padding: 0 .8ch; }
   .xf-sys { gap: .8ch; }
   .xf-wl, .xf-notes { font-size: max(14px, 1em); }
@@ -1738,7 +1771,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="xf-panel" role="toolbar" aria-label="Tableau de bord Xfce">
     <button type="button" class="xf-apps" aria-haspopup="menu" aria-expanded="false" aria-controls="xf-menu" aria-label="Applications">▦<span class="l"> Applications</span></button>
     <nav class="xf-tasks" aria-label="Fenêtres ouvertes"></nav>
-    <span class="xf-sys"><span class="xf-tray" role="group" aria-label="Zone de notifications"></span><span class="xf-score" title="Score : projets shippés">0 shipped</span><span class="xf-cost" hidden title="Facture des agents, en direct (applet xfce4-billing-plugin)"></span><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button><span class="xf-clock"></span><span class="xf-user"></span></span>
+    <span class="xf-sys"><button type="button" class="xf-pl xf-cpu" data-pl="cpu"></button><button type="button" class="xf-pl xf-wx" data-pl="wx" aria-haspopup="dialog" aria-expanded="false"></button><span class="xf-tray" role="group" aria-label="Zone de notifications"></span><span class="xf-score" title="Score : projets shippés">0 shipped</span><button type="button" class="xf-pl xf-cost" data-pl="cost" hidden title="Facture des agents, en direct (xfce4-billing-plugin) : le détail" aria-haspopup="dialog" aria-expanded="false"></button><button type="button" class="xf-pl xf-vol" data-pl="vol" aria-haspopup="dialog" aria-expanded="false"></button><button type="button" class="fs-btn" data-act="fullscreen" title="Plein écran (F)" aria-label="Plein écran" aria-pressed="false">⤢</button><button type="button" class="xf-pl xf-clock" data-pl="cal" aria-haspopup="dialog" aria-expanded="false"></button><span class="xf-user"></span></span>
   </div>
   <div class="xf-desk"><div class="xf-wall" aria-hidden="true"></div><div class="xf-icons" role="group" aria-label="Icônes du bureau"></div></div>
   <div class="xf-menu" id="xf-menu" role="menu" aria-label="Applications" hidden></div>
@@ -1746,6 +1779,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   <div class="xf-sw" id="xf-sw" role="listbox" aria-label="Fenêtres ouvertes" hidden></div>
   <div class="xf-notes" id="xf-notes" role="dialog" aria-label="Journal des notifications" hidden></div>
   <div class="xf-wl" id="xf-wl" role="menu" aria-label="Fenêtres ouvertes" hidden></div>
+  <div class="xf-pop" id="xf-pop" role="dialog" aria-label="Greffon du tableau de bord" hidden></div>
   <div class="fm-confirm xf-dlg" id="xf-dlg" hidden><div class="fm-box" role="dialog" aria-modal="true" aria-label="Bureau"></div></div>
 </div>
 <section id="panic" hidden aria-label="Crash système">
@@ -1841,6 +1875,9 @@ const SRC_LINES = [...document.childNodes].map(n => n.outerHTML ?? (n.nodeType =
 /* ---------- utils ---------- */
 const $ = s => document.querySelector(s);
 const R = Math.random;
+const sndK = () => G.xfp?.mute ? 0 : (G.xfp?.vol ?? 100) / 100;   // le volume général (le greffon ♪ du tableau de bord de Xfce)
+function sndVol(a, v) { if (!a) return; a._own = Math.max(0, Math.min(1, v)); a.volume = a._own * sndK(); }   // le volume d'un lecteur, fois le volume général
+const sndOwn = a => a?._own ?? a?.volume ?? 1;
 const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
 const rf = (a, b, d = 1) => (a + R() * (b - a)).toFixed(d);
 const pick = a => a[Math.floor(R() * a.length)];
@@ -1858,7 +1895,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.81', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.82', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2693,6 +2730,8 @@ const ACH = [
   { id: 'rotation', g: '⟳', n: 'Rotation', d: 'Révoquer une clé volée en moins d’une minute.', p: 7.1 },
   { id: 'tiling', g: '◧', n: 'Tiling window manager', d: 'Coller deux fenêtres côte à côte, une à gauche, une à droite.', p: 16.4 },
   { id: 'xfliste', g: '▤', n: 'Sept fenêtres, un bouton', d: 'Ouvrir la liste des fenêtres du tableau de bord avec au moins sept fenêtres ouvertes.', p: 9.8 },
+  { id: 'meteo', g: '↯', n: 'Bulletin météo', d: 'Consulter la météo de la prod pendant un orage (un incident). Prévision : pluie de remboursements.', p: 7.2 },
+  { id: 'chut', g: '♪', n: 'Silence, ça déploie', d: 'Couper le son depuis le tableau de bord pendant qu’une musique joue.', p: 11.5 },
   { id: 'clignote', g: '!', n: 'Ça clignote', d: 'Laisser le bouton des agents clignoter cinq minutes pendant un incident. Il finira bien par se régler tout seul.', p: 4.4, h: 1 },
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
@@ -7803,6 +7842,7 @@ function xfExit(quiet) {
   xfMenuClose();
   xfCtxClose();
   xfWlEl.hidden = true;
+  xfPopClose();
   tabs.filter(t => PROGS[t].gui || t === 'settings-ui' || t === 'agents-ui').forEach(closeTab);   // thunar n'a plus d'affichage : il se ferme avec la session
   for (const n of Object.keys(xw)) xfRemove(n);
   xfOn = false;
@@ -8174,16 +8214,189 @@ xfWlEl.addEventListener('keydown', e => {
 addEventListener('pointerdown', e => { if (!xfWlEl.hidden && !e.target.closest('#xf-wl, [data-wl]')) xfWlToggle(false); }, true);
 function xfPanelTick() {
   if (!xfOn) return;
-  $('.xf-clock').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const now = new Date(), ck = $('.xf-clock');
+  ck.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  ck.title = `${now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · un clic : le calendrier`;
   const c = $('.xf-cost');
   c.hidden = !claudeOn;
   if (claudeOn) c.textContent = `${cli().glyph} $${usd(usage.usd)}`;
   for (const n in xw) xfLabel(n);
+  xfPlugTick();
   xfTaskState();
   xfIconsSync();
   xfTrayDraw();
 }
 setInterval(xfPanelTick, 1000);
+
+/* les greffons du tableau de bord (xfce4-cpugraph-plugin, une météo, xfce4-pulseaudio-plugin, la facture, le calendrier de l'horloge) :
+   un clic ouvre leur fenêtre (#xf-pop), sous le greffon. La météo est celle de la prod ; sa température, celle du processeur. */
+const xfPopEl = $('#xf-pop'), XF_CPU = [], XF_BILL = [], XF_SPARK = '▁▂▃▄▅▆▇█';
+let xfPopK = '', xfPopSig = '', xfCalM = 0;          // le greffon ouvert ; ce qui est affiché ; le mois du calendrier (0 : celui-ci)
+function xfCpuNow() {                              // la charge du processeur, la température, la RAM, le swap : comme htop, en plus court
+  try {
+    const L = pcLoad(), busy = claudeOn && mode === 'idle' && !paused;
+    return { u: busy ? Math.min(100, L.util * 100 * (.86 + R() * .18)) : 2 + R() * 5, t: Math.round(PCS.temp), used: L.used, ram: L.ram, swap: L.swap, oom: L.oom };
+  } catch { return { u: 3, t: Math.round(PCS.temp), used: 1, ram: 4, swap: 0, oom: false }; }
+}
+function xfWx() {                                  // la météo de la prod : [glyphe, ciel, classe, détail]
+  if (!IDLE) return ['☼', 'Grand soleil', 'ok', 'Mode libre : pas de prod, pas de nuages.'];
+  const b = Math.min(BUG_CAP, bugShare()), pr = G.pr?.open?.length || 0;   // le mur des bugs plafonne à 90 %, la météo aussi
+  if (G.inc) return ['↯', 'Orage sur la prod', 'bad', `${G.inc.id} : ${lcFirst(INC_KINDS[G.inc.k].t)}. Restez à l’abri, ou réparez.`];
+  if (isFri()) return ['↯', 'Avis de tempête : vendredi', 'warn', 'Vigilance orange pour tout déploiement après 15 h.'];
+  if (b >= .5 || G.world?.ev) return ['∴', 'Pluie de bugs', 'warn', `${Math.round(b * 100)} % du travail mangé par les bugs.`];
+  if (b >= .2 || pr >= 3) return ['≈', 'Nuageux', '', `${Math.round(b * 100)} % de bugs, ${plural(pr, 'PR')} à relire.`];
+  return ['☼', 'Grand soleil', 'ok', 'Rien ne casse. Pour l’instant.'];
+}
+function xfWxHtml() {                              // les prévisions : aujourd'hui, puis trois jours ; le vendredi, toujours la tempête
+  const D = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'], now = new Date(), w = xfWx(), c = xfCpuNow();
+  const days = [0, 1, 2, 3].map(i => {
+    const k = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i).getDay();
+    const f = !i ? [w[0], w[1]] : k === 5 ? ['↯', 'Tempête : on déploie'] : k === 6 || k === 0 ? ['☼', 'Calme : personne ne déploie'] : k === 1 ? ['∴', 'Averses : la semaine reprend'] : ['≈', 'Variable, comme les estimations'];
+    return `<span>${!i ? 'Aujourd’hui' : i === 1 ? 'Demain' : D[k]}</span><span class="g">${f[0]}</span><span>${esc(f[1])}</span>`;
+  }).join('');
+  const b = IDLE ? Math.round(Math.min(BUG_CAP, bugShare()) * 100) : 0, pr = IDLE ? G.pr?.open?.length || 0 : 0;
+  return `<h3>${w[0]} Météo de la prod</h3><p class="sub">${esc(w[3])}</p><div class="xf-wxf">${days}</div>`
+    + `<p class="row"><span>Température</span><b>${c.t} °C (le processeur)</b></p><p class="row"><span>Humidité</span><b>${b} % de bugs</b></p>`
+    + `<p class="row"><span>Vent</span><b>${plural(pr, 'PR')} à relire</b></p><p class="row"><span>Pression</span><b>$${usd(usage.usd)} de tokens</b></p>`
+    + '<p class="ft">Prévisions établies par un agent, à partir de rien. Fiabilité : celle des estimations de sprint.</p>';
+}
+function xfBillHtml() {                            // la facture : par modèle, l'électricité, ce qu'a coûté la dernière minute
+  const rows = Object.keys(MODELS).filter(k => usage.by[k]).map(k => `<tr><td>${esc(MODELS[k].id)}</td><td class="r">${kfmt(usage.by[k].in + usage.by[k].out)}</td><td class="r">$${usd(usage.by[k].usd)}</td></tr>`).join('');
+  const per = XF_BILL.length > 1 ? (XF_BILL.at(-1) - XF_BILL[0]) * 60 / (XF_BILL.length - 1) : 0;
+  return `<h3>${esc(cli().glyph)} Facture des agents</h3><p class="sub">xfce4-billing-plugin · en direct</p>`
+    + `<table>${rows || '<tr><td class="dim">Pas encore un token.</td></tr>'}</table>`
+    + `<p class="row"><span>Tokens</span><b>$${usd(usage.usd)}</b></p>`
+    + (IDLE ? `<p class="row"><span>Électricité, depuis le dernier ship</span><b>$${usd(G.elec || 0)}</b></p><p class="row"><span>Au compteur</span><b>${Math.round(wallW())} W</b></p>` : '')
+    + `<p class="row"><span>La dernière minute</span><b>+$${usd(Math.max(0, per))}</b></p>`
+    + '<p class="ft">Une seconde de jeu, vingt minutes de travail des agents. <button type="button" class="lk" data-popcmd="cost">cost, dans le terminal</button></p>';
+}
+function xfVolHtml() {
+  const v = G.xfp?.vol ?? 100, m = !!G.xfp?.mute, on = [vlcAudio && !vlcAudio.paused ? 'VLC' : '', ultraOn ? '« J’ai mal », pour l’ultracode' : ''].filter(Boolean);
+  return '<h3>♪ Volume</h3><p class="sub">xfce4-pulseaudio-plugin · Haut-parleurs (Radeon RX 7900 XTX, HDMI)</p>'
+    + `<input type="range" min="0" max="100" step="5" value="${v}" data-vol aria-label="Volume général">`
+    + `<p class="row"><span data-volv>${m ? 'muet' : `${v} %`}</span><button type="button" class="lk" data-mute aria-pressed="${m}">${m ? 'Remettre le son' : 'Couper le son'}</button></p>`
+    + `<p class="sub">En lecture : ${on.length ? on.join(' · ') : 'rien. Les agents, eux, travaillent en silence.'}</p>`
+    + '<p class="ft">La molette sur ♪ : 5 % de plus ou de moins. Le bip du POST suit aussi.</p>';
+}
+function xfCronNext(n = 3) {                       // les prochaines tâches cron, dans les 24 heures (celles de dev et de root)
+  if (!IDLE) return [];
+  const P = [['u', USER], ['root', 'root']].flatMap(([k, who]) => { const p = cronParse(G.cron?.[k]); return p.err ? [] : p.jobs.filter(j => !j.reboot).map(j => ({ j, who })); });
+  const out = [], t0 = new Date();
+  t0.setSeconds(0, 0);
+  for (let i = 1; i <= 1440 && P.length && out.length < n; i++) {
+    const d = new Date(t0.getTime() + i * 60000);
+    for (const { j, who } of P) if (out.length < n && cronMatch(j, d)) out.push([d, j.cmd, who]);
+  }
+  return out;
+}
+function xfCalHtml() {                             // le calendrier : les vendredis, les jours d'incident, aujourd'hui ; les jours sans incident, cron
+  const now = new Date(), m0 = new Date(now.getFullYear(), now.getMonth() + xfCalM, 1), y = m0.getFullYear(), mo = m0.getMonth();
+  const log = IDLE ? G.incS?.log || [] : [], inc = new Set([...log.map(l => new Date(l[0]).toDateString()), ...(IDLE && G.inc ? [new Date(G.inc.t0).toDateString()] : [])]);
+  const lead = (m0.getDay() + 6) % 7, weeks = Math.ceil((lead + new Date(y, mo + 1, 0).getDate()) / 7);
+  let cells = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(d => `<span class="h">${d}</span>`).join('');
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = new Date(y, mo, 1 - lead + i), s = d.toDateString(), f = d.getDay() === 5, x = inc.has(s);
+    const c = [d.getMonth() !== mo ? 'o' : '', f ? 'fri' : '', x ? 'inc' : '', s === now.toDateString() ? 'now' : ''].filter(Boolean).join(' ');
+    const tip = [f ? 'vendredi : jour de déploiement' : '', x ? 'un incident en prod' : ''].filter(Boolean).join(' · ');
+    cells += `<span${c ? ` class="${c}"` : ''}${tip ? ` title="${tip}"` : ''}>${d.getDate()}</span>`;
+  }
+  const last = G.inc ? now.getTime() : log.length ? log.at(-1)[0] + log.at(-1)[2] * 1000 : 0, quiet = Math.floor((now - last) / 864e5);
+  const fri = (5 - now.getDay() + 7) % 7, cr = xfCronNext();
+  return `<h3>${esc(now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))}</h3>`
+    + `<div class="xf-cal-nav"><button type="button" data-cal="-1" aria-label="Mois précédent">‹</button><b>${esc(m0.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }))}</b>`
+    + '<button type="button" data-cal="1" aria-label="Mois suivant">›</button></div>'
+    + `<div class="xf-cal">${cells}</div>`
+    + `<p class="row"><span>Jours sans incident</span><b>${!IDLE ? '—' : G.inc ? '0 (en cours)' : last ? quiet : 'aucun incident, pour l’instant'}</b></p>`
+    + `<p class="row"><span>Prochain vendredi</span><b>${isFri() ? 'aujourd’hui' : `dans ${plural(fri, 'jour')}`}</b></p>`
+    + '<p class="sub">Prochaines tâches cron</p>'
+    + (cr.length ? cr.map(([d, cmd, who]) => `<p class="row"><span>${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} · ${esc(who)}</span><b>${esc(cmd.length > 30 ? cmd.slice(0, 29) + '…' : cmd)}</b></p>`).join('')
+      : '<p class="row"><span class="dim">Aucune : crontab -e pour en écrire.</span></p>')
+    + '<p class="ft">En orange : les vendredis. Souligné de rouge : un incident.</p>';
+}
+function xfPopDraw() {
+  const h = { wx: xfWxHtml, cost: xfBillHtml, vol: xfVolHtml, cal: xfCalHtml }[xfPopK]?.();
+  if (h === undefined || h === xfPopSig) return;
+  xfPopSig = h;
+  xfPopEl.innerHTML = h;
+}
+function xfPopOpen(k, btn) {
+  if (xfPopK === k) return xfPopClose();
+  xfMenuClose(); xfCtxClose(); xfWlEl.hidden = true;
+  if (!xfNotesEl.hidden) xfNotesToggle(false);
+  xfPopClose();
+  xfPopK = k; xfPopSig = ''; xfCalM = 0;
+  xfPopDraw();
+  xfPopEl.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+  const r = btn.getBoundingClientRect(), w = xfPopEl.offsetWidth;
+  xfPopEl.style.left = Math.max(4, Math.min(r.right - w, innerWidth - w - 4)) + 'px';
+  xfPopEl.style.right = 'auto';
+  if (k === 'wx' && IDLE && G.inc) ach('meteo');
+  xfPopEl.querySelector('input, button')?.focus({ preventScroll: true });
+}
+function xfPopClose() {
+  if (!xfPopK) return;
+  xfceEl.querySelector(`[data-pl="${xfPopK}"]`)?.setAttribute('aria-expanded', 'false');
+  xfPopK = '';
+  xfPopEl.hidden = true;
+}
+function xfVolBtn() {
+  const v = G.xfp?.vol ?? 100, m = !!G.xfp?.mute, b = $('.xf-vol');
+  b.textContent = m ? '♪ muet' : `♪ ${v}`;
+  b.classList.toggle('off', m);
+  b.title = `Volume : ${m ? 'muet' : v + ' %'} · la molette : plus ou moins fort · un clic : le réglage`;
+  b.setAttribute('aria-label', b.title);
+}
+function xfVolSet(v, mute = G.xfp?.mute) {         // le volume général : gardé dans la partie, appliqué tout de suite aux lecteurs
+  G.xfp = { ...(G.xfp || {}), vol: Math.max(0, Math.min(100, Math.round(v / 5) * 5)), mute: mute ? 1 : 0 };
+  [vlcAudio, ultraAudio].forEach(a => a && sndVol(a, sndOwn(a)));
+  if (IDLE) saveGame();
+  if (G.xfp.mute && ((vlcAudio && !vlcAudio.paused) || ultraOn)) ach('chut');
+  xfVolBtn();
+  const s = xfPopEl.querySelector('[data-volv]');
+  if (s) s.textContent = G.xfp.mute ? 'muet' : `${G.xfp.vol} %`;
+}
+function xfPlugTick() {                            // chaque seconde : le graphe, la météo, le volume ; la fenêtre ouverte suit (si elle a changé)
+  const c = xfCpuNow(), cp = $('.xf-cpu'), wx = $('.xf-wx'), w = xfWx();
+  XF_CPU.push(c.u);
+  if (XF_CPU.length > 8) XF_CPU.shift();
+  XF_BILL.push(usage.usd + (IDLE ? G.elecTot || 0 : 0));
+  if (XF_BILL.length > 61) XF_BILL.shift();
+  cp.textContent = XF_CPU.map(u => XF_SPARK[Math.max(0, Math.min(7, Math.floor(u / 12.5)))]).join('');
+  const hot = c.oom || c.t >= 90;
+  cp.classList.toggle('bad', hot);                 // les classes d'état seulement : un élément masqué (xf-off) le reste
+  cp.classList.toggle('warn', !hot && c.u >= 80);
+  cp.title = `Processeur : ${Math.round(c.u)} % · ${c.t} °C · RAM ${frx(c.used.toFixed(1))} / ${frx(c.ram.toFixed(1))} Go${c.swap > 0 ? ` · swap ${frx(c.swap.toFixed(1))} Go` : ''} · un clic : htop`;
+  cp.setAttribute('aria-label', cp.title);
+  wx.textContent = `${w[0]} ${c.t}°`;
+  ['ok', 'warn', 'bad'].forEach(k => wx.classList.toggle(k, w[2] === k));
+  wx.title = `Météo de la prod : ${w[1]} · ${c.t} °C (le processeur) · un clic : les prévisions`;
+  wx.setAttribute('aria-label', wx.title);
+  xfVolBtn();
+  if (xfPopK && xfPopK !== 'vol') xfPopDraw();
+}
+xfceEl.querySelector('.xf-sys').addEventListener('click', e => {
+  const b = e.target.closest('[data-pl]');
+  if (!b) return;
+  if (b.dataset.pl === 'cpu') { xfPopClose(); return installed.has('htop') ? xfLaunch('htop') : typeIntoShell('htop'); }
+  xfPopOpen(b.dataset.pl, b);
+});
+$('#xfce .xf-vol').addEventListener('wheel', e => { e.preventDefault(); xfVolSet((G.xfp?.vol ?? 100) + (e.deltaY < 0 ? 5 : -5)); }, { passive: false });
+xfPopEl.addEventListener('input', e => { if (e.target.matches('[data-vol]')) xfVolSet(+e.target.value); });
+xfPopEl.addEventListener('click', e => {
+  const c = e.target.closest('[data-cal]'), mu = e.target.closest('[data-mute]'), pc = e.target.closest('[data-popcmd]');
+  if (c) { xfCalM += +c.dataset.cal; xfPopDraw(); }
+  else if (mu) { xfVolSet(G.xfp?.vol ?? 100, !G.xfp?.mute); xfPopSig = ''; xfPopDraw(); xfPopEl.querySelector('[data-mute]')?.focus(); }
+  else if (pc) { xfPopClose(); typeIntoShell(pc.dataset.popcmd); }
+});
+addEventListener('pointerdown', e => { if (xfPopK && !e.target.closest('#xf-pop, [data-pl]')) xfPopClose(); }, true);
+addEventListener('keydown', e => {
+  if (!xfPopK || e.key !== 'Escape') return;
+  e.preventDefault();
+  const k = xfPopK;
+  xfPopClose();
+  xfceEl.querySelector(`[data-pl="${k}"]`)?.focus();
+});
 
 /* la zone de notifications (le tableau de bord, à droite) : une icône pour chaque chose qui attend, un clic ouvre la bonne appli
    (Blunderbird ou mail, status.vibe ou incident, les PR sur GitHype ou pr list, actu, keys) ; ◔ : le journal des notifications, les
@@ -10408,7 +10621,7 @@ function makeNvlc() {                              // façon nvlc : VLC en ncurs
     const st = !t ? 'arrêt' : A.paused ? 'pause' : 'lecture';
     const rows = [`<span class="h"> VLC media player 3.0.21 Vetinari · version terminal (façon nvlc)</span>`, '',
       ` État : ${st}`, ` Titre : ${t ? esc(t.title) : '—'}`, ` Artiste : ${t ? esc(t.artist) : '—'}`,
-      ` [${'='.repeat(Math.max(0, f - 1))}${f ? '>' : ''}${' '.repeat(w - f)}] ${mmss(c)} / ${mmss(d)}    volume ${Math.round(A.volume * 100)} %`, '',
+      ` [${'='.repeat(Math.max(0, f - 1))}${f ? '>' : ''}${' '.repeat(w - f)}] ${mmss(c)} / ${mmss(d)}    volume ${Math.round(sndOwn(A) * 100)} %`, '',
       '<span class="h"> Liste de lecture</span>'];
     if (!L.length) rows.push(' (vide : la musique se télécharge sur telecharge.vibe, avec Firefaux, ou lynx en mode texte)');
     L.forEach((x, i) => rows.push(`<span class="${i === sel ? 'on' : ''}"> ${x.k === k ? '>' : ' '} ${i + 1}. ${esc(x.segs.at(-1))}   ${esc(TRACKS[x.k].title)} · ${esc(TRACKS[x.k].credit)}</span>`));
@@ -10419,7 +10632,7 @@ function makeNvlc() {                              // façon nvlc : VLC en ncurs
     if (a === 'toggle') { if (!k) return play(sel); if (A.paused) A.play().catch(() => {}); else A.pause(); }
     else if (a === 'play') play(sel);
     else if (a === 'fwd' || a === 'back') { if (k) A.currentTime = Math.max(0, Math.min((A.duration || 0) - .5, A.currentTime + (a === 'fwd' ? 10 : -10))); }
-    else if (a === 'up' || a === 'down') A.volume = Math.max(0, Math.min(1, Math.round((A.volume + (a === 'up' ? .1 : -.1)) * 10) / 10));
+    else if (a === 'up' || a === 'down') sndVol(A, Math.max(0, Math.min(1, Math.round((sndOwn(A) + (a === 'up' ? .1 : -.1)) * 10) / 10)));
     else if (a === 'stop') { A.pause(); A.currentTime = 0; k = null; }
     else if (a === 'next' || a === 'prev') { const L = tracks(); if (L.length) { sel = (sel + (a === 'next' ? 1 : -1) + L.length) % L.length; play(sel); return; } }
     else if (a === 'quit') return closeTab('nvlc');
@@ -11164,7 +11377,7 @@ function makeVlc() {
   }
   function setVol(v) {
     v = Math.max(0, Math.min(100, Math.round(v)));
-    A.volume = v / 100;
+    sndVol(A, v / 100);
     A.muted = false;
     vol.value = v;
     try { localStorage.setItem('aidcs:vlc', String(v)); } catch { /* navigation privée : tant pis */ }
@@ -11208,7 +11421,7 @@ function makeVlc() {
     q('[data-v="loop"]').setAttribute('aria-pressed', String(A.loop));
     q('[data-v="info"]').setAttribute('aria-pressed', String(info));
     infoEl.hidden = !info;
-    q('.pct').textContent = A.muted ? 'muet' : `${Math.round(A.volume * 100)} %`;
+    q('.pct').textContent = A.muted ? 'muet' : `${Math.round(sndOwn(A) * 100)} %`;
     statusEl.textContent = noting ? note : !file ? 'Aucun média'
       : !t ? `Erreur · ${tildePath(file)}`
       : `${playing ? '▶ Lecture' : cur > 0 ? '❚❚ Pause' : '■ Arrêt'} · ${mmss(cur)} / ${mmss(dur)} · AAC ${t.kbps} kbit/s · ${tildePath(file)}`;
@@ -11255,7 +11468,7 @@ function makeVlc() {
     if (kk === ' ' || kk === 'k' || kk === 'K') { e.preventDefault(); toggle(); }
     else if (kk === 's' || kk === 'S') stop();
     else if (kk === 'ArrowLeft' || kk === 'ArrowRight') { e.preventDefault(); seek(kk === 'ArrowLeft' ? -5 : 5); }
-    else if (kk === 'ArrowUp' || kk === 'ArrowDown') { e.preventDefault(); setVol(A.volume * 100 + (kk === 'ArrowUp' ? 5 : -5)); }
+    else if (kk === 'ArrowUp' || kk === 'ArrowDown') { e.preventDefault(); setVol(sndOwn(A) * 100 + (kk === 'ArrowUp' ? 5 : -5)); }
     else if (kk === 'm' || kk === 'M') q('[data-v="mute"]').click();
     else if (kk === 'l' || kk === 'L') q('[data-v="loop"]').click();
     else if (kk === 'i' || kk === 'I') { info = !info; render(); }
@@ -11271,7 +11484,7 @@ function makeVlc() {
   let v0 = 80;
   try { const s = parseInt(localStorage.getItem('aidcs:vlc'), 10); if (Number.isFinite(s)) v0 = Math.max(0, Math.min(100, s)); } catch { /* tant pis */ }
   vol.value = v0;
-  A.volume = v0 / 100;
+  sndVol(A, v0 / 100);
   A.loop = false;
   show();
   render();
@@ -14945,7 +15158,7 @@ let ultraAudio = null, ultraOn = false;
 function ultraMusic() {                            // au lancement du mode, à sa fin, chaque seconde, et quand l'onglet change : jouer, ou se taire
   const want = IDLE && boostOn('claude') && boostRunning('claude') && !paused && mode === 'idle' && !document.hidden && !(vlcAudio && !vlcAudio.paused);
   if (want && !ultraOn) {
-    if (!ultraAudio) { ultraAudio = new Audio(trackUrl(TRACKS.jaimal)); ultraAudio.loop = true; ultraAudio.volume = .7; }
+    if (!ultraAudio) { ultraAudio = new Audio(trackUrl(TRACKS.jaimal)); ultraAudio.loop = true; sndVol(ultraAudio, .7); }
     ultraOn = true;
     ultraAudio.play().catch(() => { ultraOn = false; });   // le navigateur refuse sans geste : on réessaiera
   } else if (!want && ultraOn) {
@@ -15803,7 +16016,7 @@ function postBeep(n) {
     for (let i = 0; i < n; i++) {                 // un bip carré, court, à 880 Hz, pas trop fort
       const osc = beepCtx.createOscillator(), g = beepCtx.createGain(), t = t0 + i * .22;
       osc.type = 'square'; osc.frequency.value = 880;
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.04, t + .005); g.gain.setValueAtTime(.04, t + .12); g.gain.linearRampToValueAtTime(0, t + .13);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.04 * sndK(), t + .005); g.gain.setValueAtTime(.04 * sndK(), t + .12); g.gain.linearRampToValueAtTime(0, t + .13);
       osc.connect(g).connect(beepCtx.destination); osc.start(t); osc.stop(t + .14);
     }
   } catch { /* pas de son : le POST reste muet */ }
