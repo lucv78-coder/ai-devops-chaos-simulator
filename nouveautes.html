@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>76</b><span>mises à jour</span></div>
-    <div role="listitem"><b>144 h 18</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 470</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>77</b><span>mises à jour</span></div>
+    <div role="listitem"><b>144 h 31</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 16 620</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#77</span><time datetime="2026-11-28T11:58">11 h 58</time><a href="#dev">Les outils de développement (F12)</a></li>
       <li><span class="n">#76</span><time datetime="2026-11-28T11:45">11 h 45</time><a href="#onglets">Les onglets, qui mangent la RAM</a></li>
       <li><span class="n">#75</span><time datetime="2026-11-28T11:39">11 h 39</time><a href="#ff-doigt">Firefaux au doigt</a></li>
       <li><span class="n">#74</span><time datetime="2026-11-28T05:33">05 h 33</time><a href="#superviseur">Le mot de passe, Boot Override, et le bip</a></li>
@@ -226,8 +227,26 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="onglets" aria-labelledby="t76">
-    <p class="meta"><span class="n">#76</span><span class="new">dernière</span><span class="v">alpha 0.76</span><time datetime="2026-11-28T11:45">28 nov. 2026 · 11 h 45</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/5cec3fe">5cec3fe</a><span>16 327 → 16 470 lignes</span></p>
+  <article class="maj latest" id="dev" aria-labelledby="t77">
+    <p class="meta"><span class="n">#77</span><span class="new">dernière</span><span class="v">alpha 0.77</span><time datetime="2026-11-28T11:58">28 nov. 2026 · 11 h 58</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/e232e05">e232e05</a><span>16 470 → 16 620 lignes</span></p>
+    <h2 id="t77"><a href="#dev">Les outils de développement (F12)</a></h2>
+    <ul>
+      <li>F12 ouvre les outils de Firefaux, pas ceux de votre navigateur. Sur téléphone, ils sont dans le menu ☰.</li>
+      <li>La console commence par « Stop ! » : si quelqu’un vous dit d’y coller quelque chose, c’est une arnaque. Juste en dessous, un agent vous conseille d’y coller fetch('/api/prod', { method: 'DELETE' }). Le coller fait tomber la prod (un succès caché).</li>
+      <li>Sur localhost:3000, la console montre les bugs du projet, d’autant plus nombreux que le mur des bugs en mange, la clé d’API laissée dans le HTML, et le 503 de l’incident en cours. Elle n’exécute rien de ce que vous tapez : 1+1 répond 3, document.cookie montre ce que vous avez accepté.</li>
+      <li>L’onglet Réseau : sur localhost:3000, les vraies requêtes facturées, une par ligne, avec leurs tokens et leur coût, en direct. Ailleurs, la page et ses traqueurs, barrés quand uBlock les bloque.</li>
+      <li>Le code source : l’onglet Source, Ctrl+U, ou view-source: devant une adresse. Les commentaires des agents en vert, et la clé d’API en rouge, dans un TODO « à retirer avant la prod ».</li>
+      <li>Deux succès Steam, dont un caché.</li>
+    </ul>
+    <blockquote>« La console dit en rouge de ne rien y coller. L’agent dit, en bleu, de coller ça. Statistiquement, le bleu gagne. »<cite>l’agent, 11 h 58</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-dev.png" title="Voir en grand"><img src="assets/screen-dev.png" width="900" height="540" loading="lazy" alt="Firefaux sur localhost:3000, les outils de développement ouverts sous la page : « Stop ! » en grand, l’avertissement, le conseil de l’agent (fetch('/api/prod', { method: 'DELETE' })), des erreurs en rouge (TypeError, Unhandled Promise Rejection, Maximum call stack size exceeded), puis 1+1 = 3 et document.cookie."></a><figcaption>La console : « Stop ! », et l’agent qui conseille de coller ça.</figcaption></figure>
+      <figure><a href="assets/screen-dev-reseau.png" title="Voir en grand"><img src="assets/screen-dev-reseau.png" width="900" height="540" loading="lazy" alt="L’onglet Réseau des outils de Firefaux, sur localhost:3000 : des requêtes POST /v1/messages, une par ligne, avec leur état, leurs tokens et leur coût en dollars, et le total en bas : « votre facture, ligne à ligne »."></a><figcaption>Réseau : la facture, requête par requête.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="onglets" aria-labelledby="t76">
+    <p class="meta"><span class="n">#76</span><span class="v">alpha 0.76</span><time datetime="2026-11-28T11:45">28 nov. 2026 · 11 h 45</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/5cec3fe">5cec3fe</a><span>16 327 → 16 470 lignes</span></p>
     <h2 id="t76"><a href="#onglets">Les onglets, qui mangent la RAM</a></h2>
     <ul>
       <li>Firefaux a des onglets : le bouton +, ou Alt+T (Ctrl+T ouvre un onglet dans votre vrai navigateur, qui ne le cède pas). La croix ou Alt+W pour fermer, Alt+Maj+T pour rouvrir, Alt+1 à Alt+9 pour passer de l’un à l’autre.</li>
