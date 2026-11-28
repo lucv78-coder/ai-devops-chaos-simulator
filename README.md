@@ -13,11 +13,11 @@
 <p align="center"><sub>Les chiffres sortent des <a href="https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html">nouveautés</a> : le journal des mises à jour, raconté par l'agent qui n'a rien relu.</sub></p>
 
 <p align="center">
-  <img src="assets/badges/version.svg" alt="version : alpha 0.71">
+  <img src="assets/badges/version.svg" alt="version : alpha 0.72">
   <img src="assets/badges/build.svg" alt="build : passing / failing / hallucinating / vibing">
   <img src="assets/badges/coverage.svg" alt="coverage : 98 % / 137 % / 420 % / NaN %">
   <img src="assets/badges/tests.svg" alt="tests : 0 / 0 passed">
-  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 16 043">
+  <img src="assets/badges/relues.svg" alt="lignes relues : 0 / 16 079">
   <br>
   <img src="assets/badges/review.svg" alt="code review : LGTM (par l'agent)">
   <img src="assets/badges/deploy.svg" alt="deploy : vendredi 17 h">
@@ -85,7 +85,7 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **La zone de notifications.** Dans le tableau de bord de Xfce : les courriels non lus, l'incident en cours, les PR ouvertes, la panne du monde, la clé exposée. Un clic ouvre la bonne appli (Blunderbird, status.vibe, GitHype, le terminal), et le journal garde les notifications qui ont filé.
 - **Hardware-in-the-loop.** Vous démarrez sur un PC patate, boîtier ouvert, posé par terre. Lancez trop d'agents et il rame, swappe, chauffe à 94 °C, puis part en kernel panic. L'agent appelle ça « un redémarrage planifié ».
 - **La facture d'électricité.** Le compteur tourne tant que les agents travaillent : ce que tire le PC, overclocking compris, divisé par le rendement de l'alim (la no-name en perd un tiers). Payée à chaque ship, avec les tokens. L'IA locale ne paie pas de tokens, mais elle paie l'électricité. Les contrats Vibe Énergie vont des heures creuses au petit réacteur modulaire.
-- **Les succès, dans Steam.** 99 succès (dont 23 cachés) : ships, trésorerie, matériel, BIOS, memtest86+, et quelques bêtises (rm -rf /, shipper un vendredi). Steam s'ouvre enfin dans Xfce, avec la fiche du jeu, le temps de jeu et des pourcentages de joueurs inventés. Une notification à chaque succès. Rien ne se débloque dans le bac à sable : c'est de la triche.
+- **Les succès, dans Steam.** 101 succès (dont 24 cachés) : ships, trésorerie, matériel, BIOS, memtest86+, et quelques bêtises (rm -rf /, shipper un vendredi). Steam s'ouvre enfin dans Xfce, avec la fiche du jeu, le temps de jeu et des pourcentages de joueurs inventés. Une notification à chaque succès. Rien ne se débloque dans le bac à sable : c'est de la triche.
 - **VLC, et la musique.** `sudo apt install vlc`, puis la musique se télécharge dans Firefaux, sur telecharge.vibe (trois publicités, un compte à rebours, et le vrai lien, en tout petit). Double-cliquez-la dans Thunar : VLC la joue, avec un spectre en caractères. Les deux morceaux, « Mon morceau 35 » et « J'ai mal », sont de Christopher GASQ, le seul humain à avoir produit quelque chose de concret sur ce jeu. Les MP3 des agents, eux, ne contiennent que du silence.
 - **nano, et des réglages en plein écran.** `nano fichier` ouvre un vrai nano dans le terminal : ^O écrire, ^X quitter, et ^F pour chercher, parce que ^W fermerait l'onglet du navigateur. Les réglages (`M`) et le choix des agents (`A`) ont leur propre écran dans le terminal, façon nmtui, et leur vraie fenêtre sous Xfce.
 - **Kernel panic certifié.** L'écran donne la cause (« alimentation dépassée, 499 W demandés, 230 W disponibles »), une pile d'appels authentique (`tokens_burn_all`, `npm_install_universe`, `friday_deploy`), puis « Rebooting in 5 seconds.. ». Le PC redémarre sur le BIOS. Personne n'a lu la pile d'appels.
@@ -107,12 +107,12 @@ C'est un idle game : le jeu se joue tout seul. Comme votre carrière depuis 2025
 - **À propos.** Dans le menu Applications de Xfce (ou `xfce4-about`) : la config du PC du jeu en direct, l'éditeur, les contributeurs (et une mention spéciale), les agents qui ont travaillé sur le projet, la licence.
 - **Les pubs, et uBlock Origin.** Sans bloqueur, Firefaux affiche un bandeau de pub sur chaque page web et ouvre des pop-ups (trois au plus, avec une croix minuscule) ; chacun prend de la RAM, et htop le montre. uBlock Origin s'installe depuis addons.firefaux.vibe, après la demande de permissions : plus de pub, et son badge compte celles qu'il bloque. Les modules se gèrent dans `about:addons`.
 - **Les logiciels malveillants, et ClamAV.** Une pub trop belle, le gros bouton TÉLÉCHARGER ou un « Bloqueur de Pubs GRATUIT » non vérifié, et un mineur de VibeCoin s'installe : il se fait appeler `kworker-update`, prend la moitié d'un processeur, et cron le relance quand on le tue. `sudo apt install clamav`, `sudo freshclam`, `clamscan -r --remove ~`, puis `kill kworker-update` : clamscan supprime les fichiers, pas les processus.
-- **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin à lunettes, avec une barre de chargement qui avance par à-coups et s'arrête à 99 %. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde. Ou Suppr pendant le POST, si vous êtes assez rapide : le setup du BIOS, façon AMIBIOS, pour overclocker le processeur et la RAM. Même au doigt : sur téléphone, DEL est une vraie touche et le setup prend tout l'écran, avec ◄ ► pour changer une valeur. Le ventilateur passe en Turbo (il refroidit, et il s'entend), et Load Fail-Safe Defaults met tout au plus bas, pour la facture. Trop loin, l'écran glitche, les erreurs matérielles pleuvent et les agents plantent. On redescend d'un cran. `reboot` pour y retourner. Puis GRUB, avec un vrai menu : memtest86+ (enfin lancé), un mode sans agents, et un Windows 11 qui se met à jour.
+- **Démarrage BIOS authentique.** Nouvelle partie et Continuer allument vraiment le PC : POST, GRUB, noyau `6.11.0-friday`, puis Vibian GNU/Linux et son pingouin à lunettes, avec une barre de chargement qui avance par à-coups et s'arrête à 99 %. Neuf secondes sur la patate. Une touche pour passer, comme tout le monde. Ou Suppr pendant le POST, si vous êtes assez rapide : le setup du BIOS, façon AMIBIOS, pour overclocker le processeur et la RAM. Même au doigt : sur téléphone, DEL est une vraie touche et le setup prend tout l'écran, avec ◄ ► pour changer une valeur. Le ventilateur passe en Turbo (il refroidit, et il s'entend), et Load Fail-Safe Defaults met tout au plus bas, pour la facture. Trop loin, l'écran glitche, les erreurs matérielles pleuvent et les agents plantent. On redescend d'un cran. Bien trop loin, le PC ne démarre même plus : écran noir, un Q-Code rouge, trois essais, puis « Overclocking failed! ». Et après une coupure de courant, la pile de la CMOS, morte en 2019, fait tout oublier. `reboot` pour y retourner. Puis GRUB, avec un vrai menu : memtest86+ (enfin lancé), un mode sans agents, et un Windows 11 qui se met à jour.
 - **htop, tskill, apt, npm, un terminal de bunker antiatomique…** Tout ce qu'un agent a jugé indispensable à 3 h du matin.
 - **Bac à sable.** Une entrée du menu titre : tout est débloqué d'office (plateformes, 8 agents chacune, modèles, skills, matériel, modes boost sans limite par jour), avec une sauvegarde à part. La partie normale ne bouge pas. L'agent y a shippé 20 projets en 5 secondes.
 - **Bouton « tout effacer ».** Paramètres, Réinitialiser la partie, deux clics. L'agent a appris à demander confirmation. Une fois.
 - **Exporter, importer.** Paramètres, Exporter la partie : un fichier .vibe, et le même code dans le presse-papiers. Dans un autre navigateur, Importer une partie la reprend, disque, succès et temps de jeu compris. Les agents, eux, n'ont toujours pas de sauvegarde.
-- **Monolithe artisanal.** 1 fichier, 16 043 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
+- **Monolithe artisanal.** 1 fichier, 16 079 lignes, 0 dépendance. Une seule exception : une police d'écriture, l'agent a insisté. Le [journal des mises à jour](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html) a eu droit à sa propre page : l'agent venait de découvrir qu'on pouvait créer un deuxième fichier. Puis un troisième : le [wiki](https://lucv78-coder.github.io/ai-devops-chaos-simulator/wiki.html), illustré, avec toutes les commandes (chacune se copie d'un clic), le store et le matériel.
 
 ## <img src="assets/readme/g-hardware.svg" width="30" height="30" align="top" alt=""> Le matériel
 
@@ -180,7 +180,7 @@ Livraison en 0 seconde, installation à chaud, garantie zéro jour. Ne faites pa
 
 ## <img src="assets/readme/g-architecture.svg" width="30" height="30" align="top" alt=""> Architecture
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (16 043 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Schéma : vous, puis l'agent IA en mode YOLO, puis index.html (16 079 lignes), puis la prod en feu. Une boucle relie la prod à l'agent : bug, « corrige », deux bugs. Sur le côté, barrés : tests, revue de code, Kubernetes, microservices, documentation, promis par l'agent et jamais livrés."></p>
 
 > Architecture validée par l'agent qui l'a écrite. Revue par les pairs : le même agent, dans une autre fenêtre de contexte. Conclusion : « excellente architecture, rien à signaler ».
 
@@ -304,6 +304,7 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 - [x] Lancer memtest86+, une fois, pour voir (FAIL)
 - [x] Un BIOS au doigt, parce que les vrais overclockeurs règlent leur multiplicateur dans le métro
 - [x] Un ventilateur Turbo, parce qu'un PC qui ne décolle pas n'est pas assez overclocké
+- [x] Un écran noir avec un code d'erreur, parce que la carte mère aussi a le droit de ne pas expliquer
 - [x] Une facture d'électricité, parce que les tokens, c'était trop bon marché
 - [x] Des succès Steam, pour qu'il y ait enfin quelque chose à débloquer
 - [x] Exporter sa partie, pour avoir enfin une sauvegarde plus récente que celle de jeudi
@@ -318,14 +319,14 @@ Ou, plus simple : **[jouez en ligne](https://lucv78-coder.github.io/ai-devops-ch
 **Le code a-t-il été relu ?**
 Non. Question suivante.
 
-**Pourquoi un seul fichier de 16 043 lignes ?**
+**Pourquoi un seul fichier de 16 079 lignes ?**
 L'agent ne savait pas qu'on pouvait créer d'autres fichiers. On n'a pas voulu le contrarier. Il l'a découvert le jour où il a fallu écrire [les nouveautés](https://lucv78-coder.github.io/ai-devops-chaos-simulator/nouveautes.html). Le jeu, lui, tient toujours dans un seul fichier.
 
 **Est-ce que ça scale ?**
 Ça tient dans un onglet de navigateur. C'est plus que la plupart des startups. Et maintenant, ça scale horizontalement : il suffit d'acheter une alim plus grosse.
 
 **Pourquoi le jeu démarre-t-il avec un BIOS ?**
-Charger 16 043 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
+Charger 16 079 lignes de HTML prend 0,1 seconde. C'était trop rapide pour être crédible.
 
 **Mon PC siffle, c'est normal ?**
 Dans le jeu, c'est l'alim no-name : changez-la. Dans la vraie vie, aussi.

@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>71</b><span>mises à jour</span></div>
-    <div role="listitem"><b>135 h 17</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 043</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>72</b><span>mises à jour</span></div>
+    <div role="listitem"><b>136 h 12</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 16 079</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#72</span><time datetime="2026-11-28T03:39">03 h 39</time><a href="#ecran-noir">L’écran noir, et la pile morte</a></li>
       <li><span class="n">#71</span><time datetime="2026-11-28T02:44">02 h 44</time><a href="#ventilateur">Le ventilateur en Turbo, et les Fail-Safe Defaults</a></li>
       <li><span class="n">#70</span><time datetime="2026-11-28T01:46">01 h 46</time><a href="#bios-doigt">Le BIOS au doigt</a></li>
       <li><span class="n">#69</span><time datetime="2026-11-27T01:27">01 h 27</time><a href="#j-ai-mal">« J’ai mal », la deuxième musique, et celle de l’ultracode</a></li>
@@ -221,8 +222,24 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="ventilateur" aria-labelledby="t71">
-    <p class="meta"><span class="n">#71</span><span class="new">dernière</span><span class="v">alpha 0.71</span><time datetime="2026-11-28T02:44">28 nov. 2026 · 02 h 44</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d4d1c27">d4d1c27</a><span>16 019 → 16 043 lignes</span></p>
+  <article class="maj latest" id="ecran-noir" aria-labelledby="t72">
+    <p class="meta"><span class="n">#72</span><span class="new">dernière</span><span class="v">alpha 0.72</span><time datetime="2026-11-28T03:39">28 nov. 2026 · 03 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f14f8be">f14f8be</a><span>16 043 → 16 079 lignes</span></p>
+    <h2 id="t72"><a href="#ecran-noir">L’écran noir, et la pile morte</a></h2>
+    <ul>
+      <li>Bien trop loin au-delà de la marge (15 % pour le processeur, 25 % pour la RAM), le PC ne passe plus le POST : écran noir, l’afficheur Q-Code de la carte mère en rouge (00 : le processeur boude ; 55 : la RAM refuse de s’entraîner), les ventilateurs qui repartent. Trois essais.</li>
+      <li>Puis la carte mère abandonne : « Overclocking failed! Please enter Setup to re-configure your system. » CPU Ratio et DRAM Frequency reviennent sur Auto ; Quick Boot et le ventilateur restent. F1 (ou Suppr) ouvre le setup. Un Save & Exit trop haut recommence le cirque. Juste en dessous de la limite, ça démarre, mais ça glitche.</li>
+      <li>La pile de la CMOS est morte en 2019 (l’aide du setup le disait). Après une coupure de courant, alimentation dépassée ou alim no-name qui lâche, une fois sur deux : « CMOS Checksum Bad - Default Loaded », « CMOS Battery Low », et les réglages du BIOS sont perdus. Une surchauffe ou un kernel panic ne coupent pas le courant : la CMOS garde tout.</li>
+      <li>Deux succès Steam : Écran noir, et un caché.</li>
+    </ul>
+    <blockquote>« Trois essais, puis tout sur Auto : la carte mère a plus de patience que les agents, et moins de mémoire que la pile. »<cite>l’agent, 03 h 39</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-ocfail.png" title="Voir en grand"><img src="assets/screen-ocfail.png" width="900" height="540" loading="lazy" alt="Le POST d’AMIVIBES après trois écrans noirs : « Overclocking failed! Please enter Setup to re-configure your system. » en rouge, « Press F1 to Run SETUP (le processeur ne tenait pas : CPU Ratio et DRAM Frequency sont revenus sur Auto) », puis la suite du POST."></a><figcaption>Overclocking failed! : trois essais, puis tout sur Auto.</figcaption></figure>
+      <figure><a href="assets/screen-cmos.png" title="Voir en grand"><img src="assets/screen-cmos.png" width="900" height="540" loading="lazy" alt="Le POST après une coupure de courant : « CMOS Checksum Bad - Default Loaded » en rouge, « CMOS Battery Low (la pile est morte en 2019 : la coupure a effacé les réglages du BIOS) », « Press F1 to Run SETUP », et « Warning! Power supply overload on last boot »."></a><figcaption>CMOS Checksum Bad : la coupure de courant a tout effacé.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="ventilateur" aria-labelledby="t71">
+    <p class="meta"><span class="n">#71</span><span class="v">alpha 0.71</span><time datetime="2026-11-28T02:44">28 nov. 2026 · 02 h 44</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d4d1c27">d4d1c27</a><span>16 019 → 16 043 lignes</span></p>
     <h2 id="t71"><a href="#ventilateur">Le ventilateur en Turbo, et les Fail-Safe Defaults</a></h2>
     <ul>
       <li>Advanced › Smart Fan Control se règle enfin : Silent, Standard (le réglage d’usine) ou Turbo. Turbo refroidit 18 % mieux, de quoi pousser l’overclocking un cran plus loin, tire 8 W de plus et s’entend : de temps en temps, le tableau de bord le fait remarquer. Silent chauffe, assez pour faire planter le PC patate.</li>
