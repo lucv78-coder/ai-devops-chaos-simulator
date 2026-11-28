@@ -1344,7 +1344,9 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ami-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(22ch, 30ch); min-height: 0; margin: .5em 1ch; border: 3px double var(--a-fg); }
 .ami-main { position: relative; min-width: 0; min-height: 0; overflow: auto; padding: .4em 1ch; scrollbar-width: thin; }
 .ami-side { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; border-left: 1px solid var(--a-fg); }
-.ami-help { min-height: 0; overflow: auto; padding: .4em 1ch; white-space: normal; }
+.ami-help { display: grid; align-content: start; min-height: 0; overflow: auto; padding: .4em 1ch; white-space: normal; }
+.ami-help > * { grid-area: 1 / 1; }
+.ami-hs { display: none; visibility: hidden; }   /* les aides de l'onglet, invisibles : elles donnent la hauteur */
 .ami-keys { padding: .4em 1ch; border-top: 1px solid var(--a-fg); }
 .ami-keys > * { display: block; width: 100%; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .ami-keys b { display: inline-block; min-width: 6ch; }
@@ -1385,9 +1387,10 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .ami-main { padding: .3em .8ch; }
   .ami-t, .ami-row > span, .ami-foot { white-space: normal; text-overflow: clip; }
   .ami-row { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
-  .ami-it, .ami-steps button { min-height: 2.4em; align-items: center; }
+  .ami-it { min-height: 2.4em; align-items: center; }   /* les flèches prennent la hauteur de leur ligne, pas plus */
   .ami-side { grid-template-rows: auto auto; border-left: 0; border-top: 1px solid var(--a-fg); }
   .ami-help { min-height: 5.8em; }
+  .ami-hs { display: block; }
   .ami-keys { display: flex; flex-wrap: wrap; gap: 0 2ch; }
   .ami-keys > * { width: auto; }
   .ami-keys button, .ami .ami-opt, .ami-btns button { display: flex; align-items: center; min-height: 2.4em; }
@@ -1685,7 +1688,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.70', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.71', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2444,6 +2447,8 @@ const ACH = [
   { id: 'oc', g: '↑', n: 'Overclocker du dimanche', d: 'Overclocker le processeur ou la RAM dans le BIOS.', p: 17.5, t: () => { const k = ocK(); return k.cr > 1.004 || k.rr > 1.004; } },
   { id: 'glitch', g: '▒', n: 'Ça glitche, donc ça va vite', d: 'Pousser l’overclocking jusqu’aux glitchs.', p: 9.8, t: () => { const u = ocU(); return Math.max(u.cpu, u.ram) >= .5; } },
   { id: 'under', g: '↓', n: 'Écolo malgré lui', d: 'Sous-cadencer le processeur dans le BIOS.', p: 5.2, t: () => ocK().cr < .996 },
+  { id: 'turbo', g: '≋', n: 'Décollage', d: 'Mettre le ventilateur du processeur en Turbo dans le BIOS.', p: 8.3, t: () => ocSt().fan === 2 },
+  { id: 'failsafe', g: '▿', n: 'Mode sans échec', d: 'Charger les Fail-Safe Defaults dans le BIOS : tout au minimum, même l’ambition.', p: 2.6, h: 1 },
   { id: 'mtpass', g: '✓', n: 'PASS', d: 'Passer memtest86+ sans une erreur.', p: 7.4 },
   { id: 'mtfail', g: '✗', n: 'FAIL', d: 'Faire échouer memtest86+ (ou le figer).', p: 4.9 },
   { id: 'elec', g: '↯', n: 'Heures creuses', d: 'Souscrire un contrat Vibe Énergie.', p: 19.6, t: () => (G.elecT || 0) >= 1 },
@@ -6836,9 +6841,10 @@ function ocSt() {                                // les réglages du BIOS (remis
   const pc = PC();
   let o = IDLE ? G.oc : SB_OC;
   if (!o || typeof o !== 'object') {
-    o = { cpuT: pc.cpu, ramT: pc.ram, ratio: 0, mhz: 0, lc: ocLot(), lr: ocLot(), quick: 1, err: 0, chg: '' };
+    o = { cpuT: pc.cpu, ramT: pc.ram, ratio: 0, mhz: 0, lc: ocLot(), lr: ocLot(), quick: 1, fan: 1, err: 0, chg: '' };
     if (IDLE) G.oc = o; else SB_OC = o;
   }
+  if (o.fan == null) o.fan = 1;
   if (o.cpuT !== pc.cpu) { if (o.ratio) o.chg = 'cpu'; Object.assign(o, { cpuT: pc.cpu, ratio: 0, lc: ocLot() }); }
   if (o.ramT !== pc.ram) { if (o.mhz) o.chg = o.chg === 'cpu' ? 'both' : 'ram'; Object.assign(o, { ramT: pc.ram, mhz: 0, lr: ocLot() }); }
   return o;
@@ -6846,6 +6852,11 @@ function ocSt() {                                // les réglages du BIOS (remis
 const cpuBase = (c = part('cpu')) => Math.round(c.ghz * 1000);   // MHz, d'origine
 const cpuMhz = () => ocSt().ratio * 100 || cpuBase();
 const ramMhz = () => ocSt().mhz || part('ram').mhz;
+// Smart Fan Control : k, le refroidissement (par rapport à Standard) ; w, ce que tirent les ventilateurs en plus ; rpm, leur vitesse
+const FAN = [{ n: 'Silent', k: .8, w: -2, rpm: .65 }, { n: 'Standard', k: 1, w: 0, rpm: 1 }, { n: 'Turbo', k: 1.18, w: 8, rpm: 1.7 }];
+const fanSet = () => FAN[ocSt().fan] || FAN[1];
+const fanRpm = (t = PCS.temp) => { const co = part('cool'), f = fanSet(), b = co.w <= 60 ? 900 : 1100 + co.w % 800;   // Standard suit la température
+  return Math.round(b * f.rpm + (f === FAN[1] ? 12 * Math.max(0, t - 35) : 0) + (R() * 2 - 1) * 15); };
 const ocRange = (c = part('cpu')) => [Math.max(8, Math.round(c.ghz * 6)), Math.round(c.ghz * 14.5)];   // le multiplicateur : de −40 % à +45 %
 const frMhz = v => `${Math.round(v).toLocaleString('fr-FR')} MHz`;
 const ocPct = (f, b) => Math.round(f) === Math.round(b) ? 'd’origine' : `${f > b ? '+' : '−'}${Math.abs(Math.round((f / b - 1) * 100))} %`;
@@ -6881,9 +6892,9 @@ function pcLoad(o = {}) {
   const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web + ad.ram + .4 * mine;   // Go (les pubs de Firefaux et le mineur compris)
   const swap = Math.max(0, used - r.go);
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
-  const heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + heat + g.tdp * gpuU + (d.raid ? 25 : 0);
+  const fs = fanSet(), heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + fs.w + heat + g.tdp * gpuU + (d.raid ? 25 : 0);   // Smart Fan : Turbo refroidit mieux et tire 8 W
   return { n, bg, plats, boost: (c.perf ?? 1) * (1 + .6 * (k.cr - 1)) * (1 + .3 * (k.rr - 1)), demand, util, cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
-    tTarget: 30 + (worldOn('heat') ? 12 : 0) + 62 * heat / co.w, cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
+    tTarget: 30 + (worldOn('heat') ? 12 : 0) + 62 * heat / (co.w * fs.k), cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
 }
 function hwState(o = {}) {                       // le rendement de la machine : 1 = rien ne freine les agents ; 0 = PC à terre
   const L = pcLoad(o), temp = o.off ? L.tTarget : PCS.temp;
@@ -15143,6 +15154,7 @@ async function biosBoot(o = {}) {
     for (let i = 1; i <= steps; i++) { mem.textContent = `${Math.round(total * i / steps)}MB`; await wait((full ? 48 : 34) * slow); }
     mem.textContent += ' OK';
     add('USB Device(s): 1 Keyboard, 1 Mouse, 1 Agent', '', post);
+    if (oc.fan !== 1 && co.w < 1000) add(oc.fan === 2 ? `CPU Fan Mode : Turbo (${fanRpm()} RPM, on ne s’entend plus)` : 'CPU Fan Mode : Silent (le processeur transpire en silence)', 'dim', post);
     if (o.crash && !nPost) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
       : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
       : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
@@ -15286,18 +15298,18 @@ const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Exit'
 const AMI_HELP = 'Vibe Tweaker : CPU Ratio (le multiplicateur du processeur) et DRAM Frequency (la RAM). Plus haut : les agents vont plus vite, '
   + 'le processeur chauffe et consomme davantage. Trop haut : glitchs à l’écran, erreurs matérielles, agents qui plantent. Chaque puce a sa marge '
   + '(la loterie du silicium) : montez par paliers, redescendez au premier glitch. F10 : enregistrer et redémarrer · Échap : quitter sans enregistrer '
-  + '· F9 : tout sur Auto. L’agent a remplacé le BIOS VibeAward par un AMIVIBES : il appelle ça une mise à jour. Personne n’a gardé l’ancien.';
-const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', def: 'Load Optimal Defaults?' };
+  + '· F9 : tout sur Auto. Advanced › Smart Fan Control : Turbo refroidit mieux, et s’entend. L’agent a remplacé le BIOS VibeAward par un AMIVIBES : il appelle ça une mise à jour. Personne n’a gardé l’ancien.';
+const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', def: 'Load Optimal Defaults?', fs: 'Load Fail-Safe Defaults?' };
 function amiSetup(el, bindKey) {
   return new Promise(done => {
     const st = ocSt(), c = part('cpu'), r = part('ram'), co = part('cool'), ps = part('psu'), d = part('disk');
-    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1 };   // les réglages en cours d'édition
+    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan };   // les réglages en cours d'édition
     const [lo, hi] = ocRange(c), fC = v => v * 100 || cpuBase(c), fR = v => v || r.mhz;
     const cpuOpts = [0, ...Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)], ramOpts = [0, ...(OC_DDR[r.ddr] || [])];
     // Hardware Monitor, en direct : le BIOS ne met jamais le processeur au repos, la température monte pendant qu'on lit
-    const cr = cpuMhz() / cpuBase(c), M = { t: PCS.temp }, rpm0 = co.w <= 60 ? 900 : ri(1100, 1900), jit = (x, a) => x + (R() * 2 - 1) * a;
-    const monTick = () => { M.t += (30 + (worldOn('heat') ? 12 : 0) + 62 * c.tdp * cr ** 1.8 * .3 / co.w - M.t) * (1 - Math.exp(-1 / 12)); };
-    const fan = () => co.w >= 1000 ? 'N/A (azote liquide)' : co.w <= 60 ? `${Math.round(jit(900, 12))}RPM (poussière)` : `${Math.round(jit(rpm0 + 12 * Math.max(0, M.t - 35), 20))}RPM`;
+    const cr = cpuMhz() / cpuBase(c), M = { t: PCS.temp }, jit = (x, a) => x + (R() * 2 - 1) * a;
+    const monTick = () => { M.t += (30 + (worldOn('heat') ? 12 : 0) + 62 * c.tdp * cr ** 1.8 * .3 / (co.w * fanSet().k) - M.t) * (1 - Math.exp(-1 / 12)); };
+    const fan = () => co.w >= 1000 ? 'N/A (azote liquide)' : `${fanRpm(M.t)}RPM${co.w <= 60 ? ' (poussière)' : ''}`;
     const deg = x => `${x}°C/${Math.round(x * 9 / 5 + 32)}°F`;
     const clock = () => { const n = new Date(), p = x => String(x).padStart(2, '0');
       return { time: `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`, date: `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][n.getDay()]} ${p(n.getMonth() + 1)}/${p(n.getDate())}/${n.getFullYear()}` }; };
@@ -15327,7 +15339,8 @@ function amiSetup(el, bindKey) {
         { i: ['VCORE Voltage', () => `${jit(cr > 1 ? 1.552 : 1.2, .008).toFixed(3)}V${cr > 1 ? ' (Auto, réglé par l’agent)' : ''}`], live: 1 },
         { i: ['+12V Voltage', () => ps.noname ? `${jit(11.1, .08).toFixed(1)}V (elle siffle)` : `${jit(12.096, .024).toFixed(3)}V`], live: 1 },
         { i: ['Power Supply', ps.n] }, {},
-        lock('fan', 'Smart Fan Control', 'Disabled', 'Le ventilateur n’a qu’une vitesse : à fond. Un agent a désactivé le reste « pour le silence ».'),
+        opt('fan', 'Smart Fan Control', [0, 1, 2], v => FAN[v].n, 'Silent : moins de bruit, moins de refroidissement (le PC patate peut y laisser sa peau). Standard : le réglage d’usine. '
+          + 'Turbo : 18 % de refroidissement en plus, de quoi pousser l’overclocking un peu plus loin, un bruit d’aspirateur et 8 W de plus sur la facture.'),
         lock('virt', 'Vibe Virtualization Tech', 'Enabled', 'Activé : les agents lancent des conteneurs dans des conteneurs dans des conteneurs.'), {},
         { t: 'Le BIOS ne met jamais le processeur au repos :', w: 1 }, { t: 'il chauffe pendant que vous lisez.', w: 1 }],
       [{ h: 'Boot Settings Configuration' }, {},
@@ -15343,7 +15356,8 @@ function amiSetup(el, bindKey) {
         act('save', 'Save Changes and Exit', 'Enregistre les réglages et redémarre (F10).', () => ask('save')),
         act('discard', 'Discard Changes and Exit', 'Quitte sans rien enregistrer : le démarrage continue (Échap).', () => ask('discard')),
         act('undo', 'Discard Changes', 'Revient aux réglages enregistrés, sans quitter.', () => ask('undo')),
-        act('def', 'Load Optimal Defaults', 'Tout sur Auto : fréquences d’origine, Quick Boot activé (F9).', () => ask('def'))],
+        act('def', 'Load Optimal Defaults', 'Tout sur Auto : fréquences d’origine, Quick Boot activé, ventilateur en Standard (F9).', () => ask('def')),
+        act('fs', 'Load Fail-Safe Defaults', 'Tout au minimum : processeur et RAM sous-cadencés, Quick Boot coupé, ventilateur en Standard. Les agents ralentissent, la facture d’électricité aussi.', () => ask('fs'))],
     ];
     const page = () => PAGES()[tab];
     const sels = L => L.map((it, i) => it.k ? i : -1).filter(i => i >= 0);
@@ -15383,7 +15397,8 @@ function amiSetup(el, bindKey) {
       el.innerHTML = '<div class="ami" role="application" aria-label="BIOS Setup Utility"><div class="ami-head">BIOS SETUP UTILITY</div>'
         + `<div class="ami-tabs" role="tablist">${AMI_TABS.map((n, i) => `<button type="button" role="tab" tabindex="-1" data-tab="${i}" aria-selected="${i === tab}">${esc(n)}</button>`).join('')}</div>`
         + `<div class="ami-body"><div class="ami-main">${L.map(row).join('')}</div><div class="ami-side">`
-        + `<div class="ami-help" aria-live="polite">${esc((L[sel] || {}).help || 'Utilisez ← → pour changer d’onglet. L’overclocking est dans Vibe Tweaker.')}</div><div class="ami-keys">${KEYS}</div></div></div>`
+        + `<div class="ami-help" aria-live="polite"><div>${esc((L[sel] || {}).help || 'Utilisez ← → pour changer d’onglet. L’overclocking est dans Vibe Tweaker.')}</div>`
+        + `${[...new Set(L.map(it => it.help).filter(Boolean))].map(h => `<div class="ami-hs" aria-hidden="true">${esc(h)}</div>`).join('')}</div><div class="ami-keys">${KEYS}</div></div></div>`
         + '<div class="ami-foot">v02.69 (C)Copyright 1985-2026, American Megavibes, Inc.</div>' + box + '</div>';
       const main = el.querySelector('.ami-main'), tabsEl = el.querySelector('.ami-tabs');
       main.scrollTop = top;                      // la liste ne remonte pas en haut à chaque touche (ni à chaque tap)
@@ -15426,7 +15441,9 @@ function amiSetup(el, bindKey) {
     }
     function doAct(a) {                          // Ok dans une boîte de confirmation
       if (a === 'save' || a === 'discard') return finish(a);
-      Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1 } : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1 });
+      if (a === 'fs') ach('failsafe');
+      Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1, fan: 1 } : a === 'fs' ? { ratio: lo, mhz: ramOpts[1] || 0, quick: 0, fan: 1 }   // Fail-Safe : tout au plus bas
+        : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan });
     }
     function onKey(e) {
       const k = e.key;
@@ -15677,6 +15694,13 @@ function pcTick(dt, now) {                       // température, alimentation, 
     }
   }
   if (part('disk').raid && chance(dt / 5400)) raidFail();
+  fanNoise(dt);
+}
+
+const FAN_NOISE = ['Ventilateur en Turbo : l’agent demande s’il peut travailler depuis la cuisine', 'Ventilateur en Turbo : le PC décolle, les agents attachent leur ceinture',
+  'Ventilateur en Turbo : un voisin demande si vous passez l’aspirateur à cette heure-ci', 'Ventilateur en Turbo : l’orchestrateur parle plus fort, personne ne l’entend mieux'];
+function fanNoise(dt) {                         // Turbo : refroidit mieux, et s'entend (une remarque toutes les quatre minutes, en moyenne)
+  if (fanSet() === FAN[2] && part('cool').w < 1000 && chance(dt / 240)) hudNote(pick(FAN_NOISE), 'ok');
 }
 
 /* les outils pour vérifier si le PC est à terre, sans ouvrir htop */
@@ -15685,7 +15709,7 @@ function sensorsLines() {
   return [
     ['coretemp-isa-0000', 'dim', 15], ['Adapter: ISA adapter', 'dim', 15],
     [H('Package id 0:  ', [`+${s.temp.toFixed(1)}°C`, tc], '  (high = +90.0°C, crit = +100.0°C)', s.temp >= 90 ? ['  ALARME : throttling', 'errc'] : ''), '', 15],
-    [H(`fan1:          ${co.w <= 60 ? '900 RPM  (poussière : beaucoup)' : co.w >= 1000 ? '0 RPM  (azote liquide, pas besoin)' : `${ri(1100, 1900)} RPM`}`), '', 15],
+    [H(`fan1:          ${co.w >= 1000 ? '0 RPM  (azote liquide, pas besoin)' : `${fanRpm(s.temp)} RPM  (${fanSet().n}${co.w <= 60 ? ', poussière : beaucoup' : ''})`}`), '', 15],
     [H('power1:        ', [`${Math.round(s.draw)} W / ${ps.w} W`, s.draw > .85 * ps.w ? 'errc' : 'okc'], `  (${ps.n}${ps.noname ? ', elle siffle' : ''})`), '', 15],
     ...(IDLE ? [[H('compteur:      ', [`${Math.round(wallW(s))} W au mur`, 'wrn'], `  (rendement ${Math.round((ps.eff || .85) * 100)} % · `,
       claudeOn && !paused ? `$${usd(G.elec || 0)} d’électricité depuis le dernier ship)` : 'PC en veille : le compteur ne tourne pas sans agents)'), '', 15]] : []),
