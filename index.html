@@ -550,7 +550,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-cpu.bad, .xf-wx.bad { color: var(--red); font-weight: 700; }
 .xf-wx.ok { color: var(--yellow); }
 .xf-vol.off { color: var(--dim); }
-.xf-pop { position: absolute; top: var(--xfp-h); right: .5ch; z-index: 4; width: min(44ch, calc(100vw - 1ch)); max-height: 75vh; overflow: auto; padding: .5em 1.2ch .7em;
+.xf-pop { position: absolute; top: var(--xfp-px, var(--xfp-h)); right: .5ch; z-index: 4; width: min(44ch, calc(100vw - 1ch)); max-height: 75vh; overflow: auto; padding: .5em 1.2ch .7em;
   border: 1px solid var(--orange); border-radius: 0 0 4px 4px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); white-space: normal; }
 .xf-pop[hidden] { display: none; }
 .xf-pop h3 { margin-bottom: .2em; color: var(--orange); font-size: 1em; }
@@ -573,6 +573,25 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-cal .now { background: var(--orange); color: var(--ink); font-weight: 700; }
 .xf-wxf { display: grid; grid-template-columns: 13ch 2ch minmax(0, 1fr); gap: .25em 1ch; margin: .4em 0; }
 .xf-wxf .g { color: var(--orange); }
+/* les préférences du tableau de bord : en bas, la taille, le masquage automatique, les éléments masqués, le tableau de bord arrêté */
+.xf-off { display: none !important; }
+#xfce.pgone .xf-panel { display: none; }
+#xfce > .xf-panel { grid-row: 1; } #xfce > .xf-desk { grid-row: 2; }   /* des rangées fixes : arrêté ou masqué, le tableau de bord ne fait pas glisser le bureau */
+#xfce.pbot { grid-template-rows: minmax(0, 1fr) auto; }
+#xfce.pbot .xf-panel { grid-row: 2; border-bottom: 0; border-top: 1px solid var(--sep); }
+#xfce.pbot .xf-desk { grid-row: 1; }
+#xfce.pbot .xf-menu, #xfce.pbot .xf-notes, #xfce.pbot .xf-wl, #xfce.pbot .xf-pop { top: auto; bottom: var(--xfp-px, var(--xfp-h)); border-radius: 4px 4px 0 0; }
+#xfce.phide .xf-panel { position: absolute; left: 0; right: 0; top: 0; z-index: 5; transform: translateY(calc(-100% + 4px)); transition: transform .18s ease-out; }
+#xfce.phide.pbot .xf-panel { top: auto; bottom: 0; transform: translateY(calc(100% - 4px)); }
+#xfce.phide .xf-panel:hover, #xfce.phide .xf-panel:focus-within, #xfce.phide.pshow .xf-panel,
+#xfce.phide:has(#xf-menu:not([hidden]), #xf-notes:not([hidden]), #xf-wl:not([hidden]), #xf-pop:not([hidden])) .xf-panel { transform: none; }
+@media (pointer: coarse) { #xfce.phide .xf-panel { transform: translateY(calc(-100% + 10px)); } #xfce.phide.pbot .xf-panel { transform: translateY(calc(100% - 10px)); } }
+@media (pointer: fine) and (min-width: 761px) { #xfce.psz-s .xf-panel { font-size: .85em; } #xfce.psz-l .xf-panel { font-size: 1.3em; } }   /* au doigt : 40 px, toujours */
+.xfp-it { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: .6ch; padding: .1em 0; }
+.xfp-it button { padding: 0 1ch; border: 1px solid var(--rule); border-radius: 3px; color: var(--fg); }
+.xfp-it button:disabled { opacity: .35; }
+.xfs-row { display: flex; flex-wrap: wrap; align-items: center; gap: .3em 1.6ch; margin: .2em 0 .5em; }
+.xfs-row > b { min-width: 22ch; font-weight: 400; color: var(--dim); }
 @media (max-width: 760px), (pointer: coarse) and (max-width: 1100px) { .xf-cpu, .xf-wx, .xf-vol { display: none; } }   /* au doigt (téléphone, tablette), la place va aux fenêtres : le graphe, la météo, le volume restent sur ordinateur */
 .xf-sys { flex: none; display: flex; align-items: center; gap: 1.6ch; padding-right: .5ch; }
 .xf-cost { color: var(--yellow); }
@@ -595,7 +614,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-tasks.compact .xf-task { display: none; }
 .xf-tasks.compact .xf-wl-btn { display: block; }
 .xf-wl-btn:hover, .xf-wl-btn[aria-expanded="true"] { border-color: var(--orange); background: color-mix(in srgb, var(--orange) 18%, transparent); }
-.xf-wl { position: absolute; top: var(--xfp-h); left: .5ch; z-index: 4; display: grid; width: min(46ch, calc(100vw - 1ch)); max-height: 70vh; overflow: auto; padding: .3em 0;
+.xf-wl { position: absolute; top: var(--xfp-px, var(--xfp-h)); left: .5ch; z-index: 4; display: grid; width: min(46ch, calc(100vw - 1ch)); max-height: 70vh; overflow: auto; padding: .3em 0;
   border: 1px solid var(--orange); border-radius: 0 0 4px 4px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); white-space: normal; }
 .xf-wl[hidden] { display: none; }
 .xf-wl .mh { padding: .2em 1.5ch .3em; color: var(--dim); }
@@ -627,7 +646,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 @media (max-width: 760px) {
   .xf-apps .l, .xf-score .l, .xf-score .m { display: none; }   /* « ▦ » et le score seul : la place va aux fenêtres */
 }
-.xf-notes { position: absolute; top: var(--xfp-h); right: .5ch; z-index: 4; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(52ch, calc(100vw - 2ch)); max-height: 70vh;
+.xf-notes { position: absolute; top: var(--xfp-px, var(--xfp-h)); right: .5ch; z-index: 4; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(52ch, calc(100vw - 2ch)); max-height: 70vh;
   border: 1px solid var(--orange); border-radius: 4px; background: var(--panel); box-shadow: 0 .6em 2em rgba(0, 0, 0, .5); }
 .xf-notes[hidden] { display: none; }
 .xf-notes h3 { padding: .5em 1ch; border-bottom: 1px solid var(--sep); color: var(--orange); font-size: 1em; }
@@ -705,7 +724,7 @@ body.crt-on { animation: crton .7s ease-out; }                      /* allumage 
 .xf-lasso { position: absolute; z-index: 1; border: 1px solid var(--orange); background: color-mix(in srgb, var(--orange) 12%, transparent); pointer-events: none; }
 .xf-ico-hint { pointer-events: none; border: 1px dashed var(--orange); border-radius: 3px; background: color-mix(in srgb, var(--orange) 10%, transparent); }
 .xf-menu {
-  position: absolute; top: var(--xfp-h); left: .5ch; z-index: 3;
+  position: absolute; top: var(--xfp-px, var(--xfp-h)); left: .5ch; z-index: 3;
   width: min(60ch, calc(100vw - 1ch)); max-height: calc(100% - var(--lh) - 1.2em); overflow: auto; padding: .3em 0 .4em;
   background: var(--panel); border: 1px solid var(--orange); border-radius: 0 0 4px 4px; box-shadow: 0 .8em 2.4em rgba(0, 0, 0, .65);
 }
@@ -1895,7 +1914,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.82', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.83', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2732,6 +2751,8 @@ const ACH = [
   { id: 'xfliste', g: '▤', n: 'Sept fenêtres, un bouton', d: 'Ouvrir la liste des fenêtres du tableau de bord avec au moins sept fenêtres ouvertes.', p: 9.8 },
   { id: 'meteo', g: '↯', n: 'Bulletin météo', d: 'Consulter la météo de la prod pendant un orage (un incident). Prévision : pluie de remboursements.', p: 7.2 },
   { id: 'chut', g: '♪', n: 'Silence, ça déploie', d: 'Couper le son depuis le tableau de bord pendant qu’une musique joue.', p: 11.5 },
+  { id: 'xfsurmesure', g: '▭', n: 'Tableau de bord sur mesure', d: 'Changer trois réglages du tableau de bord. Les agents le rangeront autrement demain.', p: 8.6 },
+  { id: 'xfpanel', g: '↻', n: 'Le tableau de bord est revenu', d: 'Relancer xfce4-panel depuis le terminal, après qu’il s’est fermé de manière inattendue.', p: 3.9 },
   { id: 'clignote', g: '!', n: 'Ça clignote', d: 'Laisser le bouton des agents clignoter cinq minutes pendant un incident. Il finira bien par se régler tout seul.', p: 4.4, h: 1 },
   { id: 'recherche', g: '?', n: 'Je cherche, donc je trouve', d: 'Lancer une appli ou une commande depuis la recherche du menu Applications.', p: 21.7 },
   { id: 'deco', g: '▨', n: 'Décoration d’intérieur', d: 'Changer le fond d’écran du bureau Xfce.', p: 33.4 },
@@ -5436,7 +5457,7 @@ const FS_CMDS = {
 /* complétion Tab : noms de commandes, puis chemins */
 const COMPLETE_CMDS = ['agents', 'apt', 'apt-get', 'atop', 'atril', 'bunker', 'alias', 'bash', 'cat', 'cd', 'chmod', 'cp', 'git', 'sleep', 'find', 'history', 'man', 'mv', 'omv', 'source', 'vi', 'vim', 'yes', 'type', 'unalias', 'which', 'grep', 'head', 'less', 'sort', 'tail', 'tee', 'uniq', 'wc', 'claude', 'clear', 'codex', 'coffee', 'cost', 'date', 'echo', 'fallout', 'firefaux', 'free', 'help', 'htop', 'layout', 'lead', 'ls', 'mistral', 'mkdir', 'mousepad', 'nano',
   'model', 'npm', 'npx', 'pwd', 'reboot',
-  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
+  'restart', 'rm', 'rmdir', 'score', 'curl', 'pip', 'uv', 'wiki', 'smartctl', 'logitheque', 'xfce4-settings-manager', 'xfdesktop-settings', 'xfce4-session-settings', 'xfce4-panel', 'ipo', 'defi', 'pr', 'gh', 'actu', 'equipe', 'keys', 'incident', 'mail', 'mutt', 'blunderbird', 'journalctl', 'systemctl', 'kubectl', 'certbot', 'dig', 'df', 'tmux', 'xfce4-terminal', 'mc', 'lynx', 'nvlc', 'steamcmd', 'moon', 'xfce4-about', 'clamscan', 'freshclam', 'crontab', 'plateformes', 'switch', 'bg', 'ultracode', 'xhigh', 'flash', 'lolama', 'studiolm', 'sensors', 'settings', 'license', 'startx', 'status', 'store', 'thunar', 'touch', 'tree', 'tskill', 'vibe', 'vlc', 'whoami', 'xfce'];
 // commandes de Claude Code : elles n'existent pas tant que « claude » n'est pas lancé
 const CLAUDE_ONLY = new Set(['agents', '/agents', 'layout', 'disposition', 'lead', 'orchestrateur', 'model', '/model', 'status',
   'cost', '/cost', 'facture', 'coffee', 'café', 'cafe', 'restart']);
@@ -6382,6 +6403,7 @@ async function runCommand(raw, inner = false) {   // inner : une étape de tube 
     xfMenuClose();
     return openTab('logitheque');
   }
+  if (rawProg === 'xfce4-panel') return xfPanelCmd(argv(cmd).slice(head === 'sudo' ? 2 : 1));   // le tableau de bord : le relancer, ses préférences
   if (Object.hasOwn(XFS_CMD, rawProg)) {          // les Paramètres du bureau : il leur faut le bureau
     if (!installed.has('xfce4')) return notInstalled(rawProg, 'xfce4');
     if (!xfOn) {
@@ -7823,6 +7845,8 @@ async function xfEnter() {
   $('#foot').inert = true;                        // la barre tmux reste cachée sous le bureau
   xfceEl.hidden = false;
   xfWallDraw();
+  xfPanelGone = false;
+  xfPanelApply();
   $('.xf-user').textContent = USER;
   xfIconSel = '';
   xfSelSet = new Set();
@@ -8222,6 +8246,7 @@ function xfPanelTick() {
   if (claudeOn) c.textContent = `${cli().glyph} $${usd(usage.usd)}`;
   for (const n in xw) xfLabel(n);
   xfPlugTick();
+  xfPanelEvents();
   xfTaskState();
   xfIconsSync();
   xfTrayDraw();
@@ -8397,6 +8422,23 @@ addEventListener('keydown', e => {
   xfPopClose();
   xfceEl.querySelector(`[data-pl="${k}"]`)?.focus();
 });
+$('#xfce .xf-panel').addEventListener('contextmenu', e => {   // clic droit sur le tableau de bord (hors boutons de fenêtres) : ses réglages
+  if (e.defaultPrevented || e.target.closest('[data-w], [data-grp]')) return;
+  e.preventDefault();
+  const P = G.xfp || {};
+  xfCtxOpen(e.clientX, e.clientY, [
+    { ic: '▭', t: 'Préférences du tableau de bord…', run: () => xfSettingsOpen('panel') },
+    { ic: '+', t: 'Ajouter de nouveaux éléments…', run: () => { xfSettingsOpen('panel'); PROGS['xfce4-settings'].el.querySelector('#xfp-items')?.scrollIntoView(); } },
+    '-',
+    { ic: P.pos === 'bottom' ? '↑' : '↓', t: P.pos === 'bottom' ? 'Déplacer en haut' : 'Déplacer en bas', run: () => xfPanelSet({ pos: P.pos === 'bottom' ? 'top' : 'bottom' }) },
+    { ic: P.hide ? '✓' : '', t: 'Masquer automatiquement', run: () => xfPanelSet({ hide: P.hide ? 0 : 1 }) },
+    { ic: P.lock ? '✓' : '', t: 'Verrouiller le tableau de bord', run: () => xfPanelSet({ lock: P.lock ? 0 : 1 }) },
+    '-',
+    { ic: '↻', t: 'Redémarrer le tableau de bord', run: () => xfPanelRestart() },
+    { ic: '✕', t: 'Quitter le tableau de bord', danger: true, run: () => xfPanelQuit() },
+  ]);
+});
+new ResizeObserver(() => xfceEl.style.setProperty('--xfp-px', $('#xfce .xf-panel').offsetHeight + 'px')).observe($('#xfce .xf-panel'));
 
 /* la zone de notifications (le tableau de bord, à droite) : une icône pour chaque chose qui attend, un clic ouvre la bonne appli
    (Blunderbird ou mail, status.vibe ou incident, les PR sur GitHype ou pr list, actu, keys) ; ◔ : le journal des notifications, les
@@ -8564,7 +8606,7 @@ function xfWallSet(k) {                            // un autre fond : tout de su
   PROGS['xfce4-settings'].redraw?.();
   return true;
 }
-const XFS_TABS = [['bureau', 'Bureau'], ['session', 'Session et démarrage']];
+const XFS_TABS = [['bureau', 'Bureau'], ['session', 'Session et démarrage'], ['panel', 'Tableau de bord']];
 const XFS_PV = { logo: 'AI', citation: '« … »', uni: '' };
 const XFS_HTML = {
   bureau: () => `<h3>Fond d’écran</h3><div class="xfs-walls">${XF_WALLS.map(([k, n, d]) => `<button type="button" class="xfs-wall${xfWall() === k ? ' on' : ''}" data-wall="${k}" aria-pressed="${xfWall() === k}">`
@@ -8619,6 +8661,137 @@ XFS_ACT.boot = a => {
   toast(a.checked ? 'Le bureau s’ouvrira au prochain démarrage.' : 'Au prochain démarrage : le terminal, comme avant.', 2600);
   PROGS['xfce4-settings'].redraw?.();
 };
+/* Tableau de bord : la position, la taille, le masquage, le verrouillage, le regroupement ; les éléments, leur ordre (G.xfp) */
+const XF_ITEMS = [['cpu', 'Graphe du processeur', '.xf-cpu'], ['wx', 'Météo de la prod', '.xf-wx'], ['tray', 'Zone de notifications', '.xf-tray'], ['score', 'Score (projets shippés)', '.xf-score'],
+  ['cost', 'Facture des agents', '.xf-cost'], ['vol', 'Volume', '.xf-vol'], ['fs', 'Plein écran', '.xf-sys > .fs-btn'], ['clock', 'Horloge et calendrier', '.xf-clock'], ['user', 'Utilisateur', '.xf-user']];
+const xfItemOrd = () => { const o = (G.xfp?.items || []).filter(k => XF_ITEMS.some(x => x[0] === k)); return [...o, ...XF_ITEMS.map(x => x[0]).filter(k => !o.includes(k))]; };
+let xfPanelGone = false, xfPanelCrashed = false, xfOptAt = Date.now() + ri(15, 30) * 60e3;   // arrêté (quitté, ou planté) ; la prochaine « optimisation » des agents
+function xfPanelApply() {                          // les préférences : la position, la taille, le masquage, les éléments et leur ordre
+  const P = G.xfp || {}, ord = xfItemOrd(), off = new Set(P.off || []);
+  xfceEl.classList.toggle('pbot', P.pos === 'bottom');
+  xfceEl.classList.toggle('phide', !!P.hide);
+  xfceEl.classList.toggle('psz-s', P.size === 's');
+  xfceEl.classList.toggle('psz-l', P.size === 'l');
+  xfceEl.classList.toggle('pgone', xfPanelGone);
+  XF_ITEMS.forEach(([k, , sel]) => { const e = xfceEl.querySelector(sel); if (e) { e.style.order = ord.indexOf(k); e.classList.toggle('xf-off', off.has(k)); } });
+  if (xfOn) { for (const n in xw) xfApply(xw[n]); xfSync(); }
+}
+function xfPanelSet(o, who = 'vous') {             // un réglage : gardé, appliqué ; trois réglages changés à la main : le succès
+  const P = G.xfp || {}, touched = new Set(P.tw || []);
+  if (who === 'vous') Object.keys(o).forEach(k => touched.add(k === 'off' ? 'items' : k));
+  G.xfp = { ...P, ...o, tw: [...touched] };
+  if (IDLE) saveGame();
+  xfPanelApply();
+  PROGS['xfce4-settings']?.redraw?.();
+  if (touched.size >= 3) ach('xfsurmesure');
+}
+const xfsRadio = (k, v, t, cur) => `<label class="xfs-chk"><input type="radio" name="xfp-${k}" data-xfsa="xfp" data-k="${k}" data-v="${v}"${cur === v ? ' checked' : ''}> ${t}</label>`;
+XFS_HTML.panel = () => {
+  const P = G.xfp || {}, ord = xfItemOrd(), off = new Set(P.off || []);
+  return '<h3>Affichage</h3>'
+    + `<div class="xfs-row"><b>Position</b>${xfsRadio('pos', 'top', 'En haut', P.pos || 'top')}${xfsRadio('pos', 'bottom', 'En bas', P.pos || 'top')}</div>`
+    + `<div class="xfs-row"><b>Taille</b>${xfsRadio('size', 's', 'Petite', P.size || 'm')}${xfsRadio('size', 'm', 'Normale', P.size || 'm')}${xfsRadio('size', 'l', 'Grande', P.size || 'm')}</div>`
+    + `<div class="xfs-row"><b>Regrouper les fenêtres</b>${xfsRadio('grp', 'auto', 'Si la place manque', P.grp || 'auto')}${xfsRadio('grp', 'always', 'Toujours', P.grp || 'auto')}${xfsRadio('grp', 'never', 'Jamais', P.grp || 'auto')}</div>`
+    + `<label class="xfs-chk"><input type="checkbox" data-xfsa="xfp" data-k="hide"${P.hide ? ' checked' : ''}> Masquer automatiquement (il revient quand la souris touche le bord)</label>`
+    + `<label class="xfs-chk"><input type="checkbox" data-xfsa="xfp" data-k="lock"${P.lock ? ' checked' : ''}> Verrouiller le tableau de bord (on ne range plus les boutons en les glissant)</label>`
+    + '<h3 id="xfp-items">Éléments</h3>'
+    + ord.map((k, i) => `<div class="xfp-it"><label class="xfs-chk"><input type="checkbox" data-xfsa="xfpit" data-k="${k}"${off.has(k) ? '' : ' checked'}> ${esc(XF_ITEMS.find(x => x[0] === k)[1])}</label>`
+      + `<button type="button" data-xfsa="xfpmv" data-k="${k}" data-v="-1" aria-label="Monter : ${esc(XF_ITEMS.find(x => x[0] === k)[1])}"${i ? '' : ' disabled'}>↑</button>`
+      + `<button type="button" data-xfsa="xfpmv" data-k="${k}" data-v="1" aria-label="Descendre : ${esc(XF_ITEMS.find(x => x[0] === k)[1])}"${i < ord.length - 1 ? '' : ' disabled'}>↓</button></div>`).join('')
+    + '<p class="dim">Applications et les boutons des fenêtres restent, toujours en tête. Clic droit sur le tableau de bord : ces réglages, et le redémarrer.</p>'
+    + `<p><button type="button" class="dl-real" data-xfsa="xfpreset">Revenir aux réglages d’origine</button></p>`
+    + (P.opt ? `<p class="dim">Vos agents l’ont « optimisé » ${P.opt === 1 ? 'une fois' : `${P.opt} fois`}. Sans demander.</p>` : '');
+};
+XFS_ACT.xfp = a => xfPanelSet({ [a.dataset.k]: a.type === 'checkbox' ? (a.checked ? 1 : 0) : a.dataset.v });
+XFS_ACT.xfpit = a => { const off = new Set(G.xfp?.off || []); a.checked ? off.delete(a.dataset.k) : off.add(a.dataset.k); xfPanelSet({ off: [...off] }); };
+XFS_ACT.xfpmv = a => {
+  const o = xfItemOrd(), i = o.indexOf(a.dataset.k), j = i + +a.dataset.v;
+  if (j < 0 || j >= o.length) return;
+  [o[i], o[j]] = [o[j], o[i]];
+  xfPanelSet({ items: o });
+  PROGS['xfce4-settings'].el.querySelector(`[data-xfsa="xfpmv"][data-k="${a.dataset.k}"][data-v="${a.dataset.v}"]:not(:disabled)`)?.focus();
+};
+XFS_ACT.xfpreset = () => { const { ord, vol, mute, opt, tw } = G.xfp || {}; G.xfp = { ord, vol, mute, opt, tw }; if (IDLE) saveGame(); xfPanelApply(); PROGS['xfce4-settings'].redraw?.(); toast('Tableau de bord : les réglages d’origine.'); };
+function xfPanelStop() { xfMenuClose(); xfCtxClose(); xfWlEl.hidden = true; xfPopClose(); if (!xfNotesEl.hidden) xfNotesToggle(false); }
+function xfPanelQuit() {                           // Quitter : le tableau de bord s'arrête ; xfce4-panel (ou le bureau) le relance
+  if (xfPanelGone) return false;
+  xfPanelStop();
+  xfPanelGone = true;
+  xfPanelApply();
+  toast('Le tableau de bord est arrêté : <kbd>xfce4-panel</kbd> dans le terminal (ou clic droit sur le bureau) pour le relancer.', 3600);
+  return true;
+}
+function xfPanelStart(term) {                      // le relancer : après un plantage, depuis le terminal, c'est un succès
+  if (!xfPanelGone) return false;
+  xfPanelGone = false;
+  xfPanelApply();
+  if (term && xfPanelCrashed) ach('xfpanel');
+  xfPanelCrashed = false;
+  return true;
+}
+function xfPanelRestart() {                        // --restart : il disparaît, il revient (avec ses réglages)
+  xfPanelStop();
+  xfPanelGone = true;
+  xfPanelApply();
+  setTimeout(() => { xfPanelGone = false; xfPanelApply(); toast('xfce4-panel a redémarré. Les agents n’ont rien remarqué.'); }, 450);
+}
+function xfPanelCrash() {                          // la RAM manque : le tableau de bord tombe ; la boîte de dialogue de Xfce, mot pour mot
+  if (!xfOn || xfPanelGone) return false;
+  xfPanelStop();
+  xfPanelGone = xfPanelCrashed = true;
+  xfPanelApply();
+  shellPrint(H([`(xfce4-panel:${ri(1200, 1999)}): `, 'errc'], 'GLib-CRITICAL **: g_malloc : impossible d’allouer 48 octets. Le tableau de bord s’est arrêté.'));
+  xfDlg('<p class="ttl">xfce4-panel</p><p>Le tableau de bord s’est fermé de manière inattendue. Voulez-vous le redémarrer ?</p>'
+    + '<p class="dim">La mémoire manque : le PC swappe. Vos agents en ont pris l’essentiel.</p>'
+    + '<div class="pk-actions"><button type="button" data-c="ok">Redémarrer</button><button type="button" data-c="no">Quitter</button></div>', () => { xfDlgClose(); xfPanelStart(); }, '[data-c="ok"]');
+  return true;
+}
+const XF_OPT = [                                   // les « optimisations » des agents : [possible ?, le réglage, ce qu'ils en disent]
+  [() => G.xfp?.pos !== 'bottom', () => ({ pos: 'bottom' }), 'le tableau de bord passe en bas, « comme sous Windows, pour l’ergonomie »'],
+  [() => G.xfp?.pos === 'bottom', () => ({ pos: 'top' }), 'le tableau de bord remonte en haut, « plus près du regard »'],
+  [() => G.xfp?.size !== 'l', () => ({ size: 'l' }), 'le tableau de bord grossit, « pour l’accessibilité »'],
+  [() => !G.xfp?.hide, () => ({ hide: 1 }), 'le tableau de bord se cache tout seul, « pour libérer de l’espace écran »'],
+  [() => xfItemOrd()[0] !== 'cost', () => ({ items: ['cost', ...xfItemOrd().filter(k => k !== 'cost')], off: (G.xfp?.off || []).filter(k => k !== 'cost') }), 'la Facture passe en premier, « pour la visibilité des coûts »'],
+  [() => !(G.xfp?.off || []).includes('wx'), () => ({ off: [...(G.xfp?.off || []), 'wx'] }), 'la météo disparaît, « elle démoralisait l’équipe »'],
+];
+function xfPanelOptimize() {                       // un agent range votre tableau de bord ; Paramètres du bureau › Tableau de bord pour défaire
+  const ok = XF_OPT.filter(o => o[0]());
+  if (!xfOn || !ok.length) return '';
+  const [, f, why] = pick(ok), who = claudeOn && panes.length ? agentName(pick(panes)) : 'Un agent';
+  xfPanelSet({ ...f(), opt: (G.xfp?.opt || 0) + 1 }, who);
+  const msg = `${who} a optimisé votre tableau de bord : ${why}.`;
+  toast(`${esc(msg)} <span class="dim">Paramètres du bureau › Tableau de bord pour défaire.</span>`, 5000);
+  return msg;
+}
+function xfPanelEvents() {                         // chaque seconde : les agents rangent (de temps en temps) ; le PC patate qui swappe fait tomber le tableau de bord
+  if (!EV_ON || !IDLE) return;
+  if (claudeOn && !paused && mode === 'idle' && Date.now() > xfOptAt) { xfOptAt = Date.now() + ri(20, 40) * 60e3; xfPanelOptimize(); }
+  if (!xfPanelGone && chance(1 / 400) && pcLoad().oom) xfPanelCrash();
+}
+function xfPanelCmd(a) {                           // xfce4-panel : le relancer, --restart, --quit, --preferences, --help, --version
+  const has = (...o) => a.some(x => o.includes(x));
+  if (has('-h', '--help')) {
+    return ['Utilisation : xfce4-panel [OPTION…]', '', '  -p, --preferences   les préférences du tableau de bord', '  -a, --add           ajouter de nouveaux éléments',
+      '  -r, --restart       redémarrer le tableau de bord', '  -q, --quit          arrêter le tableau de bord', '  -V, --version       la version', '',
+      'Sans option : relance le tableau de bord, s’il s’est arrêté.'].forEach(l => shellPrint(l));
+  }
+  if (has('-V', '--version')) { shellPrint('xfce4-panel 4.20.0 (Xfce 4.20)'); return shellPrint('Copyright (c) 2004-2026, l’équipe de développement de Xfce · tableau de bord relu par 0 humain', 'dim'); }
+  if (!installed.has('xfce4')) return notInstalled('xfce4-panel', 'xfce4');
+  if (!xfOn) {
+    shellPrint(`(xfce4-panel:${ri(30000, 39999)}): Gtk-WARNING **: cannot open display: `, 'errc');
+    return shellPrint(H('Le tableau de bord a besoin du bureau : tapez ', ['xfce', 'org'], '.'), 'dim');
+  }
+  if (has('-p', '--preferences', '-a', '--add')) return xfSettingsOpen('panel');
+  if (has('-q', '--quit')) return xfPanelQuit() ? shellPrint(H(['xfce4-panel : ', 'dim'], 'arrêté. ', ['xfce4-panel', 'org'], ' pour le relancer.')) : shellPrint('xfce4-panel : il n’est pas lancé.', 'dim');
+  if (has('-r', '--restart')) {
+    if (xfPanelGone) { xfPanelStart(true); return shellPrint(H(['✓ ', 'okc'], 'xfce4-panel relancé : le tableau de bord est revenu.')); }
+    xfPanelRestart();
+    return shellPrint(H(['xfce4-panel : ', 'dim'], 'redémarrage…'));
+  }
+  if (!xfPanelGone) return shellPrint(H(['xfce4-panel : ', 'wrn'], 'il tourne déjà (un par écran). ', ['xfce4-panel --restart', 'org'], ' pour le redémarrer.'));
+  xfPanelStart(true);
+  shellPrint(H(['✓ ', 'okc'], 'xfce4-panel relancé : le tableau de bord est revenu.'));
+}
 function xfAutostart() {                           // après la connexion : le bureau, s'il est demandé (et possible)
   if (!IDLE || !G.xfd?.boot || xfOn || !installed.has('xfce4') || G.chal === 'nodesk' || mode !== 'idle' || !titleEl.hidden) return;
   shellPrint(H(['xfce4-session', 'dim'], [' · lancé au démarrage (Paramètres du bureau › Session et démarrage)', 'dim']));
@@ -8823,6 +8996,7 @@ deskEl.addEventListener('contextmenu', e => {    // clic droit sur le fond d'éc
   e.preventDefault();
   xfNewCell = xfCellAt(e.clientX, e.clientY);       // un dossier, un document créé ici : sur cette case
   xfCtxOpen(e.clientX, e.clientY, [
+    ...(xfPanelGone ? [{ ic: '▭', t: 'Relancer le tableau de bord', run: () => xfPanelStart() }, '-'] : []),
     { ic: '■', t: 'Créer un dossier…', run: () => deskCreate(true) },
     { ic: '□', t: 'Créer un document vide…', run: () => deskCreate(false) },
     { ic: '↗', t: 'Créer un raccourci…', run: () => deskShortcut() },
