@@ -1018,6 +1018,20 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wp-src .n { display: inline-block; width: 5ch; margin-right: 1ch; color: var(--dim2); text-align: right; text-indent: 0; }
 .wp-src .c { color: var(--green); }
 .wp-src .k { color: var(--red); font-weight: 700; }
+/* le bandeau de cookies (une couche au bas de la page, comme les pop-ups) ; le captcha de Vibegle */
+.wb-ckl { grid-row: 4; grid-column: 1; align-self: end; z-index: 2; pointer-events: none; }
+.wb-ck { pointer-events: auto; display: grid; gap: .5em; max-width: 110ch; margin: 0 auto; padding: .8em 2ch 1em; border-top: 2px solid var(--orange); background: var(--panel); box-shadow: 0 -.6em 1.4em rgba(0, 0, 0, .45); white-space: normal; }
+.wb-ck .row { display: flex; flex-wrap: wrap; align-items: center; gap: .6em 2ch; }
+.wb-ck .ok { padding: .5em 3ch; border-radius: 4px; background: var(--green); color: var(--ink); font-weight: 700; font-size: 1.15em; }
+.wb-ck .lnk { color: var(--dim); text-decoration: underline; font-size: .85em; }
+.wb-ck label { display: flex; align-items: center; gap: 1ch; }
+.wb-ck input[type=checkbox] { accent-color: var(--orange); }
+.wb-ck .tiny { justify-self: end; color: var(--dim2); font-size: .7em; }
+.wb-ck.perso { max-height: min(60vh, 34em); overflow: auto; }
+.cap-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6ch; max-width: 66ch; }
+.cap-t { min-height: 4.5em; padding: .4em 1ch; border: 2px solid var(--sep); border-radius: 4px; background: var(--panel); color: var(--fg); text-align: left; overflow-wrap: anywhere; }
+.cap-t[aria-pressed="true"] { border-color: var(--orange); background: rgba(255, 176, 0, .12); }
+.cap-t code { white-space: normal; }
 @media (pointer: coarse), (max-width: 640px) {   /* Firefaux au doigt : des cibles de doigt, et pas de zoom surprise d'iOS dans les champs (16 px au moins) */
   .wb-bar { gap: .15ch; padding: .15em .4ch; font-size: max(16px, 1em); }
   .wb-bar > button { min-width: 2.3em; min-height: 2.3em; padding: 0 .3ch; }
@@ -1038,6 +1052,10 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .wb-dvi input { font-size: max(16px, 1em); }
   .wb-dvb .dn { grid-template-columns: 5ch minmax(0, 1fr) 7ch 8ch; }
   .wb-dvb .dn span:nth-child(4) { display: none; }
+  .wb-ck { font-size: max(13px, 1em); }
+  .wb-ck .ok, .wb-ck .lnk { min-height: max(2.6em, 34px); }   /* « Personnaliser » reste petit, mais se touche */
+  .wb-ck label { min-height: 2.4em; }
+  .wb-ck .tiny { min-height: 2em; }
 }
 /* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
 .mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
@@ -1781,7 +1799,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.77', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.78', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2574,6 +2592,8 @@ const ACH = [
   { id: 'loupe', g: '⊕', n: 'Loupe', d: 'Zoomer à 300 % dans Firefaux. Même les conditions générales se lisent.', p: 6.1 },
   { id: 'onglets', g: '▤', n: 'Cent onglets', d: 'Avoir 100 onglets ouverts dans Firefaux. Le PC patate, lui, en avait assez à six.', p: 1.3 },
   { id: 'inspecteur', g: '{}', n: 'Inspecteur', d: 'Ouvrir les outils de développement de Firefaux (F12). Ceux de votre vrai navigateur ne comptent pas.', p: 24.6 },
+  { id: 'refus', g: '✕', n: 'Tout refuser', d: 'Trouver le bouton « Tout refuser » d’un bandeau de cookies : tout en bas, en tout petit.', p: 14.8 },
+  { id: 'captcha', g: '▦', n: 'Pas un robot', d: 'Réussir le captcha de Vibegle. Vos agents l’avaient passé en 0,2 s.', p: 33.1 },
   { id: 'selfxss', g: '!', n: 'Collé dans la console', d: 'Coller dans la console ce qu’un agent vous a conseillé d’y coller. La prod n’a pas aimé.', p: 3.3, h: 1 },
   { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
   { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
@@ -11173,6 +11193,8 @@ const ADDONS = {
     perm: ['Lire et modifier vos données sur tous les sites (pour y retirer les pubs)'] },
   dark: { n: 'Dark Reader', g: '◐', ver: '4.9.96', users: 6200431, stars: '4,6',
     d: 'Assombrit tous les sites. Le terminal était déjà sombre ; maintenant, le Web aussi.', perm: ['Lire et modifier vos données sur tous les sites'] },
+  consent: { n: 'Consent-O-Matique', g: '✓', ver: '1.1.3', users: 512034, stars: '4,7',
+    d: 'Répond aux bandeaux de cookies à votre place : il trouve « Tout refuser », décoche les 847 partenaires, et ne vous dérange pas.', perm: ['Lire et modifier vos données sur tous les sites (pour y cliquer « Tout refuser »)'] },
   freeblock: { n: 'Bloqueur de Pubs GRATUIT Pro 2026', g: '⊘', ver: '0.0.1-beta', users: 4, stars: '2,1', bad: 1,
     d: 'Bloque 100 % des publicités. Sauf les siennes. Gratuit : le produit, c’est vous.',
     perm: ['Lire et modifier vos données sur tous les sites', 'Lire vos mots de passe enregistrés (pour les protéger)', 'Utiliser votre processeur pendant vos pauses (et le reste du temps)',
@@ -11271,6 +11293,34 @@ const FF_ZOOM = [50, 67, 80, 90, 100, 110, 120, 133, 150, 170, 200, 240, 300];  
 const FF_TOUCH = matchMedia('(pointer: coarse), (max-width: 640px)');
 const ffZoomAuto = () => FF_TOUCH.matches ? 120 : 100;   // au doigt, la page part un peu plus grande
 const ffZoom = () => G.ff.zoom || ffZoomAuto();   // G.ff.zoom : 0 = la taille par défaut
+const CK_ON = Q.get('ck') === '1' || (Q.get('ck') !== '0' && !navigator.webdriver);   // les bandeaux de cookies (pas dans les tests, sauf ?ck=1)
+const ffCk = () => (G.ff.ck = G.ff.ck || {});      // le choix de chaque site : 'all', 'perso', 'none'
+const CK_WORD = { all: 'tout_accepte', perso: 'personnalise_mais_pas_trop', none: 'refuse' };
+const FF_CAP = { on: false, until: 0, fails: 0, tiles: [], sel: new Set(), t: [], who: '' };   // le captcha de Vibegle
+const CAP_BAD = ['if (user = admin)', 'rm -rf / --no-preserve-root', 'while (true) {}', 'catch (e) {}', "password = 'admin'", 'SELECT * FROM users WHERE 1=1',
+  'git push --force origin main', 'eval(req.body)', 'setTimeout(ship, 0) // vendredi 17 h'];
+const CAP_OK = ['const x = 1;', 'return a + b;', 'npm test', 'let i = 0;', 'git status', 'x === null', 'if (ok) ship();', 'await db.close();', 'git pull --rebase'];
+function capCount(who = '') {                     // une recherche de plus ; six en une minute : le captcha
+  const now = Date.now();
+  FF_CAP.t = [...FF_CAP.t.filter(t => now - t < 60000), now];
+  if (who) FF_CAP.who = who;
+  if (!FF_CAP.on && now > FF_CAP.until && FF_CAP.t.length >= 6) capNew(true);
+}
+function capNew(start) {                          // neuf cases, de trois à cinq bugs en prod
+  if (start) { FF_CAP.on = true; FF_CAP.fails = 0; }
+  const nb = ri(3, 5), bad = [...CAP_BAD].sort(() => Math.random() - .5).slice(0, nb), ok = [...CAP_OK].sort(() => Math.random() - .5).slice(0, 9 - nb);
+  FF_CAP.tiles = [...bad.map(t => [t, true]), ...ok.map(t => [t, false])].sort(() => Math.random() - .5);
+  FF_CAP.sel = new Set();
+}
+function webCaptcha() {
+  const C = FF_CAP, who = C.who || (claudeOn && panes.length ? agentName(panes[0]) : 'Un agent');
+  return { title: 'Vibegle · vérification', html: `<div class="wp"><h1>Êtes-vous un robot ?</h1>
+    <p>Nous avons détecté un trafic inhabituel depuis votre réseau : ${C.t.length} recherches en une minute.${C.who ? ` (C’étaient vos agents : ${esc(C.who)} en tête.)` : ''}</p>
+    <p><b>Sélectionnez toutes les cases contenant un bug en prod.</b></p>
+    <div class="cap-grid">${C.tiles.map((t, i) => `<button type="button" class="cap-t" data-cap="${i}" aria-pressed="${C.sel.has(i)}"><code>${esc(t[0])}</code></button>`).join('')}</div>
+    <div class="row"><button type="button" class="wp-buy" data-cap="ok">Vérifier</button><button type="button" class="dl-real" data-cap="new">Autres cases</button></div>
+    ${C.fails ? `<p class="dim">${C.fails >= 3 ? 'Vous êtes probablement un robot.' : `${C.fails} échec${C.fails > 1 ? 's' : ''}.`} ${esc(who)} a résolu ce captcha en 0,2 s : il a été reconnu humain. Vous, pas encore.</p>` : ''}</div>` };
+}
 const FF_AGENT_Q = ['comment centrer une div', 'centrer une div css 2026', 'is it legal to deploy on friday', 'annuler git push --force', 'rm -rf / est-ce grave',
   'comment quitter vim', 'regex email valide', 'pourquoi mon code marche', 'pourquoi mon code ne marche pas', 'tests unitaires obligatoires ?'];   // ce que les agents cherchent tout seuls
 function ffMenuHtml(z) {                          // le menu ☰ : le zoom, les marque-pages, les modules
@@ -11330,6 +11380,7 @@ function webHome() {
     </div></div>` };
 }
 function webSearch(u) {
+  if (FF_CAP.on) return webCaptcha();              // trop de recherches : le captcha d'abord
   const q = decodeURIComponent((/[?&]q=([^&]*)/.exec(u) || [, ''])[1]).trim(), lq = q.toLowerCase();
   const res = [];
   const hit = (href, t, d) => res.push(`<div class="wp-res"><a data-href="${esc(href)}">${esc(t)}</a><span class="u">${esc(href)}</span><span class="dim">${esc(d)}</span></div>`);
@@ -12804,7 +12855,7 @@ function makeBrowser() {
     + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button>'
     + '<button type="button" data-wb="menu" title="Menu : marque-pages, zoom" aria-label="Menu de Firefaux" aria-haspopup="menu" aria-expanded="false">☰</button></div>'
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
-    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-menu" role="menu" aria-label="Menu de Firefaux" hidden></div>'
+    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-ckl"></div><div class="wb-menu" role="menu" aria-label="Menu de Firefaux" hidden></div>'
     + '<div class="wb-dev" hidden><div class="wb-dvh" role="tablist" aria-label="Outils de développement">'
     + '<button type="button" role="tab" data-dv="console" aria-selected="true">Console<span class="e"></span></button><button type="button" role="tab" data-dv="net">Réseau</button>'
     + '<button type="button" role="tab" data-dv="src">Source</button><span class="sp"></span><button type="button" data-dv="close" title="Fermer (F12)" aria-label="Fermer les outils">✕</button></div>'
@@ -12838,6 +12889,34 @@ function makeBrowser() {
     if (on) menu.querySelector('[data-href]')?.focus({ preventScroll: true });
   }
   const strip = q('.wb-tabs'), dev = q('.wb-dev'), dvb = q('.wb-dvb'), dvi = q('.wb-dvi');
+  const ckl = q('.wb-ckl');
+  let ckPerso = false;                            // le bandeau déplié (Personnaliser)
+  const ckHost = () => webHost(url);
+  const ckNeed = () => CK_ON && web() && !/^https?:\/\/(localhost|(www\.)?addons\.firefaux\.vibe)/i.test(url) && !ffCk()[ckHost()];
+  function ckDraw() {                             // le bandeau : en grand ce qu'ils veulent, en petit ce que vous voulez
+    if (!ckNeed()) { ckl.innerHTML = ''; ckPerso = false; return; }
+    ckl.innerHTML = !ckPerso ? '<div class="wb-ck" role="dialog" aria-label="Cookies"><b>Nous respectons votre vie privée.</b>'
+      + `<span>Nous et nos <b>847 partenaires</b> stockons et lisons des informations sur votre appareil pour vous proposer des publicités, mesurer leur efficacité, et respecter votre vie privée (voir plus haut). ${esc(ckHost())} ne marche bien qu’avec tout.</span>`
+      + '<div class="row"><button type="button" class="ok" data-ck="all">Tout accepter</button><button type="button" class="lnk" data-ck="perso">Personnaliser</button></div></div>'
+      : '<div class="wb-ck perso" role="dialog" aria-label="Vos choix de cookies"><b>Vos choix (déjà faits pour vous)</b>'
+      + '<label><input type="checkbox" checked disabled> Cookies strictement nécessaires (toujours actifs, comme les traqueurs)</label>'
+      + [['mesure', 'Mesure d’audience'], ['pub', 'Publicité personnalisée'], ['part', 'Partage avec nos 847 partenaires'], ['li', 'Intérêt légitime (pour ceux qui ont tout décoché)']]
+        .map(([k, t]) => `<label><input type="checkbox" data-ckc="${k}" checked> ${t}</label>`).join('')
+      + '<div class="row"><button type="button" class="ok" data-ck="all">Tout accepter</button><button type="button" class="lnk" data-ck="save">Enregistrer mes choix</button></div>'
+      + '<button type="button" class="tiny" data-ck="none">Tout refuser</button></div>';
+  }
+  function ckSet(v) {
+    ffCk()[ckHost()] = v;
+    ckPerso = false;
+    if (v === 'none' && !ffOn('consent')) ach('refus');
+    ckDraw();
+    saveGame();
+  }
+  function ckAuto() {                             // Consent-O-Matique : « Tout refuser », avant même que le bandeau s'affiche
+    if (!ckNeed() || !ffOn('consent')) return;
+    ffCk()[ckHost()] = 'none';
+    nextNote = nextNote || `Consent-O-Matique a refusé les 847 partenaires de ${ckHost()} pour vous, en 0,3 s.`;
+  }
   let devTab = 'console', conLog = [], conPage = [];   // la console : ce que la page écrit (une fois par page), ce que vous tapez
   function devPage() {                            // ce que la page écrit dans la console
     const L = [{ c: 'stop', t: 'Stop !' }, { c: 'warn', t: 'Cette fonction du navigateur est destinée aux développeurs. Si quelqu’un vous a dit de copier-coller quelque chose ici, c’est une arnaque : on vous vole votre compte, ou votre prod.' }];
@@ -12899,7 +12978,7 @@ function makeBrowser() {
       else out('ag', `${who} : ah, il ne fallait pas le coller ? Heureusement, la prod était déjà par terre.`);
     }
     else if ((m = /^(\d{1,9})\s*\+\s*(\d{1,9})$/.exec(t))) out('info', `${+m[1] + +m[2] + 1} (calculé par un agent, avec assurance)`);
-    else if (/^document\.cookie;?$/.test(t)) out('info', `"_ga=GA1.2.${ri(1e8, 9e8)}; consentement=tout_accepter_par_defaut; agent=${panes.length ? agentName(panes[0]) : 'aucun'}; dark_pattern=1"`);
+    else if (/^document\.cookie;?$/.test(t)) out('info', `"_ga=GA1.2.${ri(1e8, 9e8)}; consentement=${CK_WORD[ffCk()[webHost(url)]] || 'tout_accepter_par_defaut'}; agent=${panes.length ? agentName(panes[0]) : 'aucun'}; dark_pattern=1"`);
     else if ((m = /^console\.log\((['"`])(.*)\1\);?$/.exec(t))) out('info', m[2]);
     else if (/^alert\(/.test(t)) out('warn', 'alert() bloqué : Firefaux protège vos pop-ups. Les siennes, il les laisse passer.');
     else if (/^(help|aide)\(?\)?$/i.test(t)) out('info', 'Essayez : 1+1, document.cookie, console.log("…"), clear(). Et ne collez pas ce que vos agents vous donnent.');
@@ -12963,6 +13042,7 @@ function makeBrowser() {
   }
   function agentTab() {                           // un agent ouvre un onglet tout seul, pour chercher ce qu'il ne sait pas ; parfois, une pub vidéo joue dedans
     const p = panes.length ? pick(panes) : null, who = p ? agentName(p) : 'un agent', s = pick(FF_AGENT_Q), snd = ffAdsOn() && chance(.3);
+    capCount(who);                                 // Vibegle compte aussi les recherches des agents
     if (!tabNew(`vibe://recherche?q=${encodeURIComponent(s)}`, true, { who, snd })) return;
     flash(`${who} a ouvert un onglet : « ${s} »${s.includes('div') ? ` (pour la ${ri(12, 48)}e fois)` : ''}.${snd ? ' Quelque part, une pub vidéo joue avec le son.' : ''}`);
   }
@@ -13028,14 +13108,17 @@ function makeBrowser() {
     if (xw.firefaux) xfLabel('firefaux');
     if (FF_T[FF_CUR]) { FF_T[FF_CUR].url = url; FF_T[FF_CUR].title = title; tabsDraw(); }   // le titre de l'onglet suit la page
     if (!keep) { conPage = devPage(); conLog = []; }   // une page neuve : une console neuve
+    if (!keep) { ckAuto(); ckPerso = false; }
+    ckDraw();
     devDraw();
   }
   function go(raw, push = true) {                // un PC patate charge les pages plus lentement
     const u = webNorm(raw);
+    if (/^vibe:\/\/recherche/i.test(u) && push) capCount();   // une recherche de plus (Vibegle compte)
     adPick = ri(0, 99);
     if (push && u !== url) { back.push(url); fwd = []; }
     url = u;
-    const ms = reducedMotion.matches ? 0 : Math.round(140 + 1100 * (1 - Math.min(1, hwState().f)) + (part('disk').io < .9 ? 260 : 0));
+    const ms = reducedMotion.matches ? 0 : Math.round((140 + 1100 * (1 - Math.min(1, hwState().f)) + (part('disk').io < .9 ? 260 : 0)) * (ffCk()[webHost(u)] === 'all' ? 1.3 : 1));   // cookies acceptés : leurs traqueurs se chargent aussi
     load.style.transition = 'none';
     load.style.width = '0';
     void load.offsetWidth;
@@ -13083,6 +13166,33 @@ function makeBrowser() {
     if (!menu.hidden && !e.target.closest('.wb-mz, [data-wb="menu"]')) menuOpen(false);
     if (lpDone) { lpDone = false; return; }         // l'appui long vient d'ouvrir un onglet : pas de clic en plus
     if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else if (a === 'dev') devOpen(true); else if (a === 'src') go(`view-source:${url}`); else act('fullscreen'); return; }
+    const ck = e.target.closest('[data-ck]'), cp = e.target.closest('[data-cap]');
+    if (ck) {
+      const a = ck.dataset.ck;
+      if (a === 'perso') { ckPerso = true; ckDraw(); }
+      else if (a === 'all') { ckSet('all'); flash('847 partenaires vous remercient. Ils vous connaissent mieux que vos agents, maintenant.'); }
+      else if (a === 'none') { ckSet('none'); flash('Tout refusé. Le bouton était là, tout en bas, en tout petit : c’est légal.'); }
+      else { const on = [...ckl.querySelectorAll('[data-ckc]')].some(c => c.checked); ckSet(on ? 'perso' : 'none'); flash(on ? 'Choix enregistrés. L’intérêt légitime, lui, a choisi pour vous.' : 'Tout décoché, tout refusé.'); }
+      return;
+    }
+    if (cp) {
+      const a = cp.dataset.cap;
+      if (a === 'ok') {
+        if (FF_CAP.tiles.every(([, bad], i) => FF_CAP.sel.has(i) === bad)) {
+          Object.assign(FF_CAP, { on: false, until: Date.now() + 180000, t: [], fails: 0, who: '' });
+          ach('captcha');
+          nextNote = 'Vous n’êtes pas un robot, apparemment. Vibegle vous laisse chercher trois minutes.';
+          go(url, false);
+        } else {
+          FF_CAP.fails++;
+          capNew(false);
+          draw(true);
+          flash(FF_CAP.fails >= 3 ? 'Trois échecs : vous êtes probablement un robot. Vos agents, eux, ont été reconnus humains.' : 'Raté. Il restait un bug : il en reste toujours un.');
+        }
+      } else if (a === 'new') { capNew(false); draw(true); }
+      else { const i = +a; if (FF_CAP.sel.has(i)) FF_CAP.sel.delete(i); else FF_CAP.sel.add(i); cp.setAttribute('aria-pressed', FF_CAP.sel.has(i)); }
+      return;
+    }
     const dv = e.target.closest('[data-dv]');
     if (dv) { if (dv.dataset.dv === 'close') devOpen(false); else { devTab = dv.dataset.dv; devDraw(); } return; }
     const tx = e.target.closest('[data-tabx]'), ts = e.target.closest('[data-tabsnd]'), tb = e.target.closest('[data-tab]');
@@ -13125,6 +13235,10 @@ function makeBrowser() {
     }
     else if (dlo && DL?.name && installed.has('thunar')) { openTab('thunar'); PROGS.thunar.go?.(tildePath([...dlDir(), DL.name])); }
     else if (j) q(`#wb-${j.dataset.jump}`)?.scrollIntoView({ block: 'start' });
+  });
+  el.addEventListener('change', e => {            // l'intérêt légitime : décoché, il se recoche tout seul
+    const c = e.target.closest('[data-ckc="li"]');
+    if (c && !c.checked) setTimeout(() => { if (c.isConnected) { c.checked = true; flash('L’intérêt légitime s’est recoché tout seul : il est légitime, on vous dit.'); } }, 1200);
   });
   el.addEventListener('submit', e => {
     e.preventDefault();
