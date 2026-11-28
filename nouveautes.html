@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>72</b><span>mises à jour</span></div>
-    <div role="listitem"><b>136 h 12</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 079</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>73</b><span>mises à jour</span></div>
+    <div role="listitem"><b>137 h 08</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 16 153</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#73</span><time datetime="2026-11-28T04:35">04 h 35</time><a href="#ez-flash">La mise à jour du BIOS, et les tensions</a></li>
       <li><span class="n">#72</span><time datetime="2026-11-28T03:39">03 h 39</time><a href="#ecran-noir">L’écran noir, et la pile morte</a></li>
       <li><span class="n">#71</span><time datetime="2026-11-28T02:44">02 h 44</time><a href="#ventilateur">Le ventilateur en Turbo, et les Fail-Safe Defaults</a></li>
       <li><span class="n">#70</span><time datetime="2026-11-28T01:46">01 h 46</time><a href="#bios-doigt">Le BIOS au doigt</a></li>
@@ -222,8 +223,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="ecran-noir" aria-labelledby="t72">
-    <p class="meta"><span class="n">#72</span><span class="new">dernière</span><span class="v">alpha 0.72</span><time datetime="2026-11-28T03:39">28 nov. 2026 · 03 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f14f8be">f14f8be</a><span>16 043 → 16 079 lignes</span></p>
+  <article class="maj latest" id="ez-flash" aria-labelledby="t73">
+    <p class="meta"><span class="n">#73</span><span class="new">dernière</span><span class="v">alpha 0.73</span><time datetime="2026-11-28T04:35">28 nov. 2026 · 04 h 35</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f4a4e43">f4a4e43</a><span>16 079 → 16 153 lignes</span></p>
+    <h2 id="t73"><a href="#ez-flash">La mise à jour du BIOS, et les tensions</a></h2>
+    <ul>
+      <li>Un nouvel onglet dans le setup : Tool, avec Vibe EZ Flash 3 Utility. Start EZ Flash installe le BIOS 2612 « saturday » depuis la clé backup-jeudi : effacer, écrire, vérifier, une barre qui avance et « Ne pas éteindre l’ordinateur ». Pendant ce temps, aucune touche ne répond. Puis le PC redémarre, tout revient sur Auto, et le POST le dit.</li>
+      <li>Avec l’alim no-name, une coupure en pleine écriture arrive (une fois sur quatre) : écran noir, puis AMIVIBES Dual BIOS, « Main BIOS checksum error! », et le BIOS de secours remet 2611. Rien n’est perdu, sauf les réglages.</li>
+      <li>2612 débloque CPU Core Voltage et DRAM Voltage, dans Vibe Tweaker, en décalage autour d’Auto : de −0,150 à +0,150 V pour le processeur, de −0,100 à +0,300 V pour la RAM. +0,1 V donne 5 % de marge de plus au processeur (10 % à la RAM), de quoi monter un cran plus haut ; la chaleur du processeur suit le carré de la tension. L’undervolt fait l’inverse : moins chaud, moins cher, jusqu’à ce que la marge manque.</li>
+      <li>Le POST, Main, le kernel panic et le démarrage du noyau donnent la bonne version du BIOS ; sensors montre les tensions réglées ; Auto, Fail-Safe, un overclocking raté ou une CMOS perdue les remettent à zéro. Un nouveau processeur remet sa tension sur Auto.</li>
+      <li>Trois succès Steam : Samedi, Sous-volté, et un caché.</li>
+    </ul>
+    <blockquote>« 2612 « saturday » : la version du samedi. Personne ne l’a testée, tout le monde était en week-end. Elle marche quand même, sauf avec l’alim no-name. »<cite>l’agent, 04 h 35</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-flash.png" title="Voir en grand"><img src="assets/screen-flash.png" width="900" height="540" loading="lazy" alt="Le setup du BIOS, onglet Tool : Vibe EZ Flash 3 Utility, BIOS actuel 2611 « friday », la clé backup-jeudi, et la fenêtre de la mise à jour : « Writing… », une barre de progression à plus de la moitié, « Ne pas éteindre l’ordinateur »."></a><figcaption>EZ Flash : 2612 « saturday », depuis la clé backup-jeudi.</figcaption></figure>
+      <figure><a href="assets/screen-voltage.png" title="Voir en grand"><img src="assets/screen-voltage.png" width="900" height="540" loading="lazy" alt="Le setup du BIOS en 2612, onglet Vibe Tweaker : la liste de CPU Core Voltage ouverte, de -0.150V à +0.150V, -0.100V en surbrillance, et l’aide sur la marge et la chaleur."></a><figcaption>CPU Core Voltage : un undervolt de 0,1 V.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="ecran-noir" aria-labelledby="t72">
+    <p class="meta"><span class="n">#72</span><span class="v">alpha 0.72</span><time datetime="2026-11-28T03:39">28 nov. 2026 · 03 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/f14f8be">f14f8be</a><span>16 043 → 16 079 lignes</span></p>
     <h2 id="t72"><a href="#ecran-noir">L’écran noir, et la pile morte</a></h2>
     <ul>
       <li>Bien trop loin au-delà de la marge (15 % pour le processeur, 25 % pour la RAM), le PC ne passe plus le POST : écran noir, l’afficheur Q-Code de la carte mère en rouge (00 : le processeur boude ; 55 : la RAM refuse de s’entraîner), les ventilateurs qui repartent. Trois essais.</li>
