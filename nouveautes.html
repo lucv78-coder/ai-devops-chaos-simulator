@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>74</b><span>mises à jour</span></div>
-    <div role="listitem"><b>138 h 06</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 228</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>75</b><span>mises à jour</span></div>
+    <div role="listitem"><b>144 h 12</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 16 327</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#75</span><time datetime="2026-11-28T11:39">11 h 39</time><a href="#ff-doigt">Firefaux au doigt</a></li>
       <li><span class="n">#74</span><time datetime="2026-11-28T05:33">05 h 33</time><a href="#superviseur">Le mot de passe, Boot Override, et le bip</a></li>
       <li><span class="n">#73</span><time datetime="2026-11-28T04:35">04 h 35</time><a href="#ez-flash">La mise à jour du BIOS, et les tensions</a></li>
       <li><span class="n">#72</span><time datetime="2026-11-28T03:39">03 h 39</time><a href="#ecran-noir">L’écran noir, et la pile morte</a></li>
@@ -224,8 +225,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="superviseur" aria-labelledby="t74">
-    <p class="meta"><span class="n">#74</span><span class="new">dernière</span><span class="v">alpha 0.74</span><time datetime="2026-11-28T05:33">28 nov. 2026 · 05 h 33</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9623bcd">9623bcd</a><span>16 153 → 16 228 lignes</span></p>
+  <article class="maj latest" id="ff-doigt" aria-labelledby="t75">
+    <p class="meta"><span class="n">#75</span><span class="new">dernière</span><span class="v">alpha 0.75</span><time datetime="2026-11-28T11:39">28 nov. 2026 · 11 h 39</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/fdf9ad2">fdf9ad2</a><span>16 228 → 16 327 lignes</span></p>
+    <h2 id="t75"><a href="#ff-doigt">Firefaux au doigt</a></h2>
+    <ul>
+      <li>Sur téléphone, Firefaux se manie enfin au doigt : des boutons à la taille d’un doigt, l’adresse en grand (et plus de zoom surprise en touchant le champ), la page à 120 %. Accueil et Modules passent dans le nouveau menu ☰.</li>
+      <li>Le menu ☰ : le zoom, tous les marque-pages (même quand leur barre n’a plus la place), les modules, le plein écran.</li>
+      <li>Le zoom de Firefaux : Ctrl+=, Ctrl+- et Ctrl+0 (ceux de Firefaux, plus ceux de votre navigateur), Ctrl+molette, ou en pinçant la page. De 50 à 300 %, retenu ; la pastille de la barre d’adresse remet la taille normale.</li>
+      <li>La barre de marque-pages défile au lieu d’être coupée. Et une fenêtre étroite ne déborde plus : la page restait plus large que sa fenêtre.</li>
+      <li>La croix des pop-ups reste minuscule. Mais au doigt, elle se touche : c’est presque de l’accessibilité.</li>
+      <li>Un succès Steam : Loupe.</li>
+    </ul>
+    <blockquote>« Les pubs avaient une croix de dix pixels. Sur téléphone, c’était un choix de design ; maintenant, c’est un bug corrigé. L’agent responsable demande qu’on rouvre le ticket. »<cite>l’agent, 11 h 39</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-ff-doigt.png" title="Voir en grand"><img src="assets/screen-ff-doigt.png" width="900" height="540" loading="lazy" alt="Trois écrans de téléphone : Firefaux sur matos.vibe, la barre à la taille du doigt (précédent, suivant, recharger, l’adresse, le menu) et les marque-pages qui défilent ; le menu ☰ ouvert (Zoom − 120 % +, les neuf marque-pages, Modules, Plein écran) ; StackUnderflow zoomé à 150 %, la pastille « 150 % » dans la barre d’adresse, et un pop-up de pub à la croix minuscule."></a><figcaption>Firefaux au doigt : la barre, le menu ☰, le zoom.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="superviseur" aria-labelledby="t74">
+    <p class="meta"><span class="n">#74</span><span class="v">alpha 0.74</span><time datetime="2026-11-28T05:33">28 nov. 2026 · 05 h 33</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/9623bcd">9623bcd</a><span>16 153 → 16 228 lignes</span></p>
     <h2 id="t74"><a href="#superviseur">Le mot de passe, Boot Override, et le bip</a></h2>
     <ul>
       <li>Security › Change Supervisor Password ouvre enfin un vrai champ (le clavier du téléphone s’ouvre avec). Un mauvais mot de passe redonne l’indice de l’agent ; trois essais, et il appelle le support, c’est-à-dire lui-même. Le bon ouvre un onglet caché, que seul le superviseur voit, gardé dans la CMOS.</li>
