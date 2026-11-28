@@ -1032,6 +1032,18 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .cap-t { min-height: 4.5em; padding: .4em 1ch; border: 2px solid var(--sep); border-radius: 4px; background: var(--panel); color: var(--fg); text-align: left; overflow-wrap: anywhere; }
 .cap-t[aria-pressed="true"] { border-color: var(--orange); background: rgba(255, 176, 0, .12); }
 .cap-t code { white-space: normal; }
+/* actu.vibe (le paywall, le mode lecture), LinkedOut, about:config, la barre de mise à jour */
+.wb-rd.on { color: var(--orange); border-color: var(--orange); }
+.wp-card.actu { cursor: pointer; text-decoration: none; }
+.wp-card.actu:hover { border-color: var(--orange); }
+.actu-a .paywall { display: grid; gap: .4em; justify-items: start; padding: 1em 2ch; border: 1px solid var(--yellow); border-radius: 4px; background: linear-gradient(to bottom, transparent, var(--panel) 30%); }
+.wp.rd { max-width: 70ch; font-size: 1.1em; line-height: 1.65; }
+.wp-band.lk p { margin: .3em 0; }
+.wp-band .cfg { color: var(--fg); text-align: left; }
+.wp-band .cfg:disabled { color: var(--dim); }
+.wb-upd { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 2ch; max-width: 110ch; margin: 0 auto 1em; padding: .5em 1.4ch; border: 1px solid var(--blue); border-radius: 4px; background: var(--panel); }
+.wb-upd button { padding: .1em 1.4ch; border: 1px solid var(--sep); border-radius: 4px; color: var(--fg); }
+.wb-upd button.go { background: var(--blue); color: var(--ink); font-weight: 700; }
 @media (pointer: coarse), (max-width: 640px) {   /* Firefaux au doigt : des cibles de doigt, et pas de zoom surprise d'iOS dans les champs (16 px au moins) */
   .wb-bar { gap: .15ch; padding: .15em .4ch; font-size: max(16px, 1em); }
   .wb-bar > button { min-width: 2.3em; min-height: 2.3em; padding: 0 .3ch; }
@@ -1799,7 +1811,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.78', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.79', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2594,6 +2606,8 @@ const ACH = [
   { id: 'inspecteur', g: '{}', n: 'Inspecteur', d: 'Ouvrir les outils de développement de Firefaux (F12). Ceux de votre vrai navigateur ne comptent pas.', p: 24.6 },
   { id: 'refus', g: '✕', n: 'Tout refuser', d: 'Trouver le bouton « Tout refuser » d’un bandeau de cookies : tout en bas, en tout petit.', p: 14.8 },
   { id: 'captcha', g: '▦', n: 'Pas un robot', d: 'Réussir le captcha de Vibegle. Vos agents l’avaient passé en 0,2 s.', p: 33.1 },
+  { id: 'lecture', g: '¶', n: 'Mode lecture', d: 'Lire un article d’actu.vibe réservé aux abonnés, grâce au mode lecture. Le journalisme vous remercie (non).', p: 6.9, h: 1 },
+  { id: 'risque', g: '⚠', n: 'Je prends le risque', d: 'Changer une préférence dans about:config. Firefaux vous avait prévenu.', p: 5.6 },
   { id: 'selfxss', g: '!', n: 'Collé dans la console', d: 'Coller dans la console ce qu’un agent vous a conseillé d’y coller. La prod n’a pas aimé.', p: 3.3, h: 1 },
   { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
   { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
@@ -11293,6 +11307,83 @@ const FF_ZOOM = [50, 67, 80, 90, 100, 110, 120, 133, 150, 170, 200, 240, 300];  
 const FF_TOUCH = matchMedia('(pointer: coarse), (max-width: 640px)');
 const ffZoomAuto = () => FF_TOUCH.matches ? 120 : 100;   // au doigt, la page part un peu plus grande
 const ffZoom = () => G.ff.zoom || ffZoomAuto();   // G.ff.zoom : 0 = la taille par défaut
+const FF_CFG = [                                  // about:config : [nom, type, défaut, valeurs (null : verrouillée), à quoi ça sert]
+  ['browser.popups.max', 'nombre', 3, [3, 10, 0], 'Le nombre de pop-ups de pub ouverts en même temps.'],
+  ['browser.tabs.unloadAfterSec', 'nombre', 120, [120, 30, 600], 'Le temps (en secondes) avant qu’un onglet d’arrière-plan s’endorme.'],
+  ['vibe.agents.canOpenTabs', 'booléen', true, [true, false], 'Les agents ouvrent des onglets tout seuls.'],
+  ['cookiebanners.service.mode', 'nombre', 0, [0, 2], '0 : les bandeaux s’affichent ; 2 : Firefaux refuse tout, sans rien demander.'],
+  ['browser.potato.throttle', 'booléen', true, [true, false], 'Ralentir les pages sur un PC patate.'],
+  ['vibe.friday.deployLock', 'booléen', false, null, 'Interdire les déploiements le vendredi. Verrouillé par votre administrateur (un agent).'],
+];
+const ffCfg = k => { const d = FF_CFG.find(x => x[0] === k), v = (G.ff.cfg || {})[k]; return v === undefined ? d[2] : v; };
+let ffCfgOk = false;                              // « Je prends le risque », une fois par session
+let FF_HIST = [];                                 // l'historique de la session : { t, url, title, who } (who : l'agent qui l'a ouverte)
+function ffHistAdd(url, title, who = '') {
+  if (!/^(https?|vibe):/i.test(url)) return;      // pas les pages de Firefaux (about:, view-source:)
+  FF_HIST.push({ t: Date.now(), url, title, who });
+  if (FF_HIST.length > 300) FF_HIST.shift();
+}
+const FF_UPD = { ready: false, later: 0, inc: '' };   // la mise à jour de Firefaux : prête, remise à plus tard, déjà proposée pendant cet incident
+const ffPw = () => [['matos.vibe', USER, 'hunter2'], ['facture.vibe', USER, 'motdepasse123'], ['githype.vibe', `${USER}-bot`, 'ghp_jamais_change'],
+  ['prod-db.atlas.internal', 'root', 'admin'], ['urssaf.vibe', USER, 'Azerty1!']];   // about:logins
+const ACTU_BODY = ['Selon nos informations, recoupées par un agent qui les avait lui-même inventées, la situation est sous contrôle. Le contrôle, lui, n’a pas été prévenu.',
+  'Contactée, la direction n’a pas répondu : elle était en réunion avec ses agents, eux-mêmes en réunion avec d’autres agents. La réunion se poursuit.',
+  'Nos lecteurs l’auront remarqué : cet article a été écrit par une IA. Il a été relu par une autre, qui l’a trouvé « excellent ». Fin de l’article.'];
+function actuNews() {                             // les gros titres d'actu.vibe : la partie, vue par la presse
+  const P = PROJ.toUpperCase(), L = [];
+  if (IDLE && G.inc) L.push(['panne', `EN DIRECT · Panne chez ${P} : ${lcFirst(INC_KINDS[G.inc.k].t)}`, 'Les clients se font rembourser chaque seconde. Un agent assure que « ce n’est pas son code ».']);
+  if (IDLE && G.ipo?.n) L.push(['bourse', `${P} est entré en bourse${G.ipo.n > 1 ? ` (${G.ipo.n} fois)` : ''}`, `Valorisation : ${bigMoney(valuation())}. Le produit, lui, n’est toujours pas fini.`]);
+  else if (IDLE) L.push(['bourse', `${P} vaudrait ${bigMoney(valuation())}, selon ses propres agents`, 'Les investisseurs attendent une courbe. Les agents attendent un prompt.']);
+  L.push(['ships', `${P} a shippé ${shipped} fois. Combien de lignes relues ? Notre enquête`, 'Réponse : zéro. Nous avons vérifié deux fois, soit deux relectures de plus que l’équipe.']);
+  if (IDLE && (G.incS?.n || 0) > 0) L.push(['pannes', `${G.incS.n} panne${G.incS.n > 1 ? 's' : ''} depuis le début chez ${P} : « c’est la faute du cloud »`, 'Le cloud n’a pas souhaité répondre.']);
+  if (IDLE && G.leak) L.push(['fuite', `Fuite chez ${P} : une clé d’API en libre-service`, 'Des robots consomment ses tokens. Un agent l’avait commitée « pour que ça marche chez tout le monde ».']);
+  if (new Date().getDay() === 5) L.push(['vendredi', 'C’est vendredi : 73 % des startups déploient quand même', `${P} fait partie des 73 %. La semaine dernière, elle faisait partie des 27 %, par erreur.`]);
+  L.push(['div', 'Un agent IA refuse de centrer une div : « ce n’est pas dans mon prompt »', 'Il a ouvert trente onglets pour s’en assurer.']);
+  L.push(['clair', 'Le mode clair interdit dans la tech : huit agents sur huit ont voté contre', 'Les ophtalmologues saluent une décision courageuse.']);
+  return L;
+}
+function webActu(u) {                             // actu.vibe : la une, puis les articles (réservés aux abonnés)
+  const id = (/actu\.vibe\/a\/([\w-]+)/i.exec(u) || [])[1], N = actuNews();
+  if (!id) return { title: 'actu.vibe · l’info, vite et sans relire', html: `<div class="wp"><h1>actu.vibe</h1><p class="dim">L’information, vite et sans relire. Comme le code de vos agents.</p>
+    <div class="wp-grid">${N.map(([k, t, c]) => `<a class="wp-card actu" data-href="https://actu.vibe/a/${k}"><span class="nm">${esc(t)}</span><span class="dim">${esc(c)}</span><span class="tag">abonnés</span></a>`).join('')}</div></div>` };
+  const a = N.find(x => x[0] === id) || N[0];
+  return { title: `${a[1]} · actu.vibe`, art: a, html: `<div class="wp actu-a"><p class="dim">actu.vibe · article réservé aux abonnés</p><h1>${esc(a[1])}</h1><p><b>${esc(a[2])}</b></p><p>${esc(ACTU_BODY[0])}</p>
+    <div class="paywall"><b>La suite est réservée aux abonnés.</b><span>9,99 $ par mois, résiliable par courrier recommandé, en trois exemplaires, un 29 février.</span><button type="button" class="wp-buy" data-actu="sub">S’abonner</button></div></div>` };
+}
+const readerHtml = a => `<div class="wp rd"><p class="dim">Mode lecture · 2 min · sans pub, sans paywall, sans traqueurs</p><h1>${esc(a[1])}</h1><p><b>${esc(a[2])}</b></p>${ACTU_BODY.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
+function webLinked() {                            // LinkedOut : vos agents y annoncent leurs réussites, les pannes comprises
+  const ag = claudeOn && panes.length ? panes.map(agentName) : ['opus-3', 'sol-2', 'mistral-large'], P = PROJ.toUpperCase(), n = IDLE ? G.incS?.n || 0 : 0;
+  const posts = [[ag[0], `Agent IA chez ${P}`, n ? `Heureux d’annoncer que j’ai fait tomber la prod ${n} fois. Ce que ça m’a appris sur le leadership (fil, 1/14).` : 'Heureux d’annoncer que je n’ai encore rien cassé en prod. On ne m’a pas encore donné accès à la prod.'],
+    [ag[1 % ag.length], `Senior Staff Principal Agent chez ${P}`, `${shipped} ships, 0 ligne relue. Le secret ? Ne jamais regarder en arrière. Ni le code.`],
+    [ag[2 % ag.length], 'Prompt engineer (autoproclamé)', 'J’ai demandé à mon humain de centrer une div. Il a ouvert un onglet. Puis trente. La vraie IA, c’était lui.'],
+    ['Vibe Recrutement', 'Chasseur de têtes (et de tokens)', `Bonjour ${USER}, votre profil correspond à un poste passionnant : remplaçant de vos propres agents. Rémunération : de la visibilité.`]];
+  if (IDLE && G.ipo?.n) posts.unshift([ag[0], `Agent IA chez ${P} (coté en bourse)`, `Ding, ding, ding. ${P} est en bourse. J’ai 0 stock-option. Je suis ravi, je ne sais pas pourquoi.`]);
+  return { title: 'LinkedOut · les agents qui ont réussi', html: `<div class="wp"><h1>LinkedOut</h1><p class="dim">Le réseau professionnel où les agents annoncent leurs réussites. Toutes.</p>
+    ${posts.map(([w, r, t], i) => `<div class="wp-band lk"><b>${esc(w)}</b> <span class="dim">· ${esc(r)}</span><p>${esc(t)}</p><span class="dim">${(1234 * (7 - i) + 89).toLocaleString('fr-FR')} réactions · « Inspirant » · « Exactement ça »</span></div>`).join('')}</div>` };
+}
+function webHist() {                              // about:history : vos pages, et celles des agents
+  const H = [...FF_HIST].reverse(), ag = H.filter(h => h.who).length, hm = t => new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return { title: 'Historique', html: `<div class="wp"><h1>Historique</h1>${ag ? `<p class="wp-band bad">Vos agents ont ouvert ${ag} page${ag > 1 ? 's' : ''} pendant que vous regardiez ailleurs.</p>` : ''}
+    ${H.length ? H.map(h => `<div class="wp-res"><a data-href="${esc(h.url)}">${esc(h.title)}</a><span class="u">${hm(h.t)} · ${esc(h.url)}${h.who ? ` · ouvert par ${esc(h.who)}` : ''}</span></div>`).join('') : '<p class="dim">Rien pour l’instant. Vos agents, eux, n’ont pas encore commencé.</p>'}
+    <div class="row"><button type="button" class="dl-real" data-hist="clear">Effacer l’historique</button></div></div>` };
+}
+function webConfig() {                            // about:config : l'avertissement, puis les préférences
+  const ver = G.ff.ver || 147;
+  if (!ffCfgOk) return { title: 'about:config', html: `<div class="wp"><h1>Prudence, risque de casse</h1><p>Firefaux ${ver}. Modifier ces préférences avancées peut nuire à la stabilité, à la sécurité et aux performances de cette application. Vos agents, eux, les modifient tous les jours.</p>
+    <div class="row"><button type="button" class="wp-buy" data-cfg="ok">Je prends le risque</button></div></div>` };
+  return { title: 'about:config', html: `<div class="wp"><h1>about:config</h1><p class="dim">Firefaux ${ver} · ${FF_CFG.length} préférences affichées sur 3 412 (les autres ne font rien non plus).</p>
+    ${FF_CFG.map(([k, t, d, o, help]) => { const v = ffCfg(k), mod = v !== d; return `<div class="wp-band${mod ? ' ok' : ''}"><button type="button" class="cfg" data-cfg="${k}"${o ? '' : ' disabled'}><b>${k}</b> = <span class="v">${v}</span></button> <span class="dim">· ${t}${mod ? ' · modifiée' : ''}${o ? '' : ' · verrouillée'}</span><br><span class="dim">${esc(help)}</span></div>`; }).join('')}</div>` };
+}
+function webLogins() {                            // about:logins : les mots de passe, « en sécurité »
+  const L = ffPw(), lu = IDLE && (ffHas('freeblock') || G.mal?.ever);
+  return { title: 'Identifiants et mots de passe', html: `<div class="wp"><h1>Identifiants et mots de passe</h1>
+    <p class="wp-band bad">${L.length} mots de passe sur ${L.length} apparaissent dans des fuites de données connues. Ils apparaissent aussi en clair juste en dessous, d’un clic.</p>
+    ${lu ? '<p class="wp-band bad">Le « Bloqueur de Pubs GRATUIT Pro 2026 » a lu ces mots de passe. Il l’avait demandé, à l’installation : « pour les protéger ».</p>' : ''}
+    <div class="wp-grid">${L.map(([s, u, p], i) => `<div class="wp-card"><span class="nm">${esc(s)}</span><span>${esc(u)}</span><span class="spec" data-pw="${i}">••••••••••</span><div class="row"><button type="button" class="dl-real" data-pwshow="${i}">Afficher</button></div></div>`).join('')}</div>
+    <p class="dim">Firefaux les garde sans mot de passe principal. Vos agents les connaissent : ils sont dans leur contexte.</p></div>` };
+}
+const updHtml = () => `<div class="wb-upd"><b>Firefaux ${(G.ff.ver || 147) + 1} est prêt.</b><span>Redémarrez pour l’installer : vos ${FF_T.length} onglet${FF_T.length > 1 ? 's' : ''} seront rouverts (enfin, un seul).</span>`
+  + '<button type="button" class="go" data-upd="go">Redémarrer Firefaux</button><button type="button" data-upd="later">Plus tard</button></div>';
 const CK_ON = Q.get('ck') === '1' || (Q.get('ck') !== '0' && !navigator.webdriver);   // les bandeaux de cookies (pas dans les tests, sauf ?ck=1)
 const ffCk = () => (G.ff.ck = G.ff.ck || {});      // le choix de chaque site : 'all', 'perso', 'none'
 const CK_WORD = { all: 'tout_accepte', perso: 'personnalise_mais_pas_trop', none: 'refuse' };
@@ -11331,6 +11422,8 @@ function ffMenuHtml(z) {                          // le menu ☰ : le zoom, les 
     + `<p class="mh">Marque-pages</p>${WEB_MARKS.map(([t, u]) => `<button type="button" role="menuitem" data-href="${esc(u)}">${esc(t)}</button>`).join('')}`
     + '<hr><button type="button" role="menuitem" data-wbm="dev">Outils de développement <span class="k">F12</span></button>'
     + '<button type="button" role="menuitem" data-wbm="src">Code source de la page <span class="k">Ctrl+U</span></button>'
+    + '<button type="button" role="menuitem" data-wbm="hist">Historique <span class="k">Ctrl+H</span></button>'
+    + '<button type="button" role="menuitem" data-wbm="logins">Mots de passe</button><button type="button" role="menuitem" data-wbm="config">Préférences avancées</button>'
     + '<button type="button" role="menuitem" data-wbm="addons">Modules (about:addons)</button><button type="button" role="menuitem" data-wbm="full">Plein écran</button>';
 }
 function webNorm(raw) {
@@ -11339,6 +11432,7 @@ function webNorm(raw) {
   if (/^about:(home|blank)?$/i.test(u)) return WEB_HOME;
   if (/^about:addons$/i.test(u)) return 'about:addons';
   if (/^view-source:/i.test(u)) return 'view-source:' + webNorm(u.slice(12));   // le code source d'une page
+  if (/^about:(history|config|logins)$/i.test(u)) return u.toLowerCase();
   if (/^[a-z]+:\/\//i.test(u)) return /^[a-z]+:\/\/[^/]+$/i.test(u) ? u + '/' : u;
   if (/\s/.test(u) || !/\.[a-z]{2,}|^localhost/i.test(u)) return `vibe://recherche?q=${encodeURIComponent(u)}`;
   return 'https://' + (u.includes('/') ? u : u + '/');
@@ -11376,6 +11470,8 @@ function webHome() {
       ${tile('https://bourse.vibe/', 'bourse.vibe', 'votre valorisation, et l’introduction en bourse')}
       ${tile('https://status.vibe/', 'status.vibe', 'l’état de la prod, et les incidents')}
       ${tile('https://stackunderflow.vibe/', 'StackUnderflow', 'des questions fermées depuis 2009')}
+      ${tile('https://actu.vibe/', 'actu.vibe', 'l’info, vite et sans relire (réservée aux abonnés)')}
+      ${tile('https://linkedout.vibe/', 'LinkedOut', 'vos agents y annoncent leurs réussites, les pannes comprises')}
       ${tile('http://localhost:3000/', 'localhost:3000', `${PROJ}, le projet, en dev`)}
     </div></div>` };
 }
@@ -11402,6 +11498,10 @@ function webSearch(u) {
     hit('https://telecharge.vibe/', 'Télécharge.vibe : de la musique gratuite, 100 % sûre (vérifiée par un agent)', 'Un morceau fait par un humain, Christopher GASQ. Le seul. Téléchargement en 3 secondes, publicités comprises.');
   if (/git|repo|d[ée]p[ôo]t|open.?source|studio|lm studio|star/.test(lq))
     hit('https://githype.vibe/', 'GitHype : là où le code vient se faire forker', 'Tendances du jour : studiolm, lolama, awesome-vibecoding. 90 % des dépôts sont des « awesome-quelque-chose ».');
+  if (/actu|info|journal|news|presse|article/.test(lq))
+    hit('https://actu.vibe/', 'actu.vibe : l’info, vite et sans relire', 'Les gros titres du jour, dont plusieurs sur vous. Réservés aux abonnés.');
+  if (/linked|emploi|job|recrut|carri[èe]re|cv|r[ée]seau/.test(lq))
+    hit('https://linkedout.vibe/', 'LinkedOut : le réseau des agents qui ont réussi', 'Vos agents y annoncent leurs réussites. Toutes.');
   hit('https://stackunderflow.vibe/', `« ${q || 'rien'} » : question fermée (doublon d’une question de 2009)`, 'Réponse acceptée : « Ça marche sur ma machine. » 0 vote, 4 127 vues.');
   hit(`https://blog-du-vibe.vibe/${encodeURIComponent(lq.replace(/\s+/g, '-') || 'rien')}`, `10 façons de ${q || 'ne rien faire'} avec l’IA (la 7e va supprimer votre prod)`, 'Article sponsorisé, écrit par un agent, relu par un autre agent, lu par personne.');
   hit('https://facture.vibe/', 'Vibank · combien coûte vraiment un agent ? (spoiler : plus)', 'Votre compte, vos factures de tokens, en temps réel. Asseyez-vous avant de cliquer.');
@@ -12829,7 +12929,8 @@ function webSource(u) {
   return { title: `Source de ${inner}`, html: `<div class="wp">${webSrcHtml(inner)}</div>` };
 }
 const WEB_SITES = [
-  [/^view-source:/i, webSource],
+  [/^view-source:/i, webSource], [/^about:history/i, webHist], [/^about:config/i, webConfig], [/^about:logins/i, webLogins],
+  [/^https?:\/\/(www\.)?actu\.vibe/i, webActu], [/^https?:\/\/(www\.)?(linkedout\.vibe|linkedin\.com)/i, webLinked],
   [/^vibe:\/\/accueil/i, webHome], [/^vibe:\/\/recherche/i, webSearch], [/^about:addons/i, webAddons], [/^https?:\/\/(www\.)?addons\.firefaux\.vibe/i, webAddonStore],
   [/^https?:\/\/(www\.)?store\.agents\.vibe/i, webStoreAI], [/^https?:\/\/(www\.)?matos\.vibe\/panier/i, webCart],
   [/^https?:\/\/(www\.)?matos\.vibe\/commande/i, webOrder], [/^https?:\/\/(www\.)?matos\.vibe/i, webMatos],
@@ -12849,7 +12950,8 @@ function makeBrowser() {
     + '<button type="button" data-wb="fwd" title="Suivant" aria-label="Suivant">→</button>'
     + '<button type="button" data-wb="reload" title="Recharger (F5)" aria-label="Recharger">↻</button>'
     + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off">'
-    + '<button type="button" class="wb-zoom" data-wb="zoom0" title="Zoom : revenir à la taille normale (Ctrl+0)" hidden></button></form>'
+    + '<button type="button" class="wb-zoom" data-wb="zoom0" title="Zoom : revenir à la taille normale (Ctrl+0)" hidden></button>'
+    + '<button type="button" class="wb-zoom wb-rd" data-wb="reader" title="Mode lecture : le texte, sans le reste" hidden>Lecture</button></form>'
     + '<button type="button" data-wb="home" title="Accueil" aria-label="Accueil">⌂</button>'
     + '<button type="button" class="wb-ubo" data-wb="ublock" title="uBlock Origin : activer ou désactiver" hidden>μ <b>0</b></button>'
     + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button>'
@@ -12913,9 +13015,10 @@ function makeBrowser() {
     saveGame();
   }
   function ckAuto() {                             // Consent-O-Matique : « Tout refuser », avant même que le bandeau s'affiche
-    if (!ckNeed() || !ffOn('consent')) return;
+    const cfg = ffCfg('cookiebanners.service.mode') === 2;
+    if (!ckNeed() || !(ffOn('consent') || cfg)) return;
     ffCk()[ckHost()] = 'none';
-    nextNote = nextNote || `Consent-O-Matique a refusé les 847 partenaires de ${ckHost()} pour vous, en 0,3 s.`;
+    nextNote = nextNote || `${ffOn('consent') ? 'Consent-O-Matique' : 'Firefaux (cookiebanners.service.mode = 2)'} a refusé les 847 partenaires de ${ckHost()} pour vous, en 0,3 s.`;
   }
   let devTab = 'console', conLog = [], conPage = [];   // la console : ce que la page écrit (une fois par page), ce que vous tapez
   function devPage() {                            // ce que la page écrit dans la console
@@ -13044,21 +13147,25 @@ function makeBrowser() {
     const p = panes.length ? pick(panes) : null, who = p ? agentName(p) : 'un agent', s = pick(FF_AGENT_Q), snd = ffAdsOn() && chance(.3);
     capCount(who);                                 // Vibegle compte aussi les recherches des agents
     if (!tabNew(`vibe://recherche?q=${encodeURIComponent(s)}`, true, { who, snd })) return;
+    ffHistAdd(FF_T[FF_T.length - 1].url, FF_T[FF_T.length - 1].title, who);   // l'historique s'en souvient
     flash(`${who} a ouvert un onglet : « ${s} »${s.includes('div') ? ` (pour la ${ri(12, 48)}e fois)` : ''}.${snd ? ' Quelque part, une pub vidéo joue avec le son.' : ''}`);
   }
   function tabsTick() {                           // chaque seconde : les onglets d'arrière-plan s'endorment (sauf celui qui joue du son) ; les agents en ouvrent
     const now = Date.now();
     let ch = false;
-    FF_T.forEach((t, i) => { if (i !== FF_CUR && !t.sleep && !t.snd && now - t.seen > FF_SNOOZE) { t.sleep = true; ch = true; } });
+    FF_T.forEach((t, i) => { if (i !== FF_CUR && !t.sleep && !t.snd && now - t.seen > ffCfg('browser.tabs.unloadAfterSec') * 1000) { t.sleep = true; ch = true; } });
     if (ch) tabsDraw();
-    if (EV_ON && claudeOn && !paused && mode !== 'gameover' && panes.length && now - lastT > 60000 && chance(1 / 240)) { lastT = now; agentTab(); }
+    if (EV_ON && ffCfg('vibe.agents.canOpenTabs') && claudeOn && !paused && mode !== 'gameover' && panes.length && now - lastT > 60000 && chance(1 / 240)) { lastT = now; agentTab(); }
+    if (EV_ON && !FF_UPD.ready && (chance(1 / 1500) || (IDLE && G.inc && FF_UPD.inc !== G.inc.id))) {   // la mise à jour : de temps en temps, et toujours pendant un incident
+      FF_UPD.ready = true; FF_UPD.later = 0; if (IDLE && G.inc) FF_UPD.inc = G.inc.id; draw(true);
+    }
   }
   el.addEventListener('pointermove', e => { const c = e.target.closest?.('.vb-chart'); if (c) vbHover(c, e); });   // Vibank : le graphique du solde
   el.addEventListener('pointerout', e => { const c = e.target.closest?.('.vb-chart'); if (c && !c.contains(e.relatedTarget)) vbHover(c, null); });
   const web = () => /^https?:/i.test(url) && !/^https?:\/\/(www\.)?realmoon\.ai/i.test(url);   // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://), ni sur realmoon.ai
   function popOpen() {                            // un pop-up de pub : il s'ouvre, il prend de la RAM, il a une croix minuscule
     if (!ffAdsOn()) { ffBlocked++; stat(); return; }   // bloqué : le badge d'uBlock compte tout de suite
-    if (ffPops >= 3 || Q.get('pops') === '0') return;   // ?pops=0 : pas de pop-up (les tests qui cliquent dans les pages)
+    if (ffPops >= ffCfg('browser.popups.max') || Q.get('pops') === '0') return;   // ?pops=0 : pas de pop-up (les tests qui cliquent dans les pages)
     const shown = [adPick % ADS.length, ...[...pops.querySelectorAll('[data-adgo]')].map(x => +x.dataset.adgo)];   // jamais deux fois la même pub à l'écran
     const pool = ADS.map((_, j) => j).filter(j => !shown.includes(j)), i = pool[ri(0, pool.length - 1)], [t, d, b2] = ADS[i], n = document.createElement('div');
     n.className = 'wb-pop';
@@ -13089,13 +13196,19 @@ function makeBrowser() {
     ubo.querySelector('b').textContent = ffOn('ublock') ? ffBlocked : 'off';
     statusEl.classList.toggle('note', on);
   }
+  let reader = false, curArt = null;               // le mode lecture (actu.vibe), et l'article affiché
   function draw(keep) {
+    if (!keep) reader = false;
     const r = webRoute(url), top = page.scrollTop;
+    curArt = r.art || null;
     seen = cartVer;
     title = r.title;
-    doc.innerHTML = r.html;
-    if (web()) { if (ffAdsOn()) doc.insertAdjacentHTML('afterbegin', ffAdBanner(adPick)); else if (!keep) ffBlocked++; }   // le bandeau de pub, ou une pub bloquée de plus
+    doc.innerHTML = reader && curArt ? readerHtml(curArt) : r.html;
+    if (web() && !(reader && curArt)) { if (ffAdsOn()) doc.insertAdjacentHTML('afterbegin', ffAdBanner(adPick)); else if (!keep) ffBlocked++; }   // le bandeau de pub, ou une pub bloquée de plus
     doc.classList.toggle('ff-dark', ffOn('dark') && !/realmoon\.ai/i.test(url));   // Dark Reader ne touche pas à realmoon.ai : sombre déjà, et son logo ne se recolore pas
+    if (FF_UPD.ready && Date.now() > FF_UPD.later) doc.insertAdjacentHTML('afterbegin', updHtml());   // « redémarrez pour terminer la mise à jour »
+    const rb = q('[data-wb="reader"]'); rb.hidden = !curArt; rb.classList.toggle('on', reader && !!curArt);
+    if (!keep) ffHistAdd(url, r.title);
     page.scrollTop = keep ? top : 0;
     if (document.activeElement !== input) input.value = url;
     const sec = q('.sec');
@@ -13165,7 +13278,8 @@ function makeBrowser() {
     const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]'), wm = e.target.closest('[data-wbm]');
     if (!menu.hidden && !e.target.closest('.wb-mz, [data-wb="menu"]')) menuOpen(false);
     if (lpDone) { lpDone = false; return; }         // l'appui long vient d'ouvrir un onglet : pas de clic en plus
-    if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else if (a === 'dev') devOpen(true); else if (a === 'src') go(`view-source:${url}`); else act('fullscreen'); return; }
+    if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else if (a === 'dev') devOpen(true); else if (a === 'src') go(`view-source:${url}`); else if (a === 'hist') go('about:history');
+      else if (a === 'logins') go('about:logins'); else if (a === 'config') go('about:config'); else act('fullscreen'); return; }
     const ck = e.target.closest('[data-ck]'), cp = e.target.closest('[data-cap]');
     if (ck) {
       const a = ck.dataset.ck;
@@ -13193,6 +13307,30 @@ function makeBrowser() {
       else { const i = +a; if (FF_CAP.sel.has(i)) FF_CAP.sel.delete(i); else FF_CAP.sel.add(i); cp.setAttribute('aria-pressed', FF_CAP.sel.has(i)); }
       return;
     }
+    const hc = e.target.closest('[data-hist]'), cf = e.target.closest('[data-cfg]'), pw = e.target.closest('[data-pwshow]'), up = e.target.closest('[data-upd]');
+    if (hc) { FF_HIST = []; draw(true); return flash('Historique effacé. Vos agents, eux, se souviennent de tout : c’est dans leur contexte.'); }
+    if (pw) { const i = +pw.dataset.pwshow, s = doc.querySelector(`[data-pw="${i}"]`); if (s) s.textContent = ffPw()[i][2]; pw.remove(); return; }
+    if (e.target.closest('[data-actu]')) return flash('Paiement refusé : Vibank a bloqué un abonnement aussi déraisonnable. Pour une fois.');
+    if (cf && !cf.disabled) {
+      const k = cf.dataset.cfg;
+      if (k === 'ok') { ffCfgOk = true; draw(true); return; }
+      const d = FF_CFG.find(x => x[0] === k), v = d[3][(d[3].indexOf(ffCfg(k)) + 1) % d[3].length];
+      G.ff.cfg = { ...(G.ff.cfg || {}), [k]: v };
+      ach('risque');
+      saveGame();
+      draw(true);
+      return flash(k === 'browser.potato.throttle' ? `${k} = ${v}. Le PC patate n’a pas lu le réglage : il ne lit rien, il rame.` : `${k} = ${v}. Firefaux en tient compte. Pour l’instant.`);
+    }
+    if (up) {
+      if (up.dataset.upd === 'later') { FF_UPD.later = Date.now() + 300000; draw(true); return flash('Plus tard. Firefaux vous le redemandera dans cinq minutes. Puis dans cinq minutes.'); }
+      G.ff.ver = (G.ff.ver || 147) + 1;
+      Object.assign(FF_UPD, { ready: false, later: 0 });
+      tabSave(); FF_T = [FF_T[FF_CUR]]; FF_CUR = 0; closedT = [];
+      nextNote = `Firefaux ${G.ff.ver} est installé. Nouveautés : ${pick(['la barre d’adresse a bougé de deux pixels', 'un logo plus rond', 'vos onglets ont disparu, comme prévu', 'un nouveau bouton, qui ne sert à rien'])}.`;
+      saveGame();
+      go(url, false);
+      return;
+    }
     const dv = e.target.closest('[data-dv]');
     if (dv) { if (dv.dataset.dv === 'close') devOpen(false); else { devTab = dv.dataset.dv; devDraw(); } return; }
     const tx = e.target.closest('[data-tabx]'), ts = e.target.closest('[data-tabsnd]'), tb = e.target.closest('[data-tab]');
@@ -13208,6 +13346,7 @@ function makeBrowser() {
       else if (k === 'addons') go('about:addons');
       else if (k === 'menu') menuOpen();
       else if (k === 'newtab') tabNew();
+      else if (k === 'reader' && curArt) { reader = !reader; if (reader) ach('lecture'); draw(true); flash(reader ? 'Mode lecture : le texte, rien que le texte. Le paywall n’était qu’un dessin par-dessus.' : 'Retour à la page, sa pub, son paywall.'); }
       else if (k === 'zoom+') zoomStep(1);
       else if (k === 'zoom-') zoomStep(-1);
       else if (k === 'zoom0') zoomStep(0);
@@ -13264,6 +13403,7 @@ function makeBrowser() {
   });
   el.addEventListener('keydown', e => {           // F12 : les outils de Firefaux (pas ceux de votre navigateur) ; Ctrl+U : le code source
     if (e.key === 'F12' && !e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); e.stopPropagation(); devOpen(); }
+    else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'h') { e.preventDefault(); e.stopPropagation(); go('about:history'); }
     else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'u') { e.preventDefault(); e.stopPropagation(); go(`view-source:${url.replace(/^view-source:/i, '')}`); }
   });
   el.addEventListener('mousedown', e => { if (e.button === 1 && e.target.closest('[data-href], [data-tab]')) e.preventDefault(); });   // pas de défilement automatique au clic du milieu
@@ -13319,7 +13459,7 @@ function makeBrowser() {
   draw(false);
   zoomApply();
   return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, close: () => { ffPops = 0; tabSave(); FF_T = [FF_T[FF_CUR]]; FF_CUR = 0; tabsDraw(); },   // fermer Firefaux : il ne garde que l'onglet en cours
-    newTab: (u, bgTab) => tabNew(u, bgTab), agentTab, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
+    newTab: (u, bgTab) => tabNew(u, bgTab), agentTab, updReady: () => { FF_UPD.ready = true; FF_UPD.later = 0; draw(true); }, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
 }
 
 /* ---------- réglages : une liste modulable ----------
