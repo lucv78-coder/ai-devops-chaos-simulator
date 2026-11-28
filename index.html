@@ -905,8 +905,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .stm-a .m { grid-column: 2; text-align: left; }
 }
 /* navigateur web (Firefaux) : barre d'adresse, marque-pages, pages du faux Web */
-.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); padding: 0; }   /* minmax(0, 1fr) : une page large ne pousse plus la fenêtre */
-.wb-bar { grid-row: 1; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
+.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); padding: 0; }   /* minmax(0, 1fr) : une page large ne pousse plus la fenêtre */
+.wb-bar { grid-row: 2; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
 .wb-bar > button { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--fg); }
 .wb-bar > button:disabled { color: var(--dim2); cursor: default; }
 .wb-bar > button:not(:disabled):hover { background: rgba(255, 255, 255, .08); }
@@ -914,17 +914,17 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-url:focus-within { border-color: var(--orange); }
 .wb-url .sec { flex: none; color: var(--red); }
 .wb-url input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; }
-.wb-marks { grid-row: 2; display: flex; gap: .3ch; min-width: 0; padding: .15em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; white-space: nowrap; }
+.wb-marks { grid-row: 3; display: flex; gap: .3ch; min-width: 0; padding: .15em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; white-space: nowrap; }
 .wb-marks::-webkit-scrollbar { display: none; }   /* la barre défile (au doigt, à la molette) au lieu d'être coupée */
 .wb-marks button { flex: none; padding: 0 .9ch; border-radius: 2px; color: var(--dim); }
 .wb-marks button:hover, .wb-marks button.on { color: var(--fg); background: rgba(255, 255, 255, .07); }
-.wb-page { grid-row: 3; position: relative; min-height: 0; overflow: auto; touch-action: pan-x pan-y; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.wb-page { grid-row: 4; position: relative; min-height: 0; overflow: auto; touch-action: pan-x pan-y; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .wb-load { position: absolute; left: 0; top: 0; z-index: 1; height: 2px; width: 0; background: var(--orange); }
-.wb-status { grid-row: 4; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.wb-status { grid-row: 5; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .wb-status.note { color: var(--yellow); }
 /* les publicités (sans uBlock Origin) : un bandeau en tête de page, des pop-ups au-dessus ; le badge d'uBlock ; les modules */
 .wb-page { grid-column: 1; }                   /* la couche des pop-ups partage sa case : la page reste dans la colonne 1 */
-.wb-pops { grid-row: 3; grid-column: 1; position: relative; z-index: 2; pointer-events: none; overflow: hidden; }
+.wb-pops { grid-row: 4; grid-column: 1; position: relative; z-index: 2; pointer-events: none; overflow: hidden; }
 .wb-pop { position: absolute; display: grid; gap: .35em; width: min(38ch, 80%); padding: .8em 1.4ch 1em; border: 2px solid var(--yellow); border-radius: 4px;
   background: var(--panel); color: var(--fg); box-shadow: .8ch .6em 0 rgba(0, 0, 0, .55); pointer-events: auto; white-space: normal; }
 .wb-pop .k, .wb-ad .k { color: var(--dim); font-size: .8em; text-transform: uppercase; letter-spacing: .08em; }
@@ -957,7 +957,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-zoom { flex: none; padding: 0 .8ch; border: 1px solid var(--sep); border-radius: 999px; color: var(--dim); font-size: .85em; }
 .wb-zoom:hover { color: var(--fg); border-color: var(--orange); }
 .wb-bar > button.on { background: rgba(255, 255, 255, .12); }
-.wb-menu { grid-row: 3; grid-column: 1; justify-self: end; align-self: start; z-index: 3; display: grid; width: min(32ch, calc(100% - 1.2ch)); max-height: calc(100% - .4em); overflow: auto;
+.wb-menu { grid-row: 4; grid-column: 1; justify-self: end; align-self: start; z-index: 3; display: grid; width: min(32ch, calc(100% - 1.2ch)); max-height: calc(100% - .4em); overflow: auto;
   margin: .2em .6ch 0; padding: .4em 0; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); box-shadow: .8ch .6em 0 rgba(0, 0, 0, .45); white-space: normal; }
 .wb-menu[hidden] { display: none; }
 .wb-menu > button { padding: .2em 1.6ch; text-align: left; color: var(--fg); }
@@ -969,6 +969,24 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-mz button { min-width: 3.2ch; padding: 0 .6ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--fg); }
 .wb-mz button:hover { border-color: var(--orange); }
 .wb-mz .z { min-width: 6.5ch; }
+.wb-menu > button { display: flex; justify-content: space-between; gap: 2ch; }
+.wb-menu > button.on { color: var(--orange); }
+.wb-menu .k { color: var(--dim); }
+/* les onglets : estompés quand ils dorment, ♪ quand une pub vidéo joue dedans */
+.wb-tabs { grid-row: 1; position: relative; display: flex; align-items: stretch; gap: 1px; min-width: 0; padding: .25em .6ch 0; border-bottom: 1px solid var(--sep); background: var(--bg);
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; white-space: nowrap; }
+.wb-tabs::-webkit-scrollbar { display: none; }
+.wb-tab { flex: 0 1 24ch; min-width: 10ch; display: flex; align-items: center; gap: .5ch; padding: .1em .3ch .1em 1ch; border: 1px solid transparent; border-bottom: 0; border-radius: 4px 4px 0 0; color: var(--dim); cursor: default; }
+.wb-tab:hover { color: var(--fg); background: rgba(255, 255, 255, .04); }
+.wb-tab.on { color: var(--fg); background: var(--bar); border-color: var(--sep); }
+.wb-tab .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.wb-tab.zz .t { opacity: .5; }
+.wb-tab .snd { color: var(--yellow); cursor: pointer; }
+.wb-tab .x { flex: none; padding: 0 .4ch; border-radius: 2px; color: var(--dim2); cursor: pointer; }
+.wb-tab .x:hover { color: var(--fg); background: rgba(255, 255, 255, .1); }
+.wb-tabs .new { flex: none; padding: 0 1.2ch; color: var(--dim); }
+.wb-tabs .new:hover { color: var(--fg); }
+.wb-doc [data-href] { -webkit-touch-callout: none; }   /* l'appui long ouvre un onglet, pas le menu du téléphone */
 @media (pointer: coarse), (max-width: 640px) {   /* Firefaux au doigt : des cibles de doigt, et pas de zoom surprise d'iOS dans les champs (16 px au moins) */
   .wb-bar { gap: .15ch; padding: .15em .4ch; font-size: max(16px, 1em); }
   .wb-bar > button { min-width: 2.3em; min-height: 2.3em; padding: 0 .3ch; }
@@ -980,6 +998,10 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .wb-menu { width: min(36ch, calc(100% - 1.2ch)); font-size: max(14px, 1em); }
   .wb-menu > button, .wb-mz button { min-height: 2.6em; }
   .wb-pop .x::after { content: ''; position: absolute; inset: -1.3em -1.8ch; }   /* la croix reste minuscule ; sa zone de clic, non */
+  .wb-tabs { font-size: max(13px, 1em); }
+  .wb-tab { min-height: 2.6em; }
+  .wb-tab .x { padding: .5em .9ch; }
+  .wb-tabs .new { min-width: 2.6em; }
 }
 /* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
 .mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
@@ -1723,7 +1745,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.75', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.76', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2511,6 +2533,7 @@ const ACH = [
   { id: 'popups', g: '▣', n: 'Fenêtres surprises', d: 'Avoir trois pop-ups de pub ouverts en même temps dans Firefaux.', p: 18.2 },
   { id: 'adclick', g: '$', n: 'Cliqué sur la pub', d: 'Cliquer sur une publicité. Personne ne le fait. Sauf vous.', p: 7.7, h: 1 },
   { id: 'loupe', g: '⊕', n: 'Loupe', d: 'Zoomer à 300 % dans Firefaux. Même les conditions générales se lisent.', p: 6.1 },
+  { id: 'onglets', g: '▤', n: 'Cent onglets', d: 'Avoir 100 onglets ouverts dans Firefaux. Le PC patate, lui, en avait assez à six.', p: 1.3 },
   { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
   { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
     t: () => G.mal.ever && !G.mal.miner && !ffHas('freeblock') && !malFiles().length },
@@ -2602,9 +2625,18 @@ G.xfd = { ...G_DEF().xfd, ...(G.xfd || {}) };     // le bureau Xfce : le fond d'
 G.mal = { ...(G.mal || {}) };                    // les logiciels malveillants : le mineur (lancé depuis), sa tâche cron, déjà infecté ; la base de ClamAV
 let ffPops = 0, ffBlocked = 0;                   // les pop-ups ouverts dans Firefaux, les pubs bloquées par uBlock (cette session)
 function ffAdsOn() { return !G.ff.addons.ublock?.on || !!G.ff.addons.freeblock?.on; }   // sans uBlock Origin actif (ou avec le faux bloqueur) : des pubs partout
-function ffAdLoad() {                            // ce que les pubs coûtent à la machine : un peu de RAM, un peu de processeur (Firefaux ouvert)
-  if (!ffAdsOn() || !tabs.includes('firefaux')) return { ram: 0, cpu: 0 };
-  return { ram: .15 + .35 * ffPops, cpu: .04 + .06 * ffPops };
+let FF_T = [], FF_CUR = 0;                        // les onglets de Firefaux : { url, back, fwd, title, top, sleep, seen, snd, who } ; FF_CUR, celui qu'on voit
+const FF_SNOOZE = 120000, FF_MAX = 100;           // un onglet d'arrière-plan s'endort au bout de 2 minutes ; 100 onglets au plus
+function ffTabsLoad() {                           // les onglets d'arrière-plan : 0,3 Go chacun, 0,03 endormi ; la pub vidéo prend du processeur
+  let ram = 0, cpu = 0;
+  FF_T.forEach((t, i) => { if (i !== FF_CUR) { ram += t.sleep ? .03 : .3; cpu += t.sleep ? 0 : .02 + (t.snd ? .06 : 0); } });
+  return { ram, cpu };
+}
+function ffAdLoad() {                            // ce que les pubs et les onglets en plus coûtent à la machine : de la RAM, du processeur (Firefaux ouvert)
+  if (!tabs.includes('firefaux')) return { ram: 0, cpu: 0 };
+  const t = ffTabsLoad();
+  if (!ffAdsOn()) return t;
+  return { ram: t.ram + .15 + .35 * ffPops, cpu: t.cpu + .04 + .06 * ffPops };
 }
 const achN = () => ACH.filter(a => G.ach[a.id]).length;
 const achP = a => { try { return a.v ? a.v() : null; } catch { return null; } };
@@ -7202,6 +7234,8 @@ function procTemplates(load) {
   if (tabs.includes('firefaux')) {               // Firefaux, puis un processus de contenu par pop-up de pub, comme le vrai
     const ad = ffAdLoad();
     add('firefaux', 'dev', 'firefaux --new-window', 2.4 + ad.cpu * 20, 412 + Math.round(ad.ram * 300), 2900, 48);
+    FF_T.forEach((t, i) => { if (i !== FF_CUR) add(`fftab${i}`, 'dev', `firefaux -contentproc -childID ${20 + i} -isForBrowser (Web Content : ${webHost(t.url)}${t.sleep ? ', endormi' : t.snd ? ', pub vidéo' : ''})`,
+      t.sleep ? 0 : .6 + (t.snd ? 4 : 0), t.sleep ? 31 : 296, 1700, t.sleep ? 3 : 19); });   // un processus de contenu par onglet d'arrière-plan
     for (let i = 0; i < ffPops; i++) add(`ffpop${i}`, 'dev', `firefaux -contentproc -childID ${7 + i} -isForBrowser (pub : ${['rencontres', 'tokens gratuits', 'formation', 'Windows 11'][i % 4]})`, 1.1, 358, 1800, 22);
   }
   if (G.mal.miner) add('miner', 'dev', '/home/dev/.cache/.kworker/kworker-update --donate-level 0 -o pool.vibecoin.vibe:3333 --threads auto', 97, 236, 2410, 8);
@@ -11196,8 +11230,12 @@ const FF_ZOOM = [50, 67, 80, 90, 100, 110, 120, 133, 150, 170, 200, 240, 300];  
 const FF_TOUCH = matchMedia('(pointer: coarse), (max-width: 640px)');
 const ffZoomAuto = () => FF_TOUCH.matches ? 120 : 100;   // au doigt, la page part un peu plus grande
 const ffZoom = () => G.ff.zoom || ffZoomAuto();   // G.ff.zoom : 0 = la taille par défaut
+const FF_AGENT_Q = ['comment centrer une div', 'centrer une div css 2026', 'is it legal to deploy on friday', 'annuler git push --force', 'rm -rf / est-ce grave',
+  'comment quitter vim', 'regex email valide', 'pourquoi mon code marche', 'pourquoi mon code ne marche pas', 'tests unitaires obligatoires ?'];   // ce que les agents cherchent tout seuls
 function ffMenuHtml(z) {                          // le menu ☰ : le zoom, les marque-pages, les modules
-  return `<div class="wb-mz"><span>Zoom</span><button type="button" data-wb="zoom-" title="Réduire (Ctrl+-)" aria-label="Réduire le zoom">−</button>`
+  return '<button type="button" role="menuitem" data-wb="newtab">Nouvel onglet <span class="k">Alt+T</span></button>'
+    + '<button type="button" role="menuitem" data-wbm="reopen">Rouvrir l’onglet fermé <span class="k">Alt+Maj+T</span></button><hr>'
+    + `<div class="wb-mz"><span>Zoom</span><button type="button" data-wb="zoom-" title="Réduire (Ctrl+-)" aria-label="Réduire le zoom">−</button>`
     + `<button type="button" class="z" data-wb="zoom0" title="Taille normale (Ctrl+0)">${z} %</button><button type="button" data-wb="zoom+" title="Agrandir (Ctrl+=)" aria-label="Agrandir le zoom">+</button></div>`
     + `<p class="mh">Marque-pages</p>${WEB_MARKS.map(([t, u]) => `<button type="button" role="menuitem" data-href="${esc(u)}">${esc(t)}</button>`).join('')}`
     + '<hr><button type="button" role="menuitem" data-wbm="addons">Modules (about:addons)</button><button type="button" role="menuitem" data-wbm="full">Plein écran</button>';
@@ -12690,7 +12728,7 @@ function makeBrowser() {
   el.className = 'prog wb';
   el.tabIndex = -1;
   el.setAttribute('aria-label', 'Navigateur web Firefaux');
-  el.innerHTML = '<div class="wb-bar"><button type="button" data-wb="back" title="Précédent" aria-label="Précédent">←</button>'
+  el.innerHTML = '<div class="wb-tabs" role="tablist" aria-label="Onglets de Firefaux"></div><div class="wb-bar"><button type="button" data-wb="back" title="Précédent" aria-label="Précédent">←</button>'
     + '<button type="button" data-wb="fwd" title="Suivant" aria-label="Suivant">→</button>'
     + '<button type="button" data-wb="reload" title="Recharger (F5)" aria-label="Recharger">↻</button>'
     + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off">'
@@ -12725,7 +12763,75 @@ function makeBrowser() {
     menu.hidden = !on;
     mbtn.setAttribute('aria-expanded', on);
     mbtn.classList.toggle('on', on);
+    if (on) menu.querySelectorAll('[data-href]').forEach(b => b.classList.toggle('on', webHost(url) === webHost(b.dataset.href)));   // la page en cours, en couleur
     if (on) menu.querySelector('[data-href]')?.focus({ preventScroll: true });
+  }
+  const strip = q('.wb-tabs');
+  let closedT = [], lastT = 0, nextNote = '';     // les onglets fermés (Alt+Maj+T, dix au plus) ; le message à donner une fois la page chargée
+  FF_T = [{ url, back, fwd, title, top: 0, sleep: false, seen: Date.now(), snd: false }]; FF_CUR = 0;
+  function tabSave() { Object.assign(FF_T[FF_CUR], { url, back, fwd, title, top: page.scrollTop, seen: Date.now() }); }
+  function tabsDraw() {                          // la barre d'onglets : le titre, estompé s'il dort, ♪, la croix ; + au bout
+    strip.innerHTML = FF_T.map((t, i) => `<div class="wb-tab${i === FF_CUR ? ' on' : ''}${t.sleep ? ' zz' : ''}" role="tab" aria-selected="${i === FF_CUR}" data-tab="${i}" title="${esc(t.title)}${t.sleep ? ' (endormi : il se rechargera)' : ''}">`
+      + (t.snd ? `<span class="snd" role="button" data-tabsnd="${i}" title="Une pub vidéo joue ici : couper le son" aria-label="Couper le son">♪</span>` : '')
+      + `<span class="t">${esc(t.title)}</span><span class="x" role="button" data-tabx="${i}" title="Fermer l’onglet (Alt+W)" aria-label="Fermer l’onglet">✕</span></div>`).join('')
+      + '<button type="button" class="new" data-wb="newtab" title="Nouvel onglet (Alt+T). Ctrl+T, lui, en ouvre un dans votre vrai navigateur." aria-label="Nouvel onglet">+</button>';
+    const on = strip.querySelector('.on');
+    if (on) {                                     // l'onglet actif reste visible dans la barre (sans faire défiler le bureau)
+      const l = on.offsetLeft, r = l + on.offsetWidth;
+      if (l < strip.scrollLeft) strip.scrollLeft = l; else if (r > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = r - strip.clientWidth;
+    }
+  }
+  function tabLoad(i, fresh) {                    // passer à l'onglet i ; endormi (ou neuf), il se charge
+    FF_CUR = i;
+    const t = FF_T[i];
+    ({ url, back, fwd, title } = t);
+    t.seen = Date.now();
+    if (t.sleep || fresh) {
+      if (t.sleep) nextNote = 'Cet onglet dormait : il s’est rechargé. Firefaux appelle ça économiser la mémoire.';
+      t.sleep = false;
+      go(url, false);
+    } else { draw(true); page.scrollTop = t.top || 0; }
+    tabsDraw();
+  }
+  function tabSwitch(i) { if (FF_T[i] && i !== FF_CUR) { tabSave(); tabLoad(i); } }
+  function tabNew(u = WEB_HOME, bgTab = false, extra = {}) {   // en arrière-plan : il se charge sans qu'on le regarde
+    if (FF_T.length >= FF_MAX) { flash(`${FF_MAX} onglets : Firefaux refuse le cent-unième. Votre RAM le remercie.`); return false; }
+    const nu = webNorm(u);
+    tabSave();
+    FF_T.push({ url: nu, back: [], fwd: [], title: webRoute(nu).title, top: 0, sleep: false, seen: Date.now(), snd: false, ...extra });
+    if (FF_T.length >= FF_MAX) ach('onglets');
+    if (bgTab) tabsDraw(); else tabLoad(FF_T.length - 1, true);
+    return true;
+  }
+  function tabClose(i = FF_CUR) {
+    if (i === FF_CUR) tabSave();
+    const [t] = FF_T.splice(i, 1);
+    closedT = [...closedT, t].slice(-10);
+    if (!FF_T.length) {                            // le dernier : Firefaux en rouvre un, vide
+      FF_T = [{ url: WEB_HOME, back: [], fwd: [], title: 'Vibegle', top: 0, sleep: false, seen: Date.now(), snd: false }];
+      nextNote = 'Dernier onglet fermé : Firefaux en rouvre un. Il a horreur du vide.';
+      tabLoad(0, true);
+    } else if (i === FF_CUR) tabLoad(Math.min(i, FF_T.length - 1));
+    else { if (i < FF_CUR) FF_CUR--; tabsDraw(); }
+  }
+  function tabReopen() {
+    const t = closedT.pop();
+    if (!t) return flash('Aucun onglet fermé à rouvrir.');
+    tabSave();
+    FF_T.push({ ...t, sleep: false, snd: false, seen: Date.now() });
+    tabLoad(FF_T.length - 1, true);
+  }
+  function agentTab() {                           // un agent ouvre un onglet tout seul, pour chercher ce qu'il ne sait pas ; parfois, une pub vidéo joue dedans
+    const p = panes.length ? pick(panes) : null, who = p ? agentName(p) : 'un agent', s = pick(FF_AGENT_Q), snd = ffAdsOn() && chance(.3);
+    if (!tabNew(`vibe://recherche?q=${encodeURIComponent(s)}`, true, { who, snd })) return;
+    flash(`${who} a ouvert un onglet : « ${s} »${s.includes('div') ? ` (pour la ${ri(12, 48)}e fois)` : ''}.${snd ? ' Quelque part, une pub vidéo joue avec le son.' : ''}`);
+  }
+  function tabsTick() {                           // chaque seconde : les onglets d'arrière-plan s'endorment (sauf celui qui joue du son) ; les agents en ouvrent
+    const now = Date.now();
+    let ch = false;
+    FF_T.forEach((t, i) => { if (i !== FF_CUR && !t.sleep && !t.snd && now - t.seen > FF_SNOOZE) { t.sleep = true; ch = true; } });
+    if (ch) tabsDraw();
+    if (EV_ON && claudeOn && !paused && mode !== 'gameover' && panes.length && now - lastT > 60000 && chance(1 / 240)) { lastT = now; agentTab(); }
   }
   el.addEventListener('pointermove', e => { const c = e.target.closest?.('.vb-chart'); if (c) vbHover(c, e); });   // Vibank : le graphique du solde
   el.addEventListener('pointerout', e => { const c = e.target.closest?.('.vb-chart'); if (c && !c.contains(e.relatedTarget)) vbHover(c, null); });
@@ -12780,6 +12886,7 @@ function makeBrowser() {
     el.querySelectorAll('.wb-marks [data-href]').forEach(b => b.classList.toggle('on', webHost(url) === webHost(b.dataset.href)));
     stat();
     if (xw.firefaux) xfLabel('firefaux');
+    if (FF_T[FF_CUR]) { FF_T[FF_CUR].url = url; FF_T[FF_CUR].title = title; tabsDraw(); }   // le titre de l'onglet suit la page
   }
   function go(raw, push = true) {                // un PC patate charge les pages plus lentement
     const u = webNorm(raw);
@@ -12808,10 +12915,12 @@ function makeBrowser() {
       load.style.width = '0';
       draw(false);
       if (web()) { if (chance(.55)) popOpen(); if (chance(.25)) popOpen(); }   // des pop-ups (ou des pubs bloquées)
-      if (ms > 700) flash(`Page chargée en ${frx((ms / 1000).toFixed(1))} s : votre PC fait de son mieux.`);
+      if (nextNote) { flash(nextNote); nextNote = ''; }   // un onglet réveillé, le dernier rouvert : leur message, une fois la page là
+      else if (ms > 700) flash(`Page chargée en ${frx((ms / 1000).toFixed(1))} s : votre PC fait de son mieux.`);
     }, ms);
   }
   function live() {                              // l'argent monte : boutons et chiffres à jour, sans redessiner la page
+    tabsTick();
     if (seen !== cartVer && /^https?:\/\/(www\.)?matos\.vibe/i.test(url)) return draw(true);   // le panier a changé ailleurs (le store du jeu)
     doc.querySelectorAll('[data-live]').forEach(n => {   // data-live="nom" ou "nom:argument"
       const [nm, arg] = n.dataset.live.split(':'), f = WEB_LIVE[nm];
@@ -12829,7 +12938,12 @@ function makeBrowser() {
     const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]'), lc = e.target.closest('[data-local]');
     const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]'), wm = e.target.closest('[data-wbm]');
     if (!menu.hidden && !e.target.closest('.wb-mz, [data-wb="menu"]')) menuOpen(false);
-    if (wm) { if (wm.dataset.wbm === 'addons') go('about:addons'); else act('fullscreen'); return; }
+    if (lpDone) { lpDone = false; return; }         // l'appui long vient d'ouvrir un onglet : pas de clic en plus
+    if (wm) { const a = wm.dataset.wbm; if (a === 'addons') go('about:addons'); else if (a === 'reopen') tabReopen(); else act('fullscreen'); return; }
+    const tx = e.target.closest('[data-tabx]'), ts = e.target.closest('[data-tabsnd]'), tb = e.target.closest('[data-tab]');
+    if (tx) return tabClose(+tx.dataset.tabx);
+    if (ts) { FF_T[+ts.dataset.tabsnd].snd = false; tabsDraw(); return flash('Son coupé. La pub continue, en silence. Comme vos agents.'); }
+    if (tb) return tabSwitch(+tb.dataset.tab);
     if (w) {
       const k = w.dataset.wb;
       if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
@@ -12838,6 +12952,7 @@ function makeBrowser() {
       else if (k === 'home') go(WEB_HOME);
       else if (k === 'addons') go('about:addons');
       else if (k === 'menu') menuOpen();
+      else if (k === 'newtab') tabNew();
       else if (k === 'zoom+') zoomStep(1);
       else if (k === 'zoom-') zoomStep(-1);
       else if (k === 'zoom0') zoomStep(0);
@@ -12878,6 +12993,33 @@ function makeBrowser() {
     if (d === undefined) return;
     e.preventDefault(); e.stopPropagation(); zoomStep(d);
   });
+  el.addEventListener('keydown', e => {           // les onglets au clavier : Alt+T, Alt+W, Alt+Maj+T, Alt+1 à 9 (Ctrl+T et Ctrl+W appartiennent à votre vrai navigateur)
+    if (!e.altKey || e.ctrlKey || e.metaKey) return;
+    const c = e.code;
+    if (c === 'KeyT') { if (e.shiftKey) tabReopen(); else tabNew(); }
+    else if (c === 'KeyW' && !e.shiftKey) tabClose();
+    else if (/^Digit[1-9]$/.test(c) && !e.shiftKey) tabSwitch(c === 'Digit9' ? FF_T.length - 1 : +c.slice(5) - 1);
+    else return;
+    e.preventDefault(); e.stopPropagation();
+  });
+  el.addEventListener('mousedown', e => { if (e.button === 1 && e.target.closest('[data-href], [data-tab]')) e.preventDefault(); });   // pas de défilement automatique au clic du milieu
+  el.addEventListener('auxclick', e => {          // clic du milieu : un lien s'ouvre dans un onglet d'arrière-plan ; un onglet se ferme
+    if (e.button !== 1) return;
+    const h = e.target.closest('.wb-doc [data-href], .wb-marks [data-href]'), tb = e.target.closest('[data-tab]');
+    if (h) { e.preventDefault(); if (tabNew(h.dataset.href, true)) flash('Ouvert dans un nouvel onglet, en arrière-plan.'); }
+    else if (tb) { e.preventDefault(); tabClose(+tb.dataset.tab); }
+  });
+  let lpT = 0, lpXY = null, lpDone = false, lastPT = '';   // au doigt : un appui long sur un lien l'ouvre dans un onglet d'arrière-plan
+  page.addEventListener('pointerdown', e => {
+    lastPT = e.pointerType; lpDone = false; clearTimeout(lpT);
+    const h = e.pointerType === 'touch' && e.target.closest('.wb-doc [data-href]');
+    if (!h) return;
+    lpXY = [e.clientX, e.clientY];
+    lpT = setTimeout(() => { lpDone = true; if (tabNew(h.dataset.href, true)) flash('Appui long : ouvert dans un nouvel onglet, en arrière-plan.'); }, 550);
+  });
+  page.addEventListener('pointermove', e => { if (lpXY && Math.hypot(e.clientX - lpXY[0], e.clientY - lpXY[1]) > 10) clearTimeout(lpT); });
+  ['pointerup', 'pointercancel'].forEach(t => page.addEventListener(t, () => { clearTimeout(lpT); lpXY = null; }));
+  page.addEventListener('contextmenu', e => { if (lastPT === 'touch' && e.target.closest('.wb-doc [data-href]')) e.preventDefault(); });
   let wheelAcc = 0;
   page.addEventListener('wheel', e => {          // Ctrl+molette, et le pincement du pavé tactile (Chrome l'envoie ainsi)
     if (!e.ctrlKey) return;
@@ -12912,7 +13054,8 @@ function makeBrowser() {
   }
   draw(false);
   zoomApply();
-  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, close: () => { ffPops = 0; }, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
+  return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, close: () => { ffPops = 0; tabSave(); FF_T = [FF_T[FF_CUR]]; FF_CUR = 0; tabsDraw(); },   // fermer Firefaux : il ne garde que l'onglet en cours
+    newTab: (u, bgTab) => tabNew(u, bgTab), agentTab, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
 }
 
 /* ---------- réglages : une liste modulable ----------
