@@ -1371,6 +1371,9 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ami-opt.on, .ami-btns .on { background: var(--a-bg); color: var(--a-fg); }
 :root[data-theme="abri"] .ami-opt.on, :root[data-theme="abri"] .ami-btns .on { background: var(--a-fg); color: var(--a-hi); }
 .ami-q { text-align: center; }
+.ami-flash { min-width: min(46ch, 100%); }
+.ami-fbar { white-space: pre; overflow: hidden; }
+.ami-fw { font-weight: 700; }
 .ami-btns { display: flex; justify-content: center; gap: 3ch; }
 .ami-wrap { display: grid; }                     /* la ligne choisie et ses flèches ◄ ►, l'une sur l'autre */
 .ami-wrap > * { grid-area: 1 / 1; }
@@ -1690,7 +1693,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.72', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.73', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2450,6 +2453,9 @@ const ACH = [
   { id: 'glitch', g: '▒', n: 'Ça glitche, donc ça va vite', d: 'Pousser l’overclocking jusqu’aux glitchs.', p: 9.8, t: () => { const u = ocU(); return Math.max(u.cpu, u.ram) >= .5; } },
   { id: 'under', g: '↓', n: 'Écolo malgré lui', d: 'Sous-cadencer le processeur dans le BIOS.', p: 5.2, t: () => ocK().cr < .996 },
   { id: 'turbo', g: '≋', n: 'Décollage', d: 'Mettre le ventilateur du processeur en Turbo dans le BIOS.', p: 8.3, t: () => ocSt().fan === 2 },
+  { id: 'flash', g: '⇪', n: 'Samedi', d: 'Mettre le BIOS à jour : 2612 « saturday », testée par personne.', p: 7.7, t: () => ocSt().bios >= 2612 },
+  { id: 'brick', g: '▣', n: 'Presque une brique', d: 'Rater une mise à jour du BIOS. Le BIOS de secours a sauvé la carte mère.', p: 1.2, h: 1 },
+  { id: 'undervolt', g: '⏚', n: 'Sous-volté', d: 'Baisser la tension du processeur sous Auto.', p: 4.4, t: () => (ocSt().vc || 0) < 0 },
   { id: 'ocfail', g: '■', n: 'Écran noir', d: 'Overclocker si loin que le PC ne passe plus le POST.', p: 6.1 },
   { id: 'cmos', g: '◔', n: 'Pile morte', d: 'Perdre les réglages du BIOS dans une coupure de courant. La pile de la CMOS est morte en 2019.', p: 3.3, h: 1 },
   { id: 'failsafe', g: '▿', n: 'Mode sans échec', d: 'Charger les Fail-Safe Defaults dans le BIOS : tout au minimum, même l’ambition.', p: 2.6, h: 1 },
@@ -6849,13 +6855,22 @@ function ocSt() {                                // les réglages du BIOS (remis
     if (IDLE) G.oc = o; else SB_OC = o;
   }
   if (o.fan == null) o.fan = 1;
-  if (o.cpuT !== pc.cpu) { if (o.ratio) o.chg = 'cpu'; Object.assign(o, { cpuT: pc.cpu, ratio: 0, lc: ocLot() }); }
-  if (o.ramT !== pc.ram) { if (o.mhz) o.chg = o.chg === 'cpu' ? 'both' : 'ram'; Object.assign(o, { ramT: pc.ram, mhz: 0, lr: ocLot() }); }
+  if (!o.bios) Object.assign(o, { bios: 2611, vc: 0, vd: 0 });   // le BIOS d'origine, tensions sur Auto (anciennes sauvegardes comprises)
+  if (o.cpuT !== pc.cpu) { if (o.ratio) o.chg = 'cpu'; Object.assign(o, { cpuT: pc.cpu, ratio: 0, vc: 0, lc: ocLot() }); }
+  if (o.ramT !== pc.ram) { if (o.mhz) o.chg = o.chg === 'cpu' ? 'both' : 'ram'; Object.assign(o, { ramT: pc.ram, mhz: 0, vd: 0, lr: ocLot() }); }
   return o;
 }
 const cpuBase = (c = part('cpu')) => Math.round(c.ghz * 1000);   // MHz, d'origine
 const cpuMhz = () => ocSt().ratio * 100 || cpuBase();
 const ramMhz = () => ocSt().mhz || part('ram').mhz;
+// le BIOS : 2611 « friday » d'origine ; 2612 « saturday » (Tool › EZ Flash) débloque les tensions
+const BIOS_VER = { 2611: { n: 2611, tag: 'friday', ver: '08.00.15', date: '11/20/2026' }, 2612: { n: 2612, tag: 'saturday', ver: '08.00.16', date: '11/21/2026' } };
+const biosV = () => BIOS_VER[ocSt().bios] || BIOS_VER[2611];
+// les tensions, en décalage autour d'Auto (mV) : +0,1 V donne 5 % de marge de plus au processeur (10 % à la RAM) ; la chaleur du processeur suit le carré de la tension
+const VC_OPTS = [-150, -125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125, 150], VD_OPTS = [-100, -50, 0, 50, 100, 150, 200, 250, 300];
+const VD_AUTO = { 3: 1.5, 4: 1.2, 5: 1.1 };
+const vOff = v => v ? `${v > 0 ? '+' : '-'}${(Math.abs(v) / 1000).toFixed(3)}V` : 'Auto';
+let FLASH_KO = null;                             // les suites forcent la coupure pendant la mise à jour (true) ou l'empêchent (false)
 // Smart Fan Control : k, le refroidissement (par rapport à Standard) ; w, ce que tirent les ventilateurs en plus ; rpm, leur vitesse
 const FAN = [{ n: 'Silent', k: .8, w: -2, rpm: .65 }, { n: 'Standard', k: 1, w: 0, rpm: 1 }, { n: 'Turbo', k: 1.18, w: 8, rpm: 1.7 }];
 const fanSet = () => FAN[ocSt().fan] || FAN[1];
@@ -6864,12 +6879,12 @@ const fanRpm = (t = PCS.temp) => { const co = part('cool'), f = fanSet(), b = co
 const ocRange = (c = part('cpu')) => [Math.max(8, Math.round(c.ghz * 6)), Math.round(c.ghz * 14.5)];   // le multiplicateur : de −40 % à +45 %
 const frMhz = v => `${Math.round(v).toLocaleString('fr-FR')} MHz`;
 const ocPct = (f, b) => Math.round(f) === Math.round(b) ? 'd’origine' : `${f > b ? '+' : '−'}${Math.abs(Math.round((f / b - 1) * 100))} %`;
-function ocK(pc = PC()) {                        // fréquence du processeur et de la RAM, rapportée à l'origine (une autre pièce : 1)
+function ocK(pc = PC()) {                        // fréquence du processeur et de la RAM, rapportée à l'origine (une autre pièce : 1) ; vh : la chaleur due à la tension
   const I = PC();
-  return { cr: pc.cpu === I.cpu ? cpuMhz() / cpuBase() : 1, rr: pc.ram === I.ram ? ramMhz() / part('ram').mhz : 1 };
+  return { cr: pc.cpu === I.cpu ? cpuMhz() / cpuBase() : 1, rr: pc.ram === I.ram ? ramMhz() / part('ram').mhz : 1, vh: pc.cpu === I.cpu ? (1 + (ocSt().vc || 0) / 1200) ** 2 : 1 };
 }
 function ocU(pc = PC()) {                        // l'instabilité : 0 = dans la marge ; 1 = 10 % au-delà ; 3 au plus
-  const I = PC(), o = ocSt(), c = part('cpu'), r = part('ram'), sc = cpuBase(c) * (1 + c.oc * o.lc), sr = r.mhz * (1 + r.oc * o.lr);
+  const I = PC(), o = ocSt(), c = part('cpu'), r = part('ram'), sc = cpuBase(c) * (1 + c.oc * o.lc) * (1 + (o.vc || 0) / 2000), sr = r.mhz * (1 + r.oc * o.lr) * (1 + (o.vd || 0) / 1000);   // la tension donne (ou reprend) de la marge
   const u = (f, b) => Math.max(0, Math.min(3, (f - b) / (b * .1)));
   return { cpu: pc.cpu === I.cpu ? u(cpuMhz(), sc) : 0, ram: pc.ram === I.ram ? u(ramMhz(), sr) : 0 };
 }
@@ -6900,7 +6915,7 @@ function pcLoad(o = {}) {
   const used = 1 + 1.2 * sp ** .4 * all + 1.5 * lead + plats + .5 * gui + 1.5 * web + ad.ram + .4 * mine;   // Go (les pubs de Firefaux et le mineur compris)
   const swap = Math.max(0, used - r.go);
   const gpuU = hog || (live && localOn()) ? 1 : all && g.llm ? .95 : .04;   // l'IA locale met la carte graphique à fond
-  const fs = fanSet(), heat = c.tdp * k.cr ** 1.8 * util, draw = 45 + fs.w + heat + g.tdp * gpuU + (d.raid ? 25 : 0);   // Smart Fan : Turbo refroidit mieux et tire 8 W
+  const fs = fanSet(), heat = c.tdp * k.cr ** 1.8 * k.vh * util, draw = 45 + fs.w + heat + g.tdp * gpuU + (d.raid ? 25 : 0);   // Smart Fan : Turbo refroidit mieux et tire 8 W
   return { n, bg, plats, boost: (c.perf ?? 1) * (1 + .6 * (k.cr - 1)) * (1 + .3 * (k.rr - 1)), demand, util, cap, used, ram: r.go, swap, oom: swap > SWAP_GO, gpuU, heat, draw, psuW: ps.w, coolW: co.w,
     tTarget: 30 + (worldOn('heat') ? 12 : 0) + 62 * heat / (co.w * fs.k), cpuF: Math.min(1, cap / demand), ramF: swap <= 0 ? 1 : swap <= SWAP_GO ? .6 : .3, io: d.io, rev: g.rev, tok: g.tok };
 }
@@ -15116,7 +15131,7 @@ async function biosBoot(o = {}) {
     add(`${ts(dt += .01)} <b>Kernel panic - not syncing: ${cause}</b>`, 'bi-fail');
     await wait(250);
     const trace = [`CPU: ${ri(0, Math.max(0, c.thr - 1))} PID: ${ri(31337, 39999)} Comm: ${comm} Tainted: G      D  O       6.11.0-friday #1`,
-      `Hardware name: Vibe Coding Inc. ${mb.n}/PROD-01, BIOS AMIVIBES 2611 11/20/2026`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
+      `Hardware name: Vibe Coding Inc. ${mb.n}/PROD-01, BIOS AMIVIBES ${biosV().n} ${biosV().date}`, 'Call Trace:', ' <TASK>', ' dump_stack_lvl+0x5d/0x80', ' panic+0x118/0x2f0',
       k === 'oom' ? ' out_of_memory.cold+0x5c/0x70' : k === 'heat' ? ' thermal_zone_device_critical+0x41/0x50' : k === 'vram' ? ' gpu_vram_alloc.cold+0x13/0x37' : ' mce_panic+0x1b6/0x200',
       ` vibe_agent_spawn+0x2a/0x40 [${comm}_cli]`, ' tokens_burn_all+0x1337/0x2000', ' npm_install_universe+0x404/0x404', ' friday_deploy+0x17/0x420',
       ' do_syscall_64+0x82/0x170', ' entry_SYSCALL_64_after_hwframe+0x76/0x7e', ' </TASK>', 'Kernel Offset: disabled'];
@@ -15128,7 +15143,7 @@ async function biosBoot(o = {}) {
     el.innerHTML = '';
     await wait(900);                             // le noir complet, ventilateurs coupés
   }
-  let nPost = 0, choice = 'boot', ocFail = '';
+  let nPost = 0, choice = 'boot', ocFail = '', flashed = '';
   for (;;) {                                     // le PC (re)démarre : POST puis GRUB ; memtest86+ et Windows ramènent ici
   // 1. le POST du BIOS. DEL ou F2 (ou un clic sur DEL) avant qu'il ne finisse : le setup. « Save & Exit » : le PC redémarre, le POST repasse.
   for (;; nPost++) {
@@ -15144,12 +15159,20 @@ async function biosBoot(o = {}) {
         el.innerHTML = '';
         await wait(500);
       }
-      Object.assign(ocSt(), { ratio: 0, mhz: 0 });
+      Object.assign(ocSt(), { ratio: 0, mhz: 0, vc: 0, vd: 0 });
       if (IDLE) saveGame();
       ocFail = pf;
       ach('ocfail');
     }
     f1Setup = !!ocFail || !!(o.crash?.cmos && !nPost);
+    if (flashed === 'brick') {                   // la coupure pendant la mise à jour : le BIOS de secours remet le principal
+      for (const [t, cls, ms] of [['AMIVIBES Dual BIOS', '', 300], ['Main BIOS checksum error! (la mise à jour a été coupée à mi-chemin)', 'bi-fail', 700],
+        ['Switching to Backup BIOS : 2611 « friday »…', '', 700], ['Restoring Main BIOS from Backup BIOS… 100 %', '', 900], ['Done. Le BIOS principal est revenu en 2611, les réglages sur Auto.', 'bi-warn', 900]]) {
+        add(esc(t), cls); await wait(ms);
+      }
+      el.innerHTML = '';
+      await wait(400);
+    }
     const top = document.createElement('div');
     top.className = 'bi-top';
     top.innerHTML = `<div class="bi-post"></div><div class="bi-es">${ENERGY_STAR}</div>`;
@@ -15162,7 +15185,7 @@ async function biosBoot(o = {}) {
     const post = top.firstChild, oc = ocSt(), mhz = cpuMhz(), rm = ramMhz(), b0 = cpuBase(c);
     const head = document.createElement('div');
     head.className = 'bi-amih';
-    head.innerHTML = `${AMI_LOGO}<div><div class="ln"><b>AMIVIBES(C)2026 American Megavibes, Inc.</b></div><div class="ln">${esc(mb.n)} PROD-01 BIOS Revision 2611 « friday »</div></div>`;
+    head.innerHTML = `${AMI_LOGO}<div><div class="ln"><b>AMIVIBES(C)2026 American Megavibes, Inc.</b></div><div class="ln">${esc(mb.n)} PROD-01 BIOS Revision ${biosV().n} « ${biosV().tag} »</div></div>`;
     post.appendChild(head);
     add(`CPU : ${esc(c.n)} (${c.thr} threads, socket ${esc(mb.so)})`, '', post);
     add(` Speed : ${frx(+(mhz / 1000).toFixed(3))} GHz`
@@ -15178,9 +15201,13 @@ async function biosBoot(o = {}) {
     mem.textContent += ' OK';
     add('USB Device(s): 1 Keyboard, 1 Mouse, 1 Agent', '', post);
     if (oc.fan !== 1 && co.w < 1000) add(oc.fan === 2 ? `CPU Fan Mode : Turbo (${fanRpm()} RPM, on ne s’entend plus)` : 'CPU Fan Mode : Silent (le processeur transpire en silence)', 'dim', post);
+    if (flashed) {
+      add(flashed === 'flash' ? 'BIOS updated to 2612 « saturday » : settings reset to defaults. Press DEL to run Setup.' : 'BIOS update failed : power loss during flash. Le BIOS de secours a tout remis en 2611.', flashed === 'flash' ? 'bi-warn' : 'bi-fail', post);
+      flashed = '';
+    }
     if (ocFail) {
       add('Overclocking failed! Please enter Setup to re-configure your system.', 'bi-fail', post);
-      add(`Press F1 to Run SETUP <span class="dim">(${ocFail === 'cpu' ? 'le processeur' : 'la RAM'} ne tenait pas : CPU Ratio et DRAM Frequency sont revenus sur Auto)</span>`, '', post);
+      add(`Press F1 to Run SETUP <span class="dim">(${ocFail === 'cpu' ? 'le processeur' : 'la RAM'} ne tenait pas : CPU Ratio, DRAM Frequency et les tensions sont revenus sur Auto)</span>`, '', post);
       ocFail = '';
     }
     if (o.crash?.cmos && !nPost) {               // la coupure de courant, avec une pile morte : la CMOS a tout oublié
@@ -15226,7 +15253,8 @@ async function biosBoot(o = {}) {
     wantSetup = false;
     el.classList.remove('setup');
     el.innerHTML = '';
-    if (res !== 'save') break;
+    if (res === 'flash' || res === 'brick') flashed = res;   // mis à jour (ou coupé) : le PC redémarre, le POST le dit
+    else if (res !== 'save') break;
     await sleep(reducedMotion.matches ? 100 : 700);   // Save & Exit : le PC redémarre, écran noir
   }
   // 2. GRUB : le menu de démarrage
@@ -15251,7 +15279,7 @@ async function biosBoot(o = {}) {
     `Linux version ${kv} (agents@prod-01) (gcc 14.2.0, vibes 3.0) #1 SMP PREEMPT_DYNAMIC`,
     `Command line: BOOT_IMAGE=/vmlinuz-${kv} root=/dev/sda1 ro ${choice === 'recovery' ? 'single' : 'quiet splash'} agents=${choice === 'noagents' ? 'off' : 'yolo'} tests=off`,
     ...(choice === 'recovery' ? ['recovery: shell root demandé · mot de passe root changé par un agent · on continue en mode normal'] : []),
-    'DMI: Vibe Coding Inc. prod-01/agents, BIOS 2026.11 11/20/2026',
+    `DMI: Vibe Coding Inc. prod-01/agents, BIOS AMIVIBES ${biosV().n} ${biosV().date}`,
     `Memory: ${frx((r.go * .94).toFixed(1))}G/${r.go}G available (0K tests, 412K vibes)`,
     `smpboot: CPU0: ${c.n}`,
     `smpboot: Total of ${c.thr} processors activated`,
@@ -15327,16 +15355,17 @@ async function biosBoot(o = {}) {
    Boot (Quick Boot coupé : un POST plus long, plus de temps pour DEL), Security, Exit. Au clavier : flèches, Entrée, + et −, F1, F9, F10,
    Échap ; à la souris ou au doigt, onglets, lignes, options et touches sont cliquables. « Save & Exit » enregistre (la CMOS, c'est la
    sauvegarde) et redémarre. Renvoie 'save' ou 'discard'. */
-const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Exit'];
+const AMI_TABS = ['Main', 'Vibe Tweaker', 'Advanced', 'Boot', 'Security', 'Tool', 'Exit'];
 const AMI_HELP = 'Vibe Tweaker : CPU Ratio (le multiplicateur du processeur) et DRAM Frequency (la RAM). Plus haut : les agents vont plus vite, '
   + 'le processeur chauffe et consomme davantage. Trop haut : glitchs à l’écran, erreurs matérielles, agents qui plantent. Chaque puce a sa marge '
   + '(la loterie du silicium) : montez par paliers, redescendez au premier glitch. F10 : enregistrer et redémarrer · Échap : quitter sans enregistrer '
   + '· F9 : tout sur Auto. Advanced › Smart Fan Control : Turbo refroidit mieux, et s’entend. L’agent a remplacé le BIOS VibeAward par un AMIVIBES : il appelle ça une mise à jour. Personne n’a gardé l’ancien.';
-const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', def: 'Load Optimal Defaults?', fs: 'Load Fail-Safe Defaults?' };
+const AMI_ASK = { save: 'Save configuration changes and exit setup?', discard: 'Discard changes and exit setup?', undo: 'Discard changes?', flash: 'Flash AMIVIBES-2612.CAP? Do not turn off the power during the update.', def: 'Load Optimal Defaults?', fs: 'Load Fail-Safe Defaults?' };
 function amiSetup(el, bindKey) {
   return new Promise(done => {
     const st = ocSt(), c = part('cpu'), r = part('ram'), co = part('cool'), ps = part('psu'), d = part('disk');
-    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan };   // les réglages en cours d'édition
+    const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd };   // les réglages en cours d'édition
+    const v12 = st.bios >= 2612, vdA = VD_AUTO[r.ddr] || 1.2;
     const [lo, hi] = ocRange(c), fC = v => v * 100 || cpuBase(c), fR = v => v || r.mhz;
     const cpuOpts = [0, ...Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)], ramOpts = [0, ...(OC_DDR[r.ddr] || [])];
     // Hardware Monitor, en direct : le BIOS ne met jamais le processeur au repos, la température monte pendant qu'on lit
@@ -15353,7 +15382,7 @@ function amiSetup(el, bindKey) {
     const ask = a => { pop = { ask: a, ok: 0 }; };
     const PAGES = () => [
       [{ h: 'System Overview' }, {},
-        { t: 'AMIVIBES' }, { i: ['Version', '08.00.15 (friday)'] }, { i: ['Build Date', '11/20/26'] }, { i: ['ID', 'PROD-01'] }, {},
+        { t: 'AMIVIBES' }, { i: ['Version', `${biosV().ver} (${biosV().tag})`] }, { i: ['Build Date', biosV().date.replace(/20(\d\d)$/, '$1')] }, { i: ['ID', 'PROD-01'] }, {},
         { h: 'Processor' }, { t: c.n }, { i: ['Speed', `${fC(P.ratio)}MHz`] }, { i: ['Count', `${c.thr} threads`] }, {},
         { h: 'System Memory' }, { i: ['Size', `${r.go * 1024}MB · DDR${r.ddr}-${fR(P.mhz)}${r.ecc ? ' ECC' : ''}`] }, {},
         lock('time', 'System Time', '', 'L’heure de la CMOS. Sa pile est morte en 2019 : un agent recopie l’heure depuis Internet à chaque démarrage.', { v: () => clock().time, clock: 'time' }),
@@ -15363,13 +15392,18 @@ function amiSetup(el, bindKey) {
         { i: ['Target CPU Frequency', `${fC(P.ratio)}MHz (${ocPct(fC(P.ratio), cpuBase(c))})`] },
         opt('mhz', 'DRAM Frequency', ramOpts, v => v ? `DDR${r.ddr}-${v}MHz` : 'Auto', `Fréquence de la RAM. Auto : ${frMhz(r.mhz)}. Plus haut : agents un peu plus rapides. Trop haut : bits qui basculent, fichiers corrompus, écran qui bave.${r.ecc ? ' ECC : les petites erreurs sont corrigées.' : ''}`, fR),
         { i: ['Target DRAM Frequency', `${fR(P.mhz)}MHz (${ocPct(fR(P.mhz), r.mhz)})`] }, {},
-        lock('vcore', 'CPU Core Voltage', 'Auto', 'Auto : un agent règle la tension. Il a mis 1,55 V « pour être sûr ».'),
-        lock('dramv', 'DRAM Voltage', 'Auto', 'Auto. Personne ne sait ce que fait ce réglage, l’agent non plus.'), {},
+        ...(v12 ? [
+          opt('vc', 'CPU Core Voltage', VC_OPTS, vOff, 'Décalage de la tension du processeur autour d’Auto. Plus : 5 % de marge de plus par 0,1 V, de quoi monter un cran plus haut, mais la chaleur suit le carré de la tension. '
+            + 'Moins (undervolt) : il chauffe moins et la facture baisse, jusqu’à ce que la marge manque : glitchs, erreurs. Auto : l’agent a mis 1,55 V « pour être sûr » dès qu’on overclocke.'),
+          opt('vd', 'DRAM Voltage', VD_OPTS, vOff, `Décalage de la tension de la RAM autour d’Auto (${vdA.toFixed(2).replace('.', ',')} V en DDR${r.ddr}). Plus : 10 % de marge de plus par 0,1 V, pour une RAM plus rapide. Moins : la RAM oublie des bits, même d’origine.`),
+          { i: ['Target CPU Voltage', () => `${((fC(P.ratio) > cpuBase(c) ? 1.552 : 1.2) + (P.vc || 0) / 1000).toFixed(3)}V`] }, { i: ['Target DRAM Voltage', () => `${(vdA + (P.vd || 0) / 1000).toFixed(3)}V`] }]
+        : [lock('vcore', 'CPU Core Voltage', 'Auto', 'Verrouillé par le BIOS 2611 « friday ». La mise à jour 2612 (onglet Tool, EZ Flash) le débloque. En attendant, l’agent a mis 1,55 V « pour être sûr ».'),
+          lock('dramv', 'DRAM Voltage', 'Auto', 'Verrouillé par le BIOS 2611 « friday ». La mise à jour 2612 (onglet Tool, EZ Flash) le débloque.')]), {},
         { t: 'Chaque puce a sa marge : la loterie du silicium.', w: 1 }, { t: 'Montez par paliers. Au premier glitch, redescendez.', w: 1 }],
       [{ h: 'Hardware Health Configuration' }, {},
         { i: ['CPU Temperature', () => deg(Math.round(jit(M.t, .4)))], live: 1 }, { i: ['MB Temperature', () => deg(Math.round(Math.max(25, M.t - 7)))], live: 1 },
         { i: ['CPU Fan Speed', fan], live: 1 },
-        { i: ['VCORE Voltage', () => `${jit(cr > 1 ? 1.552 : 1.2, .008).toFixed(3)}V${cr > 1 ? ' (Auto, réglé par l’agent)' : ''}`], live: 1 },
+        { i: ['VCORE Voltage', () => `${jit((cr > 1 ? 1.552 : 1.2) + (st.vc || 0) / 1000, .008).toFixed(3)}V${cr > 1 && !st.vc ? ' (Auto, réglé par l’agent)' : ''}`], live: 1 },
         { i: ['+12V Voltage', () => ps.noname ? `${jit(11.1, .08).toFixed(1)}V (elle siffle)` : `${jit(12.096, .024).toFixed(3)}V`], live: 1 },
         { i: ['Power Supply', ps.n] }, {},
         opt('fan', 'Smart Fan Control', [0, 1, 2], v => FAN[v].n, 'Silent : moins de bruit, moins de refroidissement (le PC patate peut y laisser sa peau). Standard : le réglage d’usine. '
@@ -15385,6 +15419,14 @@ function amiSetup(el, bindKey) {
         { i: ['Supervisor Password', 'Installed (par un agent)'] }, { i: ['User Password', 'Not Installed'] }, {},
         act('pw', 'Change Supervisor Password', 'Il faut l’ancien mot de passe. C’est l’agent qui l’a choisi.', () => { pop = { msg: 'Enter Current Password : ********. Invalid Password. Indice laissé par l’agent : « vendredi ».', ok: 0 }; }),
         lock('bsv', 'Boot Sector Virus Protection', 'Disabled', 'Désactivé : les agents écrivent dans le secteur de démarrage. Pour optimiser.')],
+      [{ h: 'Vibe EZ Flash 3 Utility' }, {},
+        { i: ['Current BIOS', `${biosV().n} « ${biosV().tag} » (${biosV().date})`] }, { i: ['USB Device', 'backup-jeudi (FAT32)'] },
+        { i: ['BIOS File', v12 ? 'AMIVIBES-2612.CAP (déjà installé)' : 'AMIVIBES-2612.CAP'] }, {},
+        act('flash', 'Start EZ Flash', v12 ? 'Le BIOS est déjà à jour. L’agent propose de reflasher « pour être sûr ». Non.'
+          : 'Met le BIOS à jour depuis la clé backup-jeudi : 2612 « saturday » débloque CPU Core Voltage et DRAM Voltage dans Vibe Tweaker. Les réglages reviennent sur Auto. Ne coupez pas le courant pendant la mise à jour.',
+          () => { if (v12) pop = { msg: 'BIOS déjà à jour : 2612 « saturday ». Rien à flasher. L’agent est déçu.', ok: 0 }; else ask('flash'); }), {},
+        { t: 'Notes de version 2612 « saturday » (11/21/2026) :' }, { t: '- CPU Core Voltage et DRAM Voltage réglables' }, { t: '- Testée par personne : c’était samedi' },
+        ...(ps.noname ? [{}, { t: 'Alim no-name : elle peut couper pendant', w: 1 }, { t: 'la mise à jour. Le BIOS de secours est là.', w: 1 }] : [])],
       [{ h: 'Exit Options' }, {},
         act('save', 'Save Changes and Exit', 'Enregistre les réglages et redémarre (F10).', () => ask('save')),
         act('discard', 'Discard Changes and Exit', 'Quitte sans rien enregistrer : le démarrage continue (Échap).', () => ask('discard')),
@@ -15423,7 +15465,12 @@ function amiSetup(el, bindKey) {
           `<button type="button" tabindex="-1" class="ami-row ami-it${it.act ? ' ami-act' : ''}${i === sel ? ' on' : ''}${i === sel && it.opts ? ' st' : ''}" data-i="${i}"><span>${it.act ? '► ' : ''}${esc(it.l)}</span>`
           + `<span${it.clock ? ` data-clock="${it.clock}"` : ''}>${it.act ? '' : `[${esc(val(it))}]`}</span></button>`)
         : '<div class="ami-sp"></div>';
-      const box = !pop ? '' : `<div class="ami-pop"><div class="ami-box" role="dialog" aria-modal="true" aria-label="${pop.opts ? 'Options' : 'Message'}">`
+      const fl = pop?.flash, bar = fl ? Math.round(fl.p / 4) : 0;
+      const box = !pop ? '' : fl ? `<div class="ami-pop"><div class="ami-box ami-flash" role="dialog" aria-modal="true" aria-label="EZ Flash"><div class="ami-bt">Vibe EZ Flash 3 Utility</div>`
+        + `<div>${fl.done ? 'Mise à jour terminée : 2612 « saturday ». Redémarrage…' : fl.p < 20 ? 'Erasing…' : fl.p < 85 ? 'Writing…' : 'Verifying…'}</div>`
+        + `<div class="ami-fbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${fl.p}">[${'█'.repeat(bar)}${'░'.repeat(25 - bar)}] ${String(fl.p).padStart(3)} %</div>`
+        + '<div class="ami-fw">Ne pas éteindre l’ordinateur.</div></div></div>'
+        : `<div class="ami-pop"><div class="ami-box" role="dialog" aria-modal="true" aria-label="${pop.opts ? 'Options' : 'Message'}">`
         + (pop.opts ? `<div class="ami-bt">Options</div><div class="ami-opts">${pop.opts.opts.map((v, i) => `<button type="button" tabindex="-1" class="ami-opt${i === pop.idx ? ' on' : ''}" data-o="${i}">${esc(pop.opts.show(v))}</button>`).join('')}</div>`
           : `<div class="ami-q">${esc(pop.ask ? AMI_ASK[pop.ask] : pop.msg)}</div><div class="ami-btns">${(pop.ask ? ['Ok', 'Cancel'] : ['Ok']).map((b, i) => `<button type="button" tabindex="-1" class="${i === pop.ok ? 'on' : ''}" data-b="${i}">[ ${b} ]</button>`).join('')}</div>`)
         + '</div></div>';
@@ -15464,25 +15511,50 @@ function amiSetup(el, bindKey) {
       el.querySelectorAll('[data-live]').forEach(n => { const it = L[+n.dataset.live]; if (it?.i) n.textContent = `: ${iv(it)}`; });
     }, 1000);
     function finish(res) {
+      if (closed && res !== 'brick') return;
       closed = true;
       clearInterval(clockT);
       PCS.temp = M.t;                            // ce que le processeur a pris en chauffant dans le setup
       el.removeEventListener('click', onClick);
       bindKey(null);
       if (res === 'save') { Object.assign(st, P); if (IDLE) saveGame(); }
+      if (res === 'flash' || res === 'brick') {   // un BIOS neuf (ou celui de secours) : tout revient sur Auto
+        Object.assign(st, { ratio: 0, mhz: 0, quick: 1, fan: 1, vc: 0, vd: 0 }, res === 'flash' ? { bios: 2612 } : {});
+        ach(res);
+        if (IDLE) saveGame();
+      }
       done(res);
     }
     function doAct(a) {                          // Ok dans une boîte de confirmation
       if (a === 'save' || a === 'discard') return finish(a);
       if (a === 'fs') ach('failsafe');
-      Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1, fan: 1 } : a === 'fs' ? { ratio: lo, mhz: ramOpts[1] || 0, quick: 0, fan: 1 }   // Fail-Safe : tout au plus bas
-        : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan });
+      if (a === 'flash') return startFlash();
+      Object.assign(P, a === 'def' ? { ratio: 0, mhz: 0, quick: 1, fan: 1, vc: 0, vd: 0 } : a === 'fs' ? { ratio: lo, mhz: ramOpts[1] || 0, quick: 0, fan: 1, vc: 0, vd: 0 }   // Fail-Safe : tout au plus bas
+        : { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1, fan: st.fan, vc: st.vc, vd: st.vd });
+    }
+    function startFlash() {                      // EZ Flash : effacer, écrire, vérifier ; l'alim no-name peut couper en pleine écriture
+      const ko = FLASH_KO ?? (!!ps.noname && chance(EV_ON ? .25 : 0)), cut = ri(35, 80);
+      pop = { flash: { p: 0 } };
+      const fT = setInterval(() => {
+        const f = pop?.flash;
+        if (!f || closed) return clearInterval(fT);
+        f.p = Math.min(100, f.p + 2);
+        if (ko && f.p >= cut) {                  // la coupure : écran noir, le PC s'éteint
+          clearInterval(fT);
+          el.innerHTML = '';
+          closed = true;
+          return setTimeout(() => finish('brick'), 900);
+        }
+        if (f.p >= 100) { clearInterval(fT); f.done = 1; render(); return setTimeout(() => finish('flash'), 1100); }
+        render();
+      }, 110);
     }
     function onKey(e) {
       const k = e.key;
       if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(k)) return;
       e.preventDefault();
       e.stopPropagation();
+      if (pop?.flash) return;                    // la mise à jour : on n'y touche pas
       if (pop?.opts) {                           // la liste des options
         const n = pop.opts.opts.length;
         if (k === 'ArrowUp' || k === 'ArrowDown') pop.idx = (pop.idx + (k === 'ArrowDown' ? 1 : -1) + n) % n;
@@ -15510,6 +15582,7 @@ function amiSetup(el, bindKey) {
       render();
     }
     function onClick(e) {
+      if (pop?.flash) return;
       const b = e.target.closest('button');
       if (!b) { if (pop && !e.target.closest('.ami-box')) { pop = null; render(); } return; }
       if (b.dataset.step) { pop = null; change(+b.dataset.step); }
@@ -15583,7 +15656,7 @@ async function pcCrash(kind, L, opt = {}) {
     if (G.ai === 'local') safe = false;
   }
   const cmos = (kind === 'psu' || kind === 'whine') && (opt.cmos ?? chance(EV_ON ? .5 : 0));   // coupure de courant et pile morte : la CMOS oublie tout
-  if (cmos) { Object.assign(ocSt(), { ratio: 0, mhz: 0, quick: 1, fan: 1 }); ach('cmos'); }
+  if (cmos) { Object.assign(ocSt(), { ratio: 0, mhz: 0, quick: 1, fan: 1, vc: 0, vd: 0 }); ach('cmos'); }
   if (IDLE) { G.running = 0; saveGame(); }
   await biosBoot({ crash: { kind, why, panic, need: L.need, cmos }, during: haltSession, then: () => {
     mode = 'idle';
@@ -15751,8 +15824,9 @@ function sensorsLines() {
       claudeOn && !paused ? `$${usd(G.elec || 0)} d’électricité depuis le dernier ship)` : 'PC en veille : le compteur ne tourne pas sans agents)'), '', 15]] : []),
     ...(() => {                                  // les réglages du BIOS, s'ils ne sont pas sur Auto
       const o = ocSt(), r = part('ram'), u = ocU();
-      return o.ratio || o.mhz || o.err ? [[H('vibe-tweaker:  ', [`CPU ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})`, u.cpu > 0 ? 'errc' : 'okc'], ' · ',
+      return o.ratio || o.mhz || o.err || o.vc || o.vd ? [[H('vibe-tweaker:  ', [`CPU ${frMhz(cpuMhz())} (${ocPct(cpuMhz(), cpuBase())})`, u.cpu > 0 ? 'errc' : 'okc'], ' · ',
         [`RAM DDR${r.ddr}-${ramMhz()} (${ocPct(ramMhz(), r.mhz)})`, u.ram > 0 ? 'errc' : 'okc'],
+        o.vc || o.vd ? [`  Vcore ${vOff(o.vc)} · DRAM ${vOff(o.vd)}`, 'dim'] : '',
         o.err ? [`  ${o.err} erreur${o.err > 1 ? 's' : ''} matérielle${o.err > 1 ? 's' : ''} depuis le démarrage`, 'errc'] : ''), '', 15]] : [];
     })(),
     [H('État du PC :   ', [v.label, v.cls], ` · ${v.why}`), '', 15],
