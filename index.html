@@ -1315,6 +1315,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .bi-prog i { display: block; width: 0; height: 100%; background: var(--orange); transition: width .15s cubic-bezier(.2, .7, .3, 1); }
 .bi-ok { color: var(--green); } .bi-fail { color: var(--red); } .bi-warn { color: var(--yellow); }
 .bi-amih { display: flex; align-items: center; gap: 2ch; margin-bottom: .7em; }
+.bi-qc { position: absolute; top: 1em; right: 2ch; padding: 0 .5ch; border: 1px solid #5a1a14; background: #1a0604; color: #ff4a3a; font-size: 2.4em; font-weight: 700; letter-spacing: .12em; line-height: 1.2; }   /* l'afficheur Q-Code de la carte mère */
+#bios .bi-fl { position: absolute; left: 2ch; right: 2ch; bottom: 1em; height: auto; white-space: pre-wrap; }
 .bi-amil { flex: none; width: min(15ch, 20vw); height: auto; }
 .bi-del { padding: .5em .8ch; margin: -.5em -.8ch; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline dotted; text-underline-offset: .2em; cursor: pointer; }
 @media (pointer: coarse), (max-width: 640px) {
@@ -1688,7 +1690,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.71', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.72', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2448,6 +2450,8 @@ const ACH = [
   { id: 'glitch', g: '▒', n: 'Ça glitche, donc ça va vite', d: 'Pousser l’overclocking jusqu’aux glitchs.', p: 9.8, t: () => { const u = ocU(); return Math.max(u.cpu, u.ram) >= .5; } },
   { id: 'under', g: '↓', n: 'Écolo malgré lui', d: 'Sous-cadencer le processeur dans le BIOS.', p: 5.2, t: () => ocK().cr < .996 },
   { id: 'turbo', g: '≋', n: 'Décollage', d: 'Mettre le ventilateur du processeur en Turbo dans le BIOS.', p: 8.3, t: () => ocSt().fan === 2 },
+  { id: 'ocfail', g: '■', n: 'Écran noir', d: 'Overclocker si loin que le PC ne passe plus le POST.', p: 6.1 },
+  { id: 'cmos', g: '◔', n: 'Pile morte', d: 'Perdre les réglages du BIOS dans une coupure de courant. La pile de la CMOS est morte en 2019.', p: 3.3, h: 1 },
   { id: 'failsafe', g: '▿', n: 'Mode sans échec', d: 'Charger les Fail-Safe Defaults dans le BIOS : tout au minimum, même l’ambition.', p: 2.6, h: 1 },
   { id: 'mtpass', g: '✓', n: 'PASS', d: 'Passer memtest86+ sans une erreur.', p: 7.4 },
   { id: 'mtfail', g: '✗', n: 'FAIL', d: 'Faire échouer memtest86+ (ou le figer).', p: 4.9 },
@@ -6868,6 +6872,10 @@ function ocU(pc = PC()) {                        // l'instabilité : 0 = dans la
   const I = PC(), o = ocSt(), c = part('cpu'), r = part('ram'), sc = cpuBase(c) * (1 + c.oc * o.lc), sr = r.mhz * (1 + r.oc * o.lr);
   const u = (f, b) => Math.max(0, Math.min(3, (f - b) / (b * .1)));
   return { cpu: pc.cpu === I.cpu ? u(cpuMhz(), sc) : 0, ram: pc.ram === I.ram ? u(ramMhz(), sr) : 0 };
+}
+function postFail() {                            // trop loin au-delà de la marge : le PC ne passe plus le POST ('cpu', 'ram' ou '')
+  const u = ocU();
+  return u.cpu >= 1.5 ? 'cpu' : u.ram >= 2.5 ? 'ram' : '';
 }
 function ocLoad(u, util, used, ram, ecc) {       // ce que l'instabilité pèse, selon la charge (l'ECC corrige les petites erreurs de RAM)
   const cpu = u.cpu * (.35 + .65 * util), mem = (ecc ? Math.max(0, u.ram - 1) : u.ram) * (.5 + .5 * Math.min(1, used / ram));
@@ -14910,10 +14918,10 @@ async function biosBoot(o = {}) {
   if (Q.get('bios') === '0') { o.during?.(); o.then?.(); return; }
   booting = true;
   const el = biosEl;
-  let skip = false, wake = null, prePost = true, postOn = false, wantSetup = false, modalKey = null;
+  let skip = false, wake = null, prePost = true, postOn = false, wantSetup = false, modalKey = null, f1Setup = false;
   const skipper = e => {
     if (modalKey) { if (e.type === 'keydown') modalKey(e); return; }   // setup, GRUB, memtest86+, Windows : chacun ses touches (et ses clics)
-    const del = e.type === 'keydown' ? ['Delete', 'Del', 'F2'].includes(e.key) : !!e.target.closest?.('.bi-del');
+    const del = e.type === 'keydown' ? ['Delete', 'Del', 'F2'].includes(e.key) || (f1Setup && e.key === 'F1') : !!e.target.closest?.('.bi-del');
     if (e.type === 'keydown') { if (['Shift', 'Control', 'Alt', 'Meta', 'AltGraph'].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
     if (wantSetup || (del && prePost)) return;   // DEL pressé à temps : direction le setup ; martelé dès le kernel panic : on attend le POST
     if (del && postOn && !skip) { wantSetup = true; wake?.(); return; }
@@ -15120,13 +15128,28 @@ async function biosBoot(o = {}) {
     el.innerHTML = '';
     await wait(900);                             // le noir complet, ventilateurs coupés
   }
-  let nPost = 0, choice = 'boot';
+  let nPost = 0, choice = 'boot', ocFail = '';
   for (;;) {                                     // le PC (re)démarre : POST puis GRUB ; memtest86+ et Windows ramènent ici
   // 1. le POST du BIOS. DEL ou F2 (ou un clic sur DEL) avant qu'il ne finisse : le setup. « Save & Exit » : le PC redémarre, le POST repasse.
   for (;; nPost++) {
     el.innerHTML = '';
     prePost = false;
     postOn = true;
+    const pf = postFail();
+    if (pf) {                                    // trop loin : écran noir, le code de la carte mère, les ventilateurs qui repartent ; trois fois, puis tout sur Auto
+      for (let n = 1; n <= 3; n++) {
+        el.innerHTML = `<div class="bi-qc" title="Q-Code">${pf === 'ram' ? '55' : '00'}</div>`;
+        add(`Écran noir : le PC ne passe pas le POST (essai ${n} sur 3). Q-Code ${pf === 'ram' ? '55 : la RAM refuse de s’entraîner' : '00 : le processeur boude'}. Les ventilateurs tournent, s’arrêtent, repartent.`, 'dim bi-fl');
+        await wait(1300);
+        el.innerHTML = '';
+        await wait(500);
+      }
+      Object.assign(ocSt(), { ratio: 0, mhz: 0 });
+      if (IDLE) saveGame();
+      ocFail = pf;
+      ach('ocfail');
+    }
+    f1Setup = !!ocFail || !!(o.crash?.cmos && !nPost);
     const top = document.createElement('div');
     top.className = 'bi-top';
     top.innerHTML = `<div class="bi-post"></div><div class="bi-es">${ENERGY_STAR}</div>`;
@@ -15155,6 +15178,16 @@ async function biosBoot(o = {}) {
     mem.textContent += ' OK';
     add('USB Device(s): 1 Keyboard, 1 Mouse, 1 Agent', '', post);
     if (oc.fan !== 1 && co.w < 1000) add(oc.fan === 2 ? `CPU Fan Mode : Turbo (${fanRpm()} RPM, on ne s’entend plus)` : 'CPU Fan Mode : Silent (le processeur transpire en silence)', 'dim', post);
+    if (ocFail) {
+      add('Overclocking failed! Please enter Setup to re-configure your system.', 'bi-fail', post);
+      add(`Press F1 to Run SETUP <span class="dim">(${ocFail === 'cpu' ? 'le processeur' : 'la RAM'} ne tenait pas : CPU Ratio et DRAM Frequency sont revenus sur Auto)</span>`, '', post);
+      ocFail = '';
+    }
+    if (o.crash?.cmos && !nPost) {               // la coupure de courant, avec une pile morte : la CMOS a tout oublié
+      add('CMOS Checksum Bad - Default Loaded', 'bi-fail', post);
+      add('CMOS Battery Low <span class="dim">(la pile est morte en 2019 : la coupure a effacé les réglages du BIOS)</span>', 'bi-warn', post);
+      add('Press F1 to Run SETUP', '', post);
+    }
     if (o.crash && !nPost) add(o.crash.kind === 'heat' ? 'CPU Over Temperature Error! Le dernier arrêt était une surchauffe.'
       : o.crash.kind === 'psu' ? 'Warning! Power supply overload on last boot : le PC a disjoncté.'
       : o.crash.kind === 'oom' ? 'Warning! Previous shutdown: kernel panic (mémoire pleine : les agents ont tout mangé).'
@@ -15521,7 +15554,7 @@ function haltSession() {
   MON.la = [.6, .3, .1];
   PCS.temp = 34;
 }
-async function pcCrash(kind, L) {
+async function pcCrash(kind, L, opt = {}) {
   if (pcDown || mode !== 'idle') return;
   if (G.world?.ev) G.world.ev.crash = 1;          // une canicule traversée en plantant ne compte pas
   pcDown = true;
@@ -15549,12 +15582,15 @@ async function pcCrash(kind, L) {
     if (G.bg?.local && G.ai !== 'local') { delete G.bg.local; dropped.push(CLIS.local.label); }
     if (G.ai === 'local') safe = false;
   }
+  const cmos = (kind === 'psu' || kind === 'whine') && (opt.cmos ?? chance(EV_ON ? .5 : 0));   // coupure de courant et pile morte : la CMOS oublie tout
+  if (cmos) { Object.assign(ocSt(), { ratio: 0, mhz: 0, quick: 1, fan: 1 }); ach('cmos'); }
   if (IDLE) { G.running = 0; saveGame(); }
-  await biosBoot({ crash: { kind, why, panic, need: L.need }, during: haltSession, then: () => {
+  await biosBoot({ crash: { kind, why, panic, need: L.need, cmos }, during: haltSession, then: () => {
     mode = 'idle';
     pcDown = false;
     setTimeout(xfAutostart, 400);
     shellPrint(H(['✗ ', 'errc'], ['Kernel panic : ', 'errc'], why + '. Le PC a redémarré.'));
+    if (cmos) shellPrint(H(['  ', ''], ['CMOS Checksum Bad : ', 'wrn'], 'la pile du BIOS est morte, la coupure a tout effacé. Overclocking, Quick Boot et ventilateur sont revenus sur Auto.'));
     if (dropped.length) shellPrint(H(['  ', ''], ['Arrière-plan coupé : ', 'wrn'], `${dropped.join(' et ')} ne repart pas, la config ne tiendrait pas avec. `, ['plateformes', 'org'], ' pour voir.'));
     if (was && noAgents) shellPrint(H(['  ', ''], ['Mode sans agents', 'wrn'], ' (choisi dans GRUB) : les agents restent arrêtés jusqu’au prochain démarrage.'));
     else if (was && safe) {
