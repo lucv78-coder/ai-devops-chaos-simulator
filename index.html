@@ -1317,6 +1317,17 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .bi-amih { display: flex; align-items: center; gap: 2ch; margin-bottom: .7em; }
 .bi-amil { flex: none; width: min(15ch, 20vw); height: auto; }
 .bi-del { padding: .5em .8ch; margin: -.5em -.8ch; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline dotted; text-underline-offset: .2em; cursor: pointer; }
+@media (pointer: coarse), (max-width: 640px) {
+  .bi-del { position: relative; padding: 1em 2.5ch; margin: -1em -2.5ch; text-decoration: none; }   /* au doigt : DEL se touche large… */
+  .bi-del::before { content: ''; position: absolute; inset: .95em 1.7ch; border: 1px solid currentColor; pointer-events: none; }   /* …et a l'air d'une touche */
+  .bi-dl { position: relative; z-index: 1; overflow: visible; }   /* au-dessus des lignes voisines, pour le toucher large */
+}
+@media (max-width: 640px) {                      /* le POST sur téléphone : lisible, l'Energy Star au-dessus, rien qui se chevauche */
+  .bi-top { flex-direction: column-reverse; gap: .4em; font-size: clamp(11px, 3.1vw, 15px); }
+  .bi-es { align-self: flex-end; width: 28vw; }
+  .bi-post .ln { height: auto; white-space: pre-wrap; overflow: visible; }   /* les lignes longues passent à la ligne, entières */
+  .bi-foot { right: 2ch; bottom: 2.8em; white-space: pre-wrap; overflow-wrap: anywhere; }
+}
 /* le setup du BIOS (DEL ou F2 pendant le POST), façon AMIBIOS : gris, bleu, une seule police */
 #bios.setup:not([hidden]) { display: grid; place-items: center; padding: .6em 1ch; white-space: normal; font-size: clamp(8px, min(1.75vw, 2.75vh), 24px); }   /* plein écran, comme en mode texte */
 .ami {
@@ -1327,7 +1338,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 :root[data-theme="abri"] .ami { --a-bg: #0c3a1c; --a-fg: #3dff7e; --a-hi: #04140a; --a-sel: #3dff7e; --a-bar: #04140a; --a-bar-fg: #8cffb2; --a-pop-fg: #8cffb2; --a-warn: #d2ffe2; }
 .ami button { padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ami-head, .ami-foot { padding: .1em 1ch; background: var(--a-bar); color: var(--a-bar-fg); text-align: center; overflow: hidden; text-overflow: ellipsis; }
-.ami-tabs { display: flex; padding: 0 1ch; background: var(--a-bar); overflow-x: auto; scrollbar-width: none; }
+.ami-tabs { position: relative; display: flex; padding: 0 1ch; background: var(--a-bar); overflow-x: auto; scrollbar-width: none; }
 .ami-tabs button { flex: none; padding: .05em 1.6ch; color: var(--a-bar-fg); }
 .ami-tabs button[aria-selected="true"] { background: var(--a-bg); color: var(--a-fg); }
 .ami-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(22ch, 30ch); min-height: 0; margin: .5em 1ch; border: 3px double var(--a-fg); }
@@ -1342,6 +1353,8 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ami-sp { height: 1.45em; }
 .ami-row { display: grid; grid-template-columns: minmax(14ch, 26ch) minmax(0, 1fr); gap: 1ch; width: 100%; }
 .ami-row > span { overflow: hidden; text-overflow: ellipsis; }
+.ami-row.ami-act { grid-template-columns: minmax(0, 1fr); }   /* une action (Save, Discard…) : toute la ligne pour son libellé */
+.ami-act > span:last-child { display: none; }
 .ami-it.on { background: var(--a-sel); color: var(--a-hi); }
 .ami-pop { position: absolute; inset: 0; display: grid; place-items: center; padding: 1em; background: rgba(0, 0, 0, .15); }
 .ami-box {
@@ -1355,14 +1368,29 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 :root[data-theme="abri"] .ami-opt.on, :root[data-theme="abri"] .ami-btns .on { background: var(--a-fg); color: var(--a-hi); }
 .ami-q { text-align: center; }
 .ami-btns { display: flex; justify-content: center; gap: 3ch; }
+.ami-wrap { display: grid; }                     /* la ligne choisie et ses flèches ◄ ►, l'une sur l'autre */
+.ami-wrap > * { grid-area: 1 / 1; }
+.ami-steps { display: none; justify-self: end; align-self: stretch; }
+.ami .ami-steps button { display: grid; place-items: center; min-width: 2.4em; font-size: 1.15em; color: var(--a-hi); }
+.ami .ami-steps button:active { background: var(--a-hi); color: var(--a-sel); }
+@media (pointer: coarse), (max-width: 640px) {
+  .ami-steps { display: flex; }                  /* au doigt : ◄ ► changent la valeur sans ouvrir la liste */
+  .ami-it.st { padding-right: 6ch; }
+}
 @media (max-width: 640px) {
-  #bios.setup:not([hidden]) { font-size: clamp(8px, 2.9vw, 13px); }
-  .ami-tabs button { padding: .05em .8ch; }
-  .ami-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  #bios.setup:not([hidden]) { grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: stretch; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); font-size: clamp(11px, 3.4vw, 15px); }
+  .ami { width: 100%; height: 100%; }            /* tout l'écran, comme un vrai BIOS */
+  .ami-tabs button { min-height: 2.4em; padding: .05em 1.2ch; }
+  .ami-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; margin: .4em .6ch; }
+  .ami-main { padding: .3em .8ch; }
+  .ami-t, .ami-row > span, .ami-foot { white-space: normal; text-overflow: clip; }
+  .ami-row { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .ami-it, .ami-steps button { min-height: 2.4em; align-items: center; }
   .ami-side { grid-template-rows: auto auto; border-left: 0; border-top: 1px solid var(--a-fg); }
-  .ami-help { max-height: 5.8em; }
+  .ami-help { min-height: 5.8em; }
   .ami-keys { display: flex; flex-wrap: wrap; gap: 0 2ch; }
   .ami-keys > * { width: auto; }
+  .ami-keys button, .ami .ami-opt, .ami-btns button { display: flex; align-items: center; min-height: 2.4em; }
   .ami-keys > span { display: none; }            /* au doigt : seulement les touches qu'on peut toucher */
 }
 /* overclocking instable : des bandes, des caractères parasites, l'écran qui saute (DEL au démarrage, Vibe Tweaker, pour baisser) */
@@ -1657,7 +1685,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.69', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.70', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -15106,7 +15134,7 @@ async function biosBoot(o = {}) {
     add(` Speed : ${frx(+(mhz / 1000).toFixed(3))} GHz`
       + (oc.ratio ? ` (${oc.ratio} x 100 MHz, ${mhz > b0 ? 'overclocké' : mhz < b0 ? 'sous-cadencé' : 'réglé à la main'})` : ''), '', post);
     add('', '', post);
-    add('Press <button type="button" class="bi-del" tabindex="-1">DEL</button> or <b>F2</b> to run Setup', '', post);
+    add('Press <button type="button" class="bi-del" tabindex="-1">DEL</button> or <b>F2</b> to run Setup', 'bi-dl', post);
     add('Press F8 for BBS POPUP <span class="dim">(un agent a déjà choisi le disque)</span>', '', post);
     add(`DDR${r.ddr}-${rm} in ${r.go <= 4 ? 'Single-Channel Mode (les barrettes ne se parlent pas)' : 'Dual-Channel Interleaved Mode'}`
       + (oc.mhz ? `, ${rm > r.mhz ? 'overclockée' : rm < r.mhz ? 'sous-cadencée' : 'réglée à la main'}` : ''), '', post);
@@ -15266,8 +15294,11 @@ function amiSetup(el, bindKey) {
     const P = { ratio: st.ratio, mhz: st.mhz, quick: st.quick ?? 1 };   // les réglages en cours d'édition
     const [lo, hi] = ocRange(c), fC = v => v * 100 || cpuBase(c), fR = v => v || r.mhz;
     const cpuOpts = [0, ...Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)], ramOpts = [0, ...(OC_DDR[r.ddr] || [])];
-    const fan = co.w <= 60 ? '900RPM (poussière : beaucoup)' : co.w >= 1000 ? 'N/A (azote liquide)' : `${ri(1100, 1900)}RPM`;
-    const t0 = Math.round(PCS.temp), deg = x => `${x}°C/${Math.round(x * 9 / 5 + 32)}°F`;
+    // Hardware Monitor, en direct : le BIOS ne met jamais le processeur au repos, la température monte pendant qu'on lit
+    const cr = cpuMhz() / cpuBase(c), M = { t: PCS.temp }, rpm0 = co.w <= 60 ? 900 : ri(1100, 1900), jit = (x, a) => x + (R() * 2 - 1) * a;
+    const monTick = () => { M.t += (30 + (worldOn('heat') ? 12 : 0) + 62 * c.tdp * cr ** 1.8 * .3 / co.w - M.t) * (1 - Math.exp(-1 / 12)); };
+    const fan = () => co.w >= 1000 ? 'N/A (azote liquide)' : co.w <= 60 ? `${Math.round(jit(900, 12))}RPM (poussière)` : `${Math.round(jit(rpm0 + 12 * Math.max(0, M.t - 35), 20))}RPM`;
+    const deg = x => `${x}°C/${Math.round(x * 9 / 5 + 32)}°F`;
     const clock = () => { const n = new Date(), p = x => String(x).padStart(2, '0');
       return { time: `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`, date: `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][n.getDay()]} ${p(n.getMonth() + 1)}/${p(n.getDate())}/${n.getFullYear()}` }; };
     const opt = (k, l, opts, show, help, f) => ({ k, l, opts, show, help, f, cur: () => P[k], set: v => { P[k] = v; } });   // f : la fréquence d'une option (0 : Auto)
@@ -15291,11 +15322,14 @@ function amiSetup(el, bindKey) {
         lock('dramv', 'DRAM Voltage', 'Auto', 'Auto. Personne ne sait ce que fait ce réglage, l’agent non plus.'), {},
         { t: 'Chaque puce a sa marge : la loterie du silicium.', w: 1 }, { t: 'Montez par paliers. Au premier glitch, redescendez.', w: 1 }],
       [{ h: 'Hardware Health Configuration' }, {},
-        { i: ['CPU Temperature', deg(t0)] }, { i: ['MB Temperature', deg(Math.max(25, t0 - 7))] }, { i: ['CPU Fan Speed', fan] },
-        { i: ['VCORE Voltage', fC(P.ratio) > cpuBase(c) ? '1.552V (Auto, réglé par l’agent)' : '1.200V'] }, { i: ['+12V Voltage', ps.noname ? '11.1V (elle siffle)' : '12.096V'] },
+        { i: ['CPU Temperature', () => deg(Math.round(jit(M.t, .4)))], live: 1 }, { i: ['MB Temperature', () => deg(Math.round(Math.max(25, M.t - 7)))], live: 1 },
+        { i: ['CPU Fan Speed', fan], live: 1 },
+        { i: ['VCORE Voltage', () => `${jit(cr > 1 ? 1.552 : 1.2, .008).toFixed(3)}V${cr > 1 ? ' (Auto, réglé par l’agent)' : ''}`], live: 1 },
+        { i: ['+12V Voltage', () => ps.noname ? `${jit(11.1, .08).toFixed(1)}V (elle siffle)` : `${jit(12.096, .024).toFixed(3)}V`], live: 1 },
         { i: ['Power Supply', ps.n] }, {},
         lock('fan', 'Smart Fan Control', 'Disabled', 'Le ventilateur n’a qu’une vitesse : à fond. Un agent a désactivé le reste « pour le silence ».'),
-        lock('virt', 'Vibe Virtualization Tech', 'Enabled', 'Activé : les agents lancent des conteneurs dans des conteneurs dans des conteneurs.')],
+        lock('virt', 'Vibe Virtualization Tech', 'Enabled', 'Activé : les agents lancent des conteneurs dans des conteneurs dans des conteneurs.'), {},
+        { t: 'Le BIOS ne met jamais le processeur au repos :', w: 1 }, { t: 'il chauffe pendant que vous lisez.', w: 1 }],
       [{ h: 'Boot Settings Configuration' }, {},
         opt('quick', 'Quick Boot', [1, 0], v => v ? 'Enabled' : 'Disabled', 'Enabled : POST rapide, DEL passe vite. Disabled : test complet de la mémoire, plus de temps pour appuyer sur DEL.'),
         lock('quiet', 'Quiet Boot', 'Disabled', 'Pas de logo plein écran : on veut voir les erreurs. Il y en a.'),
@@ -15322,14 +15356,25 @@ function amiSetup(el, bindKey) {
       if (it.offsetTop < box.scrollTop) box.scrollTop = it.offsetTop;
       else if (it.offsetTop + it.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = it.offsetTop + it.offsetHeight - box.clientHeight;
     };
+    const keepX = (box, it) => {                 // l'onglet choisi reste visible (au doigt, les six onglets ne tiennent pas en largeur)
+      if (!box || !it) return;
+      if (it.offsetLeft < box.scrollLeft) box.scrollLeft = it.offsetLeft;
+      else if (it.offsetLeft + it.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = it.offsetLeft + it.offsetWidth - box.clientWidth;
+    };
+    const iv = it => typeof it.i[1] === 'function' ? it.i[1]() : it.i[1];
+    const STEPS = '<span class="ami-steps"><button type="button" tabindex="-1" data-step="-1" aria-label="Valeur précédente">◄</button>'
+      + '<button type="button" tabindex="-1" data-step="1" aria-label="Valeur suivante">►</button></span>';
+    let shown = -1;
     function render() {
       if (closed) return;
       const L = page(), S = sels(L);
       if (!S.includes(sel)) sel = S[0] ?? -1;
+      const m0 = el.querySelector('.ami-main'), top = m0 && shown === tab ? m0.scrollTop : 0, left = el.querySelector('.ami-tabs')?.scrollLeft || 0;
       const row = (it, i) => it.h ? `<div class="ami-h">${esc(it.h)}</div>` : it.t ? `<div class="ami-t${it.w ? ' w' : ''}">${esc(it.t)}</div>`
-        : it.i ? `<div class="ami-row ami-info"><span>${esc(it.i[0])}</span><span>: ${esc(it.i[1])}</span></div>`
-        : it.k ? `<button type="button" tabindex="-1" class="ami-row ami-it${i === sel ? ' on' : ''}" data-i="${i}"><span>${it.act ? '► ' : ''}${esc(it.l)}</span>`
-          + `<span${it.clock ? ` data-clock="${it.clock}"` : ''}>${it.act ? '' : `[${esc(val(it))}]`}</span></button>`
+        : it.i ? `<div class="ami-row ami-info"><span>${esc(it.i[0])}</span><span${it.live ? ` data-live="${i}"` : ''}>: ${esc(iv(it))}</span></div>`
+        : it.k ? (b => i === sel && it.opts ? `<div class="ami-wrap">${b}${STEPS}</div>` : b)(
+          `<button type="button" tabindex="-1" class="ami-row ami-it${it.act ? ' ami-act' : ''}${i === sel ? ' on' : ''}${i === sel && it.opts ? ' st' : ''}" data-i="${i}"><span>${it.act ? '► ' : ''}${esc(it.l)}</span>`
+          + `<span${it.clock ? ` data-clock="${it.clock}"` : ''}>${it.act ? '' : `[${esc(val(it))}]`}</span></button>`)
         : '<div class="ami-sp"></div>';
       const box = !pop ? '' : `<div class="ami-pop"><div class="ami-box" role="dialog" aria-modal="true" aria-label="${pop.opts ? 'Options' : 'Message'}">`
         + (pop.opts ? `<div class="ami-bt">Options</div><div class="ami-opts">${pop.opts.opts.map((v, i) => `<button type="button" tabindex="-1" class="ami-opt${i === pop.idx ? ' on' : ''}" data-o="${i}">${esc(pop.opts.show(v))}</button>`).join('')}</div>`
@@ -15340,7 +15385,12 @@ function amiSetup(el, bindKey) {
         + `<div class="ami-body"><div class="ami-main">${L.map(row).join('')}</div><div class="ami-side">`
         + `<div class="ami-help" aria-live="polite">${esc((L[sel] || {}).help || 'Utilisez ← → pour changer d’onglet. L’overclocking est dans Vibe Tweaker.')}</div><div class="ami-keys">${KEYS}</div></div></div>`
         + '<div class="ami-foot">v02.69 (C)Copyright 1985-2026, American Megavibes, Inc.</div>' + box + '</div>';
-      keep(el.querySelector('.ami-main'), el.querySelector('.ami-it.on'));
+      const main = el.querySelector('.ami-main'), tabsEl = el.querySelector('.ami-tabs');
+      main.scrollTop = top;                      // la liste ne remonte pas en haut à chaque touche (ni à chaque tap)
+      tabsEl.scrollLeft = left;
+      shown = tab;
+      keep(main, el.querySelector('.ami-it.on'));
+      keepX(tabsEl, tabsEl.querySelector('[aria-selected="true"]'));
       keep(el.querySelector('.ami-opts'), el.querySelector('.ami-opt.on'));
     }
     const change = dir => {                      // + et − : depuis Auto, le cran juste au-dessus (ou au-dessous) de l'origine ; Auto ne revient que par la liste ou F9
@@ -15359,10 +15409,16 @@ function amiSetup(el, bindKey) {
       else if (it.opts) pop = { opts: it, idx: Math.max(0, it.opts.indexOf(it.cur())) };
       else pop = { msg: `${it.l} : non modifiable. ${it.help}`, ok: 0 };
     };
-    const clockT = setInterval(() => { const k = clock(); el.querySelectorAll('[data-clock]').forEach(n => { n.textContent = `[${k[n.dataset.clock]}]`; }); }, 1000);
+    const clockT = setInterval(() => {           // l'horloge de la CMOS et le Hardware Monitor, chaque seconde
+      const k = clock(), L = page();
+      monTick();
+      el.querySelectorAll('[data-clock]').forEach(n => { n.textContent = `[${k[n.dataset.clock]}]`; });
+      el.querySelectorAll('[data-live]').forEach(n => { const it = L[+n.dataset.live]; if (it?.i) n.textContent = `: ${iv(it)}`; });
+    }, 1000);
     function finish(res) {
       closed = true;
       clearInterval(clockT);
+      PCS.temp = M.t;                            // ce que le processeur a pris en chauffant dans le setup
       el.removeEventListener('click', onClick);
       bindKey(null);
       if (res === 'save') { Object.assign(st, P); if (IDLE) saveGame(); }
@@ -15406,7 +15462,8 @@ function amiSetup(el, bindKey) {
     function onClick(e) {
       const b = e.target.closest('button');
       if (!b) { if (pop && !e.target.closest('.ami-box')) { pop = null; render(); } return; }
-      if (b.dataset.tab) { tab = +b.dataset.tab; sel = -1; pop = null; }
+      if (b.dataset.step) { pop = null; change(+b.dataset.step); }
+      else if (b.dataset.tab) { tab = +b.dataset.tab; sel = -1; pop = null; }
       else if (b.dataset.i) { pop = null; sel = +b.dataset.i; enter(); }
       else if (b.dataset.o && pop?.opts) { pop.opts.set(pop.opts.opts[+b.dataset.o]); pop = null; }
       else if (b.dataset.b) { const a = pop?.ask, yes = b.dataset.b === '0'; pop = null; if (a && yes) { doAct(a); if (closed) return; } }
