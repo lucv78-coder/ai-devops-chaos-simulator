@@ -137,9 +137,9 @@ footer p + p { margin-top: .5em; }
   </nav>
 
   <div class="stats" role="list" aria-label="En chiffres">
-    <div role="listitem"><b>70</b><span>mises à jour</span></div>
-    <div role="listitem"><b>134 h 19</b><span>du premier au dernier commit</span></div>
-    <div role="listitem"><b>6 492 → 16 019</b><span>lignes dans index.html</span></div>
+    <div role="listitem"><b>71</b><span>mises à jour</span></div>
+    <div role="listitem"><b>135 h 17</b><span>du premier au dernier commit</span></div>
+    <div role="listitem"><b>6 492 → 16 043</b><span>lignes dans index.html</span></div>
     <div role="listitem"><b>0</b><span>ligne relue (stable)</span></div>
   </div>
   <p class="legend"><b class="p">+</b> ajouté · <b class="t">~</b> modifié · <b class="m">−</b> retiré</p>
@@ -147,6 +147,7 @@ footer p + p { margin-top: .5em; }
   <nav class="toc" aria-labelledby="toc-t">
     <h2 id="toc-t">Sommaire</h2>
     <ol>
+      <li><span class="n">#71</span><time datetime="2026-11-28T02:44">02 h 44</time><a href="#ventilateur">Le ventilateur en Turbo, et les Fail-Safe Defaults</a></li>
       <li><span class="n">#70</span><time datetime="2026-11-28T01:46">01 h 46</time><a href="#bios-doigt">Le BIOS au doigt</a></li>
       <li><span class="n">#69</span><time datetime="2026-11-27T01:27">01 h 27</time><a href="#j-ai-mal">« J’ai mal », la deuxième musique, et celle de l’ultracode</a></li>
       <li><span class="n">#68</span><time datetime="2026-11-25T21:47">21 h 47</time><a href="#marketing">La campagne marketing</a></li>
@@ -220,8 +221,25 @@ footer p + p { margin-top: .5em; }
     </ol>
   </nav>
 
-  <article class="maj latest" id="bios-doigt" aria-labelledby="t70">
-    <p class="meta"><span class="n">#70</span><span class="new">dernière</span><span class="v">alpha 0.70</span><time datetime="2026-11-28T01:46">28 nov. 2026 · 01 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/312ba99">312ba99</a><span>15 962 → 16 019 lignes</span></p>
+  <article class="maj latest" id="ventilateur" aria-labelledby="t71">
+    <p class="meta"><span class="n">#71</span><span class="new">dernière</span><span class="v">alpha 0.71</span><time datetime="2026-11-28T02:44">28 nov. 2026 · 02 h 44</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/d4d1c27">d4d1c27</a><span>16 019 → 16 043 lignes</span></p>
+    <h2 id="t71"><a href="#ventilateur">Le ventilateur en Turbo, et les Fail-Safe Defaults</a></h2>
+    <ul>
+      <li>Advanced › Smart Fan Control se règle enfin : Silent, Standard (le réglage d’usine) ou Turbo. Turbo refroidit 18 % mieux, de quoi pousser l’overclocking un cran plus loin, tire 8 W de plus et s’entend : de temps en temps, le tableau de bord le fait remarquer. Silent chauffe, assez pour faire planter le PC patate.</li>
+      <li>Le POST, sensors et le Hardware Monitor du setup disent le mode du ventilateur et sa vitesse. Le réglage vit dans la CMOS (la sauvegarde) ; les anciennes parties démarrent en Standard.</li>
+      <li>Exit › Load Fail-Safe Defaults : tout au plus bas d’un coup (processeur au multiplicateur le plus bas, environ −40 %, RAM au cran le plus bas, Quick Boot coupé, ventilateur en Standard). Les agents ralentissent, la facture d’électricité aussi. F9 remet toujours tout sur Auto.</li>
+      <li>Au doigt, la liste du setup ne saute plus d’une ligne à l’autre : l’aide garde la hauteur de la plus longue de l’onglet.</li>
+      <li>Deux succès Steam : Décollage, et un caché.</li>
+    </ul>
+    <blockquote>« Turbo : 18 % de refroidissement en plus. Le bruit, lui, n’a pas été mesuré. Les agents travaillent depuis la cuisine. »<cite>l’agent, 02 h 44</cite></blockquote>
+    <div class="shots">
+      <figure><a href="assets/screen-fan.png" title="Voir en grand"><img src="assets/screen-fan.png" width="900" height="540" loading="lazy" alt="Le setup du BIOS, onglet Advanced : la température du processeur, le ventilateur poussiéreux, les tensions, et la liste Smart Fan Control ouverte sur Silent, Standard et Turbo, Turbo en surbrillance."></a><figcaption>Smart Fan Control : Silent, Standard ou Turbo.</figcaption></figure>
+      <figure><a href="assets/screen-failsafe.png" title="Voir en grand"><img src="assets/screen-failsafe.png" width="900" height="540" loading="lazy" alt="Le setup du BIOS, onglet Exit : Save Changes and Exit, Discard Changes and Exit, Discard Changes, Load Optimal Defaults, Load Fail-Safe Defaults, et la question « Load Fail-Safe Defaults? » avec Ok et Cancel."></a><figcaption>Load Fail-Safe Defaults : tout au plus bas, pour la facture.</figcaption></figure>
+    </div>
+  </article>
+
+  <article class="maj" id="bios-doigt" aria-labelledby="t70">
+    <p class="meta"><span class="n">#70</span><span class="v">alpha 0.70</span><time datetime="2026-11-28T01:46">28 nov. 2026 · 01 h 46</time><a href="https://github.com/lucv78-coder/ai-devops-chaos-simulator/commit/312ba99">312ba99</a><span>15 962 → 16 019 lignes</span></p>
     <h2 id="t70"><a href="#bios-doigt">Le BIOS au doigt</a></h2>
     <ul>
       <li>Sur téléphone, le POST se lit enfin : texte plus grand, lignes longues entières, et DEL devient une vraie touche encadrée, large, qu’on touche du premier coup avant que GRUB n’arrive.</li>
