@@ -905,7 +905,7 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
   .stm-a .m { grid-column: 2; text-align: left; }
 }
 /* navigateur web (Firefaux) : barre d'adresse, marque-pages, pages du faux Web */
-.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; padding: 0; }
+.wb { container-type: inline-size; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); padding: 0; }   /* minmax(0, 1fr) : une page large ne pousse plus la fenêtre */
 .wb-bar { grid-row: 1; display: flex; align-items: center; gap: .4ch; min-width: 0; padding: .25em .6ch; border-bottom: 1px solid var(--sep); background: var(--bar); }
 .wb-bar > button { flex: none; padding: 0 .8ch; border-radius: 2px; color: var(--fg); }
 .wb-bar > button:disabled { color: var(--dim2); cursor: default; }
@@ -914,10 +914,11 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .wb-url:focus-within { border-color: var(--orange); }
 .wb-url .sec { flex: none; color: var(--red); }
 .wb-url input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; }
-.wb-marks { grid-row: 2; display: flex; gap: .3ch; min-width: 0; padding: .15em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); overflow: hidden; white-space: nowrap; }
+.wb-marks { grid-row: 2; display: flex; gap: .3ch; min-width: 0; padding: .15em .6ch; border-bottom: 1px solid var(--sep); background: var(--panel); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; white-space: nowrap; }
+.wb-marks::-webkit-scrollbar { display: none; }   /* la barre défile (au doigt, à la molette) au lieu d'être coupée */
 .wb-marks button { flex: none; padding: 0 .9ch; border-radius: 2px; color: var(--dim); }
 .wb-marks button:hover, .wb-marks button.on { color: var(--fg); background: rgba(255, 255, 255, .07); }
-.wb-page { grid-row: 3; position: relative; min-height: 0; overflow: auto; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.wb-page { grid-row: 3; position: relative; min-height: 0; overflow: auto; touch-action: pan-x pan-y; padding: 1.2em 3ch 2em; background: var(--bg2); white-space: normal; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .wb-load { position: absolute; left: 0; top: 0; z-index: 1; height: 2px; width: 0; background: var(--orange); }
 .wb-status { grid-row: 4; padding: .1em 1ch; border-top: 1px solid var(--sep); background: var(--bar); color: var(--dim); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .wb-status.note { color: var(--yellow); }
@@ -952,6 +953,34 @@ body.xfce .xw-body > .prog { position: absolute; inset: 0; z-index: auto; }
 .ch-pick label { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 1ch; }
 .ch-pick label .dim { grid-column: 2; font-size: .9em; }
 .ff-dark { filter: brightness(.8) contrast(1.08); }
+/* le zoom (pastille dans la barre d'adresse) et le menu ☰ */
+.wb-zoom { flex: none; padding: 0 .8ch; border: 1px solid var(--sep); border-radius: 999px; color: var(--dim); font-size: .85em; }
+.wb-zoom:hover { color: var(--fg); border-color: var(--orange); }
+.wb-bar > button.on { background: rgba(255, 255, 255, .12); }
+.wb-menu { grid-row: 3; grid-column: 1; justify-self: end; align-self: start; z-index: 3; display: grid; width: min(32ch, calc(100% - 1.2ch)); max-height: calc(100% - .4em); overflow: auto;
+  margin: .2em .6ch 0; padding: .4em 0; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); box-shadow: .8ch .6em 0 rgba(0, 0, 0, .45); white-space: normal; }
+.wb-menu[hidden] { display: none; }
+.wb-menu > button { padding: .2em 1.6ch; text-align: left; color: var(--fg); }
+.wb-menu > button:hover, .wb-menu > button:focus-visible { background: rgba(255, 255, 255, .08); }
+.wb-menu .mh { padding: .5em 1.6ch .15em; color: var(--dim); font-size: .8em; text-transform: uppercase; letter-spacing: .08em; }
+.wb-menu hr { margin: .3em 0; border: 0; border-top: 1px solid var(--sep); }
+.wb-mz { display: flex; align-items: center; gap: .6ch; padding: .2em 1.6ch .4em; }
+.wb-mz span { flex: 1; }
+.wb-mz button { min-width: 3.2ch; padding: 0 .6ch; border: 1px solid var(--sep); border-radius: 3px; color: var(--fg); }
+.wb-mz button:hover { border-color: var(--orange); }
+.wb-mz .z { min-width: 6.5ch; }
+@media (pointer: coarse), (max-width: 640px) {   /* Firefaux au doigt : des cibles de doigt, et pas de zoom surprise d'iOS dans les champs (16 px au moins) */
+  .wb-bar { gap: .15ch; padding: .15em .4ch; font-size: max(16px, 1em); }
+  .wb-bar > button { min-width: 2.3em; min-height: 2.3em; padding: 0 .3ch; }
+  .wb-bar > [data-wb="home"], .wb-bar > [data-wb="addons"] { display: none; }   /* dans le menu ☰ (Accueil est le premier marque-page) : la place va à l'adresse */
+  .wb-url { min-height: 2.3em; }
+  .wp-search input { font-size: max(16px, 1em); }
+  .wb-marks { font-size: max(13px, 1em); }
+  .wb-marks button { min-height: 2.6em; padding: 0 1.2ch; }
+  .wb-menu { width: min(36ch, calc(100% - 1.2ch)); font-size: max(14px, 1em); }
+  .wb-menu > button, .wb-mz button { min-height: 2.6em; }
+  .wb-pop .x::after { content: ''; position: absolute; inset: -1.3em -1.8ch; }   /* la croix reste minuscule ; sa zone de clic, non */
+}
 /* realmoon.ai : l'interface sombre de Moon AI (tokens du kit : page #0B1020, panneaux, accent #A6A4FF, action #4642DF) ; le logo est le fichier officiel, jamais recoloré */
 .mn { max-width: 112ch; margin: 0 auto; padding: 32px clamp(16px, 4ch, 48px) 48px; border-radius: 24px; background: #0B1020; color: #F3F5FF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 400; line-height: 1.55; }
 .mn-logo { display: block; width: 168px; height: auto; margin: 0 0 8px; padding: 11px 0; }
@@ -1694,7 +1723,7 @@ const B = () => ri(2, 14);                       // delay between lines of a bur
 const H = (...parts) => ({ h: parts.map(p => Array.isArray(p) ? `<span class="${p[1]}">${esc(p[0])}</span>` : esc(p)).join('') });
 let capt = null, shIn = null, shErrs = 0;   // le shell : capt, la sortie d'une étape de tube (ou d'une redirection) gardée au lieu d'être affichée ; shIn, son entrée standard ; shErrs, les erreurs affichées (pour && et ||)
 
-const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.74', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
+const GAME = 'AI DevOps Chaos Simulator', VERSION = 'alpha 0.75', CLI_VER = '0.9.0-friday';   // VERSION : le jeu (alpha 0.N, N : le numéro de la mise à jour dans les nouveautés, posé à la publication) ; CLI_VER : les faux CLI
 /* réglages du joueur, gardés dans ce navigateur (la liste modulable SETTINGS est plus bas) */
 const PREFS_KEY = 'aidcs:prefs';
 const PREFS = (() => { try { const o = JSON.parse(localStorage.getItem(PREFS_KEY)); return o && typeof o === 'object' ? o : {}; } catch { return {}; } })();
@@ -2481,6 +2510,7 @@ const ACH = [
   { id: 'ublock', g: 'μ', n: 'Navigation sans pub', d: 'Installer uBlock Origin dans Firefaux.', p: 61.3 },
   { id: 'popups', g: '▣', n: 'Fenêtres surprises', d: 'Avoir trois pop-ups de pub ouverts en même temps dans Firefaux.', p: 18.2 },
   { id: 'adclick', g: '$', n: 'Cliqué sur la pub', d: 'Cliquer sur une publicité. Personne ne le fait. Sauf vous.', p: 7.7, h: 1 },
+  { id: 'loupe', g: '⊕', n: 'Loupe', d: 'Zoomer à 300 % dans Firefaux. Même les conditions générales se lisent.', p: 6.1 },
   { id: 'infecte', g: '☣', n: 'Patient zéro', d: 'Attraper un logiciel malveillant. Sur Linux. Il fallait le vouloir.', p: 9.4 },
   { id: 'desinfecte', g: '✚', n: 'Désinfecté', d: 'Se débarrasser de tout : les fichiers infectés, le processus, le faux module.', p: 5.2,
     t: () => G.mal.ever && !G.mal.miner && !ffHas('freeblock') && !malFiles().length },
@@ -11162,6 +11192,16 @@ const WEB_MARKS = [['Accueil', WEB_HOME], ['Store IA', 'https://store.agents.vib
   ['GitHype', 'https://githype.vibe/'], ['Lolama', 'https://lolama.vibe/'], ['Télécharge.vibe', 'https://telecharge.vibe/'],
   ['Vibank', 'https://facture.vibe/'], ['StackUnderflow', 'https://stackunderflow.vibe/'], ['atlas (localhost)', 'http://localhost:3000/']];
 const webHost = u => (/^[a-z]+:\/\/([^/?#]+)/i.exec(u) || [, u])[1];
+const FF_ZOOM = [50, 67, 80, 90, 100, 110, 120, 133, 150, 170, 200, 240, 300];   // les crans de zoom de Firefox
+const FF_TOUCH = matchMedia('(pointer: coarse), (max-width: 640px)');
+const ffZoomAuto = () => FF_TOUCH.matches ? 120 : 100;   // au doigt, la page part un peu plus grande
+const ffZoom = () => G.ff.zoom || ffZoomAuto();   // G.ff.zoom : 0 = la taille par défaut
+function ffMenuHtml(z) {                          // le menu ☰ : le zoom, les marque-pages, les modules
+  return `<div class="wb-mz"><span>Zoom</span><button type="button" data-wb="zoom-" title="Réduire (Ctrl+-)" aria-label="Réduire le zoom">−</button>`
+    + `<button type="button" class="z" data-wb="zoom0" title="Taille normale (Ctrl+0)">${z} %</button><button type="button" data-wb="zoom+" title="Agrandir (Ctrl+=)" aria-label="Agrandir le zoom">+</button></div>`
+    + `<p class="mh">Marque-pages</p>${WEB_MARKS.map(([t, u]) => `<button type="button" role="menuitem" data-href="${esc(u)}">${esc(t)}</button>`).join('')}`
+    + '<hr><button type="button" role="menuitem" data-wbm="addons">Modules (about:addons)</button><button type="button" role="menuitem" data-wbm="full">Plein écran</button>';
+}
 function webNorm(raw) {
   const u = (raw || '').trim();
   if (!u) return WEB_HOME;
@@ -12653,15 +12693,40 @@ function makeBrowser() {
   el.innerHTML = '<div class="wb-bar"><button type="button" data-wb="back" title="Précédent" aria-label="Précédent">←</button>'
     + '<button type="button" data-wb="fwd" title="Suivant" aria-label="Suivant">→</button>'
     + '<button type="button" data-wb="reload" title="Recharger (F5)" aria-label="Recharger">↻</button>'
-    + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off"></form>'
+    + '<form class="wb-url"><span class="sec" aria-hidden="true"></span><input aria-label="Adresse ou recherche" spellcheck="false" autocomplete="off" autocapitalize="off">'
+    + '<button type="button" class="wb-zoom" data-wb="zoom0" title="Zoom : revenir à la taille normale (Ctrl+0)" hidden></button></form>'
     + '<button type="button" data-wb="home" title="Accueil" aria-label="Accueil">⌂</button>'
     + '<button type="button" class="wb-ubo" data-wb="ublock" title="uBlock Origin : activer ou désactiver" hidden>μ <b>0</b></button>'
-    + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button></div>'
+    + '<button type="button" data-wb="addons" title="Modules (about:addons)" aria-label="Modules">⧉</button>'
+    + '<button type="button" data-wb="menu" title="Menu : marque-pages, zoom" aria-label="Menu de Firefaux" aria-haspopup="menu" aria-expanded="false">☰</button></div>'
     + `<nav class="wb-marks" aria-label="Marque-pages">${WEB_MARKS.map(([t, u]) => `<button type="button" data-href="${esc(u)}">${esc(t)}</button>`).join('')}</nav>`
-    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-status" role="status"></div>';
+    + '<div class="wb-page"><div class="wb-load"></div><div class="wb-doc"></div></div><div class="wb-pops" aria-live="polite"></div><div class="wb-menu" role="menu" aria-label="Menu de Firefaux" hidden></div><div class="wb-status" role="status"></div>';
   const q = s => el.querySelector(s), page = q('.wb-page'), doc = q('.wb-doc'), input = q('.wb-url input'), statusEl = q('.wb-status'), load = q('.wb-load');
   let url = WEB_HOME, back = [], fwd = [], title = 'Vibegle', note = '', noteUntil = 0, loadT = 0, seen = -1, loadSteps = [], loading = '', adPick = ri(0, 99);
-  const pops = q('.wb-pops'), ubo = q('.wb-ubo');
+  const pops = q('.wb-pops'), ubo = q('.wb-ubo'), menu = q('.wb-menu'), zbadge = q('.wb-zoom'), mbtn = q('[data-wb="menu"]');
+  function zoomApply() {                          // le zoom : la page et ses pop-ups, pas la barre
+    const z = ffZoom();
+    page.style.fontSize = pops.style.fontSize = z === 100 ? '' : `${z}%`;
+    zbadge.hidden = z === ffZoomAuto();
+    zbadge.textContent = `${z} %`;
+    const mz = menu.querySelector('.z');
+    if (mz) mz.textContent = `${z} %`;
+  }
+  function zoomStep(d) {                          // +1, -1 : le cran suivant ; 0 : la taille par défaut
+    const i = FF_ZOOM.indexOf(ffZoom()), n = d ? FF_ZOOM[Math.min(FF_ZOOM.length - 1, Math.max(0, (i < 0 ? FF_ZOOM.indexOf(100) : i) + d))] : 0;
+    G.ff.zoom = n === ffZoomAuto() ? 0 : n;
+    zoomApply();
+    const z = ffZoom();
+    if (z === 300) ach('loupe');
+    flash(!d ? `Zoom : ${z} %, la taille normale.` : z === 300 ? 'Zoom : 300 %, le maximum. Même les conditions générales se lisent.' : z === 50 ? 'Zoom : 50 %, le minimum. Vos agents écrivent quand même plus petit.' : `Zoom : ${z} %`);
+  }
+  function menuOpen(on = menu.hidden) {
+    if (on) menu.innerHTML = ffMenuHtml(ffZoom());
+    menu.hidden = !on;
+    mbtn.setAttribute('aria-expanded', on);
+    mbtn.classList.toggle('on', on);
+    if (on) menu.querySelector('[data-href]')?.focus({ preventScroll: true });
+  }
   el.addEventListener('pointermove', e => { const c = e.target.closest?.('.vb-chart'); if (c) vbHover(c, e); });   // Vibank : le graphique du solde
   el.addEventListener('pointerout', e => { const c = e.target.closest?.('.vb-chart'); if (c && !c.contains(e.relatedTarget)) vbHover(c, null); });
   const web = () => /^https?:/i.test(url) && !/^https?:\/\/(www\.)?realmoon\.ai/i.test(url);   // les pubs sont sur le Web, pas dans les pages de Firefaux (about:, vibe://), ni sur realmoon.ai
@@ -12762,7 +12827,9 @@ function makeBrowser() {
   el.addEventListener('click', e => {
     const w = e.target.closest('[data-wb]'), h = e.target.closest('[data-href]'), b = e.target.closest('[data-buy]'), j = e.target.closest('[data-jump]');
     const ca = e.target.closest('[data-cart-add]'), cd = e.target.closest('[data-cart-del]'), cc = e.target.closest('[data-cart]'), lc = e.target.closest('[data-local]');
-    const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]');
+    const dl = e.target.closest('[data-dl]'), ad = e.target.closest('[data-ad]'), dlo = e.target.closest('[data-dlopen]'), wm = e.target.closest('[data-wbm]');
+    if (!menu.hidden && !e.target.closest('.wb-mz, [data-wb="menu"]')) menuOpen(false);
+    if (wm) { if (wm.dataset.wbm === 'addons') go('about:addons'); else act('fullscreen'); return; }
     if (w) {
       const k = w.dataset.wb;
       if (k === 'back' && back.length) { fwd.push(url); go(back.pop(), false); }
@@ -12770,6 +12837,10 @@ function makeBrowser() {
       else if (k === 'reload') go(url, false);
       else if (k === 'home') go(WEB_HOME);
       else if (k === 'addons') go('about:addons');
+      else if (k === 'menu') menuOpen();
+      else if (k === 'zoom+') zoomStep(1);
+      else if (k === 'zoom-') zoomStep(-1);
+      else if (k === 'zoom0') zoomStep(0);
       else if (k === 'ublock') { flash(ffAddon('toggle:ublock')); draw(true); }
     } else if (e.target.closest('[data-popx]')) { e.target.closest('.wb-pop').remove(); ffPops = pops.children.length; }
     else if (e.target.closest('[data-adgo]')) { const b3 = e.target.closest('[data-adgo]'); b3.closest('.wb-pop')?.remove(); ffPops = pops.children.length; adGo(+b3.dataset.adgo); }
@@ -12801,8 +12872,35 @@ function makeBrowser() {
     else if (e.target.matches('[data-search]')) go(`vibe://recherche?q=${encodeURIComponent(e.target.q.value)}`);
   });
   input.addEventListener('focus', () => input.select());
+  el.addEventListener('keydown', e => {           // Ctrl+= / Ctrl+- / Ctrl+0 : le zoom de Firefaux, pas celui de votre navigateur
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    const d = { '+': 1, '=': 1, '-': -1, '_': -1, '0': 0 }[e.key];
+    if (d === undefined) return;
+    e.preventDefault(); e.stopPropagation(); zoomStep(d);
+  });
+  let wheelAcc = 0;
+  page.addEventListener('wheel', e => {          // Ctrl+molette, et le pincement du pavé tactile (Chrome l'envoie ainsi)
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    wheelAcc += e.deltaY;
+    if (Math.abs(wheelAcc) >= 80) { zoomStep(wheelAcc < 0 ? 1 : -1); wheelAcc = 0; }
+  }, { passive: false });
+  const pts = new Map();                          // au doigt : pincer la page zoome (touch-action laisse le défilement au navigateur)
+  let pinch0 = 0;
+  const gap = () => { const [a, b2] = [...pts.values()]; return Math.hypot(a.x - b2.x, a.y - b2.y); };
+  page.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) pinch0 = gap(); });
+  page.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size !== 2 || !pinch0) return;
+    const r = gap() / pinch0;
+    if (r > 1.25 || r < .8) { zoomStep(r > 1 ? 1 : -1); pinch0 = gap(); }
+  });
+  ['pointerup', 'pointercancel'].forEach(t => page.addEventListener(t, e => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = 0; }));
+  FF_TOUCH.addEventListener('change', zoomApply);   // le téléphone tourne, ou la fenêtre rétrécit : le zoom par défaut suit
   function key(e) {
     const k = e.key;
+    if (k === 'Escape' && !menu.hidden) { e.preventDefault(); menuOpen(false); mbtn.focus(); return; }
     if (k === 'F5') { e.preventDefault(); go(url, false); }
     else if (k === 'Backspace' && back.length) { e.preventDefault(); fwd.push(url); go(back.pop(), false); }
     else if (k === '/' || k === 'F6') { e.preventDefault(); input.focus(); }
@@ -12813,6 +12911,7 @@ function makeBrowser() {
     else if (k === 'End') page.scrollTop = page.scrollHeight;
   }
   draw(false);
+  zoomApply();
   return { el, key, render: live, redraw: () => draw(true), go: u => go(u), flash, close: () => { ffPops = 0; }, title: () => `${title} — Firefaux`, tname: () => 'Firefaux' };
 }
 
